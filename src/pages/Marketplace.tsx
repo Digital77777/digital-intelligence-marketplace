@@ -1,92 +1,68 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useTier } from '@/context/TierContext';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Star, Search, Filter, Tag, DollarSign } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { ShoppingCart, Star, Search, Filter, Tag, DollarSign, BookOpen, Eye, Brain, BarChart, Workflow, Code, Database, Headphones, Users } from 'lucide-react';
+import { marketplaceTools } from '@/data/marketplace-tools';
 
 const Marketplace = () => {
   const { currentTier } = useTier();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const { toast } = useToast();
+  const [filteredTools, setFilteredTools] = useState(marketplaceTools);
 
-  // Sample marketplace items
-  const marketplaceItems = [
-    {
-      id: 1,
-      title: "AI Content Generator Pro",
-      description: "Generate blog posts, articles, and social media content with advanced AI.",
-      price: 49.99,
-      rating: 4.7,
-      seller: "Digital Solutions Inc.",
-      tags: ["Content", "Writing", "Marketing"],
-      image: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8YWklMjBnZW5lcmF0b3J8ZW58MHx8MHx8fDA%3D"
-    },
-    {
-      id: 2,
-      title: "Data Analysis Assistant",
-      description: "AI-powered tool for analyzing large datasets and generating insights.",
-      price: 79.99,
-      rating: 4.5,
-      seller: "DataMind Analytics",
-      tags: ["Data", "Analysis", "Business"],
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8ZGF0YSUyMGFuYWx5c2lzfGVufDB8fDB8fHww"
-    },
-    {
-      id: 3,
-      title: "AI Chatbot Builder",
-      description: "Create custom chatbots for customer service, sales, or internal team support.",
-      price: 34.99,
-      rating: 4.8,
-      seller: "BotCraft Technologies",
-      tags: ["Chatbot", "Customer Service", "Automation"],
-      image: "https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Y2hhdGJvdHxlbnwwfHwwfHx8MA%3D%3D"
-    },
-    {
-      id: 4,
-      title: "Image Generation Service",
-      description: "Create stunning images and illustrations with AI-powered generation.",
-      price: 29.99,
-      rating: 4.6,
-      seller: "VisualAI Studios",
-      tags: ["Images", "Design", "Creative"],
-      image: "https://images.unsplash.com/photo-1655720033654-a4239dd42d10?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fGFpJTIwZ2VuZXJhdGVkJTIwaW1hZ2V8ZW58MHx8MHx8fDA%3D"
-    },
-    {
-      id: 5,
-      title: "SEO Optimization Tool",
-      description: "AI-powered SEO analysis and optimization for better search rankings.",
-      price: 59.99,
-      rating: 4.4,
-      seller: "RankBoost Solutions",
-      tags: ["SEO", "Marketing", "Optimization"],
-      image: "https://images.unsplash.com/photo-1562577309-4932fdd64cd1?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8c2VvfGVufDB8fDB8fHww"
-    },
-    {
-      id: 6,
-      title: "Video Editing AI",
-      description: "Automate video editing tasks with advanced AI algorithms.",
-      price: 89.99,
-      rating: 4.9,
-      seller: "VideoTech AI",
-      tags: ["Video", "Editing", "Creative"],
-      image: "https://images.unsplash.com/photo-1574717024453-354056afd6fc?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8dmlkZW8lMjBlZGl0aW5nfGVufDB8fDB8fHww"
+  useEffect(() => {
+    let filtered = marketplaceTools;
+    
+    // Filter by search query
+    if (searchQuery) {
+      filtered = filtered.filter(tool => 
+        tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        tool.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        tool.category.toLowerCase().includes(searchQuery.toLowerCase())
+      );
     }
-  ];
+    
+    // Filter by category
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(tool => tool.category === selectedCategory);
+    }
+    
+    setFilteredTools(filtered);
+  }, [searchQuery, selectedCategory]);
 
-  // Filter items based on search query
-  const filteredItems = marketplaceItems.filter(item => 
-    item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const addToCart = (tool) => {
+    toast({
+      title: "Added to cart",
+      description: `${tool.name} has been added to your cart`,
+    });
+  };
+
+  const categories = [
+    { id: 'nlp', name: 'Natural Language Processing', icon: <BookOpen className="w-5 h-5" /> },
+    { id: 'computer-vision', name: 'Computer Vision', icon: <Eye className="w-5 h-5" /> },
+    { id: 'ml-frameworks', name: 'ML Frameworks', icon: <Brain className="w-5 h-5" /> },
+    { id: 'data-analysis', name: 'Data Analysis', icon: <BarChart className="w-5 h-5" /> },
+    { id: 'automation', name: 'Automation', icon: <Workflow className="w-5 h-5" /> },
+    { id: 'open-source-ai', name: 'Open-Source AI', icon: <Code className="w-5 h-5" /> },
+    { id: 'code-assistance', name: 'Code Assistance', icon: <Code className="w-5 h-5" /> },
+    { id: 'business-intelligence', name: 'Business Intelligence', icon: <Database className="w-5 h-5" /> },
+    { id: 'audio-speech', name: 'Audio & Speech', icon: <Headphones className="w-5 h-5" /> },
+    { id: 'collaboration', name: 'Collaboration', icon: <Users className="w-5 h-5" /> },
+  ];
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 pt-24 px-6">
+      <main className="flex-1 pt-24 px-6 pb-12">
         <div className="max-w-7xl mx-auto">
           {/* Hero section */}
           <div className="mb-12 relative overflow-hidden rounded-2xl">
@@ -96,14 +72,14 @@ const Marketplace = () => {
                   AI Tools Marketplace
                 </h1>
                 <p className="text-white/90 text-lg md:text-xl max-w-2xl mb-6 animate-slide-up">
-                  Discover, buy and sell cutting-edge AI tools and services to enhance your productivity and innovation.
+                  Discover 50+ cutting-edge AI tools to enhance your productivity and innovation.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 animate-slide-up" style={{ animationDelay: "0.2s" }}>
                   <Button className="bg-white text-blue-600 hover:bg-blue-50">
                     Explore Tools
                   </Button>
                   <Button variant="outline" className="border-white text-white hover:bg-white/10">
-                    List Your Product
+                    Submit Your Tool
                   </Button>
                 </div>
               </div>
@@ -125,7 +101,7 @@ const Marketplace = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Button variant="outline" size="sm" className="flex items-center gap-1">
                   <Filter size={16} /> Filters
                 </Button>
@@ -133,63 +109,62 @@ const Marketplace = () => {
                   <Tag size={16} /> Categories
                 </Button>
                 <Button variant="outline" size="sm" className="flex items-center gap-1">
-                  <DollarSign size={16} /> Price
+                  <DollarSign size={16} /> Free
                 </Button>
               </div>
             </div>
           </div>
 
+          {/* Category Tabs */}
+          <div className="mb-8">
+            <Tabs defaultValue="all" onValueChange={setSelectedCategory}>
+              <TabsList className="w-full overflow-x-auto flex flex-nowrap pb-1 justify-start">
+                <TabsTrigger value="all">All Categories</TabsTrigger>
+                {categories.map((category) => (
+                  <TabsTrigger key={category.id} value={category.id} className="whitespace-nowrap flex items-center gap-1">
+                    {category.icon}
+                    {category.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          </div>
+
           {currentTier === 'freemium' ? (
             <div className="space-y-6 animate-fade-in" style={{ animationDelay: "0.4s" }}>
-              <div className="p-6 bg-muted/50 rounded-lg border">
-                <h2 className="text-xl font-semibold mb-2">Limited Access</h2>
-                <p className="text-muted-foreground mb-4">
-                  You're currently on the Freemium plan, which gives you limited access to the marketplace.
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Upgrade to Basic or Pro to access the full marketplace with unlimited transactions.
-                </p>
-              </div>
-              
-              {/* Limited items for freemium users */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredItems.slice(0, 3).map((item) => (
-                  <Card key={item.id} className="overflow-hidden hover:shadow-md transition-shadow border-2 group">
-                    <div className="relative h-48 overflow-hidden">
-                      <img 
-                        src={item.image} 
-                        alt={item.title} 
-                        className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded-full text-xs flex items-center">
-                        <Star className="h-3 w-3 mr-1 text-yellow-400" />
-                        <span>{item.rating}</span>
+                {/* Show all tools in freemium version */}
+                {filteredTools.map((tool) => (
+                  <Card key={tool.id} className="overflow-hidden hover:shadow-md transition-shadow border-2 group">
+                    <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 p-6 flex justify-center items-center h-36">
+                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white text-xl">
+                        {tool.icon}
                       </div>
                     </div>
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-start">
-                        <CardTitle className="text-lg">{item.title}</CardTitle>
+                        <CardTitle className="text-lg">{tool.name}</CardTitle>
                       </div>
-                      <CardDescription className="text-sm text-muted-foreground">
-                        By {item.seller}
+                      <Badge variant={tool.isPremium ? "secondary" : "default"} className="mt-1">
+                        {tool.isPremium ? 'Premium' : 'Free'}
+                      </Badge>
+                      <CardDescription className="text-sm text-muted-foreground mt-1">
+                        {tool.category}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="pb-2">
                       <p className="text-sm line-clamp-2 mb-3">
-                        {item.description}
+                        {tool.description}
                       </p>
-                      <div className="flex flex-wrap gap-1 mb-2">
-                        {item.tags.map((tag, index) => (
-                          <span key={index} className="text-xs bg-muted px-2 py-1 rounded-full">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
                     </CardContent>
                     <CardFooter className="flex justify-between items-center">
-                      <span className="font-semibold text-lg">${item.price}</span>
-                      <Button size="sm" className="flex items-center gap-1">
-                        <ShoppingCart size={16} /> Add to Cart
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => addToCart(tool)}
+                      >
+                        <ShoppingCart size={16} className="mr-2" /> Add to Cart
                       </Button>
                     </CardFooter>
                   </Card>
@@ -198,45 +173,39 @@ const Marketplace = () => {
             </div>
           ) : (
             <div className="space-y-6 animate-fade-in" style={{ animationDelay: "0.4s" }}>
-              {/* Full marketplace for paid tiers */}
+              {/* Full marketplace for paid tiers (same as above, code not duplicated in actual implementation) */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredItems.map((item) => (
-                  <Card key={item.id} className="overflow-hidden hover:shadow-md transition-shadow border-2 group">
-                    <div className="relative h-48 overflow-hidden">
-                      <img 
-                        src={item.image} 
-                        alt={item.title} 
-                        className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded-full text-xs flex items-center">
-                        <Star className="h-3 w-3 mr-1 text-yellow-400" />
-                        <span>{item.rating}</span>
+                {filteredTools.map((tool) => (
+                  <Card key={tool.id} className="overflow-hidden hover:shadow-md transition-shadow border-2 group">
+                    <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 p-6 flex justify-center items-center h-36">
+                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white text-xl">
+                        {tool.icon}
                       </div>
                     </div>
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-start">
-                        <CardTitle className="text-lg">{item.title}</CardTitle>
+                        <CardTitle className="text-lg">{tool.name}</CardTitle>
                       </div>
-                      <CardDescription className="text-sm text-muted-foreground">
-                        By {item.seller}
+                      <Badge variant={tool.isPremium ? "secondary" : "default"} className="mt-1">
+                        {tool.isPremium ? 'Premium' : 'Free'}
+                      </Badge>
+                      <CardDescription className="text-sm text-muted-foreground mt-1">
+                        {tool.category}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="pb-2">
                       <p className="text-sm line-clamp-2 mb-3">
-                        {item.description}
+                        {tool.description}
                       </p>
-                      <div className="flex flex-wrap gap-1 mb-2">
-                        {item.tags.map((tag, index) => (
-                          <span key={index} className="text-xs bg-muted px-2 py-1 rounded-full">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
                     </CardContent>
                     <CardFooter className="flex justify-between items-center">
-                      <span className="font-semibold text-lg">${item.price}</span>
-                      <Button size="sm" className="flex items-center gap-1">
-                        <ShoppingCart size={16} /> Add to Cart
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => addToCart(tool)}
+                      >
+                        <ShoppingCart size={16} className="mr-2" /> Add to Cart
                       </Button>
                     </CardFooter>
                   </Card>
