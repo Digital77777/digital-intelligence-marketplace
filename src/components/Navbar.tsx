@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, Home, Users, BookOpen, MessageSquare, User, Info, DollarSign } from 'lucide-react';
+import { Menu, X, Home, Users, BookOpen, MessageSquare, User, Info, DollarSign, ShoppingCart } from 'lucide-react';
 import Button from './Button';
 import { useTier } from '@/context/TierContext';
 import { 
@@ -103,6 +103,13 @@ const Navbar = () => {
               </NavigationMenuItem>
 
               <NavigationMenuItem>
+                <Link to="/marketplace" className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1">
+                  <ShoppingCart className="w-4 h-4" />
+                  <span>Marketplace</span>
+                </Link>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
                 <Link to="/community" className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1">
                   <MessageSquare className="w-4 h-4" />
                   <span>Community</span>
@@ -179,6 +186,14 @@ const Navbar = () => {
             >
               <BookOpen className="h-5 w-5" />
               <span>Courses</span>
+            </Link>
+            <Link
+              to="/marketplace"
+              className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <ShoppingCart className="h-5 w-5" />
+              <span>Marketplace</span>
             </Link>
             <Link
               to="/community"
