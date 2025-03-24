@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import HeroSection from '@/components/HeroSection';
 import PricingTiers from '@/components/PricingTiers';
 import Footer from '@/components/Footer';
+import Button from '@/components/Button';
 import { TierProvider } from '@/context/TierContext';
 
 const Index = () => {
