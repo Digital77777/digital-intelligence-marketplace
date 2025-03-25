@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -120,7 +119,7 @@ const SubmitTool = () => {
     toast({
       title: "Tool submitted successfully",
       description: "Your tool has been submitted for review",
-      variant: "success"
+      variant: "default"
     });
     
     // Redirect after 2 seconds

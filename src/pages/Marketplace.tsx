@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -305,7 +304,8 @@ const Marketplace = () => {
                             className="w-full justify-start text-left h-auto py-3"
                             onClick={() => {
                               setSelectedCategory(category.id);
-                              document.querySelector(".SheetClose")?.click();
+                              const closeButton = document.querySelector(".SheetClose") as HTMLElement;
+                              if (closeButton) closeButton.click();
                             }}
                           >
                             <div className="flex items-center">
