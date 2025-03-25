@@ -24,7 +24,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import {
-  ShoppingCart,
   Star,
   Search,
   Filter,
@@ -239,7 +238,7 @@ const Marketplace = () => {
                           <Checkbox 
                             id="premium-only" 
                             checked={isPremiumFilter}
-                            onCheckedChange={setIsPremiumFilter}
+                            onCheckedChange={(checked) => setIsPremiumFilter(checked === true)}
                           />
                           <Label htmlFor="premium-only">Premium Tools Only</Label>
                         </div>

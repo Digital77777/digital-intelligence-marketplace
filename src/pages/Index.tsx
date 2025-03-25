@@ -2,7 +2,6 @@
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import HeroSection from '@/components/HeroSection';
-import PricingTiers from '@/components/PricingTiers';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { TierProvider } from '@/context/TierContext';
@@ -157,7 +156,7 @@ const Index = () => {
       <Footer />
       
       {/* Add a custom style for the gradient animation */}
-      <style jsx="true">
+      <style>
         {`
         @keyframes gradient-animation {
           0% { background-position: 0% 50%; }
