@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X, Home, BookOpen, MessageSquare, User, Info, DollarSign, ShoppingCart } from 'lucide-react';
-import Button from './Button';
+import { Button } from '@/components/ui/button';
 import { useTier } from '@/context/TierContext';
 import AuthModal from './AuthModal';
 
@@ -13,6 +13,7 @@ const Navbar = () => {
   const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin');
   const { currentTier } = useTier();
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Mock login state
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -40,6 +41,12 @@ const Navbar = () => {
     // Mock logout functionality
     setIsLoggedIn(false);
   };
+  
+  const handleNavigation = (path: string) => {
+    window.scrollTo(0, 0);
+    navigate(path);
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <nav
@@ -49,7 +56,7 @@ const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center">
-          <Link to="/" className="text-xl font-bold">
+          <Link to="/" className="text-xl font-bold" onClick={() => window.scrollTo(0, 0)}>
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
               Digital Intelligence
             </span>
@@ -58,44 +65,76 @@ const Navbar = () => {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-5">
-          <Link to="/" className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5">
+          <Link 
+            to="/" 
+            className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
+            onClick={() => window.scrollTo(0, 0)}
+          >
             <Home className="w-4 h-4" />
             <span>Home</span>
           </Link>
           
-          <Link to="/ai-tools" className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5">
+          <Link 
+            to="/ai-tools" 
+            className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
+            onClick={() => window.scrollTo(0, 0)}
+          >
             <BookOpen className="w-4 h-4" />
             <span>AI Tools {currentTier === 'freemium' && <span className="text-xs text-blue-500">(Limited)</span>}</span>
           </Link>
           
-          <Link to="/courses" className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5">
+          <Link 
+            to="/courses" 
+            className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
+            onClick={() => window.scrollTo(0, 0)}
+          >
             <BookOpen className="w-4 h-4" />
             <span>Courses {currentTier === 'freemium' && <span className="text-xs text-blue-500">(Limited)</span>}</span>
           </Link>
 
-          <Link to="/marketplace" className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5">
+          <Link 
+            to="/marketplace" 
+            className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
+            onClick={() => window.scrollTo(0, 0)}
+          >
             <ShoppingCart className="w-4 h-4" />
             <span>Marketplace</span>
           </Link>
           
-          <Link to="/community" className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5">
+          <Link 
+            to="/community" 
+            className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
+            onClick={() => window.scrollTo(0, 0)}
+          >
             <MessageSquare className="w-4 h-4" />
             <span>Community</span>
           </Link>
           
-          <Link to="/about" className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5">
+          <Link 
+            to="/about" 
+            className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
+            onClick={() => window.scrollTo(0, 0)}
+          >
             <Info className="w-4 h-4" />
             <span>About</span>
           </Link>
           
-          <Link to="/pricing" className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5">
+          <Link 
+            to="/pricing" 
+            className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
+            onClick={() => window.scrollTo(0, 0)}
+          >
             <DollarSign className="w-4 h-4" />
             <span>Pricing</span>
           </Link>
 
           {isLoggedIn ? (
             <div className="flex items-center gap-4">
-              <Link to="/profile" className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5">
+              <Link 
+                to="/profile" 
+                className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
+                onClick={() => window.scrollTo(0, 0)}
+              >
                 <User className="w-4 h-4" />
                 <span>Dashboard</span>
               </Link>
@@ -147,73 +186,65 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-16 inset-x-0 bg-white dark:bg-black glass animate-fade-in">
           <div className="flex flex-col space-y-3 p-4">
-            <Link
-              to="/"
+            <button
               className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-              onClick={() => setIsMobileMenuOpen(false)}
+              onClick={() => handleNavigation('/')}
             >
               <Home className="h-5 w-5" />
               <span>Home</span>
-            </Link>
-            <Link
-              to="/ai-tools"
+            </button>
+            <button
               className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-              onClick={() => setIsMobileMenuOpen(false)}
+              onClick={() => handleNavigation('/ai-tools')}
             >
               <BookOpen className="h-5 w-5" />
               <span>AI Tools {currentTier === 'freemium' && <span className="text-xs text-blue-500">(Limited)</span>}</span>
-            </Link>
-            <Link
-              to="/courses"
+            </button>
+            <button
               className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-              onClick={() => setIsMobileMenuOpen(false)}
+              onClick={() => handleNavigation('/courses')}
             >
               <BookOpen className="h-5 w-5" />
               <span>Courses {currentTier === 'freemium' && <span className="text-xs text-blue-500">(Limited)</span>}</span>
-            </Link>
-            <Link
-              to="/marketplace"
+            </button>
+            <button
               className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-              onClick={() => setIsMobileMenuOpen(false)}
+              onClick={() => handleNavigation('/marketplace')}
             >
               <ShoppingCart className="h-5 w-5" />
               <span>Marketplace</span>
-            </Link>
-            <Link
-              to="/community"
+            </button>
+            <button
               className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-              onClick={() => setIsMobileMenuOpen(false)}
+              onClick={() => handleNavigation('/community')}
             >
               <MessageSquare className="h-5 w-5" />
               <span>Community</span>
-            </Link>
-            <Link
-              to="/about"
+            </button>
+            <button
               className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-              onClick={() => setIsMobileMenuOpen(false)}
+              onClick={() => handleNavigation('/about')}
             >
               <Info className="h-5 w-5" />
               <span>About</span>
-            </Link>
-            <Link
-              to="/pricing"
+            </button>
+            <button
               className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-              onClick={() => setIsMobileMenuOpen(false)}
+              onClick={() => handleNavigation('/pricing')}
             >
               <DollarSign className="h-5 w-5" />
               <span>Pricing</span>
-            </Link>
+            </button>
 
             {isLoggedIn ? (
               <>
-                <Link
-                  to="/profile"
+                <button
                   className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={() => handleNavigation('/profile')}
                 >
                   <User className="h-5 w-5" />
                   <span>Dashboard</span>
-                </Link>
+                </button>
                 <Button 
                   variant="outline" 
                   className="mt-2"

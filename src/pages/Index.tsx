@@ -10,6 +10,11 @@ import { Badge } from '@/components/ui/badge';
 import { Brain, Cpu, Database, Zap, BarChart3, Sparkles } from 'lucide-react';
 
 const Index = () => {
+  // Scroll to top on page load
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -84,8 +89,6 @@ const Index = () => {
           </div>
         </section>
         
-        <PricingTiers />
-        
         {/* Community Section */}
         <section className="py-20 px-6 bg-gradient-to-b from-transparent to-blue-50/30 dark:to-blue-900/10">
           <div className="max-w-7xl mx-auto">
@@ -154,7 +157,8 @@ const Index = () => {
       <Footer />
       
       {/* Add a custom style for the gradient animation */}
-      <style jsx global>{`
+      <style jsx="true">
+        {`
         @keyframes gradient-animation {
           0% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
@@ -164,7 +168,8 @@ const Index = () => {
         .shadow-text {
           text-shadow: 0 2px 10px rgba(79, 70, 229, 0.2);
         }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };
