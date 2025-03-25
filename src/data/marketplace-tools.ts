@@ -23,7 +23,18 @@ import {
 } from 'lucide-react';
 import React from 'react';
 
-export const marketplaceTools = [
+export type MarketplaceTool = {
+  id: number;
+  name: string;
+  description: string;
+  category: string;
+  isPremium: boolean;
+  price: number;
+  rating: number;
+  icon: React.ReactNode;
+}
+
+export const marketplaceTools: MarketplaceTool[] = [
   // Category 1: Natural Language Processing (NLP)
   {
     id: 1,
@@ -33,7 +44,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.8,
-    icon: <MessageSquare className="w-6 h-6" />
+    icon: React.createElement(MessageSquare, { className: "w-6 h-6" })
   },
   {
     id: 2,
@@ -43,7 +54,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.7,
-    icon: <MessageSquare className="w-6 h-6" />
+    icon: React.createElement(MessageSquare, { className: "w-6 h-6" })
   },
   {
     id: 3,
@@ -53,7 +64,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.6,
-    icon: <MessageSquare className="w-6 h-6" />
+    icon: React.createElement(MessageSquare, { className: "w-6 h-6" })
   },
   {
     id: 4,
@@ -63,7 +74,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.5,
-    icon: <MessageSquare className="w-6 h-6" />
+    icon: React.createElement(MessageSquare, { className: "w-6 h-6" })
   },
   {
     id: 5,
@@ -73,7 +84,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.4,
-    icon: <MessageSquare className="w-6 h-6" />
+    icon: React.createElement(MessageSquare, { className: "w-6 h-6" })
   },
 
   // Category 2: Computer Vision
@@ -85,7 +96,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.9,
-    icon: <Camera className="w-6 h-6" />
+    icon: React.createElement(Camera, { className: "w-6 h-6" })
   },
   {
     id: 7,
@@ -95,7 +106,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.8,
-    icon: <Eye className="w-6 h-6" />
+    icon: React.createElement(Eye, { className: "w-6 h-6" })
   },
   {
     id: 8,
@@ -105,7 +116,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.9,
-    icon: <Eye className="w-6 h-6" />
+    icon: React.createElement(Eye, { className: "w-6 h-6" })
   },
   {
     id: 9,
@@ -115,7 +126,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.7,
-    icon: <Eye className="w-6 h-6" />
+    icon: React.createElement(Eye, { className: "w-6 h-6" })
   },
   {
     id: 10,
@@ -125,7 +136,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.5,
-    icon: <Camera className="w-6 h-6" />
+    icon: React.createElement(Camera, { className: "w-6 h-6" })
   },
 
   // Category 3: Machine Learning Frameworks
@@ -137,7 +148,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.9,
-    icon: <Brain className="w-6 h-6" />
+    icon: React.createElement(Brain, { className: "w-6 h-6" })
   },
   {
     id: 12,
@@ -147,7 +158,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.8,
-    icon: <Brain className="w-6 h-6" />
+    icon: React.createElement(Brain, { className: "w-6 h-6" })
   },
   {
     id: 13,
@@ -157,7 +168,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.8,
-    icon: <CircuitBoard className="w-6 h-6" />
+    icon: React.createElement(CircuitBoard, { className: "w-6 h-6" })
   },
   {
     id: 14,
@@ -167,7 +178,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.9,
-    icon: <CircuitBoard className="w-6 h-6" />
+    icon: React.createElement(CircuitBoard, { className: "w-6 h-6" })
   },
   {
     id: 15,
@@ -177,7 +188,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.7,
-    icon: <Brain className="w-6 h-6" />
+    icon: React.createElement(Brain, { className: "w-6 h-6" })
   },
 
   // Category 4: Data Analysis & Visualization
@@ -189,7 +200,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.9,
-    icon: <BarChart className="w-6 h-6" />
+    icon: React.createElement(BarChart, { className: "w-6 h-6" })
   },
   {
     id: 17,
@@ -199,7 +210,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.9,
-    icon: <LineChart className="w-6 h-6" />
+    icon: React.createElement(LineChart, { className: "w-6 h-6" })
   },
   {
     id: 18,
@@ -209,7 +220,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.8,
-    icon: <AreaChart className="w-6 h-6" />
+    icon: React.createElement(AreaChart, { className: "w-6 h-6" })
   },
   {
     id: 19,
@@ -219,7 +230,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.7,
-    icon: <BarChart className="w-6 h-6" />
+    icon: React.createElement(BarChart, { className: "w-6 h-6" })
   },
   {
     id: 20,
@@ -229,7 +240,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.9,
-    icon: <PanelTop className="w-6 h-6" />
+    icon: React.createElement(PanelTop, { className: "w-6 h-6" })
   },
 
   // Category 5: Automation & Workflow
@@ -241,7 +252,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.7,
-    icon: <Workflow className="w-6 h-6" />
+    icon: React.createElement(Workflow, { className: "w-6 h-6" })
   },
   {
     id: 22,
@@ -251,7 +262,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.8,
-    icon: <Workflow className="w-6 h-6" />
+    icon: React.createElement(Workflow, { className: "w-6 h-6" })
   },
   {
     id: 23,
@@ -261,7 +272,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.5,
-    icon: <Bot className="w-6 h-6" />
+    icon: React.createElement(Bot, { className: "w-6 h-6" })
   },
   {
     id: 24,
@@ -271,7 +282,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.7,
-    icon: <Workflow className="w-6 h-6" />
+    icon: React.createElement(Workflow, { className: "w-6 h-6" })
   },
   {
     id: 25,
@@ -281,7 +292,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.6,
-    icon: <Bot className="w-6 h-6" />
+    icon: React.createElement(Bot, { className: "w-6 h-6" })
   },
 
   // Category 6: Open-Source AI Models
@@ -293,7 +304,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.8,
-    icon: <Sparkles className="w-6 h-6" />
+    icon: React.createElement(Sparkles, { className: "w-6 h-6" })
   },
   {
     id: 27,
@@ -303,7 +314,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.9,
-    icon: <MessageSquare className="w-6 h-6" />
+    icon: React.createElement(MessageSquare, { className: "w-6 h-6" })
   },
   {
     id: 28,
@@ -313,7 +324,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.7,
-    icon: <Sparkles className="w-6 h-6" />
+    icon: React.createElement(Sparkles, { className: "w-6 h-6" })
   },
   {
     id: 29,
@@ -323,7 +334,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.6,
-    icon: <BookOpen className="w-6 h-6" />
+    icon: React.createElement(BookOpen, { className: "w-6 h-6" })
   },
   {
     id: 30,
@@ -333,7 +344,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.7,
-    icon: <Eye className="w-6 h-6" />
+    icon: React.createElement(Eye, { className: "w-6 h-6" })
   },
 
   // Category 7: Code Assistance & Development
@@ -345,7 +356,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.9,
-    icon: <Code className="w-6 h-6" />
+    icon: React.createElement(Code, { className: "w-6 h-6" })
   },
   {
     id: 32,
@@ -355,7 +366,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.7,
-    icon: <Code className="w-6 h-6" />
+    icon: React.createElement(Code, { className: "w-6 h-6" })
   },
   {
     id: 33,
@@ -365,7 +376,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.6,
-    icon: <Code className="w-6 h-6" />
+    icon: React.createElement(Code, { className: "w-6 h-6" })
   },
   {
     id: 34,
@@ -375,7 +386,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.5,
-    icon: <Search className="w-6 h-6" />
+    icon: React.createElement(Search, { className: "w-6 h-6" })
   },
   {
     id: 35,
@@ -385,7 +396,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.8,
-    icon: <Code className="w-6 h-6" />
+    icon: React.createElement(Code, { className: "w-6 h-6" })
   },
 
   // Category 8: Business Intelligence
@@ -397,7 +408,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.8,
-    icon: <Database className="w-6 h-6" />
+    icon: React.createElement(Database, { className: "w-6 h-6" })
   },
   {
     id: 37,
@@ -407,7 +418,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.7,
-    icon: <BarChart className="w-6 h-6" />
+    icon: React.createElement(BarChart, { className: "w-6 h-6" })
   },
   {
     id: 38,
@@ -417,7 +428,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.9,
-    icon: <AreaChart className="w-6 h-6" />
+    icon: React.createElement(AreaChart, { className: "w-6 h-6" })
   },
   {
     id: 39,
@@ -427,7 +438,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.8,
-    icon: <PanelTop className="w-6 h-6" />
+    icon: React.createElement(PanelTop, { className: "w-6 h-6" })
   },
   {
     id: 40,
@@ -437,7 +448,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.6,
-    icon: <AreaChart className="w-6 h-6" />
+    icon: React.createElement(AreaChart, { className: "w-6 h-6" })
   },
 
   // Category 9: Audio & Speech Processing
@@ -449,7 +460,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.7,
-    icon: <Headphones className="w-6 h-6" />
+    icon: React.createElement(Headphones, { className: "w-6 h-6" })
   },
   {
     id: 42,
@@ -459,7 +470,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.8,
-    icon: <Mic className="w-6 h-6" />
+    icon: React.createElement(Mic, { className: "w-6 h-6" })
   },
   {
     id: 43,
@@ -469,7 +480,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.6,
-    icon: <Mic className="w-6 h-6" />
+    icon: React.createElement(Mic, { className: "w-6 h-6" })
   },
   {
     id: 44,
@@ -479,7 +490,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.5,
-    icon: <Camera className="w-6 h-6" />
+    icon: React.createElement(Camera, { className: "w-6 h-6" })
   },
   {
     id: 45,
@@ -489,7 +500,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.7,
-    icon: <Headphones className="w-6 h-6" />
+    icon: React.createElement(Headphones, { className: "w-6 h-6" })
   },
 
   // Category 10: Collaboration & Project Management
@@ -501,7 +512,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.9,
-    icon: <Users className="w-6 h-6" />
+    icon: React.createElement(Users, { className: "w-6 h-6" })
   },
   {
     id: 47,
@@ -511,7 +522,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.8,
-    icon: <PanelTop className="w-6 h-6" />
+    icon: React.createElement(PanelTop, { className: "w-6 h-6" })
   },
   {
     id: 48,
@@ -521,7 +532,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.7,
-    icon: <Users className="w-6 h-6" />
+    icon: React.createElement(Users, { className: "w-6 h-6" })
   },
   {
     id: 49,
@@ -531,7 +542,7 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.9,
-    icon: <PanelTop className="w-6 h-6" />
+    icon: React.createElement(PanelTop, { className: "w-6 h-6" })
   },
   {
     id: 50,
@@ -541,6 +552,6 @@ export const marketplaceTools = [
     isPremium: false,
     price: 0,
     rating: 4.8,
-    icon: <Share2 className="w-6 h-6" />
+    icon: React.createElement(Share2, { className: "w-6 h-6" })
   }
 ];
