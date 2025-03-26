@@ -18,10 +18,14 @@ import Marketplace from "./pages/Marketplace";
 import ToolDetail from "./pages/ToolDetail";
 import SubmitTool from "./pages/SubmitTool";
 import Pricing from "./pages/Pricing";
-// Import new Basic Tier pages
+// Import Basic Tier pages
 import TeamDashboard from "./pages/TeamDashboard";
 import CollaborationHub from "./pages/CollaborationHub";
 import WorkflowDesigner from "./pages/WorkflowDesigner";
+// Import Pro Tier pages
+import AIStudio from "./pages/AIStudio";
+import ModelMarketplace from "./pages/ModelMarketplace";
+import BusinessInsights from "./pages/BusinessInsights";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +65,12 @@ const App = () => (
               <Route path="/team-dashboard" element={<TeamDashboard />} />
               <Route path="/collaboration-hub" element={<CollaborationHub />} />
               <Route path="/workflow-designer" element={<WorkflowDesigner />} />
+              
+              {/* Pro Tier Routes */}
+              <Route path="/ai-studio" element={<AIStudio />} />
+              <Route path="/model-marketplace" element={<ModelMarketplace />} />
+              <Route path="/business-insights" element={<BusinessInsights />} />
+              {/* Add more Pro Tier routes as they are implemented */}
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

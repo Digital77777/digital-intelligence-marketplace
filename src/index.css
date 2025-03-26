@@ -43,6 +43,10 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Pro Tier Accent Colors */
+    --pro-accent: 200 100% 70%; /* #6AC8FF */
+    --pro-accent-foreground: 240 5.9% 10%;
   }
 
   .dark {
@@ -102,6 +106,23 @@
 
   .text-balance {
     text-wrap: balance;
+  }
+  
+  /* Pro Tier Utilities */
+  .pro-gradient {
+    @apply bg-gradient-to-br from-[#6AC8FF] to-purple-600;
+  }
+  
+  .pro-text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[#6AC8FF] to-purple-600;
+  }
+  
+  .pro-border {
+    @apply border border-[#6AC8FF]/30;
+  }
+  
+  .pro-shadow {
+    @apply shadow-lg shadow-[#6AC8FF]/5;
   }
 }
 

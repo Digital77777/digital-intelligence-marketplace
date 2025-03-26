@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { toast } from 'sonner';
 
@@ -15,6 +14,11 @@ export interface TierFeatures {
   collaboration: boolean;
   workflowAutomation: boolean;
   advancedSecurity: boolean;
+  customModels: boolean;
+  aiStudio: boolean;
+  unlimitedTeamMembers: boolean;
+  dedicatedSupport: boolean;
+  complianceTools: boolean;
 }
 
 interface TierContextType {
@@ -37,7 +41,12 @@ const tierFeaturesMap: Record<TierType, TierFeatures> = {
     analytics: false,
     collaboration: false,
     workflowAutomation: false,
-    advancedSecurity: false
+    advancedSecurity: false,
+    customModels: false,
+    aiStudio: false,
+    unlimitedTeamMembers: false,
+    dedicatedSupport: false,
+    complianceTools: false
   },
   basic: {
     maxTeamMembers: 10,
@@ -49,7 +58,12 @@ const tierFeaturesMap: Record<TierType, TierFeatures> = {
     analytics: true,
     collaboration: true,
     workflowAutomation: true,
-    advancedSecurity: true
+    advancedSecurity: true,
+    customModels: false,
+    aiStudio: false,
+    unlimitedTeamMembers: false,
+    dedicatedSupport: false,
+    complianceTools: false
   },
   pro: {
     maxTeamMembers: 50,
@@ -61,7 +75,12 @@ const tierFeaturesMap: Record<TierType, TierFeatures> = {
     analytics: true,
     collaboration: true,
     workflowAutomation: true,
-    advancedSecurity: true
+    advancedSecurity: true,
+    customModels: true,
+    aiStudio: true,
+    unlimitedTeamMembers: true,
+    dedicatedSupport: true,
+    complianceTools: true
   }
 };
 
@@ -76,10 +95,20 @@ const tierFeatureAccess: Record<string, TierType[]> = {
   'audit-logs': ['basic', 'pro'],
   'priority-support': ['basic', 'pro'],
   'learning-hub-pro': ['basic', 'pro'],
+  
   'custom-models': ['pro'],
   'advanced-api': ['pro'],
   'white-labeling': ['pro'],
-  'dedicated-support': ['pro']
+  'dedicated-support': ['pro'],
+  'ai-studio': ['pro'],
+  'model-marketplace': ['pro'],
+  'pipeline-designer': ['pro'],
+  'team-workspace': ['pro'],
+  'compliance-center': ['pro'],
+  'security-dashboard': ['pro'],
+  'business-insights': ['pro'],
+  'pro-chatbot': ['pro'],
+  'learning-academy': ['pro']
 };
 
 const TierContext = createContext<TierContextType | undefined>(undefined);

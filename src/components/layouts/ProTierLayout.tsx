@@ -1,0 +1,67 @@
+
+import React from 'react';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import { useNavigate } from 'react-router-dom';
+import { useTier } from '@/context/TierContext';
+import { Badge } from "@/components/ui/badge";
+import { toast } from 'sonner';
+import { Zap, Sparkles } from 'lucide-react';
+
+interface ProTierLayoutProps {
+  children: React.ReactNode;
+  pageTitle: string;
+  requiredFeature: string;
+}
+
+const ProTierLayout: React.FC<ProTierLayoutProps> = ({ 
+  children, 
+  pageTitle, 
+  requiredFeature 
+}) => {
+  const { currentTier, canAccess } = useTier();
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (!canAccess(requiredFeature)) {
+      toast.error("This feature requires a Pro subscription", {
+        description: "Please upgrade to access this premium feature.",
+        action: {
+          label: "Upgrade",
+          onClick: () => navigate('/pricing')
+        }
+      });
+      navigate('/');
+    }
+  }, [currentTier, requiredFeature, navigate, canAccess]);
+
+  if (!canAccess(requiredFeature)) {
+    return null; // Will redirect in the useEffect
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-950 to-indigo-950/60">
+      <Navbar />
+      <main className="flex-1 pt-24 px-6 pb-12">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold text-white">{pageTitle}</h1>
+              <Badge variant="outline" className="bg-purple-900/60 text-purple-200 border-purple-700 px-3 py-1 flex items-center gap-1.5">
+                <Zap className="h-3.5 w-3.5 text-[#6AC8FF]" />
+                <span>PRO</span>
+              </Badge>
+            </div>
+          </div>
+          
+          <div className="glass-dark backdrop-blur-sm rounded-xl border border-indigo-900/50 p-6 shadow-lg">
+            {children}
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+export default ProTierLayout;
