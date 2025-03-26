@@ -1,7 +1,19 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, Home, BookOpen, MessageSquare, User, Info, DollarSign, ShoppingCart } from 'lucide-react';
+import { 
+  Menu, 
+  X, 
+  Home, 
+  BookOpen, 
+  MessageSquare, 
+  User, 
+  Info, 
+  DollarSign, 
+  ShoppingCart,
+  LayoutDashboard,
+  Users,
+  GitBranch
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTier } from '@/context/TierContext';
 import AuthModal from './AuthModal';
@@ -46,6 +58,71 @@ const Navbar = () => {
     window.scrollTo(0, 0);
     navigate(path);
     setIsMobileMenuOpen(false);
+  };
+
+  const renderBasicTierLinks = () => {
+    if (currentTier === 'freemium') return null;
+    
+    return (
+      <>
+        <Link 
+          to="/team-dashboard" 
+          className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
+          onClick={() => window.scrollTo(0, 0)}
+        >
+          <LayoutDashboard className="w-4 h-4" />
+          <span>Team Dashboard</span>
+        </Link>
+        
+        <Link 
+          to="/collaboration-hub" 
+          className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
+          onClick={() => window.scrollTo(0, 0)}
+        >
+          <Users className="w-4 h-4" />
+          <span>Collaboration</span>
+        </Link>
+        
+        <Link 
+          to="/workflow-designer" 
+          className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
+          onClick={() => window.scrollTo(0, 0)}
+        >
+          <GitBranch className="w-4 h-4" />
+          <span>Workflow Designer</span>
+        </Link>
+      </>
+    );
+  };
+
+  const renderMobileBasicTierLinks = () => {
+    if (currentTier === 'freemium') return null;
+    
+    return (
+      <>
+        <button
+          className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
+          onClick={() => handleNavigation('/team-dashboard')}
+        >
+          <LayoutDashboard className="h-5 w-5" />
+          <span>Team Dashboard</span>
+        </button>
+        <button
+          className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
+          onClick={() => handleNavigation('/collaboration-hub')}
+        >
+          <Users className="h-5 w-5" />
+          <span>Collaboration</span>
+        </button>
+        <button
+          className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
+          onClick={() => handleNavigation('/workflow-designer')}
+        >
+          <GitBranch className="h-5 w-5" />
+          <span>Workflow Designer</span>
+        </button>
+      </>
+    );
   };
 
   return (
@@ -100,6 +177,8 @@ const Navbar = () => {
             <ShoppingCart className="w-4 h-4" />
             <span>Marketplace</span>
           </Link>
+          
+          {renderBasicTierLinks()}
           
           <Link 
             to="/community" 
@@ -214,6 +293,9 @@ const Navbar = () => {
               <ShoppingCart className="h-5 w-5" />
               <span>Marketplace</span>
             </button>
+            
+            {renderMobileBasicTierLinks()}
+            
             <button
               className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
               onClick={() => handleNavigation('/community')}

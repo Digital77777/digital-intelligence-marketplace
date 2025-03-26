@@ -2,36 +2,45 @@
 import React from 'react';
 import TierCard from './TierCard';
 import { useTier } from '@/context/TierContext';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Info } from 'lucide-react';
 
 const PricingTiers = () => {
   const { currentTier } = useTier();
 
   const freemiumFeatures = [
-    'Basic data insights',
-    'Limited API access',
-    'Standard reporting',
-    'Email support',
-    'Single user account'
+    'Access to 10 core AI tools',
+    'Basic learning content',
+    'Community forums access',
+    'Single user account',
+    'Limited API access (100 calls/month)',
+    'Community support'
   ];
 
   const basicFeatures = [
     'Everything in Freemium',
-    'Advanced data analytics',
-    'Expanded API access',
-    'Custom reporting',
+    'Access to 100+ AI tools',
+    'Team dashboard & collaboration',
+    'Workflow automation tools',
+    'Up to 10 team members',
+    '5,000 API calls per month',
+    'Usage analytics and reporting',
     'Priority email support',
-    'Up to 3 user accounts'
+    'Advanced security features',
+    '10GB storage'
   ];
 
   const proFeatures = [
     'Everything in Basic',
-    'Full data insights suite',
-    'Unlimited API access',
-    'Advanced custom reporting',
-    'Custom integrations',
+    'Access to 250+ AI tools',
+    'Custom model development',
+    'Advanced API integration',
+    'White-labeling options',
+    'Unlimited team members',
+    '50,000 API calls per month',
+    'Dedicated account manager',
     '24/7 priority support',
-    'Unlimited user accounts',
-    'Dedicated account manager'
+    '100GB storage'
   ];
 
   return (
@@ -47,6 +56,16 @@ const PricingTiers = () => {
             Select the tier that best fits your needs. Change anytime as your requirements evolve.
           </p>
         </div>
+
+        {currentTier === 'basic' && (
+          <Alert className="mb-8 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+            <Info className="h-4 w-4" />
+            <AlertTitle>You're on the Basic Plan</AlertTitle>
+            <AlertDescription>
+              You now have access to the advanced collaboration features, team dashboard, workflow automation, and extended AI tool access. Explore your new capabilities from the navigation menu.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="flex flex-col md:flex-row gap-8 justify-center flex-wrap">
           <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
