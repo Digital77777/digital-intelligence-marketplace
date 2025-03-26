@@ -1,230 +1,210 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import ProTierLayout from '@/components/layouts/ProTierLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DatePickerWithRange } from "@/components/ui/date-picker";
+import { Download, FileDown, FileText, TrendingUp, Users, DollarSign, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { LineChart, BarChart, AreaChart, PieChart, Line, Bar, Area, Pie, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Download, Share, Calendar, Filter, RefreshCcw, Zap, Users, LineChart as LineChartIcon, Layers, ArrowUp, ArrowDown } from 'lucide-react';
 
 // Sample data for charts
 const revenueData = [
-  { name: 'Jan', revenue: 4000, expenses: 2400, profit: 1600 },
-  { name: 'Feb', revenue: 5000, expenses: 2800, profit: 2200 },
-  { name: 'Mar', revenue: 8000, expenses: 3800, profit: 4200 },
-  { name: 'Apr', revenue: 7500, expenses: 3500, profit: 4000 },
-  { name: 'May', revenue: 9000, expenses: 4000, profit: 5000 },
-  { name: 'Jun', revenue: 11000, expenses: 4500, profit: 6500 },
-  { name: 'Jul', revenue: 12000, expenses: 5000, profit: 7000 },
+  { month: 'Jan', revenue: 5000, expenses: 3000, profit: 2000 },
+  { month: 'Feb', revenue: 7000, expenses: 3500, profit: 3500 },
+  { month: 'Mar', revenue: 8500, expenses: 4000, profit: 4500 },
+  { month: 'Apr', revenue: 9800, expenses: 4200, profit: 5600 },
+  { month: 'May', revenue: 11000, expenses: 4800, profit: 6200 },
+  { month: 'Jun', revenue: 10500, expenses: 5000, profit: 5500 },
 ];
 
-const usageData = [
-  { name: 'Mon', api_calls: 2500, predictions: 1200 },
-  { name: 'Tue', api_calls: 3000, predictions: 1400 },
-  { name: 'Wed', api_calls: 4500, predictions: 2200 },
-  { name: 'Thu', api_calls: 4000, predictions: 2000 },
-  { name: 'Fri', api_calls: 5000, predictions: 2400 },
-  { name: 'Sat', api_calls: 3500, predictions: 1800 },
-  { name: 'Sun', api_calls: 2800, predictions: 1500 },
+const userEngagementData = [
+  { day: 'Mon', newUsers: 45, activeUsers: 280, churnedUsers: 5 },
+  { day: 'Tue', newUsers: 52, activeUsers: 290, churnedUsers: 8 },
+  { day: 'Wed', newUsers: 70, activeUsers: 305, churnedUsers: 10 },
+  { day: 'Thu', newUsers: 45, activeUsers: 298, churnedUsers: 12 },
+  { day: 'Fri', newUsers: 56, activeUsers: 287, churnedUsers: 7 },
+  { day: 'Sat', newUsers: 68, activeUsers: 310, churnedUsers: 5 },
+  { day: 'Sun', newUsers: 54, activeUsers: 325, churnedUsers: 4 },
 ];
 
-const modelUsageData = [
-  { name: 'GPT-4', value: 40 },
-  { name: 'DALL-E 3', value: 25 },
-  { name: 'CodeGPT', value: 15 },
-  { name: 'Whisper', value: 12 },
-  { name: 'Other', value: 8 },
+const marketShareData = [
+  { name: 'Our Platform', value: 65 },
+  { name: 'Competitor A', value: 15 },
+  { name: 'Competitor B', value: 12 },
+  { name: 'Others', value: 8 },
 ];
 
-const userGrowthData = [
-  { name: 'Jan', users: 400 },
-  { name: 'Feb', users: 600 },
-  { name: 'Mar', users: 950 },
-  { name: 'Apr', users: 1400 },
-  { name: 'May', users: 1800 },
-  { name: 'Jun', users: 2400 },
-  { name: 'Jul', users: 3000 },
-];
+const COLORS = ['#6AC8FF', '#82ca9d', '#8884d8', '#ffc658', '#ff8042'];
 
-const COLORS = ['#6AC8FF', '#9F7AEA', '#F687B3', '#48BB78', '#A0AEC0'];
+const topPerformingProducts = [
+  { id: 1, name: 'AI Studio Pro License', sales: 1245, revenue: 124500, growth: '+18%' },
+  { id: 2, name: 'Neural Network Template Pack', sales: 867, revenue: 43350, growth: '+12%' },
+  { id: 3, name: 'Enterprise Data Connectors', sales: 658, revenue: 98700, growth: '+24%' },
+  { id: 4, name: 'Computer Vision Toolkit', sales: 524, revenue: 78600, growth: '+15%' },
+  { id: 5, name: 'NLP Advanced Models', sales: 492, revenue: 73800, growth: '+9%' },
+];
 
 const BusinessInsights = () => {
+  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>();
+  const [period, setPeriod] = useState("monthly");
+
+  const handleExportPDF = () => {
+    // In a real app, this would generate and download a PDF
+    console.log('Exporting PDF report...');
+  };
+
+  const handleExportCSV = () => {
+    // In a real app, this would generate and download a CSV
+    console.log('Exporting CSV data...');
+  };
+
   return (
-    <ProTierLayout pageTitle="Business Insights" requiredFeature="business-insights">
-      <div className="text-white space-y-8">
+    <ProTierLayout pageTitle="Business Insights" requiredFeature="businessInsights">
+      <div className="space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h2 className="text-2xl font-semibold">Analytics Dashboard</h2>
-            <p className="text-gray-400">Track your business performance and ROI</p>
+          <div className="flex flex-col gap-1">
+            <h2 className="text-2xl font-semibold text-white">Analytics Dashboard</h2>
+            <p className="text-indigo-200">Monitor your business performance and make data-driven decisions</p>
           </div>
           
-          <div className="flex flex-wrap gap-3">
-            <Button variant="outline" className="border-gray-700 text-white hover:bg-gray-800">
-              <Calendar className="h-4 w-4 mr-2" />
-              Last 30 Days
-            </Button>
-            <Button variant="outline" className="border-gray-700 text-white hover:bg-gray-800">
-              <Filter className="h-4 w-4 mr-2" />
-              Filters
-            </Button>
-            <Button variant="outline" className="border-gray-700 text-white hover:bg-gray-800">
-              <RefreshCcw className="h-4 w-4 mr-2" />
-              Refresh
-            </Button>
-            <Button variant="outline" className="border-[#6AC8FF]/30 text-[#6AC8FF] hover:bg-[#6AC8FF]/10">
-              <Download className="h-4 w-4 mr-2" />
-              Export PDF
-            </Button>
+          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+            <Select defaultValue={period} onValueChange={setPeriod}>
+              <SelectTrigger className="w-full sm:w-40 bg-indigo-950/50 border-indigo-900 text-indigo-100">
+                <SelectValue placeholder="Period" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="daily">Daily</SelectItem>
+                <SelectItem value="weekly">Weekly</SelectItem>
+                <SelectItem value="monthly">Monthly</SelectItem>
+                <SelectItem value="quarterly">Quarterly</SelectItem>
+                <SelectItem value="yearly">Yearly</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <div className="bg-indigo-950/50 border border-indigo-900 rounded-md">
+              <DatePickerWithRange date={dateRange} setDate={setDateRange} />
+            </div>
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="bg-gray-900/50 border-gray-800 text-white">
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-gray-400 text-sm">Total Revenue</p>
-                  <h3 className="text-2xl font-bold mt-1">$56,500</h3>
-                  <div className="flex items-center gap-1 mt-1">
-                    <Badge className="bg-green-500/20 text-green-400 border-green-500/20 px-1">
-                      <ArrowUp className="h-3 w-3 mr-1" />
-                      12%
-                    </Badge>
-                    <span className="text-xs text-gray-400">vs last month</span>
-                  </div>
-                </div>
-                <div className="h-12 w-12 bg-[#6AC8FF]/10 rounded-lg flex items-center justify-center">
-                  <LineChartIcon className="h-6 w-6 text-[#6AC8FF]" />
-                </div>
-              </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-indigo-950/40 border-indigo-900/50 text-white">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <DollarSign className="h-5 w-5 mr-2 text-[#6AC8FF]" />
+                Total Revenue
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">$283,450</div>
+              <p className="text-sm text-indigo-200 mt-1">
+                <span className="text-green-400">↑ 18.2%</span> from last period
+              </p>
             </CardContent>
           </Card>
           
-          <Card className="bg-gray-900/50 border-gray-800 text-white">
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-gray-400 text-sm">API Usage</p>
-                  <h3 className="text-2xl font-bold mt-1">32,450</h3>
-                  <div className="flex items-center gap-1 mt-1">
-                    <Badge className="bg-green-500/20 text-green-400 border-green-500/20 px-1">
-                      <ArrowUp className="h-3 w-3 mr-1" />
-                      18%
-                    </Badge>
-                    <span className="text-xs text-gray-400">vs last month</span>
-                  </div>
-                </div>
-                <div className="h-12 w-12 bg-purple-500/10 rounded-lg flex items-center justify-center">
-                  <Zap className="h-6 w-6 text-purple-400" />
-                </div>
-              </div>
+          <Card className="bg-indigo-950/40 border-indigo-900/50 text-white">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <Users className="h-5 w-5 mr-2 text-purple-400" />
+                Active Users
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">8,642</div>
+              <p className="text-sm text-indigo-200 mt-1">
+                <span className="text-green-400">↑ 12.5%</span> from last period
+              </p>
             </CardContent>
           </Card>
           
-          <Card className="bg-gray-900/50 border-gray-800 text-white">
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-gray-400 text-sm">Active Users</p>
-                  <h3 className="text-2xl font-bold mt-1">3,285</h3>
-                  <div className="flex items-center gap-1 mt-1">
-                    <Badge className="bg-green-500/20 text-green-400 border-green-500/20 px-1">
-                      <ArrowUp className="h-3 w-3 mr-1" />
-                      7%
-                    </Badge>
-                    <span className="text-xs text-gray-400">vs last month</span>
-                  </div>
-                </div>
-                <div className="h-12 w-12 bg-pink-500/10 rounded-lg flex items-center justify-center">
-                  <Users className="h-6 w-6 text-pink-400" />
-                </div>
-              </div>
+          <Card className="bg-indigo-950/40 border-indigo-900/50 text-white">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <TrendingUp className="h-5 w-5 mr-2 text-emerald-400" />
+                Conversion Rate
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">24.8%</div>
+              <p className="text-sm text-indigo-200 mt-1">
+                <span className="text-green-400">↑ 3.1%</span> from last period
+              </p>
             </CardContent>
           </Card>
           
-          <Card className="bg-gray-900/50 border-gray-800 text-white">
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-gray-400 text-sm">Models Deployed</p>
-                  <h3 className="text-2xl font-bold mt-1">128</h3>
-                  <div className="flex items-center gap-1 mt-1">
-                    <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/20 px-1">
-                      <ArrowUp className="h-3 w-3 mr-1" />
-                      4%
-                    </Badge>
-                    <span className="text-xs text-gray-400">vs last month</span>
-                  </div>
-                </div>
-                <div className="h-12 w-12 bg-amber-500/10 rounded-lg flex items-center justify-center">
-                  <Layers className="h-6 w-6 text-amber-400" />
-                </div>
-              </div>
+          <Card className="bg-indigo-950/40 border-indigo-900/50 text-white">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <BarChart3 className="h-5 w-5 mr-2 text-yellow-400" />
+                Avg. Order Value
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">$756</div>
+              <p className="text-sm text-indigo-200 mt-1">
+                <span className="text-green-400">↑ 5.3%</span> from last period
+              </p>
             </CardContent>
           </Card>
         </div>
         
         <Tabs defaultValue="revenue" className="w-full">
-          <TabsList className="bg-gray-800/50 border border-gray-700 mb-6">
-            <TabsTrigger value="revenue" className="data-[state=active]:bg-[#6AC8FF]/20 data-[state=active]:text-[#6AC8FF]">
+          <TabsList className="bg-indigo-950/60 border border-indigo-900/50 mb-4">
+            <TabsTrigger value="revenue" className="data-[state=active]:bg-indigo-900/60 data-[state=active]:text-white text-indigo-200">
               Revenue
             </TabsTrigger>
-            <TabsTrigger value="usage" className="data-[state=active]:bg-[#6AC8FF]/20 data-[state=active]:text-[#6AC8FF]">
-              API Usage
+            <TabsTrigger value="users" className="data-[state=active]:bg-indigo-900/60 data-[state=active]:text-white text-indigo-200">
+              User Engagement
             </TabsTrigger>
-            <TabsTrigger value="models" className="data-[state=active]:bg-[#6AC8FF]/20 data-[state=active]:text-[#6AC8FF]">
-              Models
-            </TabsTrigger>
-            <TabsTrigger value="users" className="data-[state=active]:bg-[#6AC8FF]/20 data-[state=active]:text-[#6AC8FF]">
-              Users
+            <TabsTrigger value="market" className="data-[state=active]:bg-indigo-900/60 data-[state=active]:text-white text-indigo-200">
+              Market Share
             </TabsTrigger>
           </TabsList>
           
           <TabsContent value="revenue" className="mt-0">
-            <Card className="bg-gray-900/50 border-gray-800 text-white">
-              <CardHeader className="border-b border-gray-800 bg-gray-950/50 pb-3">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-lg text-white">Revenue Overview</CardTitle>
+            <Card className="bg-indigo-950/40 border-indigo-900/50 text-white">
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                  <CardTitle>Revenue Analytics</CardTitle>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="border-gray-700 text-white hover:bg-gray-800">
-                      <Share className="h-4 w-4 mr-2" />
-                      Share
+                    <Button variant="outline" size="sm" className="flex items-center gap-1 bg-indigo-900/30 border-indigo-800 hover:bg-indigo-800/50" onClick={handleExportPDF}>
+                      <FileText className="h-4 w-4" />
+                      <span>PDF</span>
                     </Button>
-                    <Button variant="outline" size="sm" className="border-[#6AC8FF]/30 text-[#6AC8FF] hover:bg-[#6AC8FF]/10">
-                      <Download className="h-4 w-4 mr-2" />
-                      Export
+                    <Button variant="outline" size="sm" className="flex items-center gap-1 bg-indigo-900/30 border-indigo-800 hover:bg-indigo-800/50" onClick={handleExportCSV}>
+                      <FileDown className="h-4 w-4" />
+                      <span>CSV</span>
                     </Button>
                   </div>
                 </div>
+                <CardDescription className="text-indigo-200">
+                  Monthly revenue, expenses, and profit overview
+                </CardDescription>
               </CardHeader>
-              <CardContent className="p-6">
-                <div className="h-96">
+              <CardContent>
+                <div className="h-80 w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={revenueData}>
-                      <defs>
-                        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#6AC8FF" stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor="#6AC8FF" stopOpacity={0}/>
-                        </linearGradient>
-                        <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#9F7AEA" stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor="#9F7AEA" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#2D3748" />
-                      <XAxis dataKey="name" stroke="#718096" />
-                      <YAxis stroke="#718096" />
+                    <AreaChart
+                      data={revenueData}
+                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                      <XAxis dataKey="month" stroke="#94a3b8" />
+                      <YAxis stroke="#94a3b8" />
                       <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#1A202C', 
-                          borderColor: '#2D3748',
-                          borderRadius: '8px',
-                          color: 'white'
-                        }} 
+                        contentStyle={{ backgroundColor: '#1e1b4b', borderColor: '#4338ca', color: '#e0e7ff' }} 
+                        itemStyle={{ color: '#e0e7ff' }}
+                        labelStyle={{ color: '#e0e7ff' }}
                       />
-                      <Legend wrapperStyle={{ color: 'white' }} />
-                      <Area type="monotone" dataKey="revenue" stroke="#6AC8FF" fillOpacity={1} fill="url(#colorRevenue)" />
-                      <Area type="monotone" dataKey="profit" stroke="#9F7AEA" fillOpacity={1} fill="url(#colorProfit)" />
+                      <Legend />
+                      <Area type="monotone" dataKey="revenue" stackId="1" stroke="#6AC8FF" fill="#6AC8FF" fillOpacity={0.6} />
+                      <Area type="monotone" dataKey="expenses" stackId="1" stroke="#f87171" fill="#f87171" fillOpacity={0.4} />
+                      <Area type="monotone" dataKey="profit" stackId="1" stroke="#4ade80" fill="#4ade80" fillOpacity={0.5} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
@@ -232,41 +212,45 @@ const BusinessInsights = () => {
             </Card>
           </TabsContent>
           
-          <TabsContent value="usage" className="mt-0">
-            <Card className="bg-gray-900/50 border-gray-800 text-white">
-              <CardHeader className="border-b border-gray-800 bg-gray-950/50 pb-3">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-lg text-white">API Usage</CardTitle>
+          <TabsContent value="users" className="mt-0">
+            <Card className="bg-indigo-950/40 border-indigo-900/50 text-white">
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                  <CardTitle>User Engagement Metrics</CardTitle>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="border-gray-700 text-white hover:bg-gray-800">
-                      <Share className="h-4 w-4 mr-2" />
-                      Share
+                    <Button variant="outline" size="sm" className="flex items-center gap-1 bg-indigo-900/30 border-indigo-800 hover:bg-indigo-800/50" onClick={handleExportPDF}>
+                      <FileText className="h-4 w-4" />
+                      <span>PDF</span>
                     </Button>
-                    <Button variant="outline" size="sm" className="border-[#6AC8FF]/30 text-[#6AC8FF] hover:bg-[#6AC8FF]/10">
-                      <Download className="h-4 w-4 mr-2" />
-                      Export
+                    <Button variant="outline" size="sm" className="flex items-center gap-1 bg-indigo-900/30 border-indigo-800 hover:bg-indigo-800/50" onClick={handleExportCSV}>
+                      <FileDown className="h-4 w-4" />
+                      <span>CSV</span>
                     </Button>
                   </div>
                 </div>
+                <CardDescription className="text-indigo-200">
+                  Daily active users, new registrations, and churn rate
+                </CardDescription>
               </CardHeader>
-              <CardContent className="p-6">
-                <div className="h-96">
+              <CardContent>
+                <div className="h-80 w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={usageData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#2D3748" />
-                      <XAxis dataKey="name" stroke="#718096" />
-                      <YAxis stroke="#718096" />
+                    <BarChart
+                      data={userEngagementData}
+                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                      <XAxis dataKey="day" stroke="#94a3b8" />
+                      <YAxis stroke="#94a3b8" />
                       <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#1A202C', 
-                          borderColor: '#2D3748',
-                          borderRadius: '8px',
-                          color: 'white'
-                        }} 
+                        contentStyle={{ backgroundColor: '#1e1b4b', borderColor: '#4338ca', color: '#e0e7ff' }} 
+                        itemStyle={{ color: '#e0e7ff' }}
+                        labelStyle={{ color: '#e0e7ff' }}
                       />
-                      <Legend wrapperStyle={{ color: 'white' }} />
-                      <Bar dataKey="api_calls" fill="#6AC8FF" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="predictions" fill="#9F7AEA" radius={[4, 4, 0, 0]} />
+                      <Legend />
+                      <Bar dataKey="activeUsers" stackId="a" fill="#6AC8FF" />
+                      <Bar dataKey="newUsers" stackId="a" fill="#4ade80" />
+                      <Bar dataKey="churnedUsers" stackId="a" fill="#f87171" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -274,131 +258,99 @@ const BusinessInsights = () => {
             </Card>
           </TabsContent>
           
-          <TabsContent value="models" className="mt-0">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-gray-900/50 border-gray-800 text-white">
-                <CardHeader className="border-b border-gray-800 bg-gray-950/50 pb-3">
-                  <CardTitle className="text-lg text-white">Model Usage Distribution</CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={modelUsageData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          outerRadius={100}
-                          fill="#8884d8"
-                          dataKey="value"
-                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        >
-                          {modelUsageData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: '#1A202C', 
-                            borderColor: '#2D3748',
-                            borderRadius: '8px',
-                            color: 'white'
-                          }} 
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="bg-gray-900/50 border-gray-800 text-white">
-                <CardHeader className="border-b border-gray-800 bg-gray-950/50 pb-3">
-                  <CardTitle className="text-lg text-white">Top Models by API Calls</CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    {[
-                      { name: 'GPT-4 Turbo', calls: '12,450', percent: 42 },
-                      { name: 'DALL-E 3', calls: '7,320', percent: 25 },
-                      { name: 'CodeGPT Pro', calls: '4,560', percent: 15 },
-                      { name: 'Whisper Advanced', calls: '3,540', percent: 12 },
-                      { name: 'SentimentX', calls: '2,350', percent: 8 }
-                    ].map((model, idx) => (
-                      <div key={idx} className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="font-medium">{model.name}</span>
-                          <span className="text-sm text-gray-400">{model.calls} calls</span>
-                        </div>
-                        <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full rounded-full" 
-                            style={{ 
-                              width: `${model.percent}%`, 
-                              backgroundColor: COLORS[idx % COLORS.length]
-                            }}
-                          ></div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="users" className="mt-0">
-            <Card className="bg-gray-900/50 border-gray-800 text-white">
-              <CardHeader className="border-b border-gray-800 bg-gray-950/50 pb-3">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-lg text-white">User Growth</CardTitle>
+          <TabsContent value="market" className="mt-0">
+            <Card className="bg-indigo-950/40 border-indigo-900/50 text-white">
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                  <CardTitle>Market Share Analysis</CardTitle>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="border-gray-700 text-white hover:bg-gray-800">
-                      <Share className="h-4 w-4 mr-2" />
-                      Share
+                    <Button variant="outline" size="sm" className="flex items-center gap-1 bg-indigo-900/30 border-indigo-800 hover:bg-indigo-800/50" onClick={handleExportPDF}>
+                      <FileText className="h-4 w-4" />
+                      <span>PDF</span>
                     </Button>
-                    <Button variant="outline" size="sm" className="border-[#6AC8FF]/30 text-[#6AC8FF] hover:bg-[#6AC8FF]/10">
-                      <Download className="h-4 w-4 mr-2" />
-                      Export
+                    <Button variant="outline" size="sm" className="flex items-center gap-1 bg-indigo-900/30 border-indigo-800 hover:bg-indigo-800/50" onClick={handleExportCSV}>
+                      <FileDown className="h-4 w-4" />
+                      <span>CSV</span>
                     </Button>
                   </div>
                 </div>
+                <CardDescription className="text-indigo-200">
+                  Current market share compared to competitors
+                </CardDescription>
               </CardHeader>
-              <CardContent className="p-6">
-                <div className="h-96">
+              <CardContent>
+                <div className="h-80 w-full flex items-center justify-center">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={userGrowthData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#2D3748" />
-                      <XAxis dataKey="name" stroke="#718096" />
-                      <YAxis stroke="#718096" />
+                    <PieChart>
+                      <Pie
+                        data={marketShareData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={true}
+                        outerRadius={120}
+                        fill="#8884d8"
+                        dataKey="value"
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {marketShareData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
                       <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#1A202C', 
-                          borderColor: '#2D3748',
-                          borderRadius: '8px',
-                          color: 'white'
-                        }} 
+                        contentStyle={{ backgroundColor: '#1e1b4b', borderColor: '#4338ca', color: '#e0e7ff' }} 
+                        itemStyle={{ color: '#e0e7ff' }}
+                        labelStyle={{ color: '#e0e7ff' }}
                       />
-                      <Legend wrapperStyle={{ color: 'white' }} />
-                      <Line type="monotone" dataKey="users" stroke="#6AC8FF" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 8 }} />
-                    </LineChart>
+                    </PieChart>
                   </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
+        
+        <Card className="bg-indigo-950/40 border-indigo-900/50 text-white">
+          <CardHeader>
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+              <CardTitle>Top Performing Products</CardTitle>
+              <Button variant="outline" size="sm" className="flex items-center gap-1 bg-indigo-900/30 border-indigo-800 hover:bg-indigo-800/50 w-full sm:w-auto">
+                <Download className="h-4 w-4" />
+                <span>Export Data</span>
+              </Button>
+            </div>
+            <CardDescription className="text-indigo-200">
+              Products with highest sales and revenue
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow className="border-indigo-800/50 hover:bg-indigo-900/20">
+                  <TableHead className="text-indigo-200">Product Name</TableHead>
+                  <TableHead className="text-indigo-200 text-right">Units Sold</TableHead>
+                  <TableHead className="text-indigo-200 text-right">Revenue</TableHead>
+                  <TableHead className="text-indigo-200 text-right">Growth</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {topPerformingProducts.map((product) => (
+                  <TableRow key={product.id} className="border-indigo-800/50 hover:bg-indigo-900/20">
+                    <TableCell className="text-white font-medium">{product.name}</TableCell>
+                    <TableCell className="text-right text-white">{product.sales.toLocaleString()}</TableCell>
+                    <TableCell className="text-right text-white">${product.revenue.toLocaleString()}</TableCell>
+                    <TableCell className="text-right">
+                      <Badge className="bg-green-900/30 text-green-400 hover:bg-green-900/50 border-green-800/50">
+                        {product.growth}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </div>
     </ProTierLayout>
-  );
-};
-
-// Create a custom Badge component for this page
-const Badge = ({ children, className, ...props }) => {
-  return (
-    <div className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${className}`} {...props}>
-      {children}
-    </div>
   );
 };
 
