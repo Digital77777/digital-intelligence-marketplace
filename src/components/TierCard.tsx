@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Check } from 'lucide-react';
+import { Check, Shield, Sparkles, Zap } from 'lucide-react';
 import Button from './Button';
 import { useTier, TierType } from '@/context/TierContext';
 import { cn } from '@/lib/utils';
@@ -27,26 +27,56 @@ const TierCard: React.FC<TierCardProps> = ({
     setTier(type);
   };
 
+  const getTierIcon = () => {
+    switch(type) {
+      case 'basic':
+        return <Shield className="h-5 w-5 text-blue-500 mr-2" />;
+      case 'pro':
+        return <Zap className="h-5 w-5 text-purple-500 mr-2" />;
+      default:
+        return <Sparkles className="h-5 w-5 text-amber-500 mr-2" />;
+    }
+  };
+
+  const getTierGradient = () => {
+    switch(type) {
+      case 'basic':
+        return "from-blue-600 to-indigo-600";
+      case 'pro':
+        return "from-purple-600 to-pink-600";
+      default:
+        return "from-amber-500 to-orange-500";
+    }
+  };
+
   return (
     <div 
       className={cn(
-        "relative w-full max-w-md rounded-2xl border overflow-hidden transition-all duration-300 transform",
+        "relative w-full max-w-md rounded-2xl overflow-hidden transition-all duration-300 transform",
         isActive 
-          ? "border-blue-500 shadow-lg scale-[1.02] z-10" 
-          : "border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700",
-        popular && !isActive && "sm:mt-6"
+          ? `border-2 ${type === 'basic' ? 'border-blue-500' : type === 'pro' ? 'border-purple-500' : 'border-amber-500'} shadow-lg scale-[1.02] z-10` 
+          : "border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 hover:shadow-md",
+        popular && !isActive && "sm:mt-6",
+        isActive ? "bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950" : "bg-white dark:bg-gray-900"
       )}
     >
       {popular && (
-        <div className="absolute top-0 right-0 bg-gradient-to-bl from-blue-600 to-purple-600 text-white px-4 py-1 text-sm font-medium">
+        <div className={`absolute top-0 right-0 bg-gradient-to-bl ${getTierGradient()} text-white px-4 py-1 text-sm font-medium`}>
           Popular
         </div>
       )}
       
+      {isActive && (
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+      )}
+      
       <div className="p-6 sm:p-8 flex flex-col h-full">
         <div className="mb-6">
-          <h3 className="text-lg font-semibold">{name}</h3>
-          <div className="mt-4">
+          <div className="flex items-center">
+            {getTierIcon()}
+            <h3 className="text-lg font-semibold">{name}</h3>
+          </div>
+          <div className="mt-4 flex items-baseline">
             <span className="text-3xl font-bold">{price}</span>
             {price !== "Free" && <span className="text-foreground/60 ml-2">/month</span>}
           </div>
@@ -61,7 +91,7 @@ const TierCard: React.FC<TierCardProps> = ({
           <div className="space-y-4">
             {features.map((feature, index) => (
               <div key={index} className="flex items-start">
-                <div className="flex-shrink-0 h-5 w-5 text-green-500">
+                <div className={`flex-shrink-0 h-5 w-5 ${type === 'basic' ? 'text-blue-500' : type === 'pro' ? 'text-purple-500' : 'text-green-500'}`}>
                   <Check size={18} />
                 </div>
                 <p className="ml-3 text-sm text-foreground/70">{feature}</p>
@@ -73,7 +103,13 @@ const TierCard: React.FC<TierCardProps> = ({
         <div className="mt-8">
           <Button
             variant={isActive ? "premium" : "outline"}
-            className="w-full justify-center"
+            className={cn(
+              "w-full justify-center",
+              !isActive && "hover:bg-gradient-to-r hover:text-white",
+              !isActive && type === 'basic' && "hover:from-blue-600 hover:to-indigo-600",
+              !isActive && type === 'pro' && "hover:from-purple-600 hover:to-pink-600",
+              !isActive && type === 'freemium' && "hover:from-amber-500 hover:to-orange-500"
+            )}
             onClick={handleSelectTier}
             disabled={isActive}
           >

@@ -1,5 +1,6 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { toast } from 'sonner';
 
 export type TierType = 'freemium' | 'basic' | 'pro';
 
@@ -87,6 +88,17 @@ export const TierProvider = ({ children }: { children: ReactNode }) => {
   const [currentTier, setCurrentTier] = useState<TierType>('freemium');
 
   const setTier = (tier: TierType) => {
+    // Only show a toast if the tier is actually changing
+    if (tier !== currentTier) {
+      const tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
+      toast.success(`Switched to ${tierName} tier!`, {
+        description: tier === 'freemium' 
+          ? "You now have access to basic features and 10 core AI tools."
+          : tier === 'basic'
+          ? "You now have access to team collaboration features and 100+ AI tools!"
+          : "You now have access to all premium features and 250+ AI tools!"
+      });
+    }
     setCurrentTier(tier);
   };
 
@@ -103,9 +115,26 @@ export const TierProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const upgradePrompt = (targetTier: TierType) => {
-    console.log(`Upgrade to ${targetTier} to access this feature`);
-    // In a real implementation, this would show a modal or redirect to the pricing page
+    toast.info(`Upgrade to ${targetTier} to access this feature`, {
+      description: "Explore enhanced features with our premium tiers",
+      action: {
+        label: "View Plans",
+        onClick: () => window.location.href = '/pricing'
+      }
+    });
   };
+
+  // Persist tier selection to localStorage
+  useEffect(() => {
+    const savedTier = localStorage.getItem('userTier');
+    if (savedTier && (savedTier === 'freemium' || savedTier === 'basic' || savedTier === 'pro')) {
+      setCurrentTier(savedTier as TierType);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('userTier', currentTier);
+  }, [currentTier]);
 
   return (
     <TierContext.Provider value={{ 

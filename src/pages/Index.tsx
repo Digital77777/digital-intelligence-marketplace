@@ -4,11 +4,14 @@ import Navbar from '@/components/Navbar';
 import HeroSection from '@/components/HeroSection';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { TierProvider } from '@/context/TierContext';
 import { Badge } from '@/components/ui/badge';
-import { Brain, Cpu, Database, Zap, BarChart3, Sparkles } from 'lucide-react';
+import { Cpu, Database, BarChart3, Sparkles } from 'lucide-react';
+import TierSpecificContent from '@/components/TierSpecificContent';
+import { useTier } from '@/context/TierContext';
 
 const Index = () => {
+  const { currentTier } = useTier();
+  
   // Scroll to top on page load
   React.useEffect(() => {
     window.scrollTo(0, 0);
@@ -20,73 +23,8 @@ const Index = () => {
       <main className="flex-grow">
         <HeroSection />
         
-        {/* Featured AI Tools Section */}
-        <section className="py-20 px-6 bg-gradient-to-b from-transparent to-gray-50/50 dark:to-gray-900/30">
-          <div className="max-w-7xl mx-auto text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
-                Featured AI Tools
-              </span>
-            </h2>
-            
-            <p className="text-lg text-foreground/70 max-w-2xl mx-auto mb-12">
-              Cutting-edge AI technologies designed to enhance your productivity and creative potential
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[
-                {
-                  title: "AI Content Creation",
-                  description: "Generate stunning content with state-of-the-art AI models",
-                  status: "freemium",
-                  icon: <Sparkles className="h-10 w-10 text-blue-500" />
-                },
-                {
-                  title: "Machine Learning APIs",
-                  description: "Access powerful ML models through simple API calls",
-                  status: "basic",
-                  icon: <Brain className="h-10 w-10 text-purple-500" />
-                },
-                {
-                  title: "Neural Voice Synthesis",
-                  description: "Create lifelike voice recordings for any content",
-                  status: "pro",
-                  icon: <Zap className="h-10 w-10 text-amber-500" />
-                }
-              ].map((tool, index) => (
-                <div 
-                  key={index}
-                  className="relative group"
-                >
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl blur opacity-30 group-hover:opacity-70 transition duration-1000"></div>
-                  <div className="relative bg-white dark:bg-gray-800 rounded-xl p-8 shadow-xl border border-gray-100 dark:border-gray-700 hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
-                    <div className="flex justify-center mb-4">
-                      {tool.icon}
-                    </div>
-                    <h3 className="text-xl font-semibold mb-3">{tool.title}</h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-6 flex-grow">{tool.description}</p>
-                    
-                    <div className="mt-auto">
-                      {tool.status === 'freemium' ? (
-                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800">
-                          Available in Freemium
-                        </Badge>
-                      ) : tool.status === 'basic' ? (
-                        <Badge variant="outline" className="border-amber-300 text-amber-700 dark:text-amber-400">
-                          Coming in Basic Tier
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="border-purple-300 text-purple-700 dark:text-purple-400">
-                          Coming in Pro Tier
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        {/* Tier Specific Content */}
+        <TierSpecificContent />
         
         {/* Community Section */}
         <section className="py-20 px-6 bg-gradient-to-b from-transparent to-blue-50/30 dark:to-blue-900/10">
@@ -133,7 +71,7 @@ const Index = () => {
             
             <div className="mt-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
-                { icon: <Brain className="h-6 w-6" />, title: "Expert Tutorials", description: "Learn from industry veterans" },
+                { icon: <Sparkles className="h-6 w-6" />, title: "Expert Tutorials", description: "Learn from industry veterans" },
                 { icon: <Cpu className="h-6 w-6" />, title: "Weekly Workshops", description: "Hands-on AI training sessions" },
                 { icon: <Database className="h-6 w-6" />, title: "Resource Library", description: "Curated learning materials" },
                 { icon: <BarChart3 className="h-6 w-6" />, title: "Project Showcases", description: "Share your AI innovations" },

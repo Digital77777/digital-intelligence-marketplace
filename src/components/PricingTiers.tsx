@@ -3,7 +3,7 @@ import React from 'react';
 import TierCard from './TierCard';
 import { useTier } from '@/context/TierContext';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info } from 'lucide-react';
+import { Info, Shield, Sparkles, Zap } from 'lucide-react';
 
 const PricingTiers = () => {
   const { currentTier } = useTier();
@@ -43,6 +43,28 @@ const PricingTiers = () => {
     '100GB storage'
   ];
 
+  const getTierIcon = (tier: string) => {
+    switch(tier) {
+      case 'basic':
+        return <Shield className="h-4 w-4 text-blue-500" />;
+      case 'pro':
+        return <Zap className="h-4 w-4 text-purple-500" />;
+      default:
+        return <Sparkles className="h-4 w-4 text-amber-500" />;
+    }
+  };
+
+  const getTierAlertColor = (tier: string) => {
+    switch(tier) {
+      case 'basic':
+        return "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800";
+      case 'pro':
+        return "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800";
+      default:
+        return "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800";
+    }
+  };
+
   return (
     <section id="pricing" className="py-24 px-4 relative overflow-hidden">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
@@ -57,12 +79,14 @@ const PricingTiers = () => {
           </p>
         </div>
 
-        {currentTier === 'basic' && (
-          <Alert className="mb-8 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-            <Info className="h-4 w-4" />
-            <AlertTitle>You're on the Basic Plan</AlertTitle>
+        {currentTier && (
+          <Alert className={`mb-8 ${getTierAlertColor(currentTier)}`}>
+            {getTierIcon(currentTier)}
+            <AlertTitle>You're on the {currentTier.charAt(0).toUpperCase() + currentTier.slice(1)} Plan</AlertTitle>
             <AlertDescription>
-              You now have access to the advanced collaboration features, team dashboard, workflow automation, and extended AI tool access. Explore your new capabilities from the navigation menu.
+              {currentTier === 'freemium' && "You have access to 10 core AI tools and community features. Upgrade to Basic or Pro for advanced features."}
+              {currentTier === 'basic' && "You now have access to the advanced collaboration features, team dashboard, workflow automation, and extended AI tool access."}
+              {currentTier === 'pro' && "You have unlimited access to all features, tools, and premium support services."}
             </AlertDescription>
           </Alert>
         )}
@@ -97,7 +121,7 @@ const PricingTiers = () => {
           </div>
         </div>
 
-        <div className="mt-16 bg-blue-50 dark:bg-blue-950/20 rounded-2xl p-8 max-w-3xl mx-auto">
+        <div className="mt-16 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/10 rounded-2xl p-8 max-w-3xl mx-auto border border-blue-100/50 dark:border-blue-800/30 shadow-md">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             <div>
               <h3 className="text-xl font-semibold">Your Current Plan: <span className="text-blue-600 capitalize">{currentTier}</span></h3>
@@ -105,7 +129,7 @@ const PricingTiers = () => {
                 You can switch between plans anytime
               </p>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-full px-4 py-2 border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-full px-4 py-2 border border-gray-200 dark:border-gray-700 shadow-sm">
               <span className="text-sm text-foreground/70">Need help choosing? <a href="#" className="text-blue-600 font-medium">Contact us</a></span>
             </div>
           </div>
