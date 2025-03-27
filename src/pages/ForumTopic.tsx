@@ -111,18 +111,20 @@ const ForumTopic = () => {
       try {
         if (!topicId) return;
         
+        // Modified query to correctly join profiles table
         const { data: topicData, error: topicError } = await supabase
           .from('forum_topics')
           .select(`
             *,
-            profiles:user_id(username, avatar_url),
-            forum_categories:category_id(name)
+            profiles(username, avatar_url),
+            forum_categories(name)
           `)
           .eq('id', topicId)
           .single();
         
         if (topicError) throw topicError;
         
+        // Fixed the property access to correctly access the profiles data
         const formattedTopic: ForumTopic = {
           id: topicData.id,
           title: topicData.title,
@@ -160,30 +162,34 @@ const ForumTopic = () => {
       try {
         if (!topicId) return;
         
+        // Modified query to correctly join profiles table
         const { data, error } = await supabase
           .from('forum_replies')
           .select(`
             *,
-            profiles:user_id(username, avatar_url)
+            profiles(username, avatar_url)
           `)
           .eq('topic_id', topicId)
           .order('created_at', { ascending: true });
         
         if (error) throw error;
         
-        const formattedReplies: ForumReply[] = data.map(reply => ({
-          id: reply.id,
-          content: reply.content,
-          user_id: reply.user_id,
-          author_username: reply.profiles?.username || 'Unknown User',
-          author_avatar_url: reply.profiles?.avatar_url,
-          topic_id: reply.topic_id,
-          created_at: reply.created_at,
-          updated_at: reply.updated_at,
-          is_solution: reply.is_solution
-        }));
-        
-        setReplies(formattedReplies);
+        // Make sure data exists before mapping
+        if (data) {
+          const formattedReplies: ForumReply[] = data.map(reply => ({
+            id: reply.id,
+            content: reply.content,
+            user_id: reply.user_id,
+            author_username: reply.profiles?.username || 'Unknown User',
+            author_avatar_url: reply.profiles?.avatar_url,
+            topic_id: reply.topic_id,
+            created_at: reply.created_at,
+            updated_at: reply.updated_at,
+            is_solution: reply.is_solution
+          }));
+          
+          setReplies(formattedReplies);
+        }
       } catch (error) {
         console.error('Error fetching replies:', error);
         toast.error('Failed to load replies');
@@ -269,26 +275,28 @@ const ForumTopic = () => {
         .from('forum_replies')
         .select(`
           *,
-          profiles:user_id(username, avatar_url)
+          profiles(username, avatar_url)
         `)
         .eq('topic_id', topicId)
         .order('created_at', { ascending: true });
       
       if (fetchError) throw fetchError;
       
-      const formattedReplies: ForumReply[] = newReplies.map(reply => ({
-        id: reply.id,
-        content: reply.content,
-        user_id: reply.user_id,
-        author_username: reply.profiles?.username || 'Unknown User',
-        author_avatar_url: reply.profiles?.avatar_url,
-        topic_id: reply.topic_id,
-        created_at: reply.created_at,
-        updated_at: reply.updated_at,
-        is_solution: reply.is_solution
-      }));
-      
-      setReplies(formattedReplies);
+      if (newReplies) {
+        const formattedReplies: ForumReply[] = newReplies.map(reply => ({
+          id: reply.id,
+          content: reply.content,
+          user_id: reply.user_id,
+          author_username: reply.profiles?.username || 'Unknown User',
+          author_avatar_url: reply.profiles?.avatar_url,
+          topic_id: reply.topic_id,
+          created_at: reply.created_at,
+          updated_at: reply.updated_at,
+          is_solution: reply.is_solution
+        }));
+        
+        setReplies(formattedReplies);
+      }
       
       toast.success('Reply posted successfully');
     } catch (error) {

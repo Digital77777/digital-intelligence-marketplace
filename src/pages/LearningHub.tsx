@@ -45,6 +45,7 @@ interface LearningContent {
   difficulty: string;
   duration: number;
   created_at: string;
+  content: string; // Added this required field
 }
 
 const difficultyColors: Record<string, string> = {
@@ -63,88 +64,115 @@ const categoryIcons: Record<string, React.ReactNode> = {
   'AI Ethics': <Shield className="h-5 w-5" />
 };
 
-// Additional sample learning content to populate the Learning Hub
-const additionalContent: Partial<LearningContent>[] = [
+// Modified: Complete sample learning content objects with all required fields
+const additionalContent: LearningContent[] = [
   {
+    id: "1",
     title: "Building Your First Neural Network",
     description: "Learn how to build and train a simple neural network using TensorFlow and Keras.",
     image_url: "https://images.unsplash.com/photo-1617791160536-598cf32026fb",
     required_tier: "basic",
     category: "Deep Learning",
     difficulty: "Intermediate",
-    duration: 90
+    duration: 90,
+    created_at: new Date().toISOString(),
+    content: "This course covers the fundamentals of neural networks and how to implement them using modern frameworks."
   },
   {
+    id: "2",
     title: "Ethics in AI Development",
     description: "Understand the ethical considerations and best practices when developing AI applications.",
     image_url: "https://images.unsplash.com/photo-1583308612406-5cbcec225c88",
     required_tier: "basic",
     category: "AI Ethics",
     difficulty: "Beginner",
-    duration: 60
+    duration: 60,
+    created_at: new Date().toISOString(),
+    content: "This course explores ethical considerations and challenges in AI development and deployment."
   },
   {
+    id: "3",
     title: "Image Recognition with Convolutional Neural Networks",
     description: "Master image recognition techniques using CNNs and deep learning frameworks.",
     image_url: "https://images.unsplash.com/photo-1580894732444-8ecded7900cd",
     required_tier: "pro",
     category: "Computer Vision",
     difficulty: "Advanced",
-    duration: 120
+    duration: 120,
+    created_at: new Date().toISOString(),
+    content: "An in-depth look at Convolutional Neural Networks and their application in computer vision tasks."
   },
   {
+    id: "4",
     title: "Natural Language Processing Fundamentals",
     description: "Dive into NLP concepts, techniques, and applications for processing textual data.",
     image_url: "https://images.unsplash.com/photo-1546776310-eef45dd6d63c",
     required_tier: "basic",
     category: "Natural Language Processing",
     difficulty: "Intermediate",
-    duration: 75
+    duration: 75,
+    created_at: new Date().toISOString(),
+    content: "This course introduces key concepts in natural language processing and text analysis."
   },
   {
+    id: "5",
     title: "Reinforcement Learning in Games",
     description: "Explore how reinforcement learning is used to train AI agents to play and master games.",
     image_url: "https://images.unsplash.com/photo-1609770231080-e321deccc34c",
     required_tier: "pro",
     category: "Reinforcement Learning",
     difficulty: "Advanced",
-    duration: 110
+    duration: 110,
+    created_at: new Date().toISOString(),
+    content: "Learn how reinforcement learning algorithms can be applied to game environments."
   },
   {
+    id: "6",
     title: "Data Preprocessing for Machine Learning",
     description: "Learn essential techniques for cleaning and preparing data for machine learning models.",
     image_url: "https://images.unsplash.com/photo-1561736778-92e52a7769ef",
     required_tier: "basic",
     category: "Machine Learning",
     difficulty: "Beginner",
-    duration: 45
+    duration: 45,
+    created_at: new Date().toISOString(),
+    content: "This course covers data preprocessing techniques essential for building reliable machine learning models."
   },
   {
+    id: "7",
     title: "Advanced Time Series Forecasting",
     description: "Master techniques for predicting future values based on past observations in time series data.",
     image_url: "https://images.unsplash.com/photo-1551288049-bebda4e38f71",
     required_tier: "pro",
     category: "Machine Learning",
     difficulty: "Advanced",
-    duration: 150
+    duration: 150,
+    created_at: new Date().toISOString(),
+    content: "Advanced methods for time series analysis and forecasting using statistical and deep learning approaches."
   },
   {
+    id: "8",
     title: "Building Conversational AI Assistants",
     description: "Learn to develop sophisticated conversational agents using modern NLP techniques.",
     image_url: "https://images.unsplash.com/photo-1531746790731-6c087fecd65a",
     required_tier: "pro",
     category: "Natural Language Processing",
     difficulty: "Advanced",
-    duration: 180
+    duration: 180,
+    created_at: new Date().toISOString(),
+    content: "Step-by-step guide to building conversational AI systems with modern frameworks."
   },
   {
+    id: "9",
     title: "Introduction to Computer Vision",
     description: "Understand the basic concepts and applications of computer vision in artificial intelligence.",
     image_url: "https://images.unsplash.com/photo-1575403071235-5a3aae7e4a7a",
     required_tier: "basic",
     category: "Computer Vision",
     difficulty: "Beginner",
-    duration: 60
+    duration: 60,
+    created_at: new Date().toISOString(),
+    content: "An introduction to fundamental computer vision concepts and techniques."
   }
 ];
 
@@ -178,11 +206,20 @@ const LearningHub = () => {
       
       // Only add additional content if it doesn't exist yet
       if (data && data.length < 5) {
-        // Insert additional content into the database
+        // Insert additional content items one by one
         for (const item of additionalContent) {
           const { error: insertError } = await supabase
             .from('learning_content')
-            .insert([item]);
+            .insert({
+              title: item.title,
+              description: item.description,
+              image_url: item.image_url,
+              required_tier: item.required_tier,
+              category: item.category,
+              difficulty: item.difficulty,
+              duration: item.duration,
+              content: item.content // Added this required field
+            });
             
           if (insertError) {
             console.error('Error inserting learning content:', insertError);

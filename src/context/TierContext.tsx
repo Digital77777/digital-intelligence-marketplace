@@ -124,6 +124,7 @@ const tierFeatureAccess: Record<string, TierType[]> = {
   'api-calls-50000': ['pro']
 };
 
+// Create the context with default values
 const TierContext = createContext<TierContextType | undefined>(undefined);
 
 export const TierProvider = ({ children }: { children: ReactNode }) => {

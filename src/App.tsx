@@ -88,7 +88,6 @@ const App = () => (
               <Route path="/model-marketplace" element={<ModelMarketplace />} />
               <Route path="/business-insights" element={<BusinessInsights />} />
               <Route path="/ai-assistant" element={<AIAssistant />} />
-              {/* Add more Pro Tier routes as they are implemented */}
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
