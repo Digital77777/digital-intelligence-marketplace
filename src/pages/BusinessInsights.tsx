@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import ProTierLayout from '@/components/layouts/ProTierLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,8 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DatePickerWithRange } from "@/components/ui/date-picker";
 import { Download, FileDown, FileText, TrendingUp, Users, DollarSign, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DateRange } from "react-day-picker";
 
-// Sample data for charts
 const revenueData = [
   { month: 'Jan', revenue: 5000, expenses: 3000, profit: 2000 },
   { month: 'Feb', revenue: 7000, expenses: 3500, profit: 3500 },
@@ -49,7 +48,7 @@ const topPerformingProducts = [
 ];
 
 const BusinessInsights = () => {
-  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [period, setPeriod] = useState("monthly");
 
   const handleExportPDF = () => {

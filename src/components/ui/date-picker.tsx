@@ -52,7 +52,7 @@ export function DatePickerWithRange({
   setDate,
 }: {
   date?: DateRange
-  setDate: (date: DateRange | undefined) => void
+  setDate: React.Dispatch<React.SetStateAction<DateRange | undefined>>
 }) {
   return (
     <div className="grid gap-2">
