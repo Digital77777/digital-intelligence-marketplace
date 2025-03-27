@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Menu, 
   X, 
@@ -17,7 +17,16 @@ import {
   LogOut,
   Settings,
   BookMarked,
-  Bot
+  Bot,
+  ChevronLeft,
+  ChevronRight,
+  Bell,
+  Search,
+  Zap,
+  BarChart,
+  RocketIcon,
+  Sparkles,
+  MessagesSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTier } from '@/context/TierContext';
@@ -31,13 +40,27 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+
+interface NavItem {
+  label: string;
+  path: string;
+  icon: React.ReactNode;
+  requiredTier: 'freemium' | 'basic' | 'pro';
+  highlight?: boolean;
+}
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { currentTier } = useTier();
+  const { currentTier, canAccess } = useTier();
   const { user, profile, logout } = useUser();
   const navigate = useNavigate();
+  const location = useLocation();
+  const navRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -51,6 +74,47 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Check scrollability of nav items
+  useEffect(() => {
+    const checkScroll = () => {
+      if (navRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = navRef.current;
+        setCanScrollLeft(scrollLeft > 0);
+        setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5); // 5px buffer
+      }
+    };
+
+    checkScroll();
+    window.addEventListener('resize', checkScroll);
+    
+    // Create a MutationObserver to watch for changes to the navbar
+    const observer = new MutationObserver(checkScroll);
+    if (navRef.current) {
+      observer.observe(navRef.current, { childList: true, subtree: true });
+    }
+    
+    return () => {
+      window.removeEventListener('resize', checkScroll);
+      observer.disconnect();
+    };
+  }, [navRef.current]);
+
+  const handleNavScroll = (direction: 'left' | 'right') => {
+    if (navRef.current) {
+      const scrollAmount = direction === 'left' ? -200 : 200;
+      navRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      
+      // Update scroll indicators after scrolling
+      setTimeout(() => {
+        if (navRef.current) {
+          const { scrollLeft, scrollWidth, clientWidth } = navRef.current;
+          setCanScrollLeft(scrollLeft > 0);
+          setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5);
+        }
+      }, 300);
+    }
+  };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -71,71 +135,6 @@ const Navbar = () => {
     setIsMobileMenuOpen(false);
   };
 
-  const renderBasicTierLinks = () => {
-    if (currentTier === 'freemium') return null;
-    
-    return (
-      <>
-        <Link 
-          to="/team-dashboard" 
-          className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
-          onClick={() => window.scrollTo(0, 0)}
-        >
-          <LayoutDashboard className="w-4 h-4" />
-          <span>Team Dashboard</span>
-        </Link>
-        
-        <Link 
-          to="/collaboration-hub" 
-          className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
-          onClick={() => window.scrollTo(0, 0)}
-        >
-          <Users className="w-4 h-4" />
-          <span>Collaboration</span>
-        </Link>
-        
-        <Link 
-          to="/workflow-designer" 
-          className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
-          onClick={() => window.scrollTo(0, 0)}
-        >
-          <GitBranch className="w-4 h-4" />
-          <span>Workflow Designer</span>
-        </Link>
-      </>
-    );
-  };
-
-  const renderMobileBasicTierLinks = () => {
-    if (currentTier === 'freemium') return null;
-    
-    return (
-      <>
-        <button
-          className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-          onClick={() => handleNavigation('/team-dashboard')}
-        >
-          <LayoutDashboard className="h-5 w-5" />
-          <span>Team Dashboard</span>
-        </button>
-        <button
-          className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-          onClick={() => handleNavigation('/collaboration-hub')}
-        >
-          <Users className="h-5 w-5" />
-          <span>Collaboration</span>
-        </button>
-        <button
-          className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-          onClick={() => handleNavigation('/workflow-designer')}
-        >
-          <GitBranch className="h-5 w-5" />
-          <span>Workflow Designer</span>
-        </button>
-      </>
-    );
-  };
-
   const getInitials = (name: string | null) => {
     if (!name) return 'U';
     const parts = name.split(' ');
@@ -143,280 +142,224 @@ const Navbar = () => {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   };
 
+  const navItems: NavItem[] = [
+    { label: 'Home', path: '/', icon: <Home className="h-5 w-5" />, requiredTier: 'freemium' },
+    { label: 'AI Tools', path: '/ai-tools', icon: <RocketIcon className="h-5 w-5" />, requiredTier: 'freemium' },
+    { label: 'Tools Directory', path: '/ai-tools-directory', icon: <Bot className="h-5 w-5" />, requiredTier: 'basic' },
+    { label: 'Learning Hub', path: '/learning-hub', icon: <BookMarked className="h-5 w-5" />, requiredTier: 'freemium' },
+    { label: 'Marketplace', path: '/marketplace', icon: <ShoppingCart className="h-5 w-5" />, requiredTier: 'freemium' },
+    { label: 'Team Dashboard', path: '/team-dashboard', icon: <LayoutDashboard className="h-5 w-5" />, requiredTier: 'basic' },
+    { label: 'Collaboration', path: '/collaboration-hub', icon: <Users className="h-5 w-5" />, requiredTier: 'basic' },
+    { label: 'Workflow', path: '/workflow-designer', icon: <GitBranch className="h-5 w-5" />, requiredTier: 'basic' },
+    { label: 'Community', path: '/forums', icon: <MessageSquare className="h-5 w-5" />, requiredTier: 'freemium' },
+    { label: 'AI Studio', path: '/ai-studio', icon: <Sparkles className="h-5 w-5" />, requiredTier: 'pro' },
+    { label: 'AI Assistant', path: '/ai-assistant', icon: <MessagesSquare className="h-5 w-5" />, requiredTier: 'pro', highlight: true },
+    { label: 'Model Marketplace', path: '/model-marketplace', icon: <Zap className="h-5 w-5" />, requiredTier: 'pro' },
+    { label: 'Business Insights', path: '/business-insights', icon: <BarChart className="h-5 w-5" />, requiredTier: 'pro' },
+    { label: 'About', path: '/about', icon: <Info className="h-5 w-5" />, requiredTier: 'freemium' },
+    { label: 'Pricing', path: '/pricing', icon: <DollarSign className="h-5 w-5" />, requiredTier: 'freemium' }
+  ];
+
+  // Filter accessible nav items based on current tier
+  const accessibleNavItems = navItems.filter(item => {
+    if (item.requiredTier === 'freemium') return true;
+    if (item.requiredTier === 'basic') return currentTier === 'basic' || currentTier === 'pro';
+    if (item.requiredTier === 'pro') return currentTier === 'pro';
+    return false;
+  });
+
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 py-4 px-6 transition-all duration-300 ${
-        isScrolled ? 'glass bg-white/80 dark:bg-black/80 backdrop-blur-md shadow-sm' : 'bg-transparent'
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled 
+          ? 'glass bg-indigo-600/95 dark:bg-indigo-950/95 backdrop-blur-md shadow-md' 
+          : 'bg-indigo-600 dark:bg-indigo-950'
       }`}
     >
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center">
-          <Link to="/" className="text-xl font-bold" onClick={() => window.scrollTo(0, 0)}>
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
-              Digital Intelligence
-            </span>
-          </Link>
-        </div>
+      {/* Top Nav with Logo and User Controls */}
+      <div className="px-4 sm:px-6 py-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center">
+            <Link to="/" className="text-xl font-bold flex items-center" onClick={() => window.scrollTo(0, 0)}>
+              <span className="text-white mr-1">Digital</span>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-200 to-purple-200 font-extrabold">
+                Intelligence
+              </span>
+            </Link>
+          </div>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-5">
-          <Link 
-            to="/" 
-            className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
-            onClick={() => window.scrollTo(0, 0)}
-          >
-            <Home className="w-4 h-4" />
-            <span>Home</span>
-          </Link>
-          
-          <Link 
-            to="/ai-tools" 
-            className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
-            onClick={() => window.scrollTo(0, 0)}
-          >
-            <BookOpen className="w-4 h-4" />
-            <span>AI Tools {currentTier === 'freemium' && <span className="text-xs text-blue-500">(Limited)</span>}</span>
-          </Link>
+          {/* Right side controls */}
+          <div className="flex items-center space-x-3">
+            <button className="text-white p-2 rounded-full hover:bg-white/10">
+              <Search className="h-5 w-5" />
+            </button>
+            
+            <button className="text-white p-2 rounded-full hover:bg-white/10 relative">
+              <Bell className="h-5 w-5" />
+              <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 rounded-full text-xs flex items-center justify-center">
+                1
+              </span>
+            </button>
 
-          <Link 
-            to="/ai-tools-directory" 
-            className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
-            onClick={() => window.scrollTo(0, 0)}
-          >
-            <Bot className="w-4 h-4" />
-            <span>AI Directory</span>
-          </Link>
-          
-          <Link 
-            to="/learning-hub" 
-            className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
-            onClick={() => window.scrollTo(0, 0)}
-          >
-            <BookMarked className="w-4 h-4" />
-            <span>Learning Hub</span>
-          </Link>
+            {/* Mobile Menu Button */}
+            <button
+              onClick={toggleMobileMenu}
+              className="p-2 rounded-full hover:bg-white/10 md:hidden"
+              aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+            >
+              {isMobileMenuOpen ? (
+                <X className="h-5 w-5 text-white" />
+              ) : (
+                <Menu className="h-5 w-5 text-white" />
+              )}
+            </button>
 
-          <Link 
-            to="/marketplace" 
-            className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
-            onClick={() => window.scrollTo(0, 0)}
-          >
-            <ShoppingCart className="w-4 h-4" />
-            <span>Marketplace</span>
-          </Link>
-          
-          {renderBasicTierLinks()}
-          
-          <Link 
-            to="/forums" 
-            className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
-            onClick={() => window.scrollTo(0, 0)}
-          >
-            <MessageSquare className="w-4 h-4" />
-            <span>Community</span>
-          </Link>
-          
-          <Link 
-            to="/about" 
-            className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
-            onClick={() => window.scrollTo(0, 0)}
-          >
-            <Info className="w-4 h-4" />
-            <span>About</span>
-          </Link>
-          
-          <Link 
-            to="/pricing" 
-            className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
-            onClick={() => window.scrollTo(0, 0)}
-          >
-            <DollarSign className="w-4 h-4" />
-            <span>Pricing</span>
-          </Link>
-
-          {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="rounded-full p-0 w-9 h-9">
-                  <Avatar className="w-9 h-9">
-                    <AvatarImage src={profile?.avatar_url || undefined} />
-                    <AvatarFallback className="bg-primary text-primary-foreground">
-                      {getInitials(profile?.username || user.email)}
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{profile?.username || user.email}</p>
-                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate('/profile')}>
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/settings')}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-red-600">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <div className="flex items-center gap-3">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => navigate('/auth')}
-              >
-                Sign In
-              </Button>
-              <Button 
-                variant="default" 
-                size="sm"
-                onClick={() => navigate('/auth')}
-              >
-                Get Started
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {/* Mobile Menu Button */}
-        <div className="md:hidden">
-          <button
-            onClick={toggleMobileMenu}
-            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
-            aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
-          >
-            {isMobileMenuOpen ? (
-              <X className="h-6 w-6 text-foreground" />
+            {/* User Menu */}
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="rounded-full p-0 w-9 h-9 hover:bg-white/10">
+                    <Avatar className="w-9 h-9">
+                      <AvatarImage src={profile?.avatar_url || undefined} />
+                      <AvatarFallback className="bg-primary text-primary-foreground">
+                        {getInitials(profile?.username || user.email)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{profile?.username || user.email}</p>
+                      <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/profile')}>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/settings')}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
-              <Menu className="h-6 w-6 text-foreground" />
+              <div className="hidden md:flex items-center gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => navigate('/auth')}
+                  className="text-white hover:bg-white/10"
+                >
+                  Sign In
+                </Button>
+                <Button 
+                  variant="default" 
+                  size="sm"
+                  onClick={() => navigate('/auth')}
+                  className="bg-white text-indigo-600 hover:bg-white/90"
+                >
+                  Get Started
+                </Button>
+              </div>
             )}
-          </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Scrollable Navigation Tabs */}
+      <div className="relative border-t border-indigo-500/30 bg-indigo-700/50 dark:bg-indigo-900/50">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 relative">
+          {/* Left scroll button */}
+          {canScrollLeft && (
+            <button 
+              onClick={() => handleNavScroll('left')}
+              className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-gradient-to-r from-indigo-700 to-transparent dark:from-indigo-900 dark:to-transparent px-1 py-6 text-white"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+          )}
+
+          {/* Scrollable navigation */}
+          <div 
+            ref={navRef}
+            className="flex overflow-x-auto scrollbar-none py-2 px-3 space-x-1 snap-x"
+          >
+            {accessibleNavItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <button
+                  key={item.path}
+                  onClick={() => handleNavigation(item.path)}
+                  className={cn(
+                    "flex-shrink-0 flex flex-col items-center justify-center px-4 py-2 rounded-full snap-start transition-colors whitespace-nowrap",
+                    isActive 
+                      ? "bg-white text-indigo-600 dark:text-indigo-900" 
+                      : "text-white hover:bg-white/10"
+                  )}
+                >
+                  <div className="flex items-center">
+                    {item.icon}
+                    <span className="ml-2 text-sm font-medium">{item.label}</span>
+                    {item.highlight && (
+                      <Badge variant="outline" className="ml-2 bg-yellow-400/20 text-yellow-200 border-yellow-500/20 py-0">
+                        <Sparkles className="h-3 w-3 mr-1" /> Pro
+                      </Badge>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Right scroll button */}
+          {canScrollRight && (
+            <button 
+              onClick={() => handleNavScroll('right')}
+              className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-gradient-to-l from-indigo-700 to-transparent dark:from-indigo-900 dark:to-transparent px-1 py-6 text-white"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          )}
         </div>
       </div>
 
       {/* Mobile Navigation */}
       {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-16 inset-x-0 bg-white dark:bg-black glass animate-fade-in">
-          <div className="flex flex-col space-y-3 p-4">
-            <button
-              className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-              onClick={() => handleNavigation('/')}
-            >
-              <Home className="h-5 w-5" />
-              <span>Home</span>
-            </button>
-            <button
-              className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-              onClick={() => handleNavigation('/ai-tools')}
-            >
-              <BookOpen className="h-5 w-5" />
-              <span>AI Tools {currentTier === 'freemium' && <span className="text-xs text-blue-500">(Limited)</span>}</span>
-            </button>
-            <button
-              className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-              onClick={() => handleNavigation('/ai-tools-directory')}
-            >
-              <Bot className="h-5 w-5" />
-              <span>AI Directory</span>
-            </button>
-            <button
-              className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-              onClick={() => handleNavigation('/learning-hub')}
-            >
-              <BookMarked className="h-5 w-5" />
-              <span>Learning Hub</span>
-            </button>
-            <button
-              className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-              onClick={() => handleNavigation('/marketplace')}
-            >
-              <ShoppingCart className="h-5 w-5" />
-              <span>Marketplace</span>
-            </button>
+        <div className="md:hidden absolute top-16 inset-x-0 bg-indigo-900 animate-fade-in">
+          <div className="flex flex-col space-y-1 p-4">
+            {accessibleNavItems.map((item) => (
+              <button
+                key={item.path}
+                className="text-white hover:bg-white/10 transition-colors py-3 px-4 rounded-lg flex items-center gap-3"
+                onClick={() => handleNavigation(item.path)}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+                {item.requiredTier !== 'freemium' && (
+                  <Badge variant="outline" className="ml-auto bg-indigo-600/50 text-blue-200 border-blue-500/20">
+                    {item.requiredTier === 'basic' ? 'Basic' : 'Pro'}
+                  </Badge>
+                )}
+              </button>
+            ))}
             
-            {renderMobileBasicTierLinks()}
-            
-            <button
-              className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-              onClick={() => handleNavigation('/forums')}
-            >
-              <MessageSquare className="h-5 w-5" />
-              <span>Community</span>
-            </button>
-            <button
-              className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-              onClick={() => handleNavigation('/about')}
-            >
-              <Info className="h-5 w-5" />
-              <span>About</span>
-            </button>
-            <button
-              className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-              onClick={() => handleNavigation('/pricing')}
-            >
-              <DollarSign className="h-5 w-5" />
-              <span>Pricing</span>
-            </button>
-
-            {user ? (
-              <>
-                <div className="flex items-center gap-3 py-2">
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={profile?.avatar_url || undefined} />
-                    <AvatarFallback className="bg-primary text-primary-foreground">
-                      {getInitials(profile?.username || user.email)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <span className="font-medium">{profile?.username || user.email.split('@')[0]}</span>
-                    <span className="text-xs text-muted-foreground">{user.email}</span>
-                  </div>
-                </div>
-                <button
-                  className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-                  onClick={() => handleNavigation('/profile')}
-                >
-                  <User className="h-5 w-5" />
-                  <span>Profile</span>
-                </button>
-                <button
-                  className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-                  onClick={() => handleNavigation('/settings')}
-                >
-                  <Settings className="h-5 w-5" />
-                  <span>Settings</span>
-                </button>
-                <Button 
-                  variant="outline" 
-                  className="mt-2"
-                  onClick={() => {
-                    handleLogout();
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out
-                </Button>
-              </>
-            ) : (
-              <div className="flex flex-col gap-3 mt-2">
+            {!user && (
+              <div className="mt-4 flex flex-col gap-3">
                 <Button 
                   variant="outline" 
                   onClick={() => {
                     navigate('/auth');
                     setIsMobileMenuOpen(false);
                   }}
+                  className="border-white/20 text-white w-full"
                 >
                   Sign In
                 </Button>
@@ -426,6 +369,7 @@ const Navbar = () => {
                     navigate('/auth');
                     setIsMobileMenuOpen(false);
                   }}
+                  className="w-full bg-white text-indigo-700"
                 >
                   Get Started
                 </Button>

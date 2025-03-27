@@ -36,6 +36,7 @@ import WorkflowDesigner from "./pages/WorkflowDesigner";
 import AIStudio from "./pages/AIStudio";
 import ModelMarketplace from "./pages/ModelMarketplace";
 import BusinessInsights from "./pages/BusinessInsights";
+import AIAssistant from "./pages/AIAssistant";
 
 const queryClient = new QueryClient();
 
@@ -86,6 +87,7 @@ const App = () => (
               <Route path="/ai-studio" element={<AIStudio />} />
               <Route path="/model-marketplace" element={<ModelMarketplace />} />
               <Route path="/business-insights" element={<BusinessInsights />} />
+              <Route path="/ai-assistant" element={<AIAssistant />} />
               {/* Add more Pro Tier routes as they are implemented */}
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

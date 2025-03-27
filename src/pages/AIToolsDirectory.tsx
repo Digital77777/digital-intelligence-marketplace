@@ -22,7 +22,10 @@ import {
   Sparkles,
   ArrowRight,
   CheckCircle,
-  Zap
+  Zap,
+  Filter,
+  Grid,
+  List
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/context/UserContext';
@@ -48,11 +51,18 @@ const AIToolsDirectory = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
   const [categories, setCategories] = useState<string[]>([]);
+  const [viewType, setViewType] = useState<'grid' | 'list'>('grid');
   const { user, profile } = useUser();
-  const { currentTier, canAccess } = useTier();
+  const { currentTier, canAccess, upgradePrompt } = useTier();
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!canAccess('ai-tools-directory')) {
+      upgradePrompt('basic');
+      navigate('/pricing');
+      return;
+    }
+    
     fetchAITools();
   }, [currentTier]);
 
@@ -119,10 +129,18 @@ const AIToolsDirectory = () => {
     return null;
   };
 
+  // Check if user has access to a specific tool based on required tier
+  const hasAccessToTool = (requiredTier: string): boolean => {
+    if (requiredTier === 'freemium') return true;
+    if (requiredTier === 'basic') return currentTier === 'basic' || currentTier === 'pro';
+    if (requiredTier === 'pro') return currentTier === 'pro';
+    return false;
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 pt-24 px-6 pb-12 bg-gradient-to-b from-indigo-50 to-white dark:from-indigo-950/30 dark:to-gray-950">
+      <main className="flex-1 pt-28 px-6 pb-12 bg-gradient-to-b from-indigo-50 to-white dark:from-indigo-950/30 dark:to-gray-950">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
@@ -131,8 +149,8 @@ const AIToolsDirectory = () => {
                 Discover and utilize powerful AI tools for your projects
               </p>
             </div>
-            <div className="w-full md:w-auto">
-              <div className="relative">
+            <div className="w-full md:w-auto flex items-center gap-3">
+              <div className="relative flex-1 md:flex-initial">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input 
                   placeholder="Search tools..." 
@@ -140,6 +158,28 @@ const AIToolsDirectory = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
+              </div>
+              <Button variant="outline" className="gap-2">
+                <Filter className="h-4 w-4" />
+                <span className="hidden sm:inline">Filters</span>
+              </Button>
+              <div className="hidden md:flex items-center bg-muted rounded-md p-1">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setViewType('grid')}
+                  className={`p-1 h-8 w-8 ${viewType === 'grid' ? 'bg-background' : ''}`}
+                >
+                  <Grid className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setViewType('list')}
+                  className={`p-1 h-8 w-8 ${viewType === 'list' ? 'bg-background' : ''}`}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </div>
@@ -155,11 +195,14 @@ const AIToolsDirectory = () => {
             </TabsList>
           </Tabs>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className={viewType === 'grid' 
+            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            : "space-y-4"
+          }>
             {filteredTools.map(tool => {
-              const hasAccess = canAccess(tool.required_tier);
+              const hasAccess = hasAccessToTool(tool.required_tier);
               
-              return (
+              return viewType === 'grid' ? (
                 <Card key={tool.id} className={`overflow-hidden border transition-all hover:shadow-md ${!hasAccess ? 'opacity-80' : 'hover:border-primary/50'}`}>
                   <CardHeader className="pb-2">
                     <div className="flex justify-between items-start">
@@ -226,6 +269,75 @@ const AIToolsDirectory = () => {
                       {hasAccess ? <ExternalLink className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
                     </Button>
                   </CardFooter>
+                </Card>
+              ) : (
+                <Card key={tool.id} className={`overflow-hidden border transition-all hover:shadow-md ${!hasAccess ? 'opacity-80' : 'hover:border-primary/50'}`}>
+                  <div className="flex flex-col sm:flex-row">
+                    <div className="p-4 sm:p-6 flex-1">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="text-3xl">{tool.icon}</div>
+                          <div>
+                            <CardTitle className="text-xl">{tool.name}</CardTitle>
+                            <CardDescription>{tool.category}</CardDescription>
+                          </div>
+                        </div>
+                        {tool.required_tier !== 'freemium' && getTierBadge(tool.required_tier)}
+                      </div>
+                      
+                      <p className="text-muted-foreground mb-4">{tool.description}</p>
+                      
+                      {hasAccess && (
+                        <div className="mb-2">
+                          <h4 className="font-medium mb-2 flex items-center gap-2">
+                            <Zap className="h-4 w-4 text-amber-500" />
+                            Key Use Cases
+                          </h4>
+                          <div className="flex flex-wrap gap-1">
+                            {tool.use_cases.slice(0, 3).map((useCase, index) => (
+                              <Badge key={index} variant="secondary" className="mr-1 mb-1">
+                                {useCase}
+                              </Badge>
+                            ))}
+                            {tool.use_cases.length > 3 && (
+                              <Badge variant="outline">+{tool.use_cases.length - 3} more</Badge>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="p-4 sm:p-6 flex flex-col justify-center items-center sm:items-end gap-3 border-t sm:border-t-0 sm:border-l bg-muted/20 sm:min-w-[200px]">
+                      {!hasAccess ? (
+                        <>
+                          <Lock className="h-8 w-8 text-muted-foreground" />
+                          <p className="text-sm text-center font-medium">
+                            {tool.required_tier.charAt(0).toUpperCase() + tool.required_tier.slice(1)} Tier Required
+                          </p>
+                          <Button 
+                            variant="outline"
+                            onClick={() => navigate('/pricing')}
+                            className="w-full sm:w-auto"
+                          >
+                            Upgrade
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-sm text-muted-foreground text-center sm:text-right">
+                            Available for your tier
+                          </p>
+                          <Button 
+                            variant="default"
+                            onClick={() => navigate(`/ai-tools/tool/${tool.id}`)}
+                            className="w-full sm:w-auto gap-1"
+                          >
+                            Open Tool <ExternalLink className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </Card>
               );
             })}

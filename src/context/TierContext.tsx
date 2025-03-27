@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { toast } from 'sonner';
 
@@ -86,6 +87,14 @@ const tierFeaturesMap: Record<TierType, TierFeatures> = {
 
 // Features available in each tier
 const tierFeatureAccess: Record<string, TierType[]> = {
+  // Freemium accessible features
+  'core-tools': ['freemium', 'basic', 'pro'],
+  'basic-forum': ['freemium', 'basic', 'pro'],
+  'basic-learning': ['freemium', 'basic', 'pro'],
+  'profile-management': ['freemium', 'basic', 'pro'],
+  'starter-api': ['freemium', 'basic', 'pro'],
+  
+  // Basic tier features
   'team-dashboard': ['basic', 'pro'],
   'collaboration-hub': ['basic', 'pro'],
   'workflow-designer': ['basic', 'pro'],
@@ -95,7 +104,10 @@ const tierFeatureAccess: Record<string, TierType[]> = {
   'audit-logs': ['basic', 'pro'],
   'priority-support': ['basic', 'pro'],
   'learning-hub-pro': ['basic', 'pro'],
+  'api-calls-5000': ['basic', 'pro'],
+  'ai-tools-directory': ['basic', 'pro'],
   
+  // Pro tier features
   'custom-models': ['pro'],
   'advanced-api': ['pro'],
   'white-labeling': ['pro'],
@@ -108,7 +120,8 @@ const tierFeatureAccess: Record<string, TierType[]> = {
   'security-dashboard': ['pro'],
   'business-insights': ['pro'],
   'pro-chatbot': ['pro'],
-  'learning-academy': ['pro']
+  'learning-academy': ['pro'],
+  'api-calls-50000': ['pro']
 };
 
 const TierContext = createContext<TierContextType | undefined>(undefined);
