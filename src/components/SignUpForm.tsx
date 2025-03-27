@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
+import { useUser } from '@/context/UserContext';
 import {
   Form,
   FormControl,
@@ -14,10 +15,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import Button from './Button';
+import { Button } from "@/components/ui/button";
+import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
+  username: z.string().min(2, { message: "Username must be at least 2 characters" }).optional(),
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z.string().min(8, { message: "Password must be at least 8 characters" }),
   acceptTerms: z.boolean().refine(val => val === true, {
@@ -32,25 +34,26 @@ interface SignUpFormProps {
 }
 
 const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess }) => {
+  const { register, isLoading } = useUser();
+  
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      username: "",
       email: "",
       password: "",
       acceptTerms: false,
     },
   });
 
-  const onSubmit = (data: FormValues) => {
-    // In a real app, this would call a registration API
-    console.log("Sign up attempt:", data);
-    
-    // Simulate successful registration
-    setTimeout(() => {
-      toast.success("Account created successfully!");
+  const onSubmit = async (data: FormValues) => {
+    try {
+      await register(data.email, data.password, data.username || undefined);
       onSuccess();
-    }, 1000);
+    } catch (error) {
+      // Error is handled in the UserContext and displayed via toast
+      console.error("Error during sign up:", error);
+    }
   };
 
   return (
@@ -58,12 +61,12 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess }) => {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="name"
+          name="username"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Full Name</FormLabel>
+              <FormLabel>Username (optional)</FormLabel>
               <FormControl>
-                <Input placeholder="John Doe" {...field} />
+                <Input placeholder="johndoe" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -122,9 +125,14 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess }) => {
         <Button 
           type="submit" 
           className="w-full"
-          disabled={form.formState.isSubmitting}
+          disabled={isLoading}
         >
-          {form.formState.isSubmitting ? "Creating account..." : "Create Account"}
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Creating account...
+            </>
+          ) : "Create Account"}
         </Button>
       </form>
     </Form>

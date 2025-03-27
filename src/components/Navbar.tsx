@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
@@ -12,19 +13,30 @@ import {
   ShoppingCart,
   LayoutDashboard,
   Users,
-  GitBranch
+  GitBranch,
+  LogOut,
+  Settings,
+  BookMarked,
+  Bot
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTier } from '@/context/TierContext';
-import AuthModal from './AuthModal';
+import { useUser } from '@/context/UserContext';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin');
   const { currentTier } = useTier();
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Mock login state
+  const { user, profile, logout } = useUser();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -44,14 +56,13 @@ const Navbar = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleOpenAuthModal = (tab: 'signin' | 'signup') => {
-    setAuthModalTab(tab);
-    setIsAuthModalOpen(true);
-  };
-
-  const handleLogout = () => {
-    // Mock logout functionality
-    setIsLoggedIn(false);
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
   
   const handleNavigation = (path: string) => {
@@ -125,6 +136,13 @@ const Navbar = () => {
     );
   };
 
+  const getInitials = (name: string | null) => {
+    if (!name) return 'U';
+    const parts = name.split(' ');
+    if (parts.length === 1) return name.substring(0, 1).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 py-4 px-6 transition-all duration-300 ${
@@ -159,14 +177,23 @@ const Navbar = () => {
             <BookOpen className="w-4 h-4" />
             <span>AI Tools {currentTier === 'freemium' && <span className="text-xs text-blue-500">(Limited)</span>}</span>
           </Link>
-          
+
           <Link 
-            to="/courses" 
+            to="/ai-tools-directory" 
             className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
             onClick={() => window.scrollTo(0, 0)}
           >
-            <BookOpen className="w-4 h-4" />
-            <span>Courses {currentTier === 'freemium' && <span className="text-xs text-blue-500">(Limited)</span>}</span>
+            <Bot className="w-4 h-4" />
+            <span>AI Directory</span>
+          </Link>
+          
+          <Link 
+            to="/learning-hub" 
+            className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
+            onClick={() => window.scrollTo(0, 0)}
+          >
+            <BookMarked className="w-4 h-4" />
+            <span>Learning Hub</span>
           </Link>
 
           <Link 
@@ -181,7 +208,7 @@ const Navbar = () => {
           {renderBasicTierLinks()}
           
           <Link 
-            to="/community" 
+            to="/forums" 
             className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
             onClick={() => window.scrollTo(0, 0)}
           >
@@ -207,37 +234,54 @@ const Navbar = () => {
             <span>Pricing</span>
           </Link>
 
-          {isLoggedIn ? (
-            <div className="flex items-center gap-4">
-              <Link 
-                to="/profile" 
-                className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1.5"
-                onClick={() => window.scrollTo(0, 0)}
-              >
-                <User className="w-4 h-4" />
-                <span>Dashboard</span>
-              </Link>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleLogout}
-              >
-                Sign Out
-              </Button>
-            </div>
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="rounded-full p-0 w-9 h-9">
+                  <Avatar className="w-9 h-9">
+                    <AvatarImage src={profile?.avatar_url || undefined} />
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      {getInitials(profile?.username || user.email)}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{profile?.username || user.email}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/settings')}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <div className="flex items-center gap-3">
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={() => handleOpenAuthModal('signin')}
+                onClick={() => navigate('/auth')}
               >
                 Sign In
               </Button>
               <Button 
                 variant="default" 
                 size="sm"
-                onClick={() => handleOpenAuthModal('signup')}
+                onClick={() => navigate('/auth')}
               >
                 Get Started
               </Button>
@@ -281,10 +325,17 @@ const Navbar = () => {
             </button>
             <button
               className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-              onClick={() => handleNavigation('/courses')}
+              onClick={() => handleNavigation('/ai-tools-directory')}
             >
-              <BookOpen className="h-5 w-5" />
-              <span>Courses {currentTier === 'freemium' && <span className="text-xs text-blue-500">(Limited)</span>}</span>
+              <Bot className="h-5 w-5" />
+              <span>AI Directory</span>
+            </button>
+            <button
+              className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
+              onClick={() => handleNavigation('/learning-hub')}
+            >
+              <BookMarked className="h-5 w-5" />
+              <span>Learning Hub</span>
             </button>
             <button
               className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
@@ -298,7 +349,7 @@ const Navbar = () => {
             
             <button
               className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-              onClick={() => handleNavigation('/community')}
+              onClick={() => handleNavigation('/forums')}
             >
               <MessageSquare className="h-5 w-5" />
               <span>Community</span>
@@ -318,14 +369,33 @@ const Navbar = () => {
               <span>Pricing</span>
             </button>
 
-            {isLoggedIn ? (
+            {user ? (
               <>
+                <div className="flex items-center gap-3 py-2">
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src={profile?.avatar_url || undefined} />
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      {getInitials(profile?.username || user.email)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <span className="font-medium">{profile?.username || user.email.split('@')[0]}</span>
+                    <span className="text-xs text-muted-foreground">{user.email}</span>
+                  </div>
+                </div>
                 <button
                   className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
                   onClick={() => handleNavigation('/profile')}
                 >
                   <User className="h-5 w-5" />
-                  <span>Dashboard</span>
+                  <span>Profile</span>
+                </button>
+                <button
+                  className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
+                  onClick={() => handleNavigation('/settings')}
+                >
+                  <Settings className="h-5 w-5" />
+                  <span>Settings</span>
                 </button>
                 <Button 
                   variant="outline" 
@@ -335,6 +405,7 @@ const Navbar = () => {
                     setIsMobileMenuOpen(false);
                   }}
                 >
+                  <LogOut className="h-4 w-4 mr-2" />
                   Sign Out
                 </Button>
               </>
@@ -343,7 +414,7 @@ const Navbar = () => {
                 <Button 
                   variant="outline" 
                   onClick={() => {
-                    handleOpenAuthModal('signin');
+                    navigate('/auth');
                     setIsMobileMenuOpen(false);
                   }}
                 >
@@ -352,7 +423,7 @@ const Navbar = () => {
                 <Button 
                   variant="default"
                   onClick={() => {
-                    handleOpenAuthModal('signup');
+                    navigate('/auth');
                     setIsMobileMenuOpen(false);
                   }}
                 >
@@ -363,13 +434,6 @@ const Navbar = () => {
           </div>
         </div>
       )}
-
-      {/* Auth Modal */}
-      <AuthModal 
-        isOpen={isAuthModalOpen} 
-        onOpenChange={setIsAuthModalOpen} 
-        defaultTab={authModalTab}
-      />
     </nav>
   );
 };

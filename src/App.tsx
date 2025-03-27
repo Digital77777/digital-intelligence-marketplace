@@ -18,6 +18,16 @@ import Marketplace from "./pages/Marketplace";
 import ToolDetail from "./pages/ToolDetail";
 import SubmitTool from "./pages/SubmitTool";
 import Pricing from "./pages/Pricing";
+// Import Auth page
+import Auth from "./pages/Auth";
+// Import Community Forums
+import CommunityForums from "./pages/CommunityForums";
+import ForumTopic from "./pages/ForumTopic"; 
+import NewForumTopic from "./pages/NewForumTopic";
+// Import Learning Hub
+import LearningHub from "./pages/LearningHub";
+// Import AI Tools Directory
+import AIToolsDirectory from "./pages/AIToolsDirectory";
 // Import Basic Tier pages
 import TeamDashboard from "./pages/TeamDashboard";
 import CollaborationHub from "./pages/CollaborationHub";
@@ -52,14 +62,20 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/ai-tools" element={<AITools />} />
+              <Route path="/ai-tools-directory" element={<AIToolsDirectory />} />
               <Route path="/courses" element={<Courses />} />
+              <Route path="/learning-hub" element={<LearningHub />} />
               <Route path="/community" element={<Community />} />
+              <Route path="/forums" element={<CommunityForums />} />
+              <Route path="/community/topic/:topicId" element={<ForumTopic />} />
+              <Route path="/community/new-topic/:categoryId" element={<NewForumTopic />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/about" element={<About />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/tool/:id" element={<ToolDetail />} />
               <Route path="/submit-tool" element={<SubmitTool />} />
+              <Route path="/auth" element={<Auth />} />
               
               {/* Basic Tier Routes */}
               <Route path="/team-dashboard" element={<TeamDashboard />} />

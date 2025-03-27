@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
+import { useUser } from '@/context/UserContext';
 import {
   Form,
   FormControl,
@@ -13,7 +14,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import Button from './Button';
+import { Button } from "@/components/ui/button";
+import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -27,6 +29,8 @@ interface SignInFormProps {
 }
 
 const SignInForm: React.FC<SignInFormProps> = ({ onSuccess }) => {
+  const { login, isLoading } = useUser();
+  
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -35,15 +39,14 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSuccess }) => {
     },
   });
 
-  const onSubmit = (data: FormValues) => {
-    // In a real app, this would call an authentication API
-    console.log("Sign in attempt:", data);
-    
-    // Simulate successful login
-    setTimeout(() => {
-      toast.success("Successfully signed in!");
+  const onSubmit = async (data: FormValues) => {
+    try {
+      await login(data.email, data.password);
       onSuccess();
-    }, 1000);
+    } catch (error) {
+      // Error is handled in the UserContext and displayed via toast
+      console.error("Error during sign in:", error);
+    }
   };
 
   return (
@@ -86,9 +89,14 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSuccess }) => {
         <Button 
           type="submit" 
           className="w-full"
-          disabled={form.formState.isSubmitting}
+          disabled={isLoading}
         >
-          {form.formState.isSubmitting ? "Signing in..." : "Sign In"}
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Signing in...
+            </>
+          ) : "Sign In"}
         </Button>
       </form>
     </Form>
