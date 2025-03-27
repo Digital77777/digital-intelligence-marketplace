@@ -64,8 +64,10 @@ const replySchema = z.object({
   content: z.string().min(10, { message: "Reply must be at least 10 characters" })
 });
 
+type ReplyFormValues = z.infer<typeof replySchema>;
+
 const ForumTopic = () => {
-  const { topicId } = useParams();
+  const { topicId } = useParams<{ topicId: string }>();
   const navigate = useNavigate();
   const { user } = useUser();
   const [topic, setTopic] = useState<ForumTopic | null>(null);
@@ -74,7 +76,7 @@ const ForumTopic = () => {
   const [isLoadingReplies, setIsLoadingReplies] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const form = useForm<z.infer<typeof replySchema>>({
+  const form = useForm<ReplyFormValues>({
     resolver: zodResolver(replySchema),
     defaultValues: {
       content: ''
@@ -183,7 +185,7 @@ const ForumTopic = () => {
     }
   };
   
-  const onSubmitReply = async (data: z.infer<typeof replySchema>) => {
+  const onSubmitReply = async (data: ReplyFormValues) => {
     if (!user || !topicId) {
       toast.error("Authentication required", {
         description: "You must be logged in to reply"
@@ -331,12 +333,12 @@ const ForumTopic = () => {
             
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="bg-muted/50">
-                {topic.category_name}
+                {topic?.category_name}
               </Badge>
-              {topic.is_pinned && (
+              {topic?.is_pinned && (
                 <Badge variant="secondary">Pinned</Badge>
               )}
-              {topic.is_locked && (
+              {topic?.is_locked && (
                 <Badge variant="outline">Locked</Badge>
               )}
             </div>
@@ -346,16 +348,16 @@ const ForumTopic = () => {
           <Card className="mb-6">
             <CardHeader>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <CardTitle className="text-2xl">{topic.title}</CardTitle>
+                <CardTitle className="text-2xl">{topic?.title}</CardTitle>
               </div>
               <CardDescription className="flex flex-wrap gap-x-4 gap-y-2 mt-2">
                 <div className="flex items-center gap-1">
                   <Users className="h-4 w-4" />
-                  <span>{topic.author_username}</span>
+                  <span>{topic?.author_username}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Clock className="h-4 w-4" />
-                  <span>{formatDate(topic.created_at)}</span>
+                  <span>{topic ? formatDate(topic.created_at) : ''}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <MessageSquare className="h-4 w-4" />
@@ -365,7 +367,7 @@ const ForumTopic = () => {
             </CardHeader>
             <CardContent>
               <div className="prose dark:prose-invert max-w-none">
-                <p className="whitespace-pre-wrap">{topic.content}</p>
+                <p className="whitespace-pre-wrap">{topic?.content}</p>
               </div>
             </CardContent>
             <CardFooter className="flex justify-between border-t p-4">
@@ -433,7 +435,7 @@ const ForumTopic = () => {
                           Quote
                         </Button>
                       </div>
-                      {user && topic.user_id === user.id && !reply.is_solution && (
+                      {user && topic?.user_id === user.id && !reply.is_solution && (
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -452,7 +454,7 @@ const ForumTopic = () => {
           </div>
           
           {/* Reply Form */}
-          {!topic.is_locked ? (
+          {!topic?.is_locked ? (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Post a Reply</CardTitle>
