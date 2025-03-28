@@ -26,7 +26,8 @@ import {
   BarChart,
   RocketIcon,
   Sparkles,
-  MessagesSquare
+  MessagesSquare,
+  PlayCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTier } from '@/context/TierContext';
@@ -146,6 +147,7 @@ const Navbar = () => {
     { label: 'Home', path: '/', icon: <Home className="h-5 w-5" />, requiredTier: 'freemium' },
     { label: 'AI Tools', path: '/ai-tools', icon: <RocketIcon className="h-5 w-5" />, requiredTier: 'freemium' },
     { label: 'Tools Directory', path: '/ai-tools-directory', icon: <Bot className="h-5 w-5" />, requiredTier: 'basic' },
+    { label: 'AI Streams', path: '/ai-streams', icon: <PlayCircle className="h-5 w-5" />, requiredTier: 'freemium', highlight: true },
     { label: 'Learning Hub', path: '/learning-hub', icon: <BookMarked className="h-5 w-5" />, requiredTier: 'freemium' },
     { label: 'Marketplace', path: '/marketplace', icon: <ShoppingCart className="h-5 w-5" />, requiredTier: 'freemium' },
     { label: 'Team Dashboard', path: '/team-dashboard', icon: <LayoutDashboard className="h-5 w-5" />, requiredTier: 'basic' },
@@ -183,7 +185,7 @@ const Navbar = () => {
             <Link to="/" className="text-xl font-bold flex items-center" onClick={() => window.scrollTo(0, 0)}>
               <span className="text-white mr-1">Digital</span>
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-200 to-purple-200 font-extrabold">
-                Intelligence
+                Intelligence Marketplace
               </span>
             </Link>
           </div>
@@ -310,7 +312,7 @@ const Navbar = () => {
                     <span className="ml-2 text-sm font-medium">{item.label}</span>
                     {item.highlight && (
                       <Badge variant="outline" className="ml-2 bg-yellow-400/20 text-yellow-200 border-yellow-500/20 py-0">
-                        <Sparkles className="h-3 w-3 mr-1" /> Pro
+                        <Sparkles className="h-3 w-3 mr-1" /> {item.requiredTier === 'pro' ? 'Pro' : 'New'}
                       </Badge>
                     )}
                   </div>

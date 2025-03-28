@@ -37,6 +37,9 @@ import AIStudio from "./pages/AIStudio";
 import ModelMarketplace from "./pages/ModelMarketplace";
 import BusinessInsights from "./pages/BusinessInsights";
 import AIAssistant from "./pages/AIAssistant";
+// Import AI Streams pages
+import AIStreams from "./pages/AIStreams";
+import AIStreamDetail from "./pages/AIStreamDetail";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +91,10 @@ const App = () => (
               <Route path="/model-marketplace" element={<ModelMarketplace />} />
               <Route path="/business-insights" element={<BusinessInsights />} />
               <Route path="/ai-assistant" element={<AIAssistant />} />
+              
+              {/* AI Streams Routes */}
+              <Route path="/ai-streams" element={<AIStreams />} />
+              <Route path="/ai-streams/:streamId" element={<AIStreamDetail />} />
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
