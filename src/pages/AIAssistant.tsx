@@ -34,6 +34,7 @@ import {
 import ChatContainer, { ChatMessage } from '@/components/chat/ChatContainer';
 import ChatInput from '@/components/chat/ChatInput';
 import { useNavigate } from 'react-router-dom';
+import { Spinner } from '@/components/ui/spinner';
 
 const EXAMPLE_PROMPTS = [
   "Explain how to build a recommendation system for an e-commerce site",
@@ -243,7 +244,7 @@ const AIAssistant = () => {
       },
       {
         id: 'bot-1',
-        message: 'GPT-4 is more advanced than GPT-3 with several improvements:\n\n1. Improved reasoning and problem-solving abilities\n2. Better context handling and longer memory\n3. More nuanced understanding of complex instructions\n4. Reduced hallucinations and factual errors\n5. Multimodal capabilities (can process both text and images)\n\nIt's also more expensive to use and has stricter rate limits than GPT-3.',
+        message: 'GPT-4 is more advanced than GPT-3 with several improvements:\n\n1. Improved reasoning and problem-solving abilities\n2. Better context handling and longer memory\n3. More nuanced understanding of complex instructions\n4. Reduced hallucinations and factual errors\n5. Multimodal capabilities (can process both text and images)\n\nIt\'s also more expensive to use and has stricter rate limits than GPT-3.',
         isUser: false,
         timestamp: new Date(Date.now() - 1 * 60 * 1000).toISOString()
       }
