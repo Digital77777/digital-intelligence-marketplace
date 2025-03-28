@@ -48,6 +48,83 @@ export type Database = {
         }
         Relationships: []
       }
+      course_feedback: {
+        Row: {
+          comment: string | null
+          course_id: number
+          created_at: string | null
+          id: string
+          rating: number
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          course_id: number
+          created_at?: string | null
+          id?: string
+          rating: number
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          course_id?: number
+          created_at?: string | null
+          id?: string
+          rating?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_feedback_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          description: string | null
+          difficulty: string
+          duration: number
+          id: number
+          image_url: string | null
+          required_tier: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          description?: string | null
+          difficulty: string
+          duration: number
+          id?: number
+          image_url?: string | null
+          required_tier?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          description?: string | null
+          difficulty?: string
+          duration?: number
+          id?: number
+          image_url?: string | null
+          required_tier?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       forum_categories: {
         Row: {
           created_at: string
@@ -226,6 +303,139 @@ export type Database = {
           tier?: string
           updated_at?: string
           username?: string | null
+        }
+        Relationships: []
+      }
+      study_group_members: {
+        Row: {
+          group_id: string
+          joined_at: string | null
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          joined_at?: string | null
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          joined_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_groups: {
+        Row: {
+          category: string
+          created_at: string | null
+          creator_id: string
+          description: string | null
+          id: string
+          is_public: boolean | null
+          name: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          creator_id: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          creator_id?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name?: string
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          badge_description: string | null
+          badge_name: string
+          earned_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_description?: string | null
+          badge_name: string
+          earned_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_description?: string | null
+          badge_name?: string
+          earned_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_progress: {
+        Row: {
+          completion_percent: number | null
+          course_id: number
+          id: string
+          last_accessed: string | null
+          user_id: string
+        }
+        Insert: {
+          completion_percent?: number | null
+          course_id: number
+          id?: string
+          last_accessed?: string | null
+          user_id: string
+        }
+        Update: {
+          completion_percent?: number | null
+          course_id?: number
+          id?: string
+          last_accessed?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_progress_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_xp: {
+        Row: {
+          current_level: string | null
+          last_updated: string | null
+          total_xp: number | null
+          user_id: string
+        }
+        Insert: {
+          current_level?: string | null
+          last_updated?: string | null
+          total_xp?: number | null
+          user_id: string
+        }
+        Update: {
+          current_level?: string | null
+          last_updated?: string | null
+          total_xp?: number | null
+          user_id?: string
         }
         Relationships: []
       }

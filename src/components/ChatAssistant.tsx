@@ -1,346 +1,216 @@
 
-import React, { useState, useEffect } from 'react';
-import { useUser } from '@/context/UserContext';
-import { useTier } from '@/context/TierContext';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { X, MessageSquare, Clock, ArrowUp, ChevronUp, ChevronDown } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '@/integrations/supabase/client';
-import { v4 as uuidv4 } from 'uuid';
-import { toast } from 'sonner';
-import ChatContainer, { ChatMessage } from './chat/ChatContainer';
-import ChatInput from './chat/ChatInput';
-import { Card, CardContent, CardFooter, CardHeader } from './ui/card';
-import { Badge } from './ui/badge';
+import { Card } from '@/components/ui/card';
+import { Sparkles, X, Send, MessageCircle, ChevronUp, ChevronDown } from 'lucide-react';
+import { Avatar } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
+import { toast } from '@/hooks/use-toast';
+import { useUser } from '@/context/UserContext';
+import { saveChatMessage } from '@/utils/chatUtils';
+import ChatBubble from '@/components/chat/ChatBubble';
 
-const SUGGESTED_PROMPTS = [
-  "What features are available in the Pro tier?",
-  "How do I access the Learning Hub?",
-  "What AI tools can I use in the freemium tier?",
-  "Is there a community forum available?",
-  "How do I upgrade my account?"
-];
+interface ChatAssistantProps {}
 
-// Max free tier messages per day
-const FREE_TIER_DAILY_LIMIT = 5;
+interface Message {
+  id: string;
+  content: string;
+  isUser: boolean;
+  timestamp: Date;
+}
 
-const ChatAssistant = () => {
+const ChatAssistant: React.FC<ChatAssistantProps> = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [messagesRemaining, setMessagesRemaining] = useState(FREE_TIER_DAILY_LIMIT);
-  const [previousMessagesLoaded, setPreviousMessagesLoaded] = useState(false);
-  const { user, profile } = useUser();
-  const { currentTier } = useTier();
-  
-  const isPro = currentTier === 'pro';
-  const isBasic = currentTier === 'basic';
-  
-  // Load chat history from localStorage or Supabase
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { user } = useUser();
+
+  // Initial welcome message
   useEffect(() => {
-    if (user && !previousMessagesLoaded) {
-      loadChatHistory();
-    } else if (!user && !previousMessagesLoaded) {
-      // For guest users, load from localStorage
-      const savedMessages = localStorage.getItem('guest_chat_history');
-      if (savedMessages) {
-        setMessages(JSON.parse(savedMessages));
-      }
-      
-      // Set loaded flag
-      setPreviousMessagesLoaded(true);
-      
-      // Get remaining messages count from localStorage
-      const todayStr = new Date().toDateString();
-      const usageData = JSON.parse(localStorage.getItem('chat_usage') || '{}');
-      
-      if (usageData.date === todayStr) {
-        setMessagesRemaining(Math.max(0, FREE_TIER_DAILY_LIMIT - usageData.count));
-      } else {
-        // Reset for a new day
-        localStorage.setItem('chat_usage', JSON.stringify({ date: todayStr, count: 0 }));
-      }
-    }
-  }, [user, previousMessagesLoaded]);
-  
-  // Save messages for guest users
-  useEffect(() => {
-    if (!user && messages.length > 0) {
-      localStorage.setItem('guest_chat_history', JSON.stringify(messages));
-    }
-  }, [messages, user]);
-  
-  const loadChatHistory = async () => {
-    try {
-      if (isPro) {
-        // For Pro users, load from Supabase
-        const { data, error } = await supabase
-          .from('pro_chat_history')
-          .select('*')
-          .eq('user_id', user?.id)
-          .order('timestamp', { ascending: true })
-          .limit(50);
-        
-        if (error) throw error;
-        
-        if (data && data.length > 0) {
-          const formattedMessages: ChatMessage[] = data.map(item => ({
-            id: item.id,
-            message: item.message,
-            isUser: true,
-            timestamp: item.timestamp
-          })).flatMap((userMsg, i) => {
-            // Add corresponding bot response if available
-            const botMsg = data[i];
-            if (botMsg && botMsg.bot_response) {
-              return [
-                userMsg,
-                {
-                  id: `bot-${userMsg.id}`,
-                  message: botMsg.bot_response,
-                  isUser: false,
-                  timestamp: botMsg.timestamp
-                }
-              ];
-            }
-            return [userMsg];
-          });
-          
-          setMessages(formattedMessages);
-        }
-      }
-      
-      // Set loaded flag
-      setPreviousMessagesLoaded(true);
-    } catch (error) {
-      console.error('Error loading chat history:', error);
-    }
-  };
-  
-  const saveMessageToSupabase = async (userMessage: string, botResponse: string) => {
-    try {
-      if (user && isPro) {
-        const { error } = await supabase
-          .from('pro_chat_history')
-          .insert({
-            user_id: user.id,
-            message: userMessage,
-            bot_response: botResponse,
-            timestamp: new Date().toISOString()
-          });
-        
-        if (error) throw error;
-      }
-    } catch (error) {
-      console.error('Error saving chat history:', error);
-    }
-  };
-  
-  const updateMessageCount = () => {
-    if (!user) {
-      // For guests, track usage in localStorage
-      const todayStr = new Date().toDateString();
-      const usageData = JSON.parse(localStorage.getItem('chat_usage') || '{}');
-      
-      if (usageData.date === todayStr) {
-        const newCount = usageData.count + 1;
-        localStorage.setItem('chat_usage', JSON.stringify({ 
-          date: todayStr, 
-          count: newCount 
-        }));
-        setMessagesRemaining(Math.max(0, FREE_TIER_DAILY_LIMIT - newCount));
-      } else {
-        // Reset for a new day
-        localStorage.setItem('chat_usage', JSON.stringify({ 
-          date: todayStr, 
-          count: 1 
-        }));
-        setMessagesRemaining(FREE_TIER_DAILY_LIMIT - 1);
-      }
-    }
-  };
-  
-  const handleSendMessage = async (message: string) => {
-    if (!message.trim()) return;
-    
-    // Check message limit for free users
-    if (!isPro && !isBasic && messagesRemaining <= 0) {
-      toast.error("You've reached your daily message limit. Upgrade to Basic or Pro for unlimited access.");
-      return;
-    }
-    
-    const userMessage: ChatMessage = {
-      id: uuidv4(),
-      message,
-      isUser: true,
-      timestamp: new Date().toISOString()
-    };
-    
-    setMessages(prev => [...prev, userMessage]);
-    setIsLoading(true);
-    
-    try {
-      // Format previous messages for context
-      const previousMessages = messages
-        .slice(-10) // Just the last 10 messages for context
-        .map(msg => ({
-          role: msg.isUser ? 'user' : 'assistant',
-          content: msg.message
-        }));
-      
-      // Call the chatbot function
-      const response = await fetch(
-        'https://bqtxpbxoahfuuardbrmc.supabase.co/functions/v1/chatbot',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
-          },
-          body: JSON.stringify({
-            message,
-            userId: user?.id || 'guest',
-            previousMessages
-          })
-        }
-      );
-      
-      const data = await response.json();
-      
-      if (data.error) {
-        throw new Error(data.error);
-      }
-      
-      const botMessage: ChatMessage = {
-        id: uuidv4(),
-        message: data.response,
+    setMessages([
+      {
+        id: '1',
+        content: "Hi there! I'm the chat assistant for this platform. How can I help you today?",
         isUser: false,
-        timestamp: data.timestamp || new Date().toISOString()
-      };
-      
-      setMessages(prev => [...prev, botMessage]);
-      
-      // Save message to Supabase for Pro users
-      if (isPro) {
-        saveMessageToSupabase(message, data.response);
+        timestamp: new Date()
       }
+    ]);
+  }, []);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const toggleChat = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleSendMessage = async () => {
+    if (!inputValue.trim()) return;
+
+    const userMessage = {
+      id: Date.now().toString(),
+      content: inputValue,
+      isUser: true,
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+    setIsLoading(true);
+
+    try {
+      // Get response from assistant (simulated)
+      const response = await getAssistantResponse(inputValue);
       
-      // Update message count for non-Pro users
-      if (!isPro && !isBasic) {
-        updateMessageCount();
+      const assistantMessage = {
+        id: (Date.now() + 1).toString(),
+        content: response,
+        isUser: false,
+        timestamp: new Date()
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
+      
+      // Save to history if user is logged in
+      if (user) {
+        await saveChatMessage(userMessage.content, response, { type: 'chat_assistant' });
       }
     } catch (error) {
-      console.error('Chat assistant error:', error);
-      toast.error('Failed to get a response from the assistant. Please try again.');
+      console.error("Error getting response:", error);
+      toast({
+        title: "Error",
+        description: "Could not get a response. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
   };
-  
-  const handlePromptClick = (prompt: string) => {
-    handleSendMessage(prompt);
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSendMessage();
+    }
   };
-  
-  const toggleChat = () => {
-    setIsOpen(prev => !prev);
+
+  // Simulated assistant response - replace with real API in production
+  const getAssistantResponse = async (message: string): Promise<string> => {
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    message = message.toLowerCase();
+    
+    if (message.includes('hello') || message.includes('hi ') || message.includes('hey')) {
+      return "Hello! How can I assist you today with our AI platform?";
+    }
+    
+    if (message.includes('account') || message.includes('login') || message.includes('sign up')) {
+      return "You can manage your account settings in the Profile page. If you're having trouble logging in, please make sure your credentials are correct or use the 'Forgot Password' option.";
+    }
+    
+    if (message.includes('course') || message.includes('learn') || message.includes('tutorial')) {
+      return "We have various AI learning courses available in our Learning Hub. You can filter them by difficulty level and category. Some advanced courses require a Basic or Pro subscription.";
+    }
+    
+    if (message.includes('pricing') || message.includes('subscription') || message.includes('tier')) {
+      return "We offer three tiers: Freemium (free), Basic ($10/month), and Pro ($29/month). Each tier unlocks additional features. You can see a detailed comparison on our Pricing page.";
+    }
+    
+    if (message.includes('tool') || message.includes('ai tool')) {
+      return "You can explore our collection of AI tools in the AI Tools Directory. We have tools for various AI applications including NLP, computer vision, and machine learning.";
+    }
+    
+    if (message.includes('thank')) {
+      return "You're welcome! Feel free to ask if you have any other questions.";
+    }
+    
+    // Default response
+    return "I'm here to help you navigate our AI platform. You can ask me about courses, tools, account settings, or pricing plans. What would you like to know more about?";
   };
-  
-  const closeChat = () => {
-    setIsOpen(false);
-  };
-  
-  const EmptyState = () => (
-    <div className="text-center">
-      <MessageSquare className="h-12 w-12 mx-auto mb-3 text-primary/40" />
-      <h3 className="text-lg font-medium mb-2">Welcome to the AI Assistant!</h3>
-      <p className="text-sm text-muted-foreground mb-4">
-        How can I help you today? You can ask me about platform features, AI tools, or learning resources.
-      </p>
-      <div className="space-y-2">
-        {SUGGESTED_PROMPTS.slice(0, 3).map((prompt) => (
-          <Button
-            key={prompt}
-            variant="outline"
-            size="sm"
-            className="text-xs w-full justify-start"
-            onClick={() => handlePromptClick(prompt)}
-          >
-            <ArrowUp className="h-3 w-3 mr-2 rotate-45" />
-            {prompt}
-          </Button>
-        ))}
-      </div>
-    </div>
-  );
-  
+
   return (
     <>
-      {/* Chat button */}
-      <div className="fixed right-4 bottom-4 z-40">
-        <Button
-          onClick={toggleChat}
-          size="icon"
-          className={`h-12 w-12 rounded-full shadow-lg ${isOpen ? 'bg-red-500 hover:bg-red-600' : ''}`}
-        >
-          {isOpen ? <X className="h-5 w-5" /> : <MessageSquare className="h-5 w-5" />}
-        </Button>
-      </div>
+      {/* Chat toggle button */}
+      <Button
+        onClick={toggleChat}
+        variant="default"
+        size="icon"
+        className="fixed bottom-4 right-4 rounded-full p-3 shadow-lg bg-primary text-primary-foreground hover:bg-primary/90 z-50"
+      >
+        {isOpen ? <X size={22} /> : <MessageCircle size={22} />}
+      </Button>
       
-      {/* Chat panel */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className="fixed bottom-20 right-4 w-[350px] md:w-[400px] h-[500px] z-30 shadow-xl"
-          >
-            <Card className="h-full flex flex-col">
-              <CardHeader className="px-4 py-3 border-b flex-shrink-0">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="h-5 w-5 text-primary" />
-                    <h3 className="font-medium">AI Assistant</h3>
-                    {isPro && (
-                      <Badge className="bg-purple-500 hover:bg-purple-600 text-xs">Pro</Badge>
-                    )}
-                    {isBasic && (
-                      <Badge className="bg-blue-500 hover:bg-blue-600 text-xs">Basic</Badge>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {!isPro && !isBasic && (
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        <span>{messagesRemaining}/{FREE_TIER_DAILY_LIMIT}</span>
-                      </div>
-                    )}
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={closeChat}>
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              
-              <ChatContainer
-                messages={messages}
-                isLoading={isLoading}
-                emptyState={<EmptyState />}
-                avatar={profile?.avatar_url || undefined}
+      {/* Chat window */}
+      {isOpen && (
+        <Card className="fixed bottom-16 right-4 w-80 sm:w-96 h-96 flex flex-col rounded-lg border shadow-lg z-50 overflow-hidden">
+          {/* Chat header */}
+          <div className="bg-primary text-primary-foreground p-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Avatar className="h-8 w-8 bg-primary-foreground/10">
+                <Sparkles className="h-4 w-4 text-primary-foreground" />
+              </Avatar>
+              <div>
+                <h3 className="font-medium text-sm">Chat Assistant</h3>
+              </div>
+            </div>
+            <div className="flex gap-1">
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10" onClick={toggleChat}>
+                {isOpen ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
+              </Button>
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10" onClick={toggleChat}>
+                <X size={18} />
+              </Button>
+            </div>
+          </div>
+          
+          {/* Chat messages */}
+          <div className="flex-1 overflow-y-auto p-3 bg-gray-50 dark:bg-gray-900/50">
+            {messages.map((message) => (
+              <ChatBubble
+                key={message.id}
+                message={message.content}
+                isUser={message.isUser}
+                timestamp={message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               />
-              
-              <CardFooter className="px-4 py-3 border-t">
-                <ChatInput
-                  onSendMessage={handleSendMessage}
-                  isLoading={isLoading}
-                  placeholder="Type your message..."
-                />
-              </CardFooter>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+          
+          {/* Chat input */}
+          <div className="p-3 border-t bg-background">
+            <div className="flex gap-2">
+              <Input
+                value={inputValue}
+                onChange={handleInputChange}
+                onKeyPress={handleKeyPress}
+                placeholder="Type your message..."
+                disabled={isLoading}
+                className="flex-1"
+              />
+              <Button 
+                size="icon" 
+                onClick={handleSendMessage} 
+                disabled={isLoading || !inputValue.trim()}
+              >
+                {isLoading ? <Spinner size="sm" /> : <Send size={18} />}
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
     </>
   );
 };

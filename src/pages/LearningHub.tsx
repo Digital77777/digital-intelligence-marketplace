@@ -34,6 +34,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/context/UserContext';
 import { useTier } from '@/context/TierContext';
 import { useNavigate } from 'react-router-dom';
+import { Spinner } from '@/components/ui/spinner';
 
 interface LearningContent {
   id: string;
@@ -45,136 +46,8 @@ interface LearningContent {
   difficulty: string;
   duration: number;
   created_at: string;
-  content: string; // Added this required field
+  content: string;
 }
-
-const difficultyColors: Record<string, string> = {
-  'Beginner': 'bg-green-100 text-green-800 border-green-200',
-  'Intermediate': 'bg-amber-100 text-amber-800 border-amber-200',
-  'Advanced': 'bg-red-100 text-red-800 border-red-200'
-};
-
-const categoryIcons: Record<string, React.ReactNode> = {
-  'AI Fundamentals': <Bot className="h-5 w-5" />,
-  'Machine Learning': <BarChart className="h-5 w-5" />,
-  'Deep Learning': <Layers className="h-5 w-5" />,
-  'Natural Language Processing': <BookOpen className="h-5 w-5" />,
-  'Computer Vision': <BookOpen className="h-5 w-5" />,
-  'Reinforcement Learning': <Flame className="h-5 w-5" />,
-  'AI Ethics': <Shield className="h-5 w-5" />
-};
-
-// Modified: Complete sample learning content objects with all required fields
-const additionalContent: LearningContent[] = [
-  {
-    id: "1",
-    title: "Building Your First Neural Network",
-    description: "Learn how to build and train a simple neural network using TensorFlow and Keras.",
-    image_url: "https://images.unsplash.com/photo-1617791160536-598cf32026fb",
-    required_tier: "basic",
-    category: "Deep Learning",
-    difficulty: "Intermediate",
-    duration: 90,
-    created_at: new Date().toISOString(),
-    content: "This course covers the fundamentals of neural networks and how to implement them using modern frameworks."
-  },
-  {
-    id: "2",
-    title: "Ethics in AI Development",
-    description: "Understand the ethical considerations and best practices when developing AI applications.",
-    image_url: "https://images.unsplash.com/photo-1583308612406-5cbcec225c88",
-    required_tier: "basic",
-    category: "AI Ethics",
-    difficulty: "Beginner",
-    duration: 60,
-    created_at: new Date().toISOString(),
-    content: "This course explores ethical considerations and challenges in AI development and deployment."
-  },
-  {
-    id: "3",
-    title: "Image Recognition with Convolutional Neural Networks",
-    description: "Master image recognition techniques using CNNs and deep learning frameworks.",
-    image_url: "https://images.unsplash.com/photo-1580894732444-8ecded7900cd",
-    required_tier: "pro",
-    category: "Computer Vision",
-    difficulty: "Advanced",
-    duration: 120,
-    created_at: new Date().toISOString(),
-    content: "An in-depth look at Convolutional Neural Networks and their application in computer vision tasks."
-  },
-  {
-    id: "4",
-    title: "Natural Language Processing Fundamentals",
-    description: "Dive into NLP concepts, techniques, and applications for processing textual data.",
-    image_url: "https://images.unsplash.com/photo-1546776310-eef45dd6d63c",
-    required_tier: "basic",
-    category: "Natural Language Processing",
-    difficulty: "Intermediate",
-    duration: 75,
-    created_at: new Date().toISOString(),
-    content: "This course introduces key concepts in natural language processing and text analysis."
-  },
-  {
-    id: "5",
-    title: "Reinforcement Learning in Games",
-    description: "Explore how reinforcement learning is used to train AI agents to play and master games.",
-    image_url: "https://images.unsplash.com/photo-1609770231080-e321deccc34c",
-    required_tier: "pro",
-    category: "Reinforcement Learning",
-    difficulty: "Advanced",
-    duration: 110,
-    created_at: new Date().toISOString(),
-    content: "Learn how reinforcement learning algorithms can be applied to game environments."
-  },
-  {
-    id: "6",
-    title: "Data Preprocessing for Machine Learning",
-    description: "Learn essential techniques for cleaning and preparing data for machine learning models.",
-    image_url: "https://images.unsplash.com/photo-1561736778-92e52a7769ef",
-    required_tier: "basic",
-    category: "Machine Learning",
-    difficulty: "Beginner",
-    duration: 45,
-    created_at: new Date().toISOString(),
-    content: "This course covers data preprocessing techniques essential for building reliable machine learning models."
-  },
-  {
-    id: "7",
-    title: "Advanced Time Series Forecasting",
-    description: "Master techniques for predicting future values based on past observations in time series data.",
-    image_url: "https://images.unsplash.com/photo-1551288049-bebda4e38f71",
-    required_tier: "pro",
-    category: "Machine Learning",
-    difficulty: "Advanced",
-    duration: 150,
-    created_at: new Date().toISOString(),
-    content: "Advanced methods for time series analysis and forecasting using statistical and deep learning approaches."
-  },
-  {
-    id: "8",
-    title: "Building Conversational AI Assistants",
-    description: "Learn to develop sophisticated conversational agents using modern NLP techniques.",
-    image_url: "https://images.unsplash.com/photo-1531746790731-6c087fecd65a",
-    required_tier: "pro",
-    category: "Natural Language Processing",
-    difficulty: "Advanced",
-    duration: 180,
-    created_at: new Date().toISOString(),
-    content: "Step-by-step guide to building conversational AI systems with modern frameworks."
-  },
-  {
-    id: "9",
-    title: "Introduction to Computer Vision",
-    description: "Understand the basic concepts and applications of computer vision in artificial intelligence.",
-    image_url: "https://images.unsplash.com/photo-1575403071235-5a3aae7e4a7a",
-    required_tier: "basic",
-    category: "Computer Vision",
-    difficulty: "Beginner",
-    duration: 60,
-    created_at: new Date().toISOString(),
-    content: "An introduction to fundamental computer vision concepts and techniques."
-  }
-];
 
 const LearningHub = () => {
   const [content, setContent] = useState<LearningContent[]>([]);
@@ -183,6 +56,7 @@ const LearningHub = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [categories, setCategories] = useState<string[]>([]);
   const [difficulty, setDifficulty] = useState<string>('all');
+  const [isLoading, setIsLoading] = useState(true);
   const { user, profile } = useUser();
   const { currentTier, canAccess } = useTier();
   const navigate = useNavigate();
@@ -193,59 +67,155 @@ const LearningHub = () => {
 
   const fetchLearningContent = async () => {
     try {
-      // Fetch existing content from Supabase
+      setIsLoading(true);
+      // Fetch learning content from Supabase based on user's tier
       const { data, error } = await supabase
         .from('learning_content')
         .select('*')
         .order('created_at', { ascending: false });
         
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
       
-      // Combine existing content with additional sample content
-      let combinedContent = [...(data || [])];
-      
-      // Only add additional content if it doesn't exist yet
-      if (data && data.length < 5) {
-        // Insert additional content items one by one
-        for (const item of additionalContent) {
+      // If no data or very little data, add sample content for demonstration
+      if (!data || data.length < 5) {
+        const sampleContent = generateSampleContent();
+        for (const item of sampleContent) {
           const { error: insertError } = await supabase
             .from('learning_content')
-            .insert({
-              title: item.title,
-              description: item.description,
-              image_url: item.image_url,
-              required_tier: item.required_tier,
-              category: item.category,
-              difficulty: item.difficulty,
-              duration: item.duration,
-              content: item.content // Added this required field
-            });
+            .insert(item);
             
           if (insertError) {
-            console.error('Error inserting learning content:', insertError);
+            console.error('Error inserting sample content:', insertError);
           }
         }
         
-        // Fetch all content again after adding additional items
+        // Fetch the updated content
         const { data: updatedData, error: fetchError } = await supabase
           .from('learning_content')
           .select('*')
           .order('created_at', { ascending: false });
           
-        if (fetchError) throw fetchError;
+        if (fetchError) {
+          throw fetchError;
+        }
         
-        combinedContent = updatedData || [];
+        setContent(updatedData || []);
+        setFilteredContent(updatedData || []);
+      } else {
+        setContent(data);
+        setFilteredContent(data);
       }
       
-      setContent(combinedContent);
-      setFilteredContent(combinedContent);
-      
       // Extract unique categories
-      const uniqueCategories = Array.from(new Set(combinedContent.map(item => item.category)));
+      const uniqueCategories = Array.from(
+        new Set(
+          (data || []).map(item => item.category)
+        )
+      );
       setCategories(uniqueCategories);
     } catch (error) {
       console.error('Error fetching learning content:', error);
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  // Generate sample content for demonstration
+  const generateSampleContent = (): Partial<LearningContent>[] => {
+    return [
+      {
+        title: "Introduction to AI",
+        description: "Demystify AI concepts and real-world applications with this comprehensive introduction.",
+        image_url: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485",
+        required_tier: "freemium",
+        category: "AI Fundamentals",
+        difficulty: "Beginner",
+        duration: 240, // 4 hours in minutes
+        content: "This course covers what AI is, its history, types, ethics, and applications in healthcare, finance, and e-commerce. Includes hands-on project building a simple chatbot."
+      },
+      {
+        title: "Machine Learning Basics",
+        description: "Learn the fundamental concepts of machine learning without coding.",
+        image_url: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb",
+        required_tier: "freemium",
+        category: "Machine Learning",
+        difficulty: "Beginner",
+        duration: 360, // 6 hours in minutes
+        content: "Explore supervised vs. unsupervised learning, tools like Google AutoML and Teachable Machine, and build a project to predict house prices using no-code ML tools."
+      },
+      {
+        title: "NLP Essentials",
+        description: "Master the basics of natural language processing and sentiment analysis.",
+        image_url: "https://images.unsplash.com/photo-1546776310-eef45dd6d63c",
+        required_tier: "freemium",
+        category: "Natural Language Processing",
+        difficulty: "Intermediate",
+        duration: 180, // 3 hours in minutes
+        content: "Learn tokenization, stemming, TF-IDF and use Hugging Face Transformers to analyze Twitter sentiment with pre-trained models."
+      },
+      {
+        title: "Data Visualization for Beginners",
+        description: "Turn complex data into meaningful insights with visualization techniques.",
+        image_url: "https://images.unsplash.com/photo-1551288049-bebda4e38f71",
+        required_tier: "basic",
+        category: "Data Visualization",
+        difficulty: "Beginner",
+        duration: 240, // 4 hours in minutes
+        content: "Use tools like Tableau Public and Google Data Studio to visualize COVID-19 trends with open datasets."
+      },
+      {
+        title: "Automation 101",
+        description: "Streamline workflows with no-code automation tools.",
+        image_url: "https://images.unsplash.com/photo-1563986768494-4dee2763ff3f",
+        required_tier: "basic",
+        category: "Automation",
+        difficulty: "Beginner",
+        duration: 180, // 3 hours in minutes
+        content: "Learn to use Zapier and n8n to automate email responses using Gmail and Slack."
+      },
+      {
+        title: "Python Basics for AI",
+        description: "Build coding foundations essential for AI development.",
+        image_url: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb",
+        required_tier: "freemium",
+        category: "AI Fundamentals",
+        difficulty: "Beginner",
+        duration: 300, // 5 hours in minutes
+        content: "Master Python basics and build a calculator and weather API fetcher using Replit."
+      },
+      {
+        title: "Computer Vision Fundamentals",
+        description: "Introduction to image processing and object detection basics.",
+        image_url: "https://images.unsplash.com/photo-1575403071235-5a3aae7e4a7a",
+        required_tier: "basic",
+        category: "Computer Vision",
+        difficulty: "Intermediate",
+        duration: 360, // 6 hours in minutes
+        content: "Learn the basics of computer vision including image filtering, feature extraction and simple object recognition."
+      },
+      {
+        title: "Advanced Natural Language Processing",
+        description: "Deep dive into advanced NLP techniques and transformer models.",
+        image_url: "https://images.unsplash.com/photo-1546776310-eef45dd6d63c",
+        required_tier: "pro",
+        category: "Natural Language Processing",
+        difficulty: "Advanced",
+        duration: 480, // 8 hours in minutes
+        content: "Master advanced NLP concepts including fine-tuning transformer models, building chatbots, and implementing translation systems."
+      },
+      {
+        title: "Reinforcement Learning Basics",
+        description: "Learn how AI agents can learn from their environment.",
+        image_url: "https://images.unsplash.com/photo-1534723452862-4c874018d66d",
+        required_tier: "pro",
+        category: "Reinforcement Learning",
+        difficulty: "Advanced",
+        duration: 420, // 7 hours in minutes
+        content: "Introduction to reinforcement learning concepts, algorithms like Q-learning, and applications in games and robotics."
+      }
+    ];
   };
 
   useEffect(() => {
@@ -274,6 +244,24 @@ const LearningHub = () => {
     }
     
     setFilteredContent(filtered);
+  };
+
+  const difficultyColors: Record<string, string> = {
+    'Beginner': 'bg-green-100 text-green-800 border-green-200',
+    'Intermediate': 'bg-amber-100 text-amber-800 border-amber-200',
+    'Advanced': 'bg-red-100 text-red-800 border-red-200'
+  };
+
+  const categoryIcons: Record<string, React.ReactNode> = {
+    'AI Fundamentals': <Bot className="h-5 w-5" />,
+    'Machine Learning': <BarChart className="h-5 w-5" />,
+    'Deep Learning': <Layers className="h-5 w-5" />,
+    'Natural Language Processing': <BookOpen className="h-5 w-5" />,
+    'Computer Vision': <BookOpen className="h-5 w-5" />,
+    'Reinforcement Learning': <Flame className="h-5 w-5" />,
+    'AI Ethics': <Shield className="h-5 w-5" />,
+    'Data Visualization': <BarChart className="h-5 w-5" />,
+    'Automation': <Flame className="h-5 w-5" />
   };
 
   const getTierBadge = (tier: string) => {
@@ -312,15 +300,20 @@ const LearningHub = () => {
     return false;
   };
 
-  // Get content available for the current tier
-  const getAvailableContent = () => {
-    return content.filter(item => {
-      if (item.required_tier === 'freemium') return true;
-      if (item.required_tier === 'basic') return currentTier === 'basic' || currentTier === 'pro';
-      if (item.required_tier === 'pro') return currentTier === 'pro';
-      return false;
-    });
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 pt-28 px-6 pb-12 flex items-center justify-center">
+          <div className="text-center">
+            <Spinner size="lg" className="mx-auto mb-4" />
+            <p className="text-xl font-medium">Loading Learning Hub...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -359,11 +352,7 @@ const LearningHub = () => {
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Courses Available</p>
                     <p className="text-3xl font-bold">
-                      {currentTier === 'freemium' 
-                        ? content.filter(item => item.required_tier === 'freemium').length
-                        : currentTier === 'basic'
-                        ? content.filter(item => item.required_tier === 'freemium' || item.required_tier === 'basic').length
-                        : content.length}
+                      {content.filter(item => hasAccess(item.required_tier)).length}
                       <span className="text-sm text-muted-foreground ml-2">of {content.length}</span>
                     </p>
                   </div>
@@ -380,7 +369,9 @@ const LearningHub = () => {
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Hours of Content</p>
                     <p className="text-3xl font-bold">
-                      {Math.round(getAvailableContent().reduce((acc, item) => acc + item.duration, 0) / 60)}
+                      {Math.round(content
+                        .filter(item => hasAccess(item.required_tier))
+                        .reduce((acc, item) => acc + item.duration, 0) / 60)}
                       <span className="text-sm text-muted-foreground ml-2">hours</span>
                     </p>
                   </div>
@@ -416,7 +407,7 @@ const LearningHub = () => {
               {categories.map(category => (
                 <TabsTrigger key={category} value={category}>
                   <div className="flex items-center gap-1.5">
-                    {categoryIcons[category]}
+                    {categoryIcons[category] || <BookOpen className="h-4 w-4" />}
                     <span>{category}</span>
                   </div>
                 </TabsTrigger>
@@ -541,7 +532,7 @@ const LearningHub = () => {
                   </CardContent>
                   <CardFooter className="border-t p-4 flex justify-between">
                     <div className="flex items-center gap-1 text-sm">
-                      {categoryIcons[item.category]}
+                      {categoryIcons[item.category] || <BookOpen className="h-4 w-4" />}
                       <span>{item.category}</span>
                     </div>
                     <Button 
