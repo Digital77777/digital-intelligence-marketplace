@@ -1,55 +1,48 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { useTier } from '@/context/TierContext';
 import { useUser } from '@/context/UserContext';
+import { useTier } from '@/context/TierContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import {
-  ArrowLeft,
-  Code,
-  Download,
-  Copy,
-  Check,
-  MessageSquare,
-  ThumbsUp,
-  Share2,
-  Flag,
-  Bookmark,
-  Play,
-  Clock,
-  Calendar,
-  User,
-  List,
-  X,
-  MessageCircle,
-  Send
-} from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { 
+  Play, 
+  Pause, 
+  Volume2, 
+  VolumeX, 
+  Heart, 
+  MessageSquare, 
+  Share2, 
+  Bookmark, 
+  Code, 
+  Download, 
+  ChevronLeft, 
+  ChevronRight,
+  Sparkles,
+  Bot,
+} from 'lucide-react';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
 
+// Define types for stream and comments
 interface CodeSnippet {
   language: string;
   content: string;
-  description?: string;
 }
 
 interface Annotation {
+  timestamp: number;
   user_id: string;
-  username?: string;
-  timestamp: number;  // in seconds
+  username: string;
   content: string;
-  created_at: string;
 }
 
 interface AIStream {
@@ -57,635 +50,611 @@ interface AIStream {
   user_id: string;
   title: string;
   description?: string;
+  thumbnail_url: string;
+  video_url: string;
+  duration: number;
   category: 'tutorial' | 'research' | 'demo' | 'live';
-  thumbnail_url?: string;
-  video_url?: string;
-  duration?: number;
   code_snippets?: CodeSnippet[];
   annotations?: Annotation[];
-  tools_used?: string[];
+  views: number;
+  likes: number;
   created_at: string;
-  is_flagged?: boolean;
-  author?: {
-    username?: string;
-    avatar_url?: string;
-    tier?: string;
-  };
+  creator_name: string;
+  creator_avatar?: string;
 }
+
+interface Comment {
+  id: string;
+  user_id: string;
+  username: string;
+  avatar_url?: string;
+  content: string;
+  timestamp: string;
+}
+
+// Mock data for development - will be replaced with Supabase
+const mockAIStream: AIStream = {
+  id: '1',
+  user_id: '123',
+  title: 'Fine-tuning GPT-4 for Custom Datasets',
+  description: 'Learn how to fine-tune GPT-4 on your own datasets to create specialized AI models that perform better on domain-specific tasks.',
+  thumbnail_url: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485',
+  video_url: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4',
+  duration: 580, // in seconds
+  category: 'tutorial',
+  code_snippets: [
+    {
+      language: 'python',
+      content: `import torch
+from transformers import GPT2Tokenizer, GPT2LMHeadModel, TextDataset, DataCollatorForLanguageModeling
+from transformers import Trainer, TrainingArguments
+
+# Load pre-trained model and tokenizer
+tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+model = GPT2LMHeadModel.from_pretrained('gpt2')
+
+# Prepare dataset
+dataset = TextDataset(
+    tokenizer=tokenizer,
+    file_path="train.txt",
+    block_size=128)
+
+data_collator = DataCollatorForLanguageModeling(
+    tokenizer=tokenizer, 
+    mlm=False)
+
+# Set up training arguments
+training_args = TrainingArguments(
+    output_dir="./gpt2-finetuned",
+    overwrite_output_dir=True,
+    num_train_epochs=3,
+    per_device_train_batch_size=4,
+    save_steps=10_000,
+    save_total_limit=2,
+)
+
+# Initialize trainer
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    data_collator=data_collator,
+    train_dataset=dataset,
+)
+
+# Start training
+trainer.train()
+
+# Save the model
+model.save_pretrained("./gpt2-finetuned")`
+    }
+  ],
+  annotations: [
+    {
+      timestamp: 45,
+      user_id: '123',
+      username: 'ai_expert',
+      content: 'This is where we load the pre-trained model as our starting point'
+    },
+    {
+      timestamp: 120,
+      user_id: '123',
+      username: 'ai_expert',
+      content: 'Pay attention to the batch size - larger values require more GPU memory'
+    }
+  ],
+  views: 1240,
+  likes: 89,
+  created_at: '2023-05-15T14:48:00.000Z',
+  creator_name: 'AI Academy',
+  creator_avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=aiexpert&backgroundColor=b6e3f4'
+};
+
+const mockComments: Comment[] = [
+  {
+    id: '1',
+    user_id: '456',
+    username: 'neural_ninja',
+    avatar_url: 'https://api.dicebear.com/7.x/bottts/svg?seed=ninja',
+    content: 'Great tutorial! I was struggling with tokenization for my custom dataset. This helped a lot.',
+    timestamp: '2023-05-15T15:30:00.000Z'
+  },
+  {
+    id: '2',
+    user_id: '789',
+    username: 'data_scientist42',
+    avatar_url: 'https://api.dicebear.com/7.x/bottts/svg?seed=data42',
+    content: 'Have you tried using a different learning rate? I found 5e-5 works better for domain adaptation.',
+    timestamp: '2023-05-15T16:15:00.000Z'
+  }
+];
+
+const formatTime = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+};
 
 const AIStreamDetail = () => {
   const { streamId } = useParams<{ streamId: string }>();
+  const { user, profile } = useUser();
+  const { currentTier, canAccess } = useTier();
   const navigate = useNavigate();
-  const { currentTier, canAccess, upgradePrompt } = useTier();
-  const { user } = useUser();
-  
+
   const [stream, setStream] = useState<AIStream | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [copiedSnippetIndex, setCopiedSnippetIndex] = useState<number | null>(null);
-  const [comment, setComment] = useState('');
-  const [submittingComment, setSubmittingComment] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [commentInput, setCommentInput] = useState('');
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  
-  // Placeholder data for demo
-  const exampleComments = [
-    {
-      id: '1',
-      user_id: 'user1',
-      username: 'AIExpert',
-      content: 'Great explanation of the transformer architecture!',
-      created_at: new Date().toISOString(),
-      avatar_url: null
-    },
-    {
-      id: '2',
-      user_id: 'user2',
-      username: 'MLEngineer',
-      content: 'I implemented this model and got 95% accuracy on my dataset. Definitely recommend it!',
-      created_at: new Date(Date.now() - 3600000).toISOString(),
-      avatar_url: null
-    }
-  ];
-  
+  const [duration, setDuration] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [relatedStreams, setRelatedStreams] = useState<AIStream[]>([]);
+  const [activeAnnotation, setActiveAnnotation] = useState<Annotation | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
   useEffect(() => {
+    // This would be replaced with a Supabase query
     const fetchStream = async () => {
-      if (!streamId) return;
-      
       try {
-        setLoading(true);
+        // Mock data for development
+        setIsLoading(true);
         
-        // In a real implementation, we would fetch from the database
-        // This is mocked data for now
-        const mockStream: AIStream = {
-          id: streamId,
-          user_id: 'author-id',
-          title: 'Building a GPT-4 Fine-tuned Model for Specialized Tasks',
-          description: 'Learn how to fine-tune GPT-4 for domain-specific tasks and improve accuracy with custom datasets',
-          category: 'tutorial',
-          thumbnail_url: 'https://picsum.photos/seed/ai-stream/800/450',
-          video_url: 'https://example.com/video.mp4',
-          duration: 645, // 10:45
-          code_snippets: [
-            {
-              language: 'python',
-              content: 'import torch\nimport transformers\n\nmodel = transformers.AutoModelForCausalLM.from_pretrained("gpt-4")\n\n# Fine-tuning code\noptimizer = torch.optim.AdamW(model.parameters(), lr=5e-5)\n\nfor epoch in range(3):\n    for batch in dataloader:\n        outputs = model(**batch)\n        loss = outputs.loss\n        loss.backward()\n        optimizer.step()\n        optimizer.zero_grad()',
-              description: 'Basic GPT-4 fine-tuning setup with PyTorch'
-            },
-            {
-              language: 'python',
-              content: 'def preprocess_dataset(texts, labels):\n    """Preprocess text data for fine-tuning"""\n    tokenizer = transformers.AutoTokenizer.from_pretrained("gpt-4")\n    \n    # Tokenize inputs\n    tokenized = tokenizer(\n        texts,\n        padding="max_length",\n        truncation=True,\n        max_length=512,\n        return_tensors="pt"\n    )\n    \n    return {\n        "input_ids": tokenized.input_ids,\n        "attention_mask": tokenized.attention_mask,\n        "labels": torch.tensor(labels)\n    }',
-              description: 'Dataset preprocessing function'
-            }
-          ],
-          annotations: [
-            {
-              user_id: 'annotator-1',
-              username: 'AI_Researcher',
-              timestamp: 120, // 2:00
-              content: 'At this point, we're loading the pre-trained model. Note that you'll need proper API access.',
-              created_at: new Date().toISOString()
-            },
-            {
-              user_id: 'annotator-2',
-              username: 'ML_Engineer',
-              timestamp: 305, // 5:05
-              content: 'This learning rate worked best in my tests. You might need to adjust based on your dataset size.',
-              created_at: new Date().toISOString()
-            }
-          ],
-          tools_used: ['PyTorch', 'Hugging Face', 'GPT-4', 'CUDA'],
-          created_at: new Date(Date.now() - 86400000 * 3).toISOString(), // 3 days ago
-          author: {
-            username: 'AIInnovator',
-            avatar_url: null,
-            tier: 'pro'
-          }
-        };
+        // In a real implementation, this would be a Supabase query
+        // const { data, error } = await supabase
+        //   .from('ai_streams')
+        //   .select('*')
+        //   .eq('id', streamId)
+        //   .single();
         
-        setStream(mockStream);
-      } catch (err) {
-        console.error('Error fetching AI stream:', err);
-        setError('Failed to load the stream. Please try again.');
-      } finally {
-        setLoading(false);
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        setStream(mockAIStream);
+        setComments(mockComments);
+        
+        // Also fetch related streams
+        setRelatedStreams(Array(5).fill(null).map((_, i) => ({
+          ...mockAIStream,
+          id: `related-${i}`,
+          title: `Related AI Stream ${i + 1}`,
+          views: Math.floor(Math.random() * 1000),
+          likes: Math.floor(Math.random() * 100)
+        })));
+        
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error fetching stream:', error);
+        toast.error('Failed to load stream data');
+        setIsLoading(false);
       }
     };
-    
-    fetchStream();
+
+    if (streamId) {
+      fetchStream();
+    }
   }, [streamId]);
-  
-  const handleCopyCode = (index: number) => {
-    if (!stream?.code_snippets?.[index]) return;
-    
-    navigator.clipboard.writeText(stream.code_snippets[index].content);
-    setCopiedSnippetIndex(index);
-    
-    setTimeout(() => {
-      setCopiedSnippetIndex(null);
-    }, 2000);
-    
-    toast.success('Code copied to clipboard');
+
+  useEffect(() => {
+    // Check for annotations at current timestamp
+    if (stream?.annotations && currentTime > 0) {
+      const currentAnnotation = stream.annotations.find(
+        ann => Math.abs(ann.timestamp - currentTime) < 2
+      );
+      
+      if (currentAnnotation && (!activeAnnotation || activeAnnotation.timestamp !== currentAnnotation.timestamp)) {
+        setActiveAnnotation(currentAnnotation);
+        
+        // Auto-hide annotation after 5 seconds
+        const timer = setTimeout(() => {
+          setActiveAnnotation(null);
+        }, 5000);
+        
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [currentTime, stream?.annotations, activeAnnotation]);
+
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      setCurrentTime(videoRef.current.currentTime);
+    }
   };
-  
-  const handleSubmitComment = async (e: React.FormEvent) => {
-    e.preventDefault();
+
+  const handleLoadedMetadata = () => {
+    if (videoRef.current) {
+      setDuration(videoRef.current.duration);
+    }
+  };
+
+  const handlePlayPause = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleMuteToggle = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const time = parseFloat(e.target.value);
+    if (videoRef.current) {
+      videoRef.current.currentTime = time;
+      setCurrentTime(time);
+    }
+  };
+
+  const handleLike = () => {
+    if (!user) {
+      toast.error('Please sign in to like this stream');
+      return;
+    }
+    
+    toast.success('Stream liked!');
+    // In a real implementation, this would update the likes in Supabase
+  };
+
+  const handleComment = () => {
+    if (!commentInput.trim()) return;
     
     if (!user) {
-      toast.error('You must be signed in to comment');
-      navigate('/auth');
+      toast.error('Please sign in to comment');
       return;
     }
     
-    if (!canAccess('learning-hub-pro')) {
-      upgradePrompt('basic');
+    const newComment: Comment = {
+      id: `new-${Date.now()}`,
+      user_id: user.id,
+      username: profile?.username || user.email || 'User',
+      avatar_url: profile?.avatar_url || undefined,
+      content: commentInput,
+      timestamp: new Date().toISOString()
+    };
+    
+    setComments([newComment, ...comments]);
+    setCommentInput('');
+    toast.success('Comment added!');
+    // In a real implementation, this would insert the comment in Supabase
+  };
+
+  const handleShare = () => {
+    // Copy the current URL to clipboard
+    navigator.clipboard.writeText(window.location.href);
+    toast.success('Link copied to clipboard!');
+  };
+
+  const handleBookmark = () => {
+    if (!user) {
+      toast.error('Please sign in to bookmark this stream');
       return;
     }
     
-    if (!comment.trim()) {
-      toast.error('Comment cannot be empty');
-      return;
-    }
-    
-    try {
-      setSubmittingComment(true);
-      
-      // In a real implementation, we would save to the database
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network request
-      
-      toast.success('Comment posted successfully!');
-      setComment('');
-    } catch (err) {
-      console.error('Error posting comment:', err);
-      toast.error('Failed to post your comment. Please try again.');
-    } finally {
-      setSubmittingComment(false);
-    }
+    toast.success('Stream bookmarked!');
+    // In a real implementation, this would update bookmarks in Supabase
   };
-  
-  const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+
+  const handleNavigateToStream = (id: string) => {
+    navigate(`/ai-streams/${id}`);
+    window.scrollTo(0, 0);
   };
-  
-  const getInitials = (name: string | null) => {
-    if (!name) return 'U';
-    const parts = name.split(' ');
-    if (parts.length === 1) return name.substring(0, 1).toUpperCase();
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  };
-  
-  if (loading) {
+
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20">
+      <div className="flex min-h-screen flex-col bg-gradient-to-b from-gray-950 to-gray-900">
         <Navbar />
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate('/ai-streams')}
-            className="mb-6"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to AI Streams
-          </Button>
-          
-          <div className="flex flex-col lg:flex-row gap-6">
-            <div className="lg:w-2/3">
-              <Skeleton className="aspect-video w-full rounded-lg mb-4" />
-              <Skeleton className="h-10 w-3/4 mb-2" />
-              <Skeleton className="h-4 w-1/2 mb-6" />
-              <Skeleton className="h-20 w-full" />
-            </div>
-            
-            <div className="lg:w-1/3">
-              <Card>
-                <CardHeader>
-                  <Skeleton className="h-6 w-24" />
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Skeleton className="h-20 w-full" />
-                  <Skeleton className="h-20 w-full" />
-                </CardContent>
-              </Card>
+        <main className="flex-1 pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-[50vh]">
+            <div className="animate-pulse space-y-4 w-full">
+              <div className="bg-gray-800 h-[400px] w-full rounded-lg"></div>
+              <div className="bg-gray-800 h-8 w-3/4 rounded"></div>
+              <div className="bg-gray-800 h-4 w-1/2 rounded"></div>
             </div>
           </div>
-        </div>
+        </main>
+        <Footer />
       </div>
     );
   }
-  
-  if (error || !stream) {
+
+  if (!stream) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20">
+      <div className="flex min-h-screen flex-col bg-gradient-to-b from-gray-950 to-gray-900">
         <Navbar />
-        <div className="max-w-7xl mx-auto px-4 py-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">
-            {error || 'Stream not found'}
-          </h1>
-          <Button onClick={() => navigate('/ai-streams')}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to AI Streams
-          </Button>
-        </div>
+        <main className="flex-1 pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+          <div className="flex flex-col items-center justify-center h-[50vh]">
+            <h2 className="text-2xl font-bold text-white mb-4">Stream not found</h2>
+            <Button onClick={() => navigate('/ai-streams')}>
+              Return to AI Streams
+            </Button>
+          </div>
+        </main>
+        <Footer />
       </div>
     );
   }
-  
+
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
+    <div className="flex min-h-screen flex-col bg-gradient-to-b from-gray-950 to-gray-900">
       <Navbar />
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/ai-streams')}
-          className="mb-6"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to AI Streams
-        </Button>
-        
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Main video content */}
-          <div className="lg:w-2/3">
-            <div className="aspect-video bg-black rounded-lg relative overflow-hidden mb-4">
-              {stream.thumbnail_url ? (
-                <img 
-                  src={stream.thumbnail_url} 
-                  alt={stream.title} 
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-indigo-900 to-violet-900">
-                  <Code className="h-24 w-24 text-white/30" />
+      <main className="flex-1 pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main video section */}
+          <div className="lg:col-span-2">
+            <div className="relative aspect-video bg-gray-900 rounded-lg overflow-hidden mb-4">
+              <video
+                ref={videoRef}
+                src={stream.video_url}
+                className="w-full h-full object-cover"
+                onTimeUpdate={handleTimeUpdate}
+                onLoadedMetadata={handleLoadedMetadata}
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+                controls={false}
+              />
+              
+              {/* Video controls overlay */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                <div className="flex items-center mb-2">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="text-white" 
+                    onClick={handlePlayPause}
+                  >
+                    {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
+                  </Button>
+                  
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="text-white" 
+                    onClick={handleMuteToggle}
+                  >
+                    {isMuted ? <VolumeX className="h-6 w-6" /> : <Volume2 className="h-6 w-6" />}
+                  </Button>
+                  
+                  <div className="flex-1 mx-2">
+                    <input
+                      type="range"
+                      min="0"
+                      max={duration || 100}
+                      value={currentTime}
+                      onChange={handleSeek}
+                      className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                    />
+                  </div>
+                  
+                  <span className="text-white text-sm">
+                    {formatTime(currentTime)} / {formatTime(duration)}
+                  </span>
+                </div>
+              </div>
+              
+              {/* Annotation overlay */}
+              {activeAnnotation && (
+                <div className="absolute bottom-16 left-4 right-4 bg-indigo-900/80 text-white p-3 rounded-lg border border-indigo-500 shadow-lg">
+                  <div className="flex items-start">
+                    <Badge variant="outline" className="bg-indigo-700 mr-2 shrink-0">
+                      {formatTime(activeAnnotation.timestamp)}
+                    </Badge>
+                    <div>
+                      <p className="text-sm font-medium">{activeAnnotation.username}:</p>
+                      <p className="text-sm">{activeAnnotation.content}</p>
+                    </div>
+                  </div>
                 </div>
               )}
-              
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Button 
-                  size="lg" 
-                  variant="secondary" 
-                  className="rounded-full h-16 w-16 flex items-center justify-center"
-                >
-                  <Play className="h-8 w-8" />
-                </Button>
-              </div>
-              
-              {/* Video progress bar */}
-              <div className="absolute bottom-0 left-0 right-0 bg-black/50 px-4 py-2 flex items-center gap-4">
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:text-white hover:bg-white/20">
-                  <Play className="h-4 w-4" />
-                </Button>
-                
-                <div className="relative flex-1 h-1 bg-white/30 rounded-full">
-                  <div className="absolute h-full bg-white rounded-full" style={{ width: '35%' }}></div>
-                </div>
-                
-                <span className="text-white text-sm">
-                  {formatTime(currentTime)} / {formatTime(stream.duration || 0)}
-                </span>
-              </div>
-              
-              {/* Annotations overlay */}
-              {stream.annotations?.map((annotation, index) => (
-                <div 
-                  key={index}
-                  className="absolute left-4 bg-black/80 text-white p-2 rounded text-sm max-w-xs"
-                  style={{ 
-                    bottom: 40 + index * 60, 
-                    display: currentTime >= annotation.timestamp ? 'block' : 'none' 
-                  }}
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium">{annotation.username}</span>
-                    <span className="text-xs text-white/70">@{formatTime(annotation.timestamp)}</span>
-                  </div>
-                  {annotation.content}
-                </div>
-              ))}
             </div>
             
             <div className="mb-6">
-              <h1 className="text-2xl font-bold">{stream.title}</h1>
-              
-              <div className="flex flex-wrap items-center gap-2 mt-2 text-sm text-muted-foreground">
-                <Badge variant="outline">
-                  {stream.category.charAt(0).toUpperCase() + stream.category.slice(1)}
-                </Badge>
-                
-                <span className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-1" />
-                  {format(new Date(stream.created_at), 'MMM d, yyyy')}
-                </span>
-                
-                <span className="flex items-center">
-                  <Clock className="h-4 w-4 mr-1" />
-                  {formatTime(stream.duration || 0)}
-                </span>
-                
-                <span className="flex items-center">
-                  <User className="h-4 w-4 mr-1" />
-                  {stream.author?.username || 'Anonymous'}
-                </span>
-              </div>
-              
-              <p className="mt-4 text-gray-700">{stream.description}</p>
-              
-              <div className="flex flex-wrap gap-2 mt-4">
-                {stream.tools_used?.map((tool, index) => (
-                  <Badge key={index} variant="secondary">
-                    {tool}
+              <h1 className="text-2xl font-bold text-white mb-2">{stream.title}</h1>
+              <div className="flex flex-wrap items-center justify-between gap-2 text-gray-300 text-sm mb-4">
+                <div className="flex items-center">
+                  <Badge variant="outline" className="mr-2 bg-blue-900/30 text-blue-300 border-blue-600/30">
+                    {stream.category.charAt(0).toUpperCase() + stream.category.slice(1)}
                   </Badge>
-                ))}
+                  <span className="mr-3">{stream.views.toLocaleString()} views</span>
+                  <span>{new Date(stream.created_at).toLocaleDateString()}</span>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Button variant="ghost" size="sm" className="text-white gap-1" onClick={handleLike}>
+                    <Heart className="h-4 w-4" />
+                    <span>{stream.likes}</span>
+                  </Button>
+                  
+                  <Button variant="ghost" size="sm" className="text-white gap-1" onClick={handleShare}>
+                    <Share2 className="h-4 w-4" />
+                    <span>Share</span>
+                  </Button>
+                  
+                  <Button variant="ghost" size="sm" className="text-white gap-1" onClick={handleBookmark}>
+                    <Bookmark className="h-4 w-4" />
+                    <span>Save</span>
+                  </Button>
+                </div>
               </div>
-            </div>
-            
-            <div className="flex gap-3 mb-8">
-              <Button variant="outline" className="flex-1">
-                <ThumbsUp className="h-4 w-4 mr-2" /> Like
-              </Button>
-              <Button variant="outline" className="flex-1">
-                <Share2 className="h-4 w-4 mr-2" /> Share
-              </Button>
-              <Button variant="outline" className="flex-1">
-                <Bookmark className="h-4 w-4 mr-2" /> Save
-              </Button>
-              <Button variant="outline" className="flex-1">
-                <Flag className="h-4 w-4 mr-2" /> Report
-              </Button>
-            </div>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <MessageCircle className="h-5 w-5 mr-2" /> Comments
-                </CardTitle>
-              </CardHeader>
               
-              <CardContent>
-                <form onSubmit={handleSubmitComment} className="mb-6">
+              <div className="flex items-center py-4 border-t border-b border-gray-800">
+                <Avatar className="h-10 w-10 mr-3">
+                  <AvatarImage src={stream.creator_avatar} />
+                  <AvatarFallback>{stream.creator_name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium text-white">{stream.creator_name}</p>
+                  <p className="text-sm text-gray-400">AI Solutions Expert</p>
+                </div>
+                <Button variant="outline" size="sm" className="ml-auto">
+                  Follow
+                </Button>
+              </div>
+              
+              <p className="mt-4 text-gray-300">{stream.description}</p>
+            </div>
+            
+            <Tabs defaultValue="comments" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 bg-gray-800">
+                <TabsTrigger value="comments">Comments</TabsTrigger>
+                <TabsTrigger value="code">Code Snippets</TabsTrigger>
+                <TabsTrigger value="related">Related</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="comments" className="p-4 bg-gray-900 rounded-b-lg border border-gray-800">
+                <div className="mb-4">
                   <Textarea
                     placeholder="Add a comment..."
-                    className="mb-2"
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    disabled={!user || submittingComment || !canAccess('learning-hub-pro')}
+                    value={commentInput}
+                    onChange={(e) => setCommentInput(e.target.value)}
+                    className="bg-gray-800 border-gray-700 text-white resize-none mb-2"
                   />
-                  <div className="flex justify-end">
-                    <Button 
-                      type="submit" 
-                      disabled={!user || submittingComment || !canAccess('learning-hub-pro')}
-                    >
-                      {submittingComment ? (
-                        'Posting...'
-                      ) : (
-                        <>
-                          <Send className="h-4 w-4 mr-2" /> Post
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                  
-                  {!user ? (
-                    <p className="text-sm text-muted-foreground mt-2 text-center">
-                      <a href="/auth" className="text-blue-600 hover:underline">Sign in</a> to comment
-                    </p>
-                  ) : !canAccess('learning-hub-pro') ? (
-                    <p className="text-sm text-muted-foreground mt-2 text-center">
-                      <a href="/pricing" className="text-blue-600 hover:underline">Upgrade to Basic or Pro</a> to comment
-                    </p>
-                  ) : null}
-                </form>
+                  <Button onClick={handleComment} disabled={!commentInput.trim()}>
+                    Comment
+                  </Button>
+                </div>
                 
-                <div className="space-y-6">
-                  {exampleComments.map(comment => (
-                    <div key={comment.id} className="flex gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={comment.avatar_url || undefined} />
-                        <AvatarFallback>
-                          {getInitials(comment.username)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{comment.username}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
-                          </span>
-                        </div>
-                        <p className="mt-1">{comment.content}</p>
-                        <div className="flex gap-4 mt-2">
-                          <button className="text-xs text-muted-foreground hover:text-foreground">
-                            Like
-                          </button>
-                          <button className="text-xs text-muted-foreground hover:text-foreground">
-                            Reply
-                          </button>
+                <ScrollArea className="h-[400px]">
+                  <div className="space-y-4">
+                    {comments.map((comment) => (
+                      <div key={comment.id} className="flex gap-3 p-3 rounded-lg bg-gray-800/50">
+                        <Avatar className="h-8 w-8 shrink-0">
+                          <AvatarImage src={comment.avatar_url} />
+                          <AvatarFallback>{comment.username?.charAt(0) || 'U'}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="font-medium text-white">{comment.username}</p>
+                            <span className="text-xs text-gray-400">
+                              {new Date(comment.timestamp).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-gray-300">{comment.content}</p>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+              
+              <TabsContent value="code" className="p-4 bg-gray-900 rounded-b-lg border border-gray-800">
+                <ScrollArea className="h-[400px]">
+                  <div className="space-y-4">
+                    {stream.code_snippets?.map((snippet, index) => (
+                      <div key={index} className="rounded-lg overflow-hidden">
+                        <div className="bg-gray-800 px-4 py-2 flex justify-between items-center">
+                          <div className="flex items-center">
+                            <Code className="h-4 w-4 mr-2 text-blue-400" />
+                            <span className="text-white font-medium">{snippet.language}</span>
+                          </div>
+                          <Button variant="ghost" size="sm" className="text-gray-400" onClick={() => {
+                            navigator.clipboard.writeText(snippet.content);
+                            toast.success('Code copied to clipboard!');
+                          }}>
+                            <Download className="h-4 w-4 mr-1" />
+                            <span>Copy</span>
+                          </Button>
+                        </div>
+                        <pre className="bg-gray-950 p-4 overflow-x-auto text-gray-300 text-sm">
+                          <code>{snippet.content}</code>
+                        </pre>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+              
+              <TabsContent value="related" className="p-4 bg-gray-900 rounded-b-lg border border-gray-800">
+                <ScrollArea className="h-[400px]">
+                  <div className="space-y-4">
+                    {relatedStreams.map((relatedStream) => (
+                      <Card key={relatedStream.id} className="bg-gray-800 border-gray-700 overflow-hidden">
+                        <div className="flex flex-col sm:flex-row">
+                          <div className="relative sm:w-40 h-32 shrink-0">
+                            <img 
+                              src={relatedStream.thumbnail_url} 
+                              alt={relatedStream.title} 
+                              className="object-cover w-full h-full"
+                            />
+                            <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-1 rounded">
+                              {formatTime(relatedStream.duration)}
+                            </div>
+                          </div>
+                          <CardContent className="p-3 flex-1">
+                            <h3 className="font-medium text-white line-clamp-2 mb-1">{relatedStream.title}</h3>
+                            <p className="text-sm text-gray-400 mb-2">{relatedStream.creator_name}</p>
+                            <div className="flex items-center text-xs text-gray-400">
+                              <span className="mr-2">{relatedStream.views.toLocaleString()} views</span>
+                              <span>{new Date(relatedStream.created_at).toLocaleDateString()}</span>
+                            </div>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="mt-2 text-blue-400" 
+                              onClick={() => handleNavigateToStream(relatedStream.id)}
+                            >
+                              Watch now
+                            </Button>
+                          </CardContent>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+            </Tabs>
           </div>
           
-          {/* Sidebar content */}
-          <div className="lg:w-1/3">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Interactive Resources</h2>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="lg:hidden"
-              >
-                {sidebarOpen ? <X className="h-4 w-4" /> : <List className="h-4 w-4" />}
-              </Button>
-            </div>
-            
-            <div className={`space-y-6 ${sidebarOpen ? 'block' : 'hidden lg:block'}`}>
-              {/* Code snippets */}
-              {stream.code_snippets && stream.code_snippets.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-md">
-                      <Code className="h-4 w-4 inline mr-2" /> Code Snippets
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <Tabs defaultValue="0" className="w-full">
-                      <TabsList className="w-full justify-start rounded-none px-4">
-                        {stream.code_snippets.map((_, index) => (
-                          <TabsTrigger 
-                            key={index} 
-                            value={index.toString()}
-                            className="text-xs"
-                          >
-                            Snippet {index + 1}
-                          </TabsTrigger>
-                        ))}
-                      </TabsList>
-                      
-                      {stream.code_snippets.map((snippet, index) => (
-                        <TabsContent 
-                          key={index} 
-                          value={index.toString()} 
-                          className="m-0 p-0"
-                        >
-                          <div className="p-4 pt-0">
-                            <div className="flex justify-between items-center mb-2">
-                              <div className="text-sm font-medium">
-                                {snippet.language}
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 px-2"
-                                onClick={() => handleCopyCode(index)}
-                              >
-                                {copiedSnippetIndex === index ? (
-                                  <>
-                                    <Check className="h-3.5 w-3.5 mr-1" /> Copied
-                                  </>
-                                ) : (
-                                  <>
-                                    <Copy className="h-3.5 w-3.5 mr-1" /> Copy
-                                  </>
-                                )}
-                              </Button>
-                            </div>
-                            
-                            {snippet.description && (
-                              <p className="text-xs text-muted-foreground mb-2">
-                                {snippet.description}
-                              </p>
-                            )}
-                            
-                            <div className="bg-muted p-3 rounded-md overflow-x-auto">
-                              <pre className="text-xs">{snippet.content}</pre>
-                            </div>
-                            
-                            <div className="mt-3 flex gap-2">
-                              <Button size="sm" variant="outline" className="text-xs">
-                                <Download className="h-3.5 w-3.5 mr-1" /> Download
-                              </Button>
-                              
-                              <Button size="sm" variant="outline" className="text-xs">
-                                Fork Code
-                              </Button>
-                            </div>
-                          </div>
-                        </TabsContent>
-                      ))}
-                    </Tabs>
-                  </CardContent>
-                </Card>
-              )}
-              
-              {/* Annotations */}
-              {stream.annotations && stream.annotations.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-md">
-                      <MessageSquare className="h-4 w-4 inline mr-2" /> Annotations
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ScrollArea className="h-60">
-                      <div className="space-y-4">
-                        {stream.annotations.map((annotation, index) => (
-                          <div key={index} className="border-l-2 border-primary pl-3 py-1">
-                            <div className="flex justify-between items-start">
-                              <div className="font-medium text-sm">{annotation.username}</div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 px-2 text-xs"
-                                // In a real implementation, this would seek to the timestamp
-                                onClick={() => setCurrentTime(annotation.timestamp)}
-                              >
-                                {formatTime(annotation.timestamp)}
-                              </Button>
-                            </div>
-                            <p className="text-sm mt-1">{annotation.content}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
-              )}
-              
-              {/* Author info */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-md">Creator</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-4">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={stream.author?.avatar_url || undefined} />
-                      <AvatarFallback>
-                        {getInitials(stream.author?.username || 'User')}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="font-medium">{stream.author?.username || 'Anonymous'}</div>
-                      <div className="flex items-center mt-1">
-                        <Badge variant="secondary" className="text-xs">
-                          {stream.author?.tier === 'pro' ? 'Pro' : stream.author?.tier === 'basic' ? 'Basic' : 'Freemium'}
-                        </Badge>
+          {/* Sidebar with thumbnail navigation */}
+          <div className="hidden lg:block">
+            <h3 className="text-lg font-medium text-white mb-4">More AI Streams</h3>
+            <div className="space-y-3 sticky top-24">
+              {relatedStreams.map((relatedStream) => (
+                <Card 
+                  key={relatedStream.id} 
+                  className="bg-gray-800 border-gray-700 overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors"
+                  onClick={() => handleNavigateToStream(relatedStream.id)}
+                >
+                  <div className="flex">
+                    <div className="relative w-32 h-24 shrink-0">
+                      <img 
+                        src={relatedStream.thumbnail_url} 
+                        alt={relatedStream.title} 
+                        className="object-cover w-full h-full"
+                      />
+                      <div className="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-1 rounded">
+                        {formatTime(relatedStream.duration)}
                       </div>
                     </div>
+                    <CardContent className="p-2">
+                      <h4 className="font-medium text-white text-sm line-clamp-2 mb-1">{relatedStream.title}</h4>
+                      <p className="text-xs text-gray-400">{relatedStream.creator_name}</p>
+                      <p className="text-xs text-gray-500 mt-1">{relatedStream.views.toLocaleString()} views</p>
+                    </CardContent>
                   </div>
-                  <Separator className="my-4" />
-                  <Button className="w-full" variant="outline">
-                    View Profile
-                  </Button>
-                </CardContent>
-              </Card>
+                </Card>
+              ))}
+              
+              <Button 
+                variant="outline" 
+                className="w-full mt-4" 
+                onClick={() => navigate('/ai-streams')}
+              >
+                Browse All Streams
+              </Button>
             </div>
           </div>
         </div>
-      </div>
+      </main>
       <Footer />
     </div>
   );
 };
-
-function formatDistanceToNow(date: Date, options: { addSuffix: boolean }) {
-  const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-  
-  if (diffInSeconds < 60) {
-    return options.addSuffix ? 'just now' : 'less than a minute';
-  }
-  
-  const diffInMinutes = Math.floor(diffInSeconds / 60);
-  
-  if (diffInMinutes < 60) {
-    return options.addSuffix ? `${diffInMinutes} minutes ago` : `${diffInMinutes} minutes`;
-  }
-  
-  const diffInHours = Math.floor(diffInMinutes / 60);
-  
-  if (diffInHours < 24) {
-    return options.addSuffix ? `${diffInHours} hours ago` : `${diffInHours} hours`;
-  }
-  
-  const diffInDays = Math.floor(diffInHours / 24);
-  
-  if (diffInDays < 30) {
-    return options.addSuffix ? `${diffInDays} days ago` : `${diffInDays} days`;
-  }
-  
-  const diffInMonths = Math.floor(diffInDays / 30);
-  
-  if (diffInMonths < 12) {
-    return options.addSuffix ? `${diffInMonths} months ago` : `${diffInMonths} months`;
-  }
-  
-  const diffInYears = Math.floor(diffInMonths / 12);
-  
-  return options.addSuffix ? `${diffInYears} years ago` : `${diffInYears} years`;
-}
 
 export default AIStreamDetail;
