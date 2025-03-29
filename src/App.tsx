@@ -70,7 +70,6 @@ const App = () => (
               <ScrollToTop />
               <Routes>
                 <Route path="/" element={<Index />} />
-                <Route path="/ai-tools" element={<AITools />} />
                 <Route path="/ai-tools-directory" element={<AIToolsDirectory />} />
                 <Route path="/ai-tools/tool/:id" element={<ToolDetail />} />
                 <Route path="/courses" element={<Courses />} />
@@ -87,6 +86,7 @@ const App = () => (
                 <Route path="/submit-tool" element={<SubmitTool />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/discovery" element={<DiscoveryPage />} />
+                <Route path="/pro-chatbot" element={<AIAssistant />} />
                 
                 {/* Basic Tier Routes */}
                 <Route path="/team-dashboard" element={<TeamDashboard />} />

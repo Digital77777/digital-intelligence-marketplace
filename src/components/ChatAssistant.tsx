@@ -123,6 +123,10 @@ const ChatAssistant: React.FC = () => {
       return "You can explore our collection of AI tools in the AI Tools Directory. We have tools for various AI applications including NLP, computer vision, and machine learning.";
     }
     
+    if (message.includes('marketplace')) {
+      return "Our Marketplace offers a wide range of AI tools, models, and services from our partners and community. You can browse all the offerings in the Marketplace section.";
+    }
+    
     if (message.includes('thank')) {
       return "You're welcome! Feel free to ask if you have any other questions about the Digital Intelligence Marketplace.";
     }

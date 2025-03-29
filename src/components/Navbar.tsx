@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '@/context/UserContext';
@@ -51,23 +50,25 @@ const Navbar = () => {
           <nav className="hidden md:flex items-center gap-6 lg:gap-8 ml-6">
             <div className="relative group">
               <Link 
-                to="/ai-tools" 
+                to="/ai-tools-directory" 
                 className={cn(
                   "text-sm flex items-center group hover:text-white/90 transition-colors",
-                  isActive('/ai-tools') ? "text-white" : "text-white/80"
+                  isActive('/ai-tools-directory') ? "text-white" : "text-white/80"
                 )}
               >
-                AI Tools
-                <ChevronDown className="ml-1 h-4 w-4 opacity-70" />
+                AI Tools Directory
               </Link>
-              <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white text-gray-800 hidden group-hover:block animate-in fade-in-50 z-50">
-                <div className="py-1">
-                  <Link to="/ai-tools" className="block px-4 py-2 text-sm hover:bg-gray-100">All AI Tools</Link>
-                  <Link to="/ai-tools-directory" className="block px-4 py-2 text-sm hover:bg-gray-100">Tools Directory</Link>
-                  <Link to="/submit-tool" className="block px-4 py-2 text-sm hover:bg-gray-100">Submit a Tool</Link>
-                </div>
-              </div>
             </div>
+            
+            <Link 
+              to="/marketplace" 
+              className={cn(
+                "text-sm hover:text-white/90 transition-colors",
+                isActive('/marketplace') ? "text-white" : "text-white/80"
+              )}
+            >
+              Marketplace
+            </Link>
             
             <div className="relative group">
               <Link 
@@ -190,11 +191,11 @@ const Navbar = () => {
                 </SheetDescription>
               </SheetHeader>
               <div className="grid gap-4 py-4">
-                <Button variant="ghost" className="justify-start" onClick={() => { navigate('/ai-tools'); setIsMobileMenuOpen(false); }}>
-                  AI Tools
-                </Button>
                 <Button variant="ghost" className="justify-start" onClick={() => { navigate('/ai-tools-directory'); setIsMobileMenuOpen(false); }}>
-                  Tools Directory
+                  AI Tools Directory
+                </Button>
+                <Button variant="ghost" className="justify-start" onClick={() => { navigate('/marketplace'); setIsMobileMenuOpen(false); }}>
+                  Marketplace
                 </Button>
                 <Button variant="ghost" className="justify-start" onClick={() => { navigate('/learning-hub'); setIsMobileMenuOpen(false); }}>
                   Learning Hub
@@ -240,8 +241,8 @@ const Navbar = () => {
       <div className="hidden md:block bg-[#003580] py-2 px-6">
         <div className="container mx-auto">
           <div className="flex items-center space-x-6">
-            <Link to="/ai-tools" className="text-white/90 text-xs font-medium hover:text-white">AI Tools</Link>
             <Link to="/ai-tools-directory" className="text-white/90 text-xs font-medium hover:text-white">Tools Directory</Link>
+            <Link to="/marketplace" className="text-white/90 text-xs font-medium hover:text-white">Marketplace</Link>
             <Link to="/learning-hub" className="text-white/90 text-xs font-medium hover:text-white">Learning Hub</Link>
             <Link to="/ai-streams" className="text-white/90 text-xs font-medium hover:text-white">AI Streams</Link>
             <Link to="/community" className="text-white/90 text-xs font-medium hover:text-white">Forums</Link>

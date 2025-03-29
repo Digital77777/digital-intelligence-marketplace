@@ -18,7 +18,8 @@ import {
   LineChart,
   ShieldCheck,
   BookText,
-  MessageSquareText
+  MessageSquareText,
+  ShoppingBag
 } from 'lucide-react';
 
 const TierSpecificContent = () => {
@@ -42,9 +43,9 @@ const TierSpecificContent = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
         {[
           {
-            icon: <Zap className="h-10 w-10 text-amber-500" />,
-            title: "Core AI Tools",
-            description: "Access to 10 essential AI tools to get started with your projects",
+            icon: <ShoppingBag className="h-10 w-10 text-amber-500" />,
+            title: "AI Marketplace",
+            description: "Access our marketplace of AI tools and services",
             available: true
           },
           {

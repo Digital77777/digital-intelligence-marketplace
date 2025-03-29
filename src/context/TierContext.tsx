@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { toast } from 'sonner';
 
@@ -93,6 +92,7 @@ const tierFeatureAccess: Record<string, TierType[]> = {
   'basic-learning': ['freemium', 'basic', 'pro'],
   'profile-management': ['freemium', 'basic', 'pro'],
   'starter-api': ['freemium', 'basic', 'pro'],
+  'marketplace': ['freemium', 'basic', 'pro'],
   
   // Basic tier features
   'team-dashboard': ['basic', 'pro'],
