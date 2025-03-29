@@ -22,22 +22,24 @@ const ChatAssistant: React.FC = () => {
   const { user } = useUser();
   const { currentTier, upgradePrompt } = useTier();
 
-  // Check if user has Pro tier to show Pro Chat Assistant instead
+  // Initial welcome message
+  useEffect(() => {
+    if (messages.length === 0) {
+      setMessages([
+        {
+          id: uuidv4(),
+          role: 'assistant',
+          content: "Hi there! I'm the chat assistant for this platform. How can I help you today?",
+          timestamp: new Date()
+        }
+      ]);
+    }
+  }, [messages.length]);
+
+  // Separate rendering logic for Pro tier
   if (currentTier === 'pro') {
     return <ProChatAssistant />;
   }
-
-  // Initial welcome message
-  useEffect(() => {
-    setMessages([
-      {
-        id: uuidv4(),
-        role: 'assistant',
-        content: "Hi there! I'm the chat assistant for this platform. How can I help you today?",
-        timestamp: new Date()
-      }
-    ]);
-  }, []);
 
   const toggleChat = () => {
     setIsOpen(!isOpen);

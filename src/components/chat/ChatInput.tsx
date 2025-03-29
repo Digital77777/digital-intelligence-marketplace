@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Send } from 'lucide-react';
 
 export interface ChatInputProps {
-  onSubmit: (message: string) => void;
+  onSubmit: () => void;
   isLoading: boolean;
   placeholder?: string;
   value?: string;
@@ -16,16 +16,16 @@ const ChatInput: React.FC<ChatInputProps> = ({
   onSubmit, 
   isLoading, 
   placeholder = "Type your message...",
-  value: externalValue,
-  onChange: externalOnChange
+  value, 
+  onChange
 }) => {
   const [internalMessage, setInternalMessage] = useState('');
   
   // Use external or internal state based on whether external props are provided
-  const message = externalValue !== undefined ? externalValue : internalMessage;
+  const message = value !== undefined ? value : internalMessage;
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (externalOnChange) {
-      externalOnChange(e.target.value);
+    if (onChange) {
+      onChange(e.target.value);
     } else {
       setInternalMessage(e.target.value);
     }
@@ -34,8 +34,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim() && !isLoading) {
-      onSubmit(message);
-      if (!externalOnChange) {
+      onSubmit();
+      if (!onChange) {
         setInternalMessage('');
       }
     }
