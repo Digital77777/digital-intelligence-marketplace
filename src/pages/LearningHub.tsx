@@ -1,799 +1,865 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { LearningContent, UserProgress, CourseCategory } from '@/types/learning';
+import { useTier } from '@/context/TierContext';
+import { useUser } from '@/context/UserContext';
+import { convertToLearningContent, convertToUserProgress, ensureString, ensureNumber } from '@/utils/dataConverters';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  BookOpen,
-  Clock,
-  Filter,
-  Search,
-  CheckCircle,
-  TrendingUp,
-  Zap,
-  Star,
-  Users,
-  Award,
-  Lock,
-  Play,
-  Info,
-  FileText
-} from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { useUser } from '@/context/UserContext';
-import { useTier } from '@/context/TierContext';
-import { supabase } from '@/integrations/supabase/client';
-import { LearningContent, UserProgress } from '@/types/learning';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from '@/components/ui/card';
+import { 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
+} from '@/components/ui/tabs';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import { 
+  Search, 
+  Filter, 
+  BookOpen, 
+  Clock, 
+  BarChart, 
+  Brain, 
+  MessageSquare, 
+  Eye, 
+  Shield, 
+  ChevronRight, 
+  Lock, 
+  CheckCircle, 
+  Star, 
+  Sparkles, 
+  Users, 
+  ArrowRight
+} from 'lucide-react';
+import { Avatar } from '@/components/ui/avatar';
+import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const LearningHub = () => {
-  const { courseId } = useParams<{ courseId?: string }>();
-  const navigate = useNavigate();
-  const { user } = useUser();
-  const { currentTier, canAccess, upgradePrompt } = useTier();
-
   const [courses, setCourses] = useState<LearningContent[]>([]);
   const [filteredCourses, setFilteredCourses] = useState<LearningContent[]>([]);
-  const [activeCourse, setActiveCourse] = useState<LearningContent | null>(null);
+  const [categories, setCategories] = useState<CourseCategory[]>([]);
   const [userProgress, setUserProgress] = useState<UserProgress[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('all');
-  const [activeDifficulty, setActiveDifficulty] = useState('all');
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('all-courses');
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { courseId } = useParams<{ courseId: string }>();
+  const { currentTier, upgradePrompt } = useTier();
+  const { user } = useUser();
+  const navigate = useNavigate();
 
-  // Fetch courses and user progress
+  // Fetch courses
   useEffect(() => {
-    fetchCourses();
-    if (user) {
-      fetchUserProgress();
-    }
-  }, [user, currentTier]);
-
-  // Handle course ID from URL
-  useEffect(() => {
-    if (courseId && courses.length > 0) {
-      const course = courses.find(c => c.id === courseId);
-      if (course) {
-        setActiveCourse(course);
-        setActiveTab('course-details');
-      }
-    }
-  }, [courseId, courses]);
-
-  // Filter courses when filters change
-  useEffect(() => {
-    filterCourses();
-  }, [searchQuery, activeCategory, activeDifficulty, courses]);
-
-  const fetchCourses = async () => {
-    try {
+    const fetchCourses = async () => {
       setIsLoading(true);
-      
-      // Base query to fetch all courses
-      let query = supabase.from('courses').select('*');
-      
-      // Add tier filtering based on user's tier
-      if (currentTier === 'freemium') {
-        query = query.eq('required_tier', 'freemium');
-      } else if (currentTier === 'basic') {
-        query = query.in('required_tier', ['freemium', 'basic']);
-      }
-      
-      const { data, error } = await query.order('created_at', { ascending: false });
-      
-      if (error) {
-        throw error;
-      }
-      
-      setCourses(data || []);
-      setFilteredCourses(data || []);
-    } catch (error) {
-      console.error('Error fetching courses:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchUserProgress = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('user_progress')
-        .select('*')
-        .eq('user_id', user?.id);
+      try {
+        // Fetch courses
+        const { data: coursesData, error: coursesError } = await supabase
+          .from('courses')
+          .select('*');
         
-      if (error) {
-        throw error;
+        if (coursesError) throw coursesError;
+        
+        // Convert database types to app types
+        const convertedCourses = coursesData.map(convertToLearningContent);
+        setCourses(convertedCourses);
+        setFilteredCourses(convertedCourses);
+        
+        // Mock categories for now
+        setCategories([
+          { id: "1", name: "Machine Learning", icon: "brain", description: "Learn about ML algorithms and applications" },
+          { id: "2", name: "NLP", icon: "message-square", description: "Natural Language Processing concepts and tools" },
+          { id: "3", name: "Computer Vision", icon: "eye", description: "Image recognition and visual data processing" },
+          { id: "4", name: "Data Science", icon: "bar-chart", description: "Data analysis and visualization techniques" },
+          { id: "5", name: "AI Ethics", icon: "shield", description: "Ethical considerations in AI development" },
+        ]);
+        
+        // Fetch user progress if logged in
+        if (user) {
+          const { data: progressData, error: progressError } = await supabase
+            .from('user_progress')
+            .select('*')
+            .eq('user_id', user.id);
+          
+          if (progressError) throw progressError;
+          
+          // Convert database types to app types
+          const convertedProgress = progressData.map(convertToUserProgress);
+          setUserProgress(convertedProgress);
+        }
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      } finally {
+        setIsLoading(false);
       }
-      
-      setUserProgress(data || []);
-    } catch (error) {
-      console.error('Error fetching user progress:', error);
-    }
-  };
-
-  const filterCourses = () => {
+    };
+    
+    fetchCourses();
+  }, [user]);
+  
+  // Filter courses based on search, category, difficulty
+  useEffect(() => {
     let filtered = [...courses];
     
-    // Filter by search query
-    if (searchQuery) {
-      filtered = filtered.filter(course => 
-        course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (course.description && course.description.toLowerCase().includes(searchQuery.toLowerCase()))
-      );
-    }
+    // Filter by access level (tier)
+    filtered = filtered.filter(course => {
+      if (course.required_tier === 'freemium') return true;
+      if (course.required_tier === 'basic' && (currentTier === 'basic' || currentTier === 'pro')) return true;
+      if (course.required_tier === 'pro' && currentTier === 'pro') return true;
+      return false;
+    });
     
     // Filter by category
-    if (activeCategory !== 'all') {
-      filtered = filtered.filter(course => course.category === activeCategory);
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter(course => course.category.toLowerCase() === selectedCategory.toLowerCase());
     }
     
     // Filter by difficulty
-    if (activeDifficulty !== 'all') {
-      filtered = filtered.filter(course => course.difficulty === activeDifficulty);
+    if (selectedDifficulty !== "all") {
+      filtered = filtered.filter(course => course.difficulty.toLowerCase() === selectedDifficulty.toLowerCase());
+    }
+    
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        course => 
+          course.title.toLowerCase().includes(query) || 
+          (course.description && course.description.toLowerCase().includes(query))
+      );
     }
     
     setFilteredCourses(filtered);
+  }, [courses, selectedCategory, selectedDifficulty, searchQuery, currentTier]);
+  
+  // Handler for tracking course progress
+  const trackProgress = async (courseId: string, completionPercent: number) => {
+    if (!user) return;
+    
+    try {
+      // Check if progress record exists
+      const { data: existingProgress } = await supabase
+        .from('user_progress')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('course_id', ensureNumber(courseId))
+        .single();
+      
+      const now = new Date().toISOString();
+      
+      if (existingProgress) {
+        // Update existing progress
+        await supabase
+          .from('user_progress')
+          .update({
+            completion_percent: completionPercent,
+            last_accessed: now
+          })
+          .eq('id', existingProgress.id);
+      } else {
+        // Create new progress record
+        await supabase
+          .from('user_progress')
+          .insert({
+            user_id: user.id,
+            course_id: ensureNumber(courseId),
+            completion_percent: completionPercent,
+            last_accessed: now
+          });
+      }
+      
+      // Refresh progress data
+      const { data: progressData } = await supabase
+        .from('user_progress')
+        .select('*')
+        .eq('user_id', user.id);
+      
+      if (progressData) {
+        const convertedProgress = progressData.map(convertToUserProgress);
+        setUserProgress(convertedProgress);
+      }
+    } catch (error) {
+      console.error("Error tracking progress:", error);
+    }
+  };
+  
+  // Course selection handler
+  const handleCourseSelect = (course: LearningContent) => {
+    // Check if user has access to this course
+    if ((course.required_tier === 'basic' && currentTier === 'freemium') || 
+        (course.required_tier === 'pro' && currentTier !== 'pro')) {
+      upgradePrompt(course.required_tier as 'basic' | 'pro');
+      return;
+    }
+    
+    // If user has access, navigate to the course
+    navigate(`/learning/${course.id}`);
+    
+    // Track that user accessed the course
+    if (user) {
+      // Get existing progress or default to 0
+      const existingProgress = userProgress.find(p => p.course_id === course.id);
+      const completionPercent = existingProgress ? existingProgress.completion_percent : 0;
+      
+      trackProgress(course.id, completionPercent);
+    }
   };
 
-  const getProgressForCourse = (courseId: string): number => {
+  // Get course progress
+  const getCourseProgress = (courseId: string): number => {
+    if (!user) return 0;
     const progress = userProgress.find(p => p.course_id === courseId);
     return progress ? progress.completion_percent : 0;
   };
 
-  const startOrContinueCourse = async (course: LearningContent) => {
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
-    
-    if (!hasAccessToCourse(course)) {
-      upgradePrompt(course.required_tier as any);
-      return;
-    }
-    
-    setActiveCourse(course);
-    setActiveTab('course-details');
-    
-    try {
-      // Check if progress record exists
-      const { data, error } = await supabase
-        .from('user_progress')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('course_id', course.id)
-        .single();
-        
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
-      
-      // If no progress record exists, create one
-      if (!data) {
-        const newProgress = {
-          user_id: user.id,
-          course_id: course.id,
-          completion_percent: 0,
-          last_accessed: new Date().toISOString()
-        };
-        
-        await supabase.from('user_progress').insert(newProgress);
-        
-        // Update local state
-        setUserProgress([...userProgress, { ...newProgress, id: '' }]);
-      } else {
-        // Update last_accessed
-        await supabase
-          .from('user_progress')
-          .update({ last_accessed: new Date().toISOString() })
-          .eq('id', data.id);
-      }
-    } catch (error) {
-      console.error('Error updating course progress:', error);
+  // Get category icon
+  const getCategoryIcon = (categoryName: string) => {
+    switch (categoryName.toLowerCase()) {
+      case 'machine learning':
+        return <Brain className="h-4 w-4" />;
+      case 'nlp':
+        return <MessageSquare className="h-4 w-4" />;
+      case 'computer vision':
+        return <Eye className="h-4 w-4" />;
+      case 'data science':
+        return <BarChart className="h-4 w-4" />;
+      case 'ai ethics':
+        return <Shield className="h-4 w-4" />;
+      default:
+        return <BookOpen className="h-4 w-4" />;
     }
   };
 
-  const hasAccessToCourse = (course: LearningContent): boolean => {
-    if (course.required_tier === 'freemium') return true;
-    if (course.required_tier === 'basic') return currentTier === 'basic' || currentTier === 'pro';
-    if (course.required_tier === 'pro') return currentTier === 'pro';
-    return false;
-  };
-
-  const getCategoryCount = (category: string): number => {
-    return courses.filter(course => course.category === category).length;
-  };
-
-  const getDifficultyCount = (difficulty: string): number => {
-    return courses.filter(course => course.difficulty === difficulty).length;
-  };
-
-  const getCourseCategories = (): string[] => {
-    const categories = courses.map(course => course.category);
-    return [...new Set(categories)];
-  };
-
-  const getCourseDifficulties = (): string[] => {
-    const difficulties = courses.map(course => course.difficulty);
-    return [...new Set(difficulties)];
-  };
-
+  // Format duration
   const formatDuration = (minutes: number): string => {
     if (minutes < 60) {
       return `${minutes} min`;
     }
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
-    if (remainingMinutes === 0) {
-      return `${hours} hr`;
-    }
-    return `${hours} hr ${remainingMinutes} min`;
+    return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
   };
 
-  const renderCoursesList = () => (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">All Courses</h2>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="hidden md:flex items-center gap-1">
-            <Filter className="h-4 w-4" />
-            Filters
-          </Button>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input 
-              placeholder="Search courses..."
-              className="pl-9 h-9 w-full sm:w-[200px]"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </div>
-      </div>
-      
-      <div className="flex flex-wrap gap-2">
-        <Button 
-          variant={activeCategory === 'all' ? 'default' : 'outline'} 
-          size="sm"
-          onClick={() => setActiveCategory('all')}
-        >
-          All Categories
-        </Button>
-        {getCourseCategories().map(category => (
-          <Button 
-            key={category}
-            variant={activeCategory === category ? 'default' : 'outline'} 
-            size="sm"
-            onClick={() => setActiveCategory(category)}
-          >
-            {category} ({getCategoryCount(category)})
-          </Button>
-        ))}
-      </div>
-      
-      <div className="flex flex-wrap gap-2">
-        <Button 
-          variant={activeDifficulty === 'all' ? 'default' : 'outline'} 
-          size="sm"
-          onClick={() => setActiveDifficulty('all')}
-        >
-          All Levels
-        </Button>
-        {getCourseDifficulties().map(difficulty => (
-          <Button 
-            key={difficulty}
-            variant={activeDifficulty === difficulty ? 'default' : 'outline'} 
-            size="sm"
-            onClick={() => setActiveDifficulty(difficulty)}
-          >
-            {difficulty} ({getDifficultyCount(difficulty)})
-          </Button>
-        ))}
-      </div>
-      
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map((_, index) => (
-            <Card key={index} className="animate-pulse">
-              <CardHeader className="pb-2">
-                <div className="bg-muted h-6 w-3/4 rounded mb-2"></div>
-                <div className="bg-muted h-4 w-1/2 rounded"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-muted h-4 w-full rounded mb-4"></div>
-                <div className="bg-muted h-4 w-3/4 rounded mb-4"></div>
-                <div className="bg-muted h-8 w-full rounded"></div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : filteredCourses.length === 0 ? (
-        <div className="text-center py-12 bg-muted/30 rounded-lg">
-          <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium mb-2">No Courses Found</h3>
-          <p className="text-muted-foreground max-w-md mx-auto mb-6">
-            We couldn't find any courses matching your search criteria. Try changing your filters or check back later.
-          </p>
-          <Button onClick={() => {
-            setSearchQuery('');
-            setActiveCategory('all');
-            setActiveDifficulty('all');
-          }}>
-            Clear Filters
-          </Button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCourses.map(course => {
-            const hasAccess = hasAccessToCourse(course);
-            const progress = getProgressForCourse(course.id);
-            
-            return (
-              <Card 
-                key={course.id} 
-                className={`overflow-hidden transition-all hover:shadow-md ${!hasAccess ? 'opacity-80' : ''}`}
-              >
-                <div className="aspect-video relative bg-muted w-full">
-                  {course.image_url ? (
-                    <img 
-                      src={course.image_url} 
-                      alt={course.title} 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-primary/10">
-                      <BookOpen className="h-12 w-12 text-primary/50" />
-                    </div>
-                  )}
-                  <div className="absolute top-2 right-2 flex gap-2">
-                    <Badge className="bg-primary/90">{course.difficulty}</Badge>
-                    {course.required_tier !== 'freemium' && (
-                      <Badge className="capitalize bg-secondary/90">{course.required_tier}</Badge>
-                    )}
-                  </div>
-                </div>
-                
-                <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg">{course.title}</CardTitle>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    <span>{formatDuration(course.duration)}</span>
-                  </div>
-                </CardHeader>
-                
-                <CardContent>
-                  <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-                    {course.description || 'Learn essential skills and concepts with this course.'}
-                  </p>
-                  
-                  {progress > 0 && (
-                    <div className="mb-4">
-                      <div className="flex items-center justify-between text-sm mb-1">
-                        <span>Progress</span>
-                        <span>{progress}%</span>
-                      </div>
-                      <Progress value={progress} className="h-2" />
-                    </div>
-                  )}
-                  
-                  {!hasAccess ? (
-                    <Button 
-                      onClick={() => upgradePrompt(course.required_tier as any)}
-                      className="w-full"
-                      variant="outline"
-                    >
-                      <Lock className="mr-2 h-4 w-4" />
-                      Upgrade to Access
-                    </Button>
-                  ) : (
-                    <Button 
-                      onClick={() => startOrContinueCourse(course)}
-                      className="w-full"
-                    >
-                      {progress > 0 ? 'Continue Learning' : 'Start Course'}
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
+  // Get tier badge
+  const getTierBadge = (tier: string) => {
+    switch (tier) {
+      case 'basic':
+        return (
+          <Badge variant="outline" className="ml-2 text-blue-500 border-blue-200 dark:border-blue-800">
+            Basic
+          </Badge>
+        );
+      case 'pro':
+        return (
+          <Badge variant="outline" className="ml-2 text-purple-500 border-purple-200 dark:border-purple-800">
+            <Sparkles className="h-3 w-3 mr-1" />
+            Pro
+          </Badge>
+        );
+      default:
+        return null;
+    }
+  };
 
-  const renderCourseDetails = () => {
-    if (!activeCourse) return null;
-    
-    const hasAccess = hasAccessToCourse(activeCourse);
-    const progress = getProgressForCourse(activeCourse.id);
+  // Render course card
+  const renderCourseCard = (course: LearningContent) => {
+    const progress = getCourseProgress(course.id);
+    const isLocked = (course.required_tier === 'basic' && currentTier === 'freemium') || 
+                     (course.required_tier === 'pro' && currentTier !== 'pro');
     
     return (
-      <div className="space-y-6">
-        <Button 
-          variant="ghost" 
-          onClick={() => setActiveTab('all-courses')}
-          className="mb-2"
-        >
-          ← Back to courses
-        </Button>
+      <Card 
+        key={course.id} 
+        className={`overflow-hidden transition-all hover:shadow-md ${isLocked ? 'opacity-80' : ''}`}
+      >
+        <div className="relative h-40 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 flex items-center justify-center">
+          {course.image_url ? (
+            <img 
+              src={course.image_url} 
+              alt={course.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <BookOpen className="h-16 w-16 text-primary/20" />
+          )}
+          
+          {isLocked && (
+            <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+              <div className="flex flex-col items-center">
+                <Lock className="h-8 w-8 text-muted-foreground mb-2" />
+                <Badge variant="outline">
+                  {course.required_tier === 'basic' ? 'Basic' : 'Pro'} Tier Required
+                </Badge>
+              </div>
+            </div>
+          )}
+          
+          <Badge 
+            className="absolute top-2 left-2 capitalize"
+            variant="secondary"
+          >
+            {getCategoryIcon(course.category)}
+            <span className="ml-1">{course.category}</span>
+          </Badge>
+          
+          <Badge 
+            className="absolute top-2 right-2"
+            variant={course.difficulty === 'beginner' ? 'outline' : 
+                    course.difficulty === 'intermediate' ? 'secondary' : 'default'}
+          >
+            {course.difficulty}
+          </Badge>
+        </div>
         
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="md:w-2/3">
-            <div className="aspect-video relative bg-muted w-full mb-6 rounded-lg overflow-hidden">
-              {activeCourse.image_url ? (
-                <img 
-                  src={activeCourse.image_url} 
-                  alt={activeCourse.title} 
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-primary/10">
-                  <BookOpen className="h-16 w-16 text-primary/50" />
-                </div>
-              )}
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg flex items-center">
+            {course.title}
+            {getTierBadge(course.required_tier)}
+          </CardTitle>
+          <CardDescription className="line-clamp-2">
+            {course.description}
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent className="pb-2">
+          <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
+            <div className="flex items-center">
+              <Clock className="h-4 w-4 mr-1" />
+              {formatDuration(course.duration)}
             </div>
-            
-            <div className="space-y-6">
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold mb-2">{activeCourse.title}</h1>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <Badge className="bg-primary/90">{activeCourse.difficulty}</Badge>
-                  <Badge variant="outline">{activeCourse.category}</Badge>
-                  {activeCourse.required_tier !== 'freemium' && (
-                    <Badge className="capitalize bg-secondary/90">{activeCourse.required_tier}</Badge>
-                  )}
-                </div>
-                <p className="text-muted-foreground">
-                  {activeCourse.description || 'Learn essential skills and concepts with this course.'}
-                </p>
+            {progress > 0 && (
+              <div className="flex items-center">
+                {progress === 100 ? (
+                  <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
+                ) : (
+                  <span>{progress}% complete</span>
+                )}
               </div>
-              
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <Card>
-                  <CardContent className="p-4 flex flex-col items-center justify-center">
-                    <Clock className="h-6 w-6 text-primary mb-2" />
-                    <span className="text-sm font-medium">{formatDuration(activeCourse.duration)}</span>
-                    <span className="text-xs text-muted-foreground">Duration</span>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4 flex flex-col items-center justify-center">
-                    <TrendingUp className="h-6 w-6 text-primary mb-2" />
-                    <span className="text-sm font-medium">{activeCourse.difficulty}</span>
-                    <span className="text-xs text-muted-foreground">Difficulty</span>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4 flex flex-col items-center justify-center">
-                    <BookOpen className="h-6 w-6 text-primary mb-2" />
-                    <span className="text-sm font-medium">5 Lessons</span>
-                    <span className="text-xs text-muted-foreground">Content</span>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4 flex flex-col items-center justify-center">
-                    <Users className="h-6 w-6 text-primary mb-2" />
-                    <span className="text-sm font-medium">423</span>
-                    <span className="text-xs text-muted-foreground">Enrolled</span>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              {!hasAccess ? (
-                <Card className="bg-muted/30">
-                  <CardContent className="p-6 text-center">
-                    <Lock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-medium mb-2">
-                      {activeCourse.required_tier.charAt(0).toUpperCase() + activeCourse.required_tier.slice(1)} Tier Required
-                    </h3>
-                    <p className="text-muted-foreground mb-4">
-                      Upgrade your subscription to access this premium course and unlock all its features.
-                    </p>
-                    <Button onClick={() => navigate('/pricing')}>
-                      View Pricing Options
-                    </Button>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Course Content</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {[
-                          'Introduction to the Course',
-                          'Core Concepts & Terminology',
-                          'Practical Exercises',
-                          'Advanced Techniques',
-                          'Final Project & Next Steps'
-                        ].map((lesson, index) => (
-                          <div 
-                            key={index} 
-                            className={`p-3 rounded-lg flex items-center justify-between ${
-                              index === 0 ? 'bg-primary/10' : 'bg-muted'
-                            }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
-                                index === 0 ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/20'
-                              }`}>
-                                {index + 1}
-                              </div>
-                              <span className={index === 0 ? 'font-medium' : ''}>{lesson}</span>
-                            </div>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              <Play className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  {/* Simplified course content for this implementation */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Course Description</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="prose prose-sm max-w-none dark:prose-invert">
-                        {activeCourse.content.split('\n').map((paragraph, idx) => (
-                          <p key={idx}>{paragraph}</p>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
-            </div>
+            )}
           </div>
           
-          <div className="md:w-1/3 space-y-6">
-            {hasAccess && progress > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Your Progress</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between text-sm mb-1">
-                      <span>Course Completion</span>
-                      <span>{progress}%</span>
-                    </div>
-                    <Progress value={progress} className="h-2" />
-                  </div>
-                  <div className="mt-6">
-                    <Button className="w-full">
-                      {progress < 100 ? 'Continue Course' : 'Review Course'}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+          {user && progress > 0 && progress < 100 && (
+            <Progress value={progress} className="h-1 mb-2" />
+          )}
+        </CardContent>
+        
+        <CardFooter>
+          <Button 
+            variant={isLocked ? "outline" : "default"} 
+            className="w-full"
+            onClick={() => handleCourseSelect(course)}
+          >
+            {isLocked ? (
+              <>Unlock<Lock className="ml-2 h-4 w-4" /></>
+            ) : progress > 0 && progress < 100 ? (
+              <>Continue Learning<ChevronRight className="ml-2 h-4 w-4" /></>
+            ) : progress === 100 ? (
+              <>Review Course<Star className="ml-2 h-4 w-4" /></>
+            ) : (
+              <>Start Learning<ChevronRight className="ml-2 h-4 w-4" /></>
             )}
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>What You'll Learn</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {[
-                    'Core concepts and principles',
-                    'Practical implementation techniques',
-                    'Best practices and common patterns',
-                    'Problem solving and troubleshooting',
-                    'Advanced use cases and applications'
-                  ].map((item, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Course Resources</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button variant="outline" className="w-full gap-2">
-                  <FileText className="h-4 w-4" />
-                  Course Slides
-                </Button>
-                <Button variant="outline" className="w-full gap-2">
-                  <FileText className="h-4 w-4" />
-                  Exercise Files
-                </Button>
-                <Button variant="outline" className="w-full gap-2">
-                  <FileText className="h-4 w-4" />
-                  Reference Guide
-                </Button>
-                <Button variant="outline" className="w-full gap-2">
-                  <Info className="h-4 w-4" />
-                  Additional Resources
-                </Button>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Related Courses</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {courses.filter(c => 
-                  c.id !== activeCourse.id && 
-                  c.category === activeCourse.category
-                ).slice(0, 3).map(course => (
-                  <div key={course.id} className="flex items-start gap-3">
-                    <div className="h-10 w-10 bg-muted rounded-md flex items-center justify-center shrink-0">
-                      <BookOpen className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-sm line-clamp-1">{course.title}</h4>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span>{formatDuration(course.duration)}</span>
-                        <span>•</span>
-                        <span>{course.difficulty}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
+          </Button>
+        </CardFooter>
+      </Card>
     );
   };
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 pt-28 px-4 md:px-6 pb-12 bg-gradient-to-b from-blue-50/30 to-white dark:from-blue-950/10 dark:to-gray-950">
+      <main className="flex-1 pt-24 px-4 md:px-6 pb-12 bg-gradient-to-b from-indigo-50/30 to-white dark:from-indigo-950/10 dark:to-gray-950">
         <div className="max-w-7xl mx-auto">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h1 className="text-3xl font-bold mb-2">Learning Hub</h1>
-                <p className="text-muted-foreground">
-                  Expand your AI knowledge with our curated courses
+          {/* Hero section */}
+          <div className="relative rounded-xl overflow-hidden mb-10">
+            <div className="bg-gradient-to-r from-blue-800 via-indigo-800 to-purple-800 py-16 px-8 rounded-xl">
+              <div className="max-w-3xl">
+                <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">Learning Hub</h1>
+                <p className="text-indigo-100 text-lg mb-6">
+                  Expand your AI knowledge with our comprehensive courses, tutorials, and resources.
                 </p>
-              </div>
-              
-              {user ? (
-                <div className="flex items-center gap-4">
-                  <div className="hidden md:block">
-                    <div className="flex items-center gap-2">
-                      <Star className="h-5 w-5 text-amber-500" />
-                      <div>
-                        <div className="text-sm font-medium">Learning Level</div>
-                        <div className="text-xs text-muted-foreground">Bronze</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="hidden md:block">
-                    <div className="flex items-center gap-2">
-                      <Award className="h-5 w-5 text-blue-500" />
-                      <div>
-                        <div className="text-sm font-medium">Courses Completed</div>
-                        <div className="text-xs text-muted-foreground">0 / {courses.length}</div>
-                      </div>
-                    </div>
-                  </div>
-                  <TabsList>
-                    <TabsTrigger value="all-courses">All Courses</TabsTrigger>
-                    <TabsTrigger value="my-courses">My Courses</TabsTrigger>
-                    {activeCourse && <TabsTrigger value="course-details">Current Course</TabsTrigger>}
-                  </TabsList>
-                </div>
-              ) : (
-                <Button onClick={() => navigate('/auth')}>Sign in to Track Progress</Button>
-              )}
-            </div>
-            
-            <TabsContent value="all-courses">
-              {renderCoursesList()}
-            </TabsContent>
-            
-            <TabsContent value="my-courses">
-              {user ? (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold">My Courses</h2>
-                  
-                  {userProgress.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {userProgress.map(progress => {
-                        const course = courses.find(c => c.id === progress.course_id);
-                        if (!course) return null;
-                        
-                        return (
-                          <Card key={progress.id} className="overflow-hidden transition-all hover:shadow-md">
-                            <div className="aspect-video relative bg-muted w-full">
-                              {course.image_url ? (
-                                <img 
-                                  src={course.image_url} 
-                                  alt={course.title} 
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-primary/10">
-                                  <BookOpen className="h-12 w-12 text-primary/50" />
-                                </div>
-                              )}
-                              <div className="absolute top-2 right-2">
-                                <Badge className="bg-primary/90">{course.difficulty}</Badge>
-                              </div>
-                            </div>
-                            
-                            <CardHeader className="pb-2">
-                              <CardTitle className="text-lg">{course.title}</CardTitle>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <span>Last accessed: {new Date(progress.last_accessed).toLocaleDateString()}</span>
-                              </div>
-                            </CardHeader>
-                            
-                            <CardContent>
-                              <div className="mb-4">
-                                <div className="flex items-center justify-between text-sm mb-1">
-                                  <span>Progress</span>
-                                  <span>{progress.completion_percent}%</span>
-                                </div>
-                                <Progress value={progress.completion_percent} className="h-2" />
-                              </div>
-                              
-                              <Button 
-                                onClick={() => startOrContinueCourse(course)}
-                                className="w-full"
-                              >
-                                {progress.completion_percent === 100 ? 'Review Course' : 'Continue Learning'}
-                              </Button>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12 bg-muted/30 rounded-lg">
-                      <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-medium mb-2">No Courses Started</h3>
-                      <p className="text-muted-foreground max-w-md mx-auto mb-6">
-                        You haven't started any courses yet. Browse our catalog and start learning today!
-                      </p>
-                      <Button onClick={() => setActiveTab('all-courses')}>
-                        Browse Courses
-                      </Button>
-                    </div>
+                <div className="flex flex-wrap gap-3">
+                  <Button className="bg-white text-indigo-900 hover:bg-indigo-50">
+                    Browse All Courses
+                  </Button>
+                  {currentTier !== 'pro' && (
+                    <Button 
+                      variant="outline" 
+                      className="text-white border-white/30 hover:bg-white/10 hover:text-white"
+                      onClick={() => upgradePrompt('pro')}
+                    >
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Unlock Pro Courses
+                    </Button>
                   )}
                 </div>
-              ) : (
-                <div className="text-center py-12 bg-muted/30 rounded-lg">
-                  <Lock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Sign In Required</h3>
-                  <p className="text-muted-foreground max-w-md mx-auto mb-6">
-                    Please sign in to track your course progress and access your saved courses.
-                  </p>
-                  <Button onClick={() => navigate('/auth')}>
-                    Sign In
-                  </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Course filters */}
+          <div className="mb-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+              <h2 className="text-2xl font-semibold">Courses & Tutorials</h2>
+              <div className="flex items-center gap-2 w-full md:w-auto">
+                <div className="relative flex-1 md:w-64">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search courses..."
+                    className="pl-9"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
                 </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="course-details">
-              {renderCourseDetails()}
-            </TabsContent>
-          </Tabs>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon">
+                      <Filter className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setSelectedDifficulty("beginner")}>
+                      Beginner
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSelectedDifficulty("intermediate")}>
+                      Intermediate
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSelectedDifficulty("advanced")}>
+                      Advanced
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSelectedDifficulty("all")}>
+                      All Levels
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+
+            <Tabs defaultValue="all" value={selectedCategory} onValueChange={setSelectedCategory}>
+              <TabsList className="mb-6">
+                <TabsTrigger value="all">All Categories</TabsTrigger>
+                {categories.map((category) => (
+                  <TabsTrigger key={category.id} value={category.name.toLowerCase()}>
+                    {category.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              
+              <TabsContent value={selectedCategory} className="mt-0">
+                {isLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[...Array(6)].map((_, index) => (
+                      <Card key={index}>
+                        <Skeleton className="h-40 w-full" />
+                        <CardHeader className="pb-2">
+                          <Skeleton className="h-5 w-3/4 mb-2" />
+                          <Skeleton className="h-4 w-full" />
+                          <Skeleton className="h-4 w-2/3 mt-1" />
+                        </CardHeader>
+                        <CardContent className="pb-2">
+                          <Skeleton className="h-4 w-1/3" />
+                        </CardContent>
+                        <CardFooter>
+                          <Skeleton className="h-9 w-full" />
+                        </CardFooter>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    {filteredCourses.length === 0 ? (
+                      <div className="text-center py-12">
+                        <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                        <h3 className="text-lg font-medium mb-2">No courses found</h3>
+                        <p className="text-muted-foreground mb-6">
+                          Try adjusting your filters or search query
+                        </p>
+                        <Button variant="outline" onClick={() => {
+                          setSelectedCategory("all");
+                          setSelectedDifficulty("all");
+                          setSearchQuery("");
+                        }}>
+                          Reset Filters
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filteredCourses.map(renderCourseCard)}
+                      </div>
+                    )}
+                  </>
+                )}
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          {/* Learning paths section */}
+          <div className="mb-10">
+            <h2 className="text-2xl font-semibold mb-6">Learning Paths</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border-blue-100 dark:border-blue-900/30">
+                <CardHeader>
+                  <CardTitle>AI Fundamentals</CardTitle>
+                  <CardDescription>
+                    Master the core concepts of artificial intelligence
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between text-sm mb-2">
+                    <span>5 courses</span>
+                    <span>12 hours</span>
+                  </div>
+                  <Progress value={user ? 20 : 0} className="h-1 mb-4" />
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="flex items-center">
+                        <CheckCircle className="h-3.5 w-3.5 mr-1.5 text-green-500" />
+                        <span>Introduction to AI</span>
+                      </span>
+                      <Badge variant="outline" className="text-xs">Completed</Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="flex items-center">
+                        <div className="h-3.5 w-3.5 mr-1.5 rounded-full border-2 border-primary" />
+                        <span>Machine Learning Basics</span>
+                      </span>
+                      <Badge variant="outline" className="text-xs">In Progress</Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>Neural Networks</span>
+                      <Badge variant="outline" className="text-xs opacity-50">Locked</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button className="w-full">Continue Path</Button>
+                </CardFooter>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border-purple-100 dark:border-purple-900/30">
+                <CardHeader>
+                  <CardTitle>NLP Specialist</CardTitle>
+                  <CardDescription>
+                    Become an expert in Natural Language Processing
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between text-sm mb-2">
+                    <span>7 courses</span>
+                    <span>18 hours</span>
+                  </div>
+                  <Progress value={0} className="h-1 mb-4" />
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>Text Processing Fundamentals</span>
+                      <Badge variant="outline" className="text-xs opacity-50">Locked</Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>Building Language Models</span>
+                      <Badge variant="outline" className="text-xs opacity-50">Locked</Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>Advanced NLP Techniques</span>
+                      <Badge variant="outline" className="text-xs opacity-50">Locked</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button className="w-full" variant={currentTier === 'pro' ? 'default' : 'outline'}>
+                    {currentTier === 'pro' ? 'Start Path' : 'Pro Tier Required'}
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-950/20 dark:to-teal-950/20 border-green-100 dark:border-green-900/30">
+                <CardHeader>
+                  <CardTitle>Computer Vision</CardTitle>
+                  <CardDescription>
+                    Learn to build image recognition systems
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between text-sm mb-2">
+                    <span>6 courses</span>
+                    <span>15 hours</span>
+                  </div>
+                  <Progress value={0} className="h-1 mb-4" />
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>Image Processing Basics</span>
+                      <Badge variant="outline" className="text-xs opacity-50">Locked</Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>Convolutional Neural Networks</span>
+                      <Badge variant="outline" className="text-xs opacity-50">Locked</Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>Object Detection</span>
+                      <Badge variant="outline" className="text-xs opacity-50">Locked</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button className="w-full" variant={currentTier === 'basic' || currentTier === 'pro' ? 'default' : 'outline'}>
+                    {currentTier === 'freemium' ? 'Basic Tier Required' : 'Start Path'}
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+          </div>
+
+          {/* Study groups section */}
+          <div className="mb-10">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-semibold">Study Groups</h2>
+              <Button variant="outline" className="hidden md:flex">
+                <Users className="mr-2 h-4 w-4" />
+                Browse All Groups
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <Badge className="w-fit mb-1">Active</Badge>
+                  <CardTitle className="text-base">ML Study Group</CardTitle>
+                  <CardDescription className="line-clamp-1">
+                    Weekly discussions on machine learning papers
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <div className="flex -space-x-2 mb-2">
+                    {[...Array(4)].map((_, i) => (
+                      <Avatar key={i} className="border-2 border-background">
+                        <img src={`https://i.pravatar.cc/32?img=${i + 10}`} alt="Member" />
+                      </Avatar>
+                    ))}
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted text-xs">+12</div>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Next meeting: Tomorrow, 7:00 PM
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button size="sm" variant="outline" className="w-full">
+                    Join Group
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <Badge className="w-fit mb-1" variant="outline">New</Badge>
+                  <CardTitle className="text-base">NLP Enthusiasts</CardTitle>
+                  <CardDescription className="line-clamp-1">
+                    Exploring latest advancements in NLP
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <div className="flex -space-x-2 mb-2">
+                    {[...Array(3)].map((_, i) => (
+                      <Avatar key={i} className="border-2 border-background">
+                        <img src={`https://i.pravatar.cc/32?img=${i + 20}`} alt="Member" />
+                      </Avatar>
+                    ))}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Next meeting: Friday, 6:30 PM
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button size="sm" variant="outline" className="w-full">
+                    Join Group
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <Badge className="w-fit mb-1" variant="secondary">Popular</Badge>
+                  <CardTitle className="text-base">AI Ethics Discussion</CardTitle>
+                  <CardDescription className="line-clamp-1">
+                    Discussing ethical implications of AI
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <div className="flex -space-x-2 mb-2">
+                    {[...Array(5)].map((_, i) => (
+                      <Avatar key={i} className="border-2 border-background">
+                        <img src={`https://i.pravatar.cc/32?img=${i + 30}`} alt="Member" />
+                      </Avatar>
+                    ))}
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted text-xs">+8</div>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Next meeting: Monday, 5:00 PM
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button size="sm" variant="outline" className="w-full">
+                    Join Group
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-950/20 dark:to-blue-950/20 border-indigo-100 dark:border-indigo-900/30">
+                <CardHeader>
+                  <CardTitle className="text-base">Create a Study Group</CardTitle>
+                  <CardDescription>
+                    Start your own group to learn together
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <p className="text-sm text-muted-foreground">
+                    Collaborate with others who share your interests
+                  </p>
+                </CardContent>
+                <CardFooter>
+                  <Button size="sm" className="w-full">
+                    <Users className="mr-2 h-4 w-4" />
+                    Create Group
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+            <Button variant="outline" className="w-full mt-4 md:hidden">
+              <Users className="mr-2 h-4 w-4" />
+              Browse All Groups
+            </Button>
+          </div>
+
+          {/* Pro upgrade banner */}
+          {currentTier !== 'pro' && (
+            <Card className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20 border-purple-100 dark:border-purple-900/30 p-6 mb-8">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div>
+                  <h3 className="text-xl font-semibold text-purple-900 dark:text-purple-400 mb-2">Unlock Pro Learning Content</h3>
+                  <p className="text-purple-800/80 dark:text-purple-300/80 max-w-2xl">
+                    Upgrade to Pro to access advanced courses, specialized learning paths, and exclusive study materials.
+                  </p>
+                </div>
+                <Button 
+                  className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white min-w-[150px]"
+                  onClick={() => upgradePrompt('pro')}
+                >
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Upgrade to Pro
+                </Button>
+              </div>
+            </Card>
+          )}
+
+          {/* Resources section */}
+          <div>
+            <h2 className="text-2xl font-semibold mb-6">Additional Resources</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">AI Cheat Sheets</CardTitle>
+                  <CardDescription>
+                    Quick reference guides for AI concepts
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-center">
+                      <ArrowRight className="h-3 w-3 mr-2 text-primary" />
+                      Machine Learning Algorithms
+                    </li>
+                    <li className="flex items-center">
+                      <ArrowRight className="h-3 w-3 mr-2 text-primary" />
+                      Neural Network Architectures
+                    </li>
+                    <li className="flex items-center">
+                      <ArrowRight className="h-3 w-3 mr-2 text-primary" />
+                      Python for Data Science
+                    </li>
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button variant="outline" className="w-full">
+                    View All Cheat Sheets
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">AI Tools Directory</CardTitle>
+                  <CardDescription>
+                    Explore tools to enhance your AI projects
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-center">
+                      <ArrowRight className="h-3 w-3 mr-2 text-primary" />
+                      Model Training Platforms
+                    </li>
+                    <li className="flex items-center">
+                      <ArrowRight className="h-3 w-3 mr-2 text-primary" />
+                      Data Visualization Tools
+                    </li>
+                    <li className="flex items-center">
+                      <ArrowRight className="h-3 w-3 mr-2 text-primary" />
+                      AI Development Frameworks
+                    </li>
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button variant="outline" className="w-full" onClick={() => navigate('/ai-tools-directory')}>
+                    Browse AI Tools
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Community Forums</CardTitle>
+                  <CardDescription>
+                    Connect with other learners and experts
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-center">
+                      <ArrowRight className="h-3 w-3 mr-2 text-primary" />
+                      Ask Questions
+                    </li>
+                    <li className="flex items-center">
+                      <ArrowRight className="h-3 w-3 mr-2 text-primary" />
+                      Share Projects
+                    </li>
+                    <li className="flex items-center">
+                      <ArrowRight className="h-3 w-3 mr-2 text-primary" />
+                      Get Feedback
+                    </li>
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button variant="outline" className="w-full" onClick={() => navigate('/forums')}>
+                    Join Discussions
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+          </div>
         </div>
       </main>
       <Footer />

@@ -1,457 +1,450 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
+} from '@/components/ui/tabs';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { Avatar } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { 
+  Search, 
+  SlidersHorizontal, 
+  ChevronDown, 
   Play, 
-  Upload, 
   Clock, 
   Eye, 
-  MessageSquare, 
-  Code, 
-  Search,
-  Filter,
-  Plus,
-  Crown,
-  Lock
+  User,
+  Code,
+  BookOpen,
+  FlaskConical,
+  Radio
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useUser } from '@/context/UserContext';
-import { useTier } from '@/context/TierContext';
 import { AIStream } from '@/types/AIStreams';
-import { toast } from 'sonner';
+import { useTier } from '@/context/TierContext';
 
 const AIStreams = () => {
   const [streams, setStreams] = useState<AIStream[]>([]);
-  const [filteredStreams, setFilteredStreams] = useState<AIStream[]>([]);
+  const [featuredStreams, setFeaturedStreams] = useState<AIStream[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const { user, profile } = useUser();
-  const { currentTier, canAccess } = useTier();
-  const navigate = useNavigate();
-
-  const canUpload = currentTier === 'basic' || currentTier === 'pro';
+  const [activeTab, setActiveTab] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const { currentTier, upgradePrompt } = useTier();
+  const location = useLocation();
 
   useEffect(() => {
     fetchStreams();
   }, []);
 
-  useEffect(() => {
-    filterStreams();
-  }, [streams, activeCategory, searchQuery]);
-
   const fetchStreams = async () => {
+    setIsLoading(true);
+    
     try {
-      setIsLoading(true);
-      
-      // Query the ai_streams table
-      const { data: streamsData, error } = await supabase
-        .from('ai_streams')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        throw error;
-      }
-
-      // If we have streams data, fetch the user details for each stream
-      if (streamsData && streamsData.length > 0) {
-        const streamsWithAuthors = await Promise.all(
-          streamsData.map(async (stream) => {
-            // Get author details from profiles table
-            const { data: authorData } = await supabase
-              .from('profiles')
-              .select('id, username, avatar_url')
-              .eq('id', stream.user_id)
-              .single();
-
-            return {
-              ...stream,
-              author: authorData || { id: stream.user_id, username: 'Anonymous' }
-            };
-          })
-        );
-
-        setStreams(streamsWithAuthors as AIStream[]);
-        setFilteredStreams(streamsWithAuthors as AIStream[]);
-      } else {
-        // If no data in production, use some sample data for development
-        const sampleStreams: AIStream[] = [
-          {
-            id: '1',
-            user_id: '123',
-            title: 'Building a Neural Network from Scratch',
-            description: 'Learn how to implement a neural network using only NumPy and understand the math behind backpropagation.',
-            category: 'tutorial',
-            duration: '15 minutes',
-            views: 1240,
-            created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-            is_flagged: false,
-            image_url: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485',
-            author: {
-              id: '123',
-              username: 'AIEnthusiast',
-              avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde'
-            }
-          },
-          {
-            id: '2',
-            user_id: '456',
-            title: 'Latest Advancements in Transformer Models',
-            description: 'A deep dive into recent research papers on transformer architecture improvements and their implications.',
-            category: 'research',
-            duration: '28 minutes',
-            views: 856,
-            created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-            is_flagged: false,
-            image_url: 'https://images.unsplash.com/photo-1620266757065-5814239881fd',
-            author: {
-              id: '456',
-              username: 'ResearchPro',
-              avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330'
-            }
-          },
-          {
-            id: '3',
-            user_id: '789',
-            title: 'Deploying ML Models with FastAPI',
-            description: 'A step-by-step tutorial on how to create APIs for your machine learning models using FastAPI.',
-            category: 'demo',
-            duration: '20 minutes',
-            views: 1567,
-            created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-            is_flagged: false,
-            image_url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71',
-            author: {
-              id: '789',
-              username: 'DevOpsAI',
-              avatar_url: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61'
-            }
-          },
-          {
-            id: '4',
-            user_id: '101',
-            title: 'Live Training: Fine-tuning GPT-4 for Medical Applications',
-            description: 'Watch in real-time as we fine-tune a GPT-4 model on medical data for clinical decision support.',
-            category: 'live',
-            duration: '45 minutes',
-            views: 2340,
-            created_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-            is_flagged: false,
-            image_url: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef',
-            author: {
-              id: '101',
-              username: 'MedTechAI',
-              avatar_url: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857'
-            }
-          },
-          {
-            id: '5',
-            user_id: '202',
-            title: 'Computer Vision for Beginners',
-            description: 'An introduction to computer vision concepts and practical examples using OpenCV and TensorFlow.',
-            category: 'tutorial',
-            duration: '32 minutes',
-            views: 978,
-            created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-            is_flagged: false,
-            image_url: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04',
-            author: {
-              id: '202',
-              username: 'VisionAI',
-              avatar_url: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12'
-            }
+      // This is a mock implementation since the ai_streams table doesn't exist yet
+      // We'll create mock data instead
+      const mockAIStreams: AIStream[] = [
+        {
+          id: "1",
+          user_id: "123",
+          title: "Building an NLP Model from Scratch",
+          description: "Learn how to create a natural language processing model using Python and TensorFlow",
+          category: "tutorial",
+          duration: "45:22",
+          views: 1250,
+          created_at: new Date().toISOString(),
+          is_flagged: false,
+          author: {
+            id: "123",
+            username: "ai_enthusiast",
+            avatar_url: "https://i.pravatar.cc/150?img=1"
           }
-        ];
-        
-        setStreams(sampleStreams);
-        setFilteredStreams(sampleStreams);
-      }
-    } catch (error: any) {
-      console.error('Error fetching AI streams:', error.message);
-      toast.error('Failed to load AI streams');
+        },
+        {
+          id: "2",
+          user_id: "456",
+          title: "Live Demo: Computer Vision Object Detection",
+          description: "Watch as we demonstrate a real-time object detection system using computer vision",
+          category: "demo",
+          duration: "32:15",
+          views: 876,
+          created_at: new Date(Date.now() - 86400000).toISOString(),
+          is_flagged: false,
+          author: {
+            id: "456",
+            username: "vision_expert",
+            avatar_url: "https://i.pravatar.cc/150?img=2"
+          }
+        },
+        {
+          id: "3",
+          user_id: "789",
+          title: "Research Presentation: Advances in Generative AI",
+          description: "A detailed presentation about the latest breakthroughs in generative artificial intelligence",
+          category: "research",
+          duration: "1:12:45",
+          views: 2140,
+          created_at: new Date(Date.now() - 172800000).toISOString(),
+          is_flagged: false,
+          author: {
+            id: "789",
+            username: "research_lead",
+            avatar_url: "https://i.pravatar.cc/150?img=3"
+          }
+        },
+        {
+          id: "4",
+          user_id: "101",
+          title: "Live Coding: Building a Recommender System",
+          description: "Join us for a live coding session where we build a movie recommender system",
+          category: "live",
+          duration: "1:05:30",
+          views: 1872,
+          created_at: new Date(Date.now() - 259200000).toISOString(),
+          is_flagged: false,
+          author: {
+            id: "101",
+            username: "code_pro",
+            avatar_url: "https://i.pravatar.cc/150?img=4"
+          }
+        },
+      ];
+      
+      setStreams(mockAIStreams);
+      setFeaturedStreams(mockAIStreams.slice(0, 2));
+      
+    } catch (error) {
+      console.error("Error fetching AI streams:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const filterStreams = () => {
+  const getFilteredStreams = () => {
     let filtered = [...streams];
     
-    // Filter by category
-    if (activeCategory !== 'all') {
-      filtered = filtered.filter(stream => stream.category === activeCategory);
+    // Filter by tab
+    if (activeTab !== "all") {
+      filtered = filtered.filter(stream => stream.category === activeTab);
     }
     
     // Filter by search query
-    if (searchQuery.trim() !== '') {
+    if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(stream => 
-        stream.title.toLowerCase().includes(query) || 
-        stream.description.toLowerCase().includes(query)
+      filtered = filtered.filter(
+        stream => 
+          stream.title.toLowerCase().includes(query) || 
+          stream.description.toLowerCase().includes(query) ||
+          (stream.author?.username.toLowerCase().includes(query))
       );
     }
     
-    setFilteredStreams(filtered);
+    return filtered;
   };
 
-  const handleCreateStream = () => {
-    if (!user) {
-      toast.error('Please sign in to create AI streams');
-      navigate('/auth');
-      return;
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'tutorial':
+        return <BookOpen className="h-4 w-4" />;
+      case 'research':
+        return <FlaskConical className="h-4 w-4" />;
+      case 'demo':
+        return <Code className="h-4 w-4" />;
+      case 'live':
+        return <Radio className="h-4 w-4" />;
+      default:
+        return <Play className="h-4 w-4" />;
     }
-    
-    if (!canUpload) {
-      toast.error('Upgrade to Basic or Pro tier to create AI streams');
-      navigate('/pricing');
-      return;
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'tutorial':
+        return "bg-blue-500";
+      case 'research':
+        return "bg-purple-500";
+      case 'demo':
+        return "bg-green-500";
+      case 'live':
+        return "bg-red-500";
+      default:
+        return "bg-gray-500";
     }
-    
-    // Navigate to create stream page
-    navigate('/ai-streams/create');
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      year: 'numeric'
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
     }).format(date);
-  };
-
-  const getCategoryBadge = (category: string) => {
-    switch (category) {
-      case 'tutorial':
-        return <Badge className="bg-blue-500 hover:bg-blue-600">Tutorial</Badge>;
-      case 'research':
-        return <Badge className="bg-purple-500 hover:bg-purple-600">Research</Badge>;
-      case 'demo':
-        return <Badge className="bg-green-500 hover:bg-green-600">Demo</Badge>;
-      case 'live':
-        return <Badge className="bg-red-500 hover:bg-red-600">Live</Badge>;
-      default:
-        return <Badge>Unknown</Badge>;
-    }
   };
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 pt-24 px-6 pb-12">
+      <main className="flex-1 pt-24 px-4 md:px-6 pb-12 bg-gradient-to-b from-indigo-50/30 to-white dark:from-indigo-950/10 dark:to-gray-950">
         <div className="max-w-7xl mx-auto">
-          {/* Hero Section */}
-          <div className="mb-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl overflow-hidden">
-            <div className="px-6 py-12 md:py-16 md:px-12">
+          {/* Hero section */}
+          <div className="relative rounded-xl overflow-hidden mb-10">
+            <div className="bg-gradient-to-r from-indigo-800 via-purple-800 to-purple-900 py-16 px-8 rounded-xl">
               <div className="max-w-3xl">
-                <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                  AI Streams
-                </h1>
-                <p className="text-white/90 text-lg md:text-xl mb-6">
-                  Discover AI tutorials, research breakdowns, and tool demonstrations from our community. 
-                  Learn from experts and sharpen your AI skills.
+                <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">AI Streams</h1>
+                <p className="text-indigo-100 text-lg mb-6">
+                  Watch tutorials, research presentations, live demos, and coding sessions from AI experts and community members.
                 </p>
-                <div className="flex flex-wrap gap-4">
-                  {canUpload ? (
-                    <Button 
-                      onClick={handleCreateStream}
-                      className="bg-white text-blue-600 hover:bg-blue-50 flex items-center gap-2"
-                    >
-                      <Upload className="h-4 w-4" />
-                      Create AI Stream
-                    </Button>
-                  ) : (
-                    <Button 
-                      onClick={() => navigate('/pricing')}
-                      variant="outline" 
-                      className="border-white text-white hover:bg-white/10 flex items-center gap-2"
-                    >
-                      <Crown className="h-4 w-4" />
-                      Upgrade to Create Streams
-                    </Button>
-                  )}
-                  <Button 
-                    variant="outline" 
-                    className="border-white text-white hover:bg-white/10 flex items-center gap-2"
-                    onClick={() => navigate('/ai-streams/popular')}
-                  >
-                    <Eye className="h-4 w-4" />
-                    Browse Popular
+                {currentTier === 'pro' ? (
+                  <Button className="bg-white text-purple-900 hover:bg-indigo-50">
+                    Upload Your Own Stream
                   </Button>
-                </div>
+                ) : (
+                  <Button className="bg-white text-purple-900 hover:bg-indigo-50" onClick={() => upgradePrompt('pro')}>
+                    Upgrade to Upload Streams
+                  </Button>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Search and Filter */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input 
-                placeholder="Search AI streams..." 
-                className="pl-10 max-w-md w-full"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" className="flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                <span>Filters</span>
-              </Button>
-              {canUpload && (
-                <Button onClick={handleCreateStream} className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  <span>Create</span>
-                </Button>
-              )}
-            </div>
-          </div>
-
-          {/* Categories Tabs */}
-          <Tabs defaultValue="all" value={activeCategory} onValueChange={setActiveCategory} className="mb-8">
-            <TabsList className="grid grid-cols-5 mb-8">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="tutorial">Tutorials</TabsTrigger>
-              <TabsTrigger value="research">Research</TabsTrigger>
-              <TabsTrigger value="demo">Demos</TabsTrigger>
-              <TabsTrigger value="live">Live</TabsTrigger>
-            </TabsList>
-          </Tabs>
-
-          {/* Freemium Overlay - only shown when user is on freemium tier */}
-          {currentTier === 'freemium' && (
-            <div className="mb-8 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-lg p-4 dark:from-amber-900/20 dark:to-yellow-900/20 dark:border-amber-800">
-              <div className="flex flex-col md:flex-row md:items-center gap-4">
-                <div className="flex-grow">
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <Lock className="h-4 w-4 text-amber-500" /> 
-                    <span>Freemium Access - Watch Only</span>
-                  </h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    You can watch all AI Streams but need to upgrade to Basic or Pro tier to create and share your own content.
-                  </p>
-                </div>
-                <Button 
-                  onClick={() => navigate('/pricing')} 
-                  variant="outline" 
-                  className="shrink-0 border-amber-200 hover:border-amber-300 hover:bg-amber-50"
-                >
-                  View Pricing
-                </Button>
+          {/* Featured streams */}
+          {featuredStreams.length > 0 && (
+            <div className="mb-10">
+              <h2 className="text-2xl font-semibold mb-6">Featured Streams</h2>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {featuredStreams.map((stream) => (
+                  <Card key={stream.id} className="overflow-hidden">
+                    <div className="relative h-48 bg-gray-800 flex items-center justify-center">
+                      {stream.image_url ? (
+                        <img 
+                          src={stream.image_url} 
+                          alt={stream.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full w-full bg-gradient-to-br from-indigo-900 to-purple-900">
+                          <Play className="h-16 w-16 text-white opacity-70" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                        <div className="p-4 text-white">
+                          <Badge 
+                            className={`${getCategoryColor(stream.category)} text-white mb-2`}
+                          >
+                            {getCategoryIcon(stream.category)}
+                            <span className="ml-1 capitalize">{stream.category}</span>
+                          </Badge>
+                          <h3 className="text-xl font-medium">{stream.title}</h3>
+                        </div>
+                      </div>
+                      <Badge className="absolute top-3 right-3 bg-black/70 text-white">
+                        {stream.duration}
+                      </Badge>
+                    </div>
+                    <CardContent className="pt-4">
+                      <p className="text-muted-foreground line-clamp-2">{stream.description}</p>
+                    </CardContent>
+                    <CardFooter className="flex justify-between border-t pt-4">
+                      <div className="flex items-center space-x-2">
+                        <Avatar className="h-7 w-7">
+                          {stream.author?.avatar_url ? (
+                            <img src={stream.author.avatar_url} alt={stream.author.username} />
+                          ) : (
+                            <User className="h-4 w-4" />
+                          )}
+                        </Avatar>
+                        <span className="text-sm font-medium">{stream.author?.username}</span>
+                      </div>
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Eye className="h-4 w-4 mr-1" /> {stream.views.toLocaleString()}
+                      </div>
+                    </CardFooter>
+                    <Link to={`/ai-streams/${stream.id}`} className="absolute inset-0">
+                      <span className="sr-only">View stream</span>
+                    </Link>
+                  </Card>
+                ))}
               </div>
             </div>
           )}
 
-          {/* AI Streams Grid */}
-          {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <Card key={i} className="overflow-hidden">
-                  <div className="aspect-video bg-gray-200 dark:bg-gray-800 animate-pulse"></div>
-                  <CardHeader className="pb-2">
-                    <div className="h-6 bg-gray-200 dark:bg-gray-800 rounded animate-pulse mb-2"></div>
-                    <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded animate-pulse w-24"></div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded animate-pulse mb-2"></div>
-                    <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded animate-pulse w-3/4"></div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : filteredStreams.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredStreams.map((stream) => (
-                <Card key={stream.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                  <Link to={`/ai-streams/${stream.id}`} className="block">
-                    <div className="aspect-video bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
-                      {stream.image_url ? (
-                        <img 
-                          src={stream.image_url} 
-                          alt={stream.title} 
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500/10 to-purple-500/10">
-                          <Code className="h-12 w-12 text-gray-400" />
-                        </div>
-                      )}
-                      <div className="absolute bottom-3 right-3 bg-black/70 text-white px-2 py-1 rounded text-sm flex items-center">
-                        <Clock className="h-3.5 w-3.5 mr-1" />
-                        {stream.duration || '15 min'}
-                      </div>
-                    </div>
-                  </Link>
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <Link to={`/ai-streams/${stream.id}`}>
-                          <CardTitle className="hover:text-blue-600 transition-colors line-clamp-1">
-                            {stream.title}
-                          </CardTitle>
-                        </Link>
-                        <CardDescription className="flex items-center mt-1">
-                          {stream.author?.username || 'Anonymous'} • {formatDate(stream.created_at)}
-                        </CardDescription>
-                      </div>
-                      {getCategoryBadge(stream.category)}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {stream.description}
-                    </p>
-                  </CardContent>
-                  <CardFooter className="flex justify-between text-xs text-muted-foreground pt-0">
-                    <div className="flex items-center gap-4">
-                      <span className="flex items-center">
-                        <Eye className="h-3.5 w-3.5 mr-1" />
-                        {stream.views}
-                      </span>
-                      <span className="flex items-center">
-                        <MessageSquare className="h-3.5 w-3.5 mr-1" />
-                        {Math.floor(Math.random() * 50)}
-                      </span>
-                    </div>
-                    <Button size="sm" variant="ghost" className="h-8 gap-1" asChild>
-                      <Link to={`/ai-streams/${stream.id}`}>
-                        <Play className="h-3.5 w-3.5" />
-                        <span>Watch</span>
-                      </Link>
+          {/* Stream browser */}
+          <div>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 space-y-4 md:space-y-0">
+              <h2 className="text-2xl font-semibold">Browse Streams</h2>
+              <div className="flex items-center space-x-2 w-full md:w-auto">
+                <div className="relative flex-1 md:w-64">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search streams..."
+                    className="pl-9"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon">
+                      <SlidersHorizontal className="h-4 w-4" />
                     </Button>
-                  </CardFooter>
-                </Card>
-              ))}
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>Most recent</DropdownMenuItem>
+                    <DropdownMenuItem>Most viewed</DropdownMenuItem>
+                    <DropdownMenuItem>Highest rated</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
-          ) : (
-            <div className="text-center py-20">
-              <Play className="h-16 w-16 mx-auto text-gray-300 dark:text-gray-700 mb-4" />
-              <h3 className="text-xl font-medium mb-2">No streams found</h3>
-              <p className="text-muted-foreground max-w-md mx-auto mb-6">
-                {searchQuery 
-                  ? `We couldn't find any streams matching "${searchQuery}"`
-                  : `No streams found in the ${activeCategory} category`
-                }
-              </p>
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setSearchQuery('');
-                  setActiveCategory('all');
-                }}
-              >
-                Reset Filters
-              </Button>
-            </div>
+
+            <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mb-8">
+              <TabsList className="mb-4">
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="tutorial">Tutorials</TabsTrigger>
+                <TabsTrigger value="research">Research</TabsTrigger>
+                <TabsTrigger value="demo">Demos</TabsTrigger>
+                <TabsTrigger value="live">Live</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value={activeTab}>
+                {isLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[...Array(6)].map((_, index) => (
+                      <Card key={index} className="overflow-hidden">
+                        <div className="h-40 bg-muted animate-pulse" />
+                        <CardContent className="pt-4">
+                          <div className="h-5 bg-muted animate-pulse mb-2 w-3/4" />
+                          <div className="h-4 bg-muted animate-pulse mb-1 w-full" />
+                          <div className="h-4 bg-muted animate-pulse w-2/3" />
+                        </CardContent>
+                        <CardFooter className="border-t pt-4">
+                          <div className="flex justify-between w-full">
+                            <div className="flex items-center space-x-2">
+                              <div className="h-7 w-7 rounded-full bg-muted animate-pulse" />
+                              <div className="h-4 w-20 bg-muted animate-pulse" />
+                            </div>
+                            <div className="h-4 w-12 bg-muted animate-pulse" />
+                          </div>
+                        </CardFooter>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    {getFilteredStreams().length === 0 ? (
+                      <div className="text-center py-12">
+                        <h3 className="text-lg font-medium mb-2">No streams found</h3>
+                        <p className="text-muted-foreground">Try adjusting your search or filters</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {getFilteredStreams().map((stream) => (
+                          <Card key={stream.id} className="overflow-hidden relative group">
+                            <div className="relative h-40 bg-gray-800">
+                              {stream.image_url ? (
+                                <img 
+                                  src={stream.image_url} 
+                                  alt={stream.title}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="flex items-center justify-center h-full w-full bg-gradient-to-br from-gray-800 to-gray-900">
+                                  <Play className="h-12 w-12 text-white opacity-50" />
+                                </div>
+                              )}
+                              <Badge 
+                                className="absolute top-3 left-3 capitalize"
+                                variant="secondary"
+                              >
+                                {getCategoryIcon(stream.category)}
+                                <span className="ml-1">{stream.category}</span>
+                              </Badge>
+                              {stream.duration && (
+                                <Badge className="absolute bottom-3 right-3 bg-black/70 text-white">
+                                  <Clock className="h-3 w-3 mr-1" />
+                                  {stream.duration}
+                                </Badge>
+                              )}
+                              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                <Button variant="secondary" size="sm" className="h-9">
+                                  <Play className="h-4 w-4 mr-2" />
+                                  Play
+                                </Button>
+                              </div>
+                            </div>
+                            <CardContent className="pt-4">
+                              <h3 className="font-medium line-clamp-1 mb-1">{stream.title}</h3>
+                              <p className="text-sm text-muted-foreground line-clamp-2">{stream.description}</p>
+                            </CardContent>
+                            <CardFooter className="border-t pt-4 flex justify-between">
+                              <div className="flex items-center space-x-2">
+                                <Avatar className="h-6 w-6">
+                                  {stream.author?.avatar_url ? (
+                                    <img src={stream.author.avatar_url} alt={stream.author.username} />
+                                  ) : (
+                                    <User className="h-3 w-3" />
+                                  )}
+                                </Avatar>
+                                <span className="text-xs font-medium">{stream.author?.username}</span>
+                              </div>
+                              <div className="flex items-center space-x-3 text-xs text-muted-foreground">
+                                <span className="flex items-center">
+                                  <Eye className="h-3 w-3 mr-1" /> {stream.views.toLocaleString()}
+                                </span>
+                                <span>{formatDate(stream.created_at)}</span>
+                              </div>
+                            </CardFooter>
+                            <Link to={`/ai-streams/${stream.id}`} className="absolute inset-0">
+                              <span className="sr-only">View {stream.title}</span>
+                            </Link>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </TabsContent>
+            </Tabs>
+          </div>
+          
+          {/* Pro upgrade banner */}
+          {currentTier !== 'pro' && (
+            <Card className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20 border-purple-100 dark:border-purple-900/30 p-6 mb-8">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div>
+                  <h3 className="text-xl font-semibold text-purple-900 dark:text-purple-400 mb-2">Unlock Pro Features</h3>
+                  <p className="text-purple-800/80 dark:text-purple-300/80 max-w-2xl">
+                    Upgrade to Pro to upload your own AI streams, access exclusive content, and join live coding sessions with AI experts.
+                  </p>
+                </div>
+                <Button 
+                  className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white min-w-[150px]"
+                  onClick={() => upgradePrompt('pro')}
+                >
+                  Upgrade to Pro
+                </Button>
+              </div>
+            </Card>
           )}
         </div>
       </main>

@@ -8,20 +8,36 @@ export interface ChatInputProps {
   onSubmit: (message: string) => void;
   isLoading: boolean;
   placeholder?: string;
+  value?: string;
+  onChange?: (value: string) => void;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({ 
   onSubmit, 
   isLoading, 
-  placeholder = "Type your message..." 
+  placeholder = "Type your message...",
+  value: externalValue,
+  onChange: externalOnChange
 }) => {
-  const [message, setMessage] = useState('');
+  const [internalMessage, setInternalMessage] = useState('');
+  
+  // Use external or internal state based on whether external props are provided
+  const message = externalValue !== undefined ? externalValue : internalMessage;
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (externalOnChange) {
+      externalOnChange(e.target.value);
+    } else {
+      setInternalMessage(e.target.value);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim() && !isLoading) {
       onSubmit(message);
-      setMessage('');
+      if (!externalOnChange) {
+        setInternalMessage('');
+      }
     }
   };
 
@@ -36,7 +52,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
     <form onSubmit={handleSubmit} className="flex items-end space-x-2 w-full">
       <Textarea
         value={message}
-        onChange={(e) => setMessage(e.target.value)}
+        onChange={handleChange}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         className="flex-1 min-h-[80px] max-h-[150px]"

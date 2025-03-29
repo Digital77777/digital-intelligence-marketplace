@@ -176,10 +176,10 @@ const AIAssistant = () => {
                 
                 <div className="p-4 border-t mt-auto">
                   <ChatInput
+                    onSubmit={handleSendMessage}
+                    isLoading={isLoading}
                     value={inputValue}
                     onChange={setInputValue}
-                    onSend={handleSendMessage}
-                    isLoading={isLoading}
                     placeholder={
                       currentTier === 'freemium' 
                         ? `Ask a question (${5 - messages.filter(m => m.role === 'user').length}/5 remaining)`
