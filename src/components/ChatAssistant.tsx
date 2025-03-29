@@ -91,9 +91,7 @@ const ChatAssistant: React.FC = () => {
       }
     } catch (error) {
       console.error("Error sending message:", error);
-      toast({
-        description: "Could not get a response. Please try again."
-      });
+      toast("Could not get a response. Please try again.");
     } finally {
       setIsLoading(false);
     }

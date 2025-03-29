@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -33,18 +34,22 @@ const AIAssistant: React.FC = () => {
     }
   }, [messages.length]);
 
-  const handleSendMessage = async (message: string) => {
-    if (!message.trim() || isLoading) return;
+  const handleInputChange = (value: string) => {
+    setInputValue(value);
+  };
+
+  const handleSendMessage = async () => {
+    if (!inputValue.trim() || isLoading) return;
     
     if (!user) {
-      toast.error("You need to be logged in to use the Pro AI Assistant");
+      toast("You need to be logged in to use the Pro AI Assistant");
       return;
     }
     
     const userMessage: ChatMessage = {
       id: `user-${Date.now()}`,
       role: 'user',
-      content: message,
+      content: inputValue,
       timestamp: new Date()
     };
     
@@ -67,7 +72,7 @@ const AIAssistant: React.FC = () => {
       
     } catch (error) {
       console.error("Error sending message:", error);
-      toast.error("Error communicating with AI Assistant");
+      toast("Error communicating with AI Assistant");
     } finally {
       setIsLoading(false);
     }
@@ -136,11 +141,11 @@ const AIAssistant: React.FC = () => {
               </div>
               
               <ChatInput 
+                value={inputValue}
+                onChange={handleInputChange}
                 onSubmit={handleSendMessage}
                 isLoading={isLoading}
                 placeholder="Ask a question about AI tools, models, or workflows..."
-                value={inputValue}
-                onChange={(value: string) => setInputValue(value)}
               />
             </div>
           </div>

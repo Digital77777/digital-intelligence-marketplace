@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -28,6 +29,12 @@ import {
   Lock,
   Unlock
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem
+} from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
 import { LearningContent, UserProgress } from '@/types/learning';
 import { useUser } from '@/context/UserContext';
@@ -71,11 +78,7 @@ const LearningHub = () => {
     
   } catch (error) {
     console.error("Error fetching courses:", error);
-    toast({
-      title: "Error",
-      description: "Could not load courses. Please try again later.",
-      variant: "destructive"
-    });
+    toast("Could not load courses. Please try again later.");
   } finally {
     setIsLoading(false);
   }
@@ -118,11 +121,7 @@ const LearningHub = () => {
 
   const handleMarkComplete = async (courseId: string) => {
     if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to track your progress",
-        variant: "destructive"
-      });
+      toast("Please sign in to track your progress");
       return;
     }
   
@@ -194,18 +193,11 @@ const LearningHub = () => {
       return newProgress;
     });
     
-    toast({
-      title: "Progress Updated",
-      description: "Course marked as completed!",
-    });
+    toast("Course marked as completed!");
     
   } catch (error) {
     console.error("Error updating progress:", error);
-    toast({
-      title: "Error",
-      description: "Could not update progress. Please try again.",
-      variant: "destructive"
-    });
+    toast("Could not update progress. Please try again.");
   } finally {
     setIsUpdating(false);
   }
@@ -334,7 +326,7 @@ const LearningHub = () => {
                     </CardFooter>
                     <div className="absolute top-2 right-2">
                       {getCourseProgress(course.id) === 100 ? (
-                        <Badge variant="success">
+                        <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-200">
                           <CheckCircle className="h-3 w-3 mr-1" />
                           Completed
                         </Badge>
