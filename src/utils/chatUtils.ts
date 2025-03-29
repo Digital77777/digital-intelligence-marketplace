@@ -1,95 +1,153 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { v4 as uuidv4 } from 'uuid';
 import { ChatMessage } from '@/components/chat/ChatContainer';
+import { toast } from 'sonner';
 
-export interface ChatHistory {
+// Define the chat session interface
+interface ChatSession {
   id: string;
   user_id: string;
-  message: string;
-  bot_response: string;
-  timestamp: string;
-  metadata?: any;
+  title: string;
+  created_at: Date;
+  updated_at: Date;
+  messages: ChatMessage[];
 }
 
-export const fetchChatHistory = async (type: string): Promise<ChatMessage[]> => {
+// Send a message to the AI assistant
+export const sendChatMessage = async (
+  userId: string,
+  sessionId: string,
+  message: string,
+  prevMessages: ChatMessage[]
+): Promise<string> => {
   try {
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError || !sessionData.session) throw new Error('Authentication required');
-    
-    const token = sessionData.session.access_token;
-    
-    const response = await fetch(`${supabase.functions.url}/pro-chat/history`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
+    // For Pro users, use the pro-chat edge function
+    const functionName = 'pro-chat';
+    const { data, error } = await supabase.functions.invoke(functionName, {
+      body: {
+        user_id: userId,
+        session_id: sessionId,
+        message: message,
+        history: prevMessages.map(msg => ({
+          role: msg.role,
+          content: msg.content
+        }))
+      }
     });
-    
-    const result = await response.json();
-    
-    if (result.data && Array.isArray(result.data)) {
-      // Filter by type if provided in metadata
-      const filteredData = type 
-        ? result.data.filter((item: ChatHistory) => 
-            item.metadata && item.metadata.type === type
-          )
-        : result.data;
-      
-      // Transform the database format to our ChatMessage format
-      const chatHistory = filteredData.map((item: ChatHistory) => [
-        {
-          id: `user-${item.id}`,
-          message: item.message,
-          isUser: true,
-          timestamp: item.timestamp
-        },
-        {
-          id: `bot-${item.id}`,
-          message: item.bot_response,
-          isUser: false,
-          timestamp: item.timestamp
-        }
-      ]).flat();
-      
-      return chatHistory.reverse();
+
+    if (error) {
+      throw error;
     }
-    
-    return [];
+
+    // Save the conversation to the database
+    await saveConversation(userId, sessionId, prevMessages, {
+      id: uuidv4(),
+      role: 'user',
+      content: message,
+      timestamp: new Date()
+    });
+
+    if (data?.response) {
+      // Also save the assistant's response
+      await saveConversation(userId, sessionId, [...prevMessages, {
+        id: uuidv4(),
+        role: 'user',
+        content: message,
+        timestamp: new Date()
+      }], {
+        id: uuidv4(),
+        role: 'assistant',
+        content: data.response,
+        timestamp: new Date()
+      });
+
+      return data.response;
+    }
+
+    return "I'm sorry, I couldn't generate a response. Please try again.";
   } catch (error) {
-    console.error('Error fetching chat history:', error);
-    return [];
+    console.error('Error sending message to AI assistant:', error);
+    throw error;
   }
 };
 
-export const saveChatMessage = async (
-  userMessage: string, 
-  botResponse: string, 
-  metadata?: any
-): Promise<boolean> => {
+// Save a conversation to the database
+export const saveConversation = async (
+  userId: string,
+  sessionId: string,
+  prevMessages: ChatMessage[],
+  newMessage: ChatMessage
+) => {
   try {
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError || !sessionData.session) return false;
+    const { data: existingSession, error: fetchError } = await supabase
+      .from('chat_sessions')
+      .select('*')
+      .eq('id', sessionId)
+      .single();
+
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      // PGRST116 is the error code for "no rows returned"
+      throw fetchError;
+    }
+
+    const allMessages = [...prevMessages, newMessage];
     
-    const token = sessionData.session.access_token;
-    
-    const response = await fetch(`${supabase.functions.url}/pro-chat/history`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        message: userMessage,
-        botResponse: botResponse,
-        metadata
-      }),
-    });
-    
-    const result = await response.json();
-    return result.success === true;
+    if (!existingSession) {
+      // Create a new session
+      const { error: insertError } = await supabase
+        .from('chat_sessions')
+        .insert([
+          {
+            id: sessionId,
+            user_id: userId,
+            title: allMessages[0]?.content.substring(0, 50) || 'New conversation',
+            messages: allMessages.map(msg => ({
+              role: msg.role,
+              content: msg.content,
+              timestamp: msg.timestamp || new Date()
+            }))
+          }
+        ]);
+
+      if (insertError) throw insertError;
+    } else {
+      // Update existing session
+      const { error: updateError } = await supabase
+        .from('chat_sessions')
+        .update({
+          updated_at: new Date(),
+          messages: allMessages.map(msg => ({
+            role: msg.role,
+            content: msg.content,
+            timestamp: msg.timestamp || new Date()
+          }))
+        })
+        .eq('id', sessionId);
+
+      if (updateError) throw updateError;
+    }
   } catch (error) {
-    console.error('Error saving chat message:', error);
-    return false;
+    console.error('Error saving conversation:', error);
+    toast.error('Failed to save conversation');
+  }
+};
+
+// Fetch chat history for a user
+export const fetchChatHistory = async (userId: string): Promise<ChatSession[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('chat_sessions')
+      .select('*')
+      .eq('user_id', userId)
+      .order('updated_at', { ascending: false });
+
+    if (error) throw error;
+
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching chat history:', error);
+    toast.error('Failed to fetch chat history');
+    return [];
   }
 };

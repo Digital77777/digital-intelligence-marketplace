@@ -1,258 +1,313 @@
 
 import React, { useState, useEffect } from 'react';
-import ProTierLayout from '@/components/layouts/ProTierLayout';
-import { Card } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/hooks/use-toast';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from 'sonner';
+import { BrainCircuit, Send, Plus, Bot, Settings, History, Sparkles, Save, Info } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/context/UserContext';
 import { useTier } from '@/context/TierContext';
+import ProTierLayout from '@/components/layouts/ProTierLayout';
 import ChatContainer, { ChatMessage } from '@/components/chat/ChatContainer';
 import ChatInput from '@/components/chat/ChatInput';
-import { useNavigate } from 'react-router-dom';
-import { Spinner } from '@/components/ui/spinner';
-import { supabase } from '@/integrations/supabase/client';
-
-const EXAMPLE_PROMPTS = [
-  "Explain how to build a recommendation system for an e-commerce site",
-  "What's the difference between GPT-3 and GPT-4?",
-  "How can I optimize my machine learning model?",
-  "What APIs should I use for a sentiment analysis tool?",
-  "Compare supervised vs unsupervised learning",
-  "Explain the concept of transfer learning",
-];
+import { sendChatMessage, fetchChatHistory } from '@/utils/chatUtils';
 
 const AIAssistant = () => {
-  const { user } = useUser();
-  const { canAccess } = useTier();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [inputValue, setInputValue] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isFetching, setIsFetching] = useState<boolean>(true);
+  const [input, setInput] = useState('');
+  const [topic, setTopic] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [userPrompts, setUserPrompts] = useState<any[]>([]);
+  const [chatSessionId, setChatSessionId] = useState(() => uuidv4());
+  const [activeTab, setActiveTab] = useState('new-chat');
+  
   const navigate = useNavigate();
-
-  // Check access and load chat history on component mount
+  const { user } = useUser();
+  const { currentTier, canAccess, upgradePrompt } = useTier();
+  
+  // Check if user has access to this pro feature
   useEffect(() => {
-    if (!canAccess('pro')) {
+    if (!canAccess('pro-chatbot')) {
+      upgradePrompt('pro');
       navigate('/pricing');
-      toast({
-        title: "Pro Tier Required",
-        description: "This feature requires a Pro tier subscription",
-        variant: "destructive",
-      });
-      return;
     }
-
-    fetchChatHistory();
-  }, [canAccess, navigate, user?.id]);
-
-  const fetchChatHistory = async () => {
-    if (!user) {
-      setIsFetching(false);
-      return;
+  }, [canAccess, upgradePrompt, navigate]);
+  
+  // Fetch user's saved prompts
+  useEffect(() => {
+    if (user) {
+      fetchSavedPrompts();
+      loadChatHistory();
     }
-
+  }, [user]);
+  
+  const fetchSavedPrompts = async () => {
     try {
-      setIsFetching(true);
-      
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !sessionData.session) throw new Error('Authentication required');
-      
-      const token = sessionData.session.access_token;
-      
-      const response = await fetch(`${supabase.functions.url}/pro-chat/history`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      const result = await response.json();
-      
-      if (result.data && Array.isArray(result.data)) {
-        // Transform the database format to our ChatMessage format
-        const chatHistory = result.data.map((item: any) => [
-          {
-            id: `user-${item.id}`,
-            message: item.message,
-            isUser: true,
-            timestamp: item.timestamp
-          },
-          {
-            id: `bot-${item.id}`,
-            message: item.bot_response,
-            isUser: false,
-            timestamp: item.timestamp
-          }
-        ]).flat();
+      const { data, error } = await supabase
+        .from('user_prompts')
+        .select('*')
+        .eq('user_id', user?.id);
         
-        setMessages(chatHistory.reverse());
+      if (error) throw error;
+      
+      if (data) {
+        setUserPrompts(data);
       }
     } catch (error) {
-      console.error('Error fetching chat history:', error);
-      // If it's a new user or there's an error, just set some welcome messages
-      setMessages([
-        {
-          id: 'welcome-1',
-          message: 'Hi there! I\'m your AI Assistant. How can I help you today?',
-          isUser: false,
-          timestamp: new Date().toISOString()
-        }
-      ]);
-    } finally {
-      setIsFetching(false);
+      console.error('Error fetching saved prompts:', error);
     }
   };
-
-  const saveChatToHistory = async (userMessage: string, botResponse: string) => {
-    if (!user) return;
+  
+  const loadChatHistory = async () => {
+    try {
+      if (!user) return;
+      
+      const history = await fetchChatHistory(user.id);
+      
+      if (history.length > 0) {
+        // Load the most recent conversation
+        const latestSession = history[0];
+        setChatSessionId(latestSession.id);
+        setMessages(latestSession.messages.map((msg: any) => ({
+          id: uuidv4(),
+          role: msg.role,
+          content: msg.content,
+          timestamp: new Date(msg.timestamp)
+        })));
+      } else {
+        // Initialize with welcome message
+        setMessages([{
+          id: uuidv4(),
+          role: 'assistant',
+          content: "Hello! I'm your AI assistant, specialized in helping with complex AI concepts, coding, and data analysis. How can I help you today?",
+          timestamp: new Date()
+        }]);
+      }
+    } catch (error) {
+      console.error('Error loading chat history:', error);
+      toast.error('Failed to load chat history');
+    }
+  };
+  
+  const savePrompt = async () => {
+    if (!topic.trim()) {
+      toast.error('Please enter a topic name');
+      return;
+    }
     
     try {
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !sessionData.session) return;
+      const { error } = await supabase
+        .from('user_prompts')
+        .insert([
+          { 
+            user_id: user?.id, 
+            title: topic, 
+            content: input, 
+            created_at: new Date() 
+          }
+        ]);
+        
+      if (error) throw error;
       
-      const token = sessionData.session.access_token;
-      
-      await fetch(`${supabase.functions.url}/pro-chat/history`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: userMessage,
-          botResponse: botResponse,
-          metadata: { type: 'ai_assistant' }
-        }),
-      });
+      toast.success('Prompt saved successfully');
+      fetchSavedPrompts();
+      setTopic('');
     } catch (error) {
-      console.error('Error saving chat history:', error);
+      console.error('Error saving prompt:', error);
+      toast.error('Failed to save prompt');
     }
   };
-
-  const handleMessageSubmit = async (message: string) => {
+  
+  const loadPrompt = (content: string) => {
+    setInput(content);
+  };
+  
+  const startNewChat = () => {
+    const newSessionId = uuidv4();
+    setChatSessionId(newSessionId);
+    setMessages([{
+      id: uuidv4(),
+      role: 'assistant',
+      content: "Hello! I'm your AI assistant, specialized in helping with complex AI concepts, coding, and data analysis. How can I help you today?",
+      timestamp: new Date()
+    }]);
+    setInput('');
+  };
+  
+  const handleSubmitMessage = async (message: string) => {
     if (!message.trim()) return;
     
     const userMessage: ChatMessage = {
-      id: `user-${Date.now()}`,
-      message,
-      isUser: true,
-      timestamp: new Date().toISOString()
+      id: uuidv4(),
+      role: 'user',
+      content: message,
+      timestamp: new Date()
     };
     
     setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
+    setInput('');
     setIsLoading(true);
     
     try {
-      // Simulate AI response (replace with actual API call in production)
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Send message to backend
+      const response = await sendChatMessage(
+        user?.id as string,
+        chatSessionId,
+        userMessage.content,
+        messages
+      );
       
-      const botResponse = await getAIResponse(message);
-      
-      const botMessage: ChatMessage = {
-        id: `bot-${Date.now()}`,
-        message: botResponse,
-        isUser: false,
-        timestamp: new Date().toISOString()
+      // Add assistant response
+      const assistantMessage: ChatMessage = {
+        id: uuidv4(),
+        role: 'assistant',
+        content: response,
+        timestamp: new Date()
       };
       
-      setMessages(prev => [...prev, botMessage]);
-      
-      // Save the conversation to history
-      await saveChatToHistory(message, botResponse);
+      setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
-      console.error("Error getting AI response:", error);
-      toast({
-        title: "Error",
-        description: "Failed to get a response. Please try again.",
-        variant: "destructive",
-      });
+      console.error('Error sending message:', error);
+      toast.error('Failed to get response from AI');
     } finally {
       setIsLoading(false);
     }
   };
-
-  // This is a mock function - replace with actual AI service integration
-  const getAIResponse = async (message: string): Promise<string> => {
-    // Simple response mapping for demo purposes
-    if (message.toLowerCase().includes('recommendation system')) {
-      return "Building a recommendation system for e-commerce typically involves these steps:\n\n1. Collect user data (browsing history, purchases)\n2. Choose an approach (collaborative filtering, content-based, or hybrid)\n3. Prepare and preprocess your data\n4. Train your model\n5. Implement filtering and ranking logic\n6. Deploy and test with A/B testing\n\nPopular frameworks include TensorFlow Recommenders, Surprise, and Amazon Personalize.";
-    }
-    
-    if (message.toLowerCase().includes('gpt-3') && message.toLowerCase().includes('gpt-4')) {
-      return "GPT-4 is more advanced than GPT-3 with several improvements:\n\n1. Improved reasoning and problem-solving abilities\n2. Better context handling and longer memory\n3. More nuanced understanding of complex instructions\n4. Reduced hallucinations and factual errors\n5. Multimodal capabilities (can process both text and images)\n\nIt's also more expensive to use and has stricter rate limits than GPT-3.";
-    }
-    
-    if (message.toLowerCase().includes('optimize') && message.toLowerCase().includes('machine learning')) {
-      return "To optimize your machine learning model:\n\n1. Ensure data quality and perform feature engineering\n2. Try different algorithms and architectures\n3. Use hyperparameter tuning (grid search, random search, Bayesian optimization)\n4. Implement regularization techniques to prevent overfitting\n5. Consider ensemble methods\n6. Monitor and analyze errors\n7. Use cross-validation for more robust evaluation\n\nTools like MLflow, Optuna, and Weights & Biases can help with tracking experiments.";
-    }
-    
-    if (message.toLowerCase().includes('sentiment analysis') && message.toLowerCase().includes('api')) {
-      return "For sentiment analysis APIs, consider:\n\n1. Google Cloud Natural Language API\n2. Azure Text Analytics\n3. Amazon Comprehend\n4. IBM Watson NLU\n5. HuggingFace Inference API\n\nOpen-source options include:\n- NLTK\n- spaCy\n- TextBlob\n- Flair\n\nChoose based on your needs for language support, accuracy, pricing, and integration ease.";
-    }
-    
-    // Default response for other queries
-    return "I'm your AI assistant specialized in machine learning, AI development, and data science. I can help you understand complex concepts, suggest implementation strategies, or assist with troubleshooting your projects. What specific area would you like to explore further?";
-  };
-
-  const handleSelectPrompt = (prompt: string) => {
-    setInputValue(prompt);
-  };
-
-  if (isFetching) {
+  
+  if (!canAccess('pro-chatbot')) {
     return (
-      <ProTierLayout>
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <Spinner size="lg" className="mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading your AI Assistant...</p>
-          </div>
+      <ProTierLayout pageTitle="AI Assistant" requiredFeature="pro-chatbot">
+        <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+          <BrainCircuit className="h-16 w-16 text-primary mb-4" />
+          <h1 className="text-2xl font-bold mb-2">Advanced AI Assistant</h1>
+          <p className="text-muted-foreground mb-6 max-w-md">
+            Unlock our powerful AI Assistant with the Pro tier to help with complex AI concepts, coding, and data analysis.
+          </p>
+          <Button onClick={() => navigate('/pricing')}>Upgrade to Pro</Button>
         </div>
       </ProTierLayout>
     );
   }
-
+  
   return (
-    <ProTierLayout>
-      <div className="flex flex-col h-full mx-auto max-w-4xl w-full px-4 py-8">
-        <div className="flex-1 pb-4 md:pb-6">
-          <h1 className="text-3xl font-bold mb-2">AI Assistant</h1>
-          <p className="text-muted-foreground mb-6">
-            Your personal AI assistant for machine learning, AI development, and data science.
-          </p>
+    <ProTierLayout pageTitle="AI Assistant" requiredFeature="pro-chatbot">
+      <div className="flex h-full">
+        {/* Sidebar */}
+        <div className="w-64 border-r bg-background p-4 hidden md:block">
+          <Button variant="outline" className="w-full mb-4" onClick={startNewChat}>
+            <Plus className="h-4 w-4 mr-2" /> New Chat
+          </Button>
           
-          {messages.length === 0 && (
-            <Card className="p-6 bg-muted/50 mb-8">
-              <h3 className="font-medium text-lg mb-3">Try asking about:</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {EXAMPLE_PROMPTS.map((prompt, i) => (
-                  <Button 
-                    key={i} 
-                    variant="outline" 
-                    className="justify-start h-auto py-3 px-4 text-left normal-case"
-                    onClick={() => handleSelectPrompt(prompt)}
-                  >
-                    {prompt}
-                  </Button>
-                ))}
-              </div>
-            </Card>
-          )}
-
-          <div className="h-[60vh] mb-4 rounded-lg border bg-background">
-            <ChatContainer messages={messages} />
-          </div>
+          <Tabs defaultValue="history" className="w-full">
+            <TabsList className="grid grid-cols-2 w-full mb-4">
+              <TabsTrigger value="history">
+                <History className="h-4 w-4 mr-2" /> History
+              </TabsTrigger>
+              <TabsTrigger value="prompts">
+                <Save className="h-4 w-4 mr-2" /> Prompts
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="history" className="space-y-2">
+              {/* Chat history would go here */}
+              <p className="text-sm text-muted-foreground text-center py-4">
+                Your chat history will appear here
+              </p>
+            </TabsContent>
+            
+            <TabsContent value="prompts" className="space-y-2">
+              {userPrompts.length > 0 ? (
+                userPrompts.map((prompt) => (
+                  <Card key={prompt.id} className="cursor-pointer hover:bg-muted/50" onClick={() => loadPrompt(prompt.content)}>
+                    <CardContent className="p-3">
+                      <p className="text-sm font-medium truncate">{prompt.title}</p>
+                      <p className="text-xs text-muted-foreground truncate">{prompt.content.substring(0, 50)}...</p>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No saved prompts yet
+                </p>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
         
-        <div className="sticky bottom-0 bg-background py-4">
-          <ChatInput 
-            value={inputValue}
-            onChange={setInputValue}
-            onSubmit={handleMessageSubmit}
-            isLoading={isLoading}
-            placeholder="Ask me anything about AI, machine learning, or data science..."
-          />
+        {/* Main Chat Area */}
+        <div className="flex-1 flex flex-col h-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+            <div className="border-b p-2 flex items-center justify-between">
+              <TabsList>
+                <TabsTrigger value="new-chat" className="flex items-center">
+                  <Bot className="h-4 w-4 mr-2" /> AI Assistant
+                </TabsTrigger>
+                <TabsTrigger value="settings" className="flex items-center">
+                  <Settings className="h-4 w-4 mr-2" /> Settings
+                </TabsTrigger>
+              </TabsList>
+              
+              <Badge variant="outline" className="ml-auto bg-primary/10 text-primary">
+                <Sparkles className="h-3.5 w-3.5 mr-1" /> PRO
+              </Badge>
+            </div>
+            
+            <TabsContent value="new-chat" className="flex-1 flex flex-col">
+              <div className="flex-1 overflow-auto">
+                <ChatContainer messages={messages} isLoading={isLoading} />
+              </div>
+              
+              <div className="p-4 border-t">
+                <ChatInput 
+                  onSubmit={handleSubmitMessage} 
+                  isLoading={isLoading} 
+                  placeholder="Ask me anything about AI, coding, or data analysis..."
+                />
+                
+                {/* Save prompt UI */}
+                <div className="flex items-center mt-2 space-x-2">
+                  <Input
+                    placeholder="Name this prompt to save it"
+                    value={topic}
+                    onChange={(e) => setTopic(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button variant="outline" size="sm" onClick={savePrompt} disabled={!input.trim() || !topic.trim()}>
+                    <Save className="h-4 w-4 mr-2" /> Save
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="settings" className="p-4">
+              <h2 className="text-xl font-bold mb-4">Assistant Settings</h2>
+              <div className="space-y-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-start space-x-2">
+                      <Info className="h-5 w-5 text-muted-foreground mt-0.5" />
+                      <div>
+                        <h3 className="font-medium">About this Assistant</h3>
+                        <p className="text-sm text-muted-foreground">
+                          This AI Assistant is powered by advanced language models and 
+                          specialized in AI concepts, coding, and data analysis. 
+                          Your conversations are private and secure.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                {/* Additional settings would go here */}
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </ProTierLayout>

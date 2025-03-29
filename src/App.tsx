@@ -99,6 +99,9 @@ const App = () => (
                 <Route path="/ai-streams" element={<AIStreams />} />
                 <Route path="/ai-streams/:streamId" element={<AIStreamDetail />} />
                 
+                {/* Learning Routes */}
+                <Route path="/learning/:courseId" element={<LearningHub />} />
+                
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

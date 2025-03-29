@@ -1,66 +1,52 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Mic, MicOff } from 'lucide-react';
+import { Send } from 'lucide-react';
 
-interface ChatInputProps {
-  onSendMessage: (message: string) => void;
+export interface ChatInputProps {
+  onSubmit: (message: string) => void;
   isLoading: boolean;
   placeholder?: string;
 }
 
-const ChatInput = ({ onSendMessage, isLoading, placeholder = "Type a message..." }: ChatInputProps) => {
+const ChatInput: React.FC<ChatInputProps> = ({ 
+  onSubmit, 
+  isLoading, 
+  placeholder = "Type your message..." 
+}) => {
   const [message, setMessage] = useState('');
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setMessage(e.target.value);
-    
-    // Auto-resize the textarea
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 150)}px`;
-    }
-  };
-
-  const handleSubmit = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     if (message.trim() && !isLoading) {
-      onSendMessage(message.trim());
+      onSubmit(message);
       setMessage('');
-      
-      // Reset textarea height
-      if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
-      }
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSubmit();
+      handleSubmit(e);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-end gap-2">
+    <form onSubmit={handleSubmit} className="flex items-end space-x-2 w-full">
       <Textarea
-        ref={textareaRef}
         value={message}
-        onChange={handleInputChange}
+        onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className="resize-none min-h-[40px] max-h-[150px]"
+        className="flex-1 min-h-[80px] max-h-[150px]"
         disabled={isLoading}
       />
       <Button 
         type="submit" 
         size="icon" 
         disabled={!message.trim() || isLoading}
-        className="h-10 w-10 flex-shrink-0"
+        className="h-10 w-10"
       >
         <Send className="h-4 w-4" />
       </Button>
