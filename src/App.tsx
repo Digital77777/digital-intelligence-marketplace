@@ -42,6 +42,8 @@ import AIStreams from "./pages/AIStreams";
 import AIStreamDetail from "./pages/AIStreamDetail";
 // Import Chat Assistant
 import ChatAssistant from "./components/ChatAssistant";
+// Import Discovery Page
+import DiscoveryPage from "./pages/DiscoveryPage";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +72,7 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/ai-tools" element={<AITools />} />
                 <Route path="/ai-tools-directory" element={<AIToolsDirectory />} />
+                <Route path="/ai-tools/tool/:id" element={<ToolDetail />} />
                 <Route path="/courses" element={<Courses />} />
                 <Route path="/learning-hub" element={<LearningHub />} />
                 <Route path="/community" element={<Community />} />
@@ -83,6 +86,7 @@ const App = () => (
                 <Route path="/tool/:id" element={<ToolDetail />} />
                 <Route path="/submit-tool" element={<SubmitTool />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/discovery" element={<DiscoveryPage />} />
                 
                 {/* Basic Tier Routes */}
                 <Route path="/team-dashboard" element={<TeamDashboard />} />

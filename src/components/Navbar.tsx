@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '@/context/UserContext';
@@ -20,10 +21,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { Menu, Sparkles, User, Settings, LogOut } from 'lucide-react';
+import { Menu, Sparkles, User, Settings, LogOut, Search, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-interface NavbarProps {}
 
 const Navbar = () => {
   const { user, profile, logout } = useUser();
@@ -38,32 +37,51 @@ const Navbar = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-md border-b">
       <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-6 md:gap-8 lg:gap-10">
+        <div className="flex items-center gap-4 md:gap-6 lg:gap-8">
           <Link to="/" className="flex items-center gap-2 font-bold text-xl">
             <Sparkles className="h-5 w-5 text-primary" />
             <span>AI HUB</span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-6">
-            <Link to="/ai-tools" className="text-foreground/70 hover:text-foreground transition-colors">
+          <nav className="hidden md:flex items-center gap-4 lg:gap-6">
+            <Link to="/ai-tools" className="text-sm text-foreground/70 hover:text-foreground transition-colors">
               AI Tools
             </Link>
-            <Link to="/courses" className="text-foreground/70 hover:text-foreground transition-colors">
-              Courses
+            <Link to="/ai-tools-directory" className="text-sm text-foreground/70 hover:text-foreground transition-colors">
+              Tools Directory
             </Link>
-            <Link to="/learning-hub" className="text-foreground/70 hover:text-foreground transition-colors">
+            <Link to="/learning-hub" className="text-sm text-foreground/70 hover:text-foreground transition-colors">
               Learning Hub
             </Link>
-            <Link to="/community" className="text-foreground/70 hover:text-foreground transition-colors">
+            <Link to="/community" className="text-sm text-foreground/70 hover:text-foreground transition-colors">
               Community
             </Link>
-            <Link to="/about" className="text-foreground/70 hover:text-foreground transition-colors">
-              About
+            <Link to="/pricing" className="text-sm text-foreground/70 hover:text-foreground transition-colors">
+              Pricing
             </Link>
           </nav>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-9 w-9 rounded-full"
+            onClick={() => navigate('/discovery')}
+            title="Search"
+          >
+            <Search className="h-4 w-4" />
+          </Button>
+          
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-9 w-9 rounded-full"
+            title="Notifications"
+          >
+            <Bell className="h-4 w-4" />
+          </Button>
+          
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -104,8 +122,8 @@ const Navbar = () => {
             </DropdownMenu>
           ) : (
             <div className="hidden md:flex items-center gap-4">
-              <Button variant="ghost" onClick={() => navigate('/auth')}>Sign In</Button>
-              <Button onClick={() => navigate('/auth')}>Get Started</Button>
+              <Button variant="ghost" onClick={() => navigate('/auth')} size="sm">Sign In</Button>
+              <Button onClick={() => navigate('/auth')} size="sm">Get Started</Button>
             </div>
           )}
           
@@ -126,17 +144,20 @@ const Navbar = () => {
                 <Button variant="ghost" className="justify-start" onClick={() => { navigate('/ai-tools'); setIsMobileMenuOpen(false); }}>
                   AI Tools
                 </Button>
-                <Button variant="ghost" className="justify-start" onClick={() => { navigate('/courses'); setIsMobileMenuOpen(false); }}>
-                  Courses
+                <Button variant="ghost" className="justify-start" onClick={() => { navigate('/ai-tools-directory'); setIsMobileMenuOpen(false); }}>
+                  Tools Directory
                 </Button>
-                 <Button variant="ghost" className="justify-start" onClick={() => { navigate('/learning-hub'); setIsMobileMenuOpen(false); }}>
+                <Button variant="ghost" className="justify-start" onClick={() => { navigate('/learning-hub'); setIsMobileMenuOpen(false); }}>
                   Learning Hub
                 </Button>
                 <Button variant="ghost" className="justify-start" onClick={() => { navigate('/community'); setIsMobileMenuOpen(false); }}>
                   Community
                 </Button>
-                <Button variant="ghost" className="justify-start" onClick={() => { navigate('/about'); setIsMobileMenuOpen(false); }}>
-                  About
+                <Button variant="ghost" className="justify-start" onClick={() => { navigate('/pricing'); setIsMobileMenuOpen(false); }}>
+                  Pricing
+                </Button>
+                <Button variant="ghost" className="justify-start" onClick={() => { navigate('/discovery'); setIsMobileMenuOpen(false); }}>
+                  Search
                 </Button>
                 {!user ? (
                   <>

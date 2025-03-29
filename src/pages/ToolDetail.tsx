@@ -4,49 +4,126 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { marketplaceTools } from '@/data/marketplace-tools';
-import { Star, ArrowLeft, ExternalLink, Cpu, Code, Share2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  ArrowLeft,
+  CheckCircle,
+  Download,
+  ExternalLink,
+  Globe,
+  Lightbulb,
+  Lock,
+  Share2,
+  Shield,
+  Sparkles,
+  Zap,
+  Copy,
+  PlayCircle,
+  Info,
+  BookOpen,
+  Code
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useTier } from '@/context/TierContext';
+import { AITool } from '@/types/tools';
 
 const ToolDetail = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
+  const [tool, setTool] = useState<AITool | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('overview');
+  const { currentTier, canAccess, upgradePrompt } = useTier();
   const navigate = useNavigate();
-  const [tool, setTool] = useState(null);
 
-  // Scroll to top on page load
   useEffect(() => {
-    window.scrollTo(0, 0);
-    
-    if (id) {
-      const foundTool = marketplaceTools.find(t => t.id === parseInt(id));
-      setTool(foundTool || null);
+    fetchToolDetails();
+  }, [id]);
+
+  const fetchToolDetails = async () => {
+    try {
+      setIsLoading(true);
       
-      if (!foundTool) {
-        navigate('/marketplace');
+      const { data, error } = await supabase
+        .from('ai_tools')
+        .select('*')
+        .eq('id', id)
+        .single();
+        
+      if (error) throw error;
+      
+      setTool(data);
+      
+      // Check access rights
+      if (data && !hasAccessToTool(data.required_tier)) {
+        upgradePrompt(data.required_tier as any);
+        navigate('/ai-tools-directory');
       }
+    } catch (error) {
+      console.error('Error fetching tool details:', error);
+      toast.error('Failed to load tool details');
+      navigate('/ai-tools-directory');
+    } finally {
+      setIsLoading(false);
     }
-  }, [id, navigate]);
+  };
+
+  // Check if user has access to this tool based on required tier
+  const hasAccessToTool = (requiredTier: string): boolean => {
+    if (requiredTier === 'freemium') return true;
+    if (requiredTier === 'basic') return currentTier === 'basic' || currentTier === 'pro';
+    if (requiredTier === 'pro') return currentTier === 'pro';
+    return false;
+  };
+
+  const getTierBadge = (tier: string) => {
+    if (tier === 'pro') {
+      return (
+        <Badge variant="outline" className="bg-purple-900/60 text-purple-200 border-purple-700 px-3 py-1 flex items-center gap-1.5">
+          <Sparkles className="h-3.5 w-3.5 text-[#6AC8FF]" />
+          <span>PRO</span>
+        </Badge>
+      );
+    } else if (tier === 'basic') {
+      return (
+        <Badge variant="outline" className="bg-blue-900/60 text-blue-200 border-blue-700 px-3 py-1 flex items-center gap-1.5">
+          <Shield className="h-3.5 w-3.5" />
+          <span>BASIC</span>
+        </Badge>
+      );
+    }
+    return null;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 pt-28 px-6 pb-12 flex items-center justify-center">
+          <div className="animate-pulse flex flex-col items-center">
+            <div className="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+            <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!tool) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-grow pt-24 px-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center mb-8">
-              <Button
-                variant="ghost"
-                onClick={() => navigate('/marketplace')}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Marketplace
-              </Button>
-            </div>
-            <div className="h-64 flex items-center justify-center">
-              <p className="text-lg text-foreground/70">Loading tool information...</p>
-            </div>
+        <main className="flex-1 pt-28 px-6 pb-12 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-2">Tool Not Found</h1>
+            <p className="text-muted-foreground mb-6">This AI tool doesn't exist or has been removed.</p>
+            <Button onClick={() => navigate('/ai-tools-directory')}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Tools Directory
+            </Button>
           </div>
         </main>
         <Footer />
@@ -57,150 +134,209 @@ const ToolDetail = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-grow pt-24 px-6 pb-12">
+      <main className="flex-1 pt-24 px-4 md:px-6 pb-12">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center mb-8">
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/marketplace')}
-              className="flex items-center gap-2"
+          <div className="mb-6">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/ai-tools-directory')}
+              className="mb-4 text-sm"
             >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Marketplace
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Tools
             </Button>
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
-                <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 p-12 flex justify-center items-center">
-                  <div className="w-32 h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white text-3xl">
-                    {tool.icon}
+            
+            <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+              <div className="flex items-start gap-4">
+                <div className="text-4xl">{tool.icon}</div>
+                <div>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <h1 className="text-2xl md:text-3xl font-bold">{tool.name}</h1>
+                    {getTierBadge(tool.required_tier)}
                   </div>
-                </div>
-                
-                <div className="p-6">
-                  <div className="flex flex-wrap items-center gap-3 mb-4">
-                    <h1 className="text-3xl font-bold">{tool.name}</h1>
-                    <Badge variant="outline" className="text-sm">
-                      {tool.category}
-                    </Badge>
-                  </div>
-                  
-                  <div className="flex items-center gap-1 mb-6">
-                    {[...Array(Math.floor(tool.rating))].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                    ))}
-                    {tool.rating % 1 > 0 && (
-                      <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                    )}
-                    <span className="ml-2 text-foreground/70">{tool.rating.toFixed(1)}</span>
-                  </div>
-                  
-                  <p className="text-lg mb-8">{tool.description}</p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Card>
-                      <CardContent className="p-6">
-                        <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                          <Cpu className="w-5 h-5 text-blue-500" />
-                          Key Features
-                        </h3>
-                        <ul className="list-disc pl-5 space-y-1">
-                          <li>Easy integration</li>
-                          <li>Pre-trained models</li>
-                          <li>Cross-platform compatibility</li>
-                          <li>Active community support</li>
-                        </ul>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card>
-                      <CardContent className="p-6">
-                        <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                          <Code className="w-5 h-5 text-purple-500" />
-                          Implementation
-                        </h3>
-                        <ul className="list-disc pl-5 space-y-1">
-                          <li>Comprehensive documentation</li>
-                          <li>Code examples available</li>
-                          <li>Regular updates</li>
-                          <li>Open source contributions welcome</li>
-                        </ul>
-                      </CardContent>
-                    </Card>
-                  </div>
+                  <p className="text-muted-foreground mt-1 text-sm md:text-base">
+                    {tool.category} • {new Date(tool.created_at).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
               
-              <div className="mt-8 bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-                <h2 className="text-xl font-bold mb-4">Getting Started</h2>
-                <p className="mb-4">
-                  Visit the official documentation to learn how to install and use {tool.name} in your projects.
-                  The tool provides a straightforward API that can be integrated into most development workflows.
-                </p>
-                <div className="bg-gray-100 dark:bg-gray-900 rounded-lg p-4 mb-6 overflow-x-auto">
-                  <code className="text-sm">
-                    # Example installation<br />
-                    pip install {tool.name.toLowerCase().replace(/\s+/g, '-')}<br /><br />
-                    # Quick usage example<br />
-                    import {tool.name.toLowerCase().replace(/\s+/g, '_')}<br />
-                    model = {tool.name.toLowerCase().replace(/\s+/g, '_')}.load_model('default')<br />
-                    result = model.predict(data)
-                  </code>
-                </div>
-                <Button className="flex items-center gap-2">
-                  <ExternalLink className="w-4 h-4" />
-                  View Documentation
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="gap-1">
+                  <Share2 className="h-4 w-4" />
+                  <span className="hidden sm:inline">Share</span>
+                </Button>
+                <Button size="sm" className="gap-1">
+                  <Download className="h-4 w-4" />
+                  <span>Use Tool</span>
                 </Button>
               </div>
             </div>
             
-            <div>
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
-                <h2 className="text-xl font-bold mb-4">Tool Information</h2>
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-sm font-medium text-foreground/70">Category</h3>
-                    <p>{tool.category}</p>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-foreground/70">Rating</h3>
-                    <div className="flex items-center">
-                      {[...Array(Math.floor(tool.rating))].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      ))}
-                      {tool.rating % 1 > 0 && (
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+            <Separator className="my-6" />
+            
+            <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="mb-6">
+                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="documentation">Documentation</TabsTrigger>
+                <TabsTrigger value="examples">Examples</TabsTrigger>
+                <TabsTrigger value="integrations">Integrations</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="overview" className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="md:col-span-2">
+                    <div className="bg-card rounded-lg border p-6">
+                      <h2 className="text-xl font-semibold mb-4">About this Tool</h2>
+                      <p className="text-muted-foreground mb-6">{tool.description}</p>
+                      
+                      <h3 className="font-medium mb-3 flex items-center gap-2 text-lg">
+                        <Zap className="h-5 w-5 text-amber-500" />
+                        Key Use Cases
+                      </h3>
+                      <ul className="space-y-3 mb-6">
+                        {tool.use_cases.map((useCase, index) => (
+                          <li key={index} className="flex items-start gap-3">
+                            <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+                            <span>{useCase}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      
+                      {tool.rationale && (
+                        <>
+                          <h3 className="font-medium mb-3 flex items-center gap-2 text-lg">
+                            <Lightbulb className="h-5 w-5 text-blue-500" />
+                            Why Use This Tool
+                          </h3>
+                          <p className="text-muted-foreground">{tool.rationale}</p>
+                        </>
                       )}
-                      <span className="ml-2">{tool.rating.toFixed(1)}</span>
                     </div>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-foreground/70">Price</h3>
-                    <p>{tool.isPremium ? 'Premium (Paid)' : 'Open Source'}</p>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-foreground/70">Last Updated</h3>
-                    <p>March 2025</p>
+                  
+                  <div className="space-y-6">
+                    <div className="bg-card rounded-lg border p-6">
+                      <h3 className="font-medium mb-4">Quick Start</h3>
+                      <div className="space-y-3">
+                        <Button className="w-full justify-start gap-2" size="sm">
+                          <PlayCircle className="h-4 w-4" />
+                          Launch Tool
+                        </Button>
+                        <Button variant="outline" className="w-full justify-start gap-2" size="sm">
+                          <BookOpen className="h-4 w-4" />
+                          View Tutorial
+                        </Button>
+                        <Button variant="outline" className="w-full justify-start gap-2" size="sm">
+                          <Code className="h-4 w-4" />
+                          API Reference
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-card rounded-lg border p-6">
+                      <h3 className="font-medium mb-4">Tool Information</h3>
+                      <div className="space-y-3 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Category</span>
+                          <span className="font-medium">{tool.category}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Required Tier</span>
+                          <span className="font-medium capitalize">{tool.required_tier}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Added</span>
+                          <span className="font-medium">{new Date(tool.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">API Access</span>
+                          <span className="font-medium">Yes</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-card rounded-lg border p-6">
+                      <h3 className="font-medium mb-4">Community</h3>
+                      <div className="space-y-3">
+                        <Button variant="outline" className="w-full justify-start gap-2" size="sm">
+                          <Globe className="h-4 w-4" />
+                          Community Forum
+                        </Button>
+                        <Button variant="outline" className="w-full justify-start gap-2" size="sm">
+                          <ExternalLink className="h-4 w-4" />
+                          Documentation
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </TabsContent>
               
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-                <h2 className="text-xl font-bold mb-4">Share</h2>
-                <div className="flex gap-3">
-                  <Button variant="outline" size="sm" className="flex items-center gap-2">
-                    <Share2 className="w-4 h-4" />
-                    Twitter
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex items-center gap-2">
-                    <Share2 className="w-4 h-4" />
-                    LinkedIn
-                  </Button>
+              <TabsContent value="documentation" className="space-y-6">
+                <div className="bg-card rounded-lg border p-6">
+                  <h2 className="text-xl font-semibold mb-4">Documentation</h2>
+                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                    <p>Comprehensive documentation for {tool.name} will be available here, including:</p>
+                    <ul>
+                      <li>Step-by-step guides</li>
+                      <li>API references</li>
+                      <li>Best practices</li>
+                      <li>Troubleshooting</li>
+                    </ul>
+                    <p>This section is currently under development. Check back soon for complete documentation.</p>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </TabsContent>
+              
+              <TabsContent value="examples" className="space-y-6">
+                <div className="bg-card rounded-lg border p-6">
+                  <h2 className="text-xl font-semibold mb-4">Usage Examples</h2>
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="font-medium mb-2">Example 1: Basic Usage</h3>
+                      <div className="bg-muted rounded-md p-4 relative">
+                        <pre className="text-sm overflow-x-auto"><code>// Example code or configuration will be displayed here</code></pre>
+                        <Button size="sm" variant="ghost" className="absolute top-2 right-2 h-8 w-8 p-0" onClick={() => toast.success('Code copied to clipboard')}>
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 className="font-medium mb-2">Example 2: Advanced Configuration</h3>
+                      <div className="bg-muted rounded-md p-4 relative">
+                        <pre className="text-sm overflow-x-auto"><code>// Advanced usage examples will be shown here</code></pre>
+                        <Button size="sm" variant="ghost" className="absolute top-2 right-2 h-8 w-8 p-0" onClick={() => toast.success('Code copied to clipboard')}>
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="integrations" className="space-y-6">
+                <div className="bg-card rounded-lg border p-6">
+                  <h2 className="text-xl font-semibold mb-4">Integrations</h2>
+                  <p className="text-muted-foreground mb-6">
+                    {tool.name} works seamlessly with the following platforms and tools:
+                  </p>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {['API Integration', 'Data Export', 'Third-party Services'].map((integration, index) => (
+                      <div key={index} className="border rounded-lg p-4 flex items-start gap-3">
+                        <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
+                          <Info className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-medium">{integration}</h3>
+                          <p className="text-sm text-muted-foreground">Integration details will be listed here.</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </main>

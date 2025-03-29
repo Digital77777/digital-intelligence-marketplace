@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Loader } from 'lucide-react'; // Changed from Spinner to Loader
+import { Loader } from 'lucide-react'; 
 import ChatBubble from './ChatBubble';
 
 export interface ChatMessage {

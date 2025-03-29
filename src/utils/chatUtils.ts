@@ -1,153 +1,83 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { v4 as uuidv4 } from 'uuid';
 import { ChatMessage } from '@/components/chat/ChatContainer';
-import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
 
-// Define the chat session interface
-interface ChatSession {
+export interface ChatSession {
   id: string;
   user_id: string;
-  title: string;
-  created_at: Date;
-  updated_at: Date;
+  created_at: string;
+  updated_at: string;
   messages: ChatMessage[];
 }
 
-// Send a message to the AI assistant
-export const sendChatMessage = async (
-  userId: string,
-  sessionId: string,
-  message: string,
-  prevMessages: ChatMessage[]
-): Promise<string> => {
+export const sendChatMessage = async (content: string, sessionId: string) => {
   try {
-    // For Pro users, use the pro-chat edge function
-    const functionName = 'pro-chat';
-    const { data, error } = await supabase.functions.invoke(functionName, {
-      body: {
-        user_id: userId,
-        session_id: sessionId,
-        message: message,
-        history: prevMessages.map(msg => ({
-          role: msg.role,
-          content: msg.content
-        }))
-      }
-    });
-
-    if (error) {
-      throw error;
+    const { data: user } = await supabase.auth.getUser();
+    
+    if (!user.user) {
+      throw new Error('User not authenticated');
     }
-
-    // Save the conversation to the database
-    await saveConversation(userId, sessionId, prevMessages, {
+    
+    const message: ChatMessage = {
       id: uuidv4(),
       role: 'user',
-      content: message,
+      content,
       timestamp: new Date()
-    });
-
-    if (data?.response) {
-      // Also save the assistant's response
-      await saveConversation(userId, sessionId, [...prevMessages, {
-        id: uuidv4(),
-        role: 'user',
-        content: message,
-        timestamp: new Date()
-      }], {
-        id: uuidv4(),
-        role: 'assistant',
-        content: data.response,
-        timestamp: new Date()
-      });
-
-      return data.response;
-    }
-
-    return "I'm sorry, I couldn't generate a response. Please try again.";
+    };
+    
+    return message;
   } catch (error) {
-    console.error('Error sending message to AI assistant:', error);
+    console.error('Error sending chat message:', error);
     throw error;
   }
 };
 
-// Save a conversation to the database
-export const saveConversation = async (
-  userId: string,
+export const fetchAIResponse = async (
+  userMessage: string, 
   sessionId: string,
-  prevMessages: ChatMessage[],
-  newMessage: ChatMessage
-) => {
+  chatType: 'general' | 'pro' = 'general'
+): Promise<ChatMessage> => {
   try {
-    const { data: existingSession, error: fetchError } = await supabase
-      .from('chat_sessions')
-      .select('*')
-      .eq('id', sessionId)
-      .single();
-
-    if (fetchError && fetchError.code !== 'PGRST116') {
-      // PGRST116 is the error code for "no rows returned"
-      throw fetchError;
-    }
-
-    const allMessages = [...prevMessages, newMessage];
+    // This simulates an AI response for now
+    // In a real implementation, we would call our edge function or external API
     
-    if (!existingSession) {
-      // Create a new session
-      const { error: insertError } = await supabase
-        .from('chat_sessions')
-        .insert([
-          {
-            id: sessionId,
-            user_id: userId,
-            title: allMessages[0]?.content.substring(0, 50) || 'New conversation',
-            messages: allMessages.map(msg => ({
-              role: msg.role,
-              content: msg.content,
-              timestamp: msg.timestamp || new Date()
-            }))
-          }
-        ]);
-
-      if (insertError) throw insertError;
-    } else {
-      // Update existing session
-      const { error: updateError } = await supabase
-        .from('chat_sessions')
-        .update({
-          updated_at: new Date(),
-          messages: allMessages.map(msg => ({
-            role: msg.role,
-            content: msg.content,
-            timestamp: msg.timestamp || new Date()
-          }))
-        })
-        .eq('id', sessionId);
-
-      if (updateError) throw updateError;
-    }
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+    
+    // Demo response
+    const responsePrefix = chatType === 'pro' ? 'Pro AI: ' : 'AI: ';
+    
+    return {
+      id: uuidv4(),
+      role: 'assistant',
+      content: `${responsePrefix}${generateDemoResponse(userMessage, chatType)}`,
+      timestamp: new Date()
+    };
   } catch (error) {
-    console.error('Error saving conversation:', error);
-    toast.error('Failed to save conversation');
+    console.error('Error fetching AI response:', error);
+    throw error;
   }
 };
 
-// Fetch chat history for a user
-export const fetchChatHistory = async (userId: string): Promise<ChatSession[]> => {
-  try {
-    const { data, error } = await supabase
-      .from('chat_sessions')
-      .select('*')
-      .eq('user_id', userId)
-      .order('updated_at', { ascending: false });
-
-    if (error) throw error;
-
-    return data || [];
-  } catch (error) {
-    console.error('Error fetching chat history:', error);
-    toast.error('Failed to fetch chat history');
-    return [];
+// Helper function to generate demo responses
+const generateDemoResponse = (userMessage: string, chatType: 'general' | 'pro'): string => {
+  const message = userMessage.toLowerCase();
+  
+  if (message.includes('hello') || message.includes('hi')) {
+    return 'Hello! How can I assist you today?';
   }
+  
+  if (message.includes('help')) {
+    return 'I\'m here to help! What would you like to know about our AI tools and features?';
+  }
+  
+  if (chatType === 'pro' && message.includes('model')) {
+    return 'As a Pro user, you have access to our advanced model customization features. You can fine-tune parameters, adjust response styles, and even create specialized models for your specific needs.';
+  }
+  
+  if (chatType === 'general') {
+    return 'I can answer general questions about AI tools and features. For more advanced help and personalized recommendations, consider upgrading to our Pro tier!';
+  }
+  
+  return 'I understand your question about "' + userMessage + '". How else can I assist you today?';
 };
