@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -111,9 +110,24 @@ const DiscoveryPage = () => {
       const { data: coursesData, error: coursesError } = await supabase
         .from('courses')
         .select('*')
-        .or(`title.ilike.%${query}%,description.ilike.%${query}%`);
+        .limit(6);
 
       if (coursesError) throw coursesError;
+      
+      // Convert courses using our utility
+      const convertedCourses = coursesData?.map(course => convertToLearningContent(course)) || [];
+      
+      // Map courses to discovery items
+      const courseItems = convertedCourses.map(course => ({
+        id: course.id,
+        title: course.title,
+        description: course.description || '',
+        type: 'course' as const,
+        category: course.category,
+        required_tier: course.required_tier,
+        link: `/learning/${course.id}`,
+        icon: <BookOpen className="h-4 w-4" />
+      }));
 
       // Transform results
       const toolResults: SearchResult[] = (toolsData || []).map((tool: AITool) => ({
@@ -127,19 +141,7 @@ const DiscoveryPage = () => {
         icon: <Code className="h-4 w-4" />
       }));
 
-      const courseResults: SearchResult[] = (coursesData || []).map((course) => ({
-        id: String(course.id),
-        title: course.title,
-        description: course.description || '',
-        type: 'course',
-        category: course.category,
-        required_tier: course.required_tier,
-        link: `/learning/${course.id}`,
-        icon: <BookOpen className="h-4 w-4" />
-      }));
-
-      // Combine results
-      const combinedResults = [...toolResults, ...courseResults];
+      const combinedResults = [...toolResults, ...courseItems];
       
       // Filter by access level
       const accessibleResults = combinedResults.filter(result => {

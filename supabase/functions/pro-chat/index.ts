@@ -1,214 +1,172 @@
 
-import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.29.0";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { Configuration, OpenAIApi } from "https://esm.sh/openai@3.2.1";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+// Initialize OpenAI
+const configuration = new Configuration({
+  apiKey: Deno.env.get("OPENAI_API_KEY"),
+});
+const openai = new OpenAIApi(configuration);
+
+// Initialize Supabase client
+const supabaseClient = createClient(
+  Deno.env.get("SUPABASE_URL") ?? "",
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+);
 
 serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-
-  const url = new URL(req.url);
-  
   try {
-    // Get the authorization header
-    const authHeader = req.headers.get('Authorization');
+    // Get JWT token from request
+    const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'No authorization header' }), {
+      return new Response(JSON.stringify({ error: "Missing Authorization header" }), {
         status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
-    // Create a Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+    const token = authHeader.replace("Bearer ", "");
     
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // First, verify the user token
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+    // Verify the JWT and get the user
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+    
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: "Invalid token or user not found" }), {
         status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
-    // Get the user's tier from profiles table
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('tier')
-      .eq('id', user.id)
-      .single();
+    // Check if this is a query or history request
+    const url = new URL(req.url);
+    const path = url.pathname.split('/').pop();
 
-    if (profileError || !profile) {
-      return new Response(JSON.stringify({ error: 'User profile not found' }), {
-        status: 404,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    if (path === 'history') {
+      // Return chat history for the user
+      const { data, error } = await supabaseClient
+        .from('pro_chat_history')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('timestamp', { ascending: false })
+        .limit(20);
+      
+      if (error) throw error;
+      
+      return new Response(JSON.stringify({ data }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
       });
-    }
-
-    // Check if user has Pro tier access
-    if (profile.tier !== 'pro' && url.pathname.includes('/pro-chat')) {
-      return new Response(JSON.stringify({ error: 'Pro tier required for this feature' }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Parse the request body
-    const body = await req.json();
-    
-    if (url.pathname === '/pro-chat/query') {
-      if (req.method === 'POST') {
-        const { message } = body;
-        
-        if (!message) {
-          return new Response(JSON.stringify({ error: 'Message is required' }), {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-
-        // First, check for any exact matches in the knowledge base
-        const { data: knowledgeMatches, error: knowledgeError } = await supabase
-          .from('platform_knowledge')
-          .select('*')
-          .textSearch('question', message, {
-            type: 'websearch',
-            config: 'english'
-          });
-
-        // Call OpenAI API
-        const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-        
-        if (!OPENAI_API_KEY) {
-          return new Response(JSON.stringify({ error: 'OpenAI API key not configured' }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-
-        // Prepare the system message
-        let systemMessage = `You are DIM's AI assistant for the Digital Intelligence Marketplace. Help users navigate the platform, answer questions about AI tools, and provide personalized recommendations. 
-User tier: ${profile.tier}
-Current time: ${new Date().toISOString()}`;
-
-        // If we have knowledge base matches, add them to the system message
-        if (knowledgeMatches && knowledgeMatches.length > 0) {
-          systemMessage += "\n\nHere is some specific information that might help answer the query:\n\n";
-          knowledgeMatches.forEach(item => {
-            systemMessage += `Q: ${item.question}\nA: ${item.answer}\n\n`;
-          });
-        }
-
-        // Call OpenAI API using fetch (no SDK in Deno)
-        const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${OPENAI_API_KEY}`
-          },
-          body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: [
-              { role: "system", content: systemMessage },
-              { role: "user", content: message }
-            ],
-            temperature: 0.7,
-            max_tokens: 1024
-          })
-        });
-
-        const openaiData = await openaiResponse.json();
-
-        // Check for OpenAI API errors
-        if (openaiData.error) {
-          console.error('OpenAI API error:', openaiData.error);
-          return new Response(JSON.stringify({ error: 'Error calling OpenAI API' }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-
-        const botResponse = openaiData.choices[0].message.content;
-
-        // Save to chat history
-        const { error: insertError } = await supabase
-          .from('pro_chat_history')
-          .insert({
-            user_id: user.id,
-            message,
-            bot_response: botResponse,
-            metadata: {
-              intent: detectIntent(message),
-              model: "gpt-4o-mini",
-              matches: knowledgeMatches ? knowledgeMatches.length : 0
-            }
-          });
-
-        if (insertError) {
-          console.error('Error saving to chat history:', insertError);
-        }
-
-        // Return the response
-        return new Response(JSON.stringify({ response: botResponse }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      
+    } else {
+      // Process a chat query
+      const { message } = await req.json();
+      
+      if (!message) {
+        return new Response(JSON.stringify({ error: "Missing message parameter" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
         });
       }
-    } else if (url.pathname === '/pro-chat/history') {
-      if (req.method === 'GET') {
-        // Get the chat history for the user
-        const { data, error } = await supabase
-          .from('pro_chat_history')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('timestamp', { ascending: false })
-          .limit(50);
-
-        if (error) throw error;
-
-        return new Response(JSON.stringify({ data }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      
+      // Check if we need to navigate
+      const navigationIntent = checkNavigationIntent(message);
+      
+      // Get user profile info for context
+      const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
+      // Setup system message with user context
+      const systemMessage = `You are a Pro-tier AI Assistant for the Digital Intelligence Marketplace (DIM). 
+      Help users navigate the platform, answer questions about AI tools, and provide personalized recommendations. 
+      User tier: ${profile?.tier || 'Unknown'}.`;
+      
+      // Send to OpenAI
+      const completion = await openai.createChatCompletion({
+        model: "gpt-3.5-turbo",
+        messages: [
+          { role: "system", content: systemMessage },
+          { role: "user", content: message }
+        ],
+      });
+      
+      const responseContent = completion.data.choices[0].message?.content || "I'm sorry, I couldn't generate a response";
+      
+      // Save to chat history
+      await supabaseClient
+        .from('pro_chat_history')
+        .insert({
+          user_id: user.id,
+          message: message,
+          bot_response: responseContent,
+          metadata: navigationIntent ? { intent: 'navigation', destination: navigationIntent } : null
         });
-      }
+      
+      return new Response(JSON.stringify({
+        response: responseContent,
+        navigation_intent: navigationIntent
+      }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
     }
-
-    // Default response for unsupported methods/paths
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    
   } catch (error) {
-    console.error('Error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error("Error processing request:", error);
+    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   }
 });
 
-// Simple intent detection function
-function detectIntent(message: string): string {
+// Helper function to check for navigation intent in the message
+function checkNavigationIntent(message: string): string | null {
   const lowerMessage = message.toLowerCase();
   
-  if (lowerMessage.includes('navigate') || lowerMessage.includes('take me to') || lowerMessage.includes('go to') || lowerMessage.includes('open')) {
-    return 'navigation';
-  } else if (lowerMessage.includes('how do i') || lowerMessage.includes('how to')) {
-    return 'instruction';
-  } else if (lowerMessage.includes('what is') || lowerMessage.includes('explain')) {
-    return 'explanation';
-  } else if (lowerMessage.includes('difference between') || lowerMessage.includes('compare')) {
-    return 'comparison';
-  } else {
-    return 'general';
+  // Map keywords to routes
+  const navigationMappings: Record<string, string> = {
+    'ai studio': '/ai-studio',
+    'ai tools': '/ai-tools',
+    'tools directory': '/ai-tools-directory',
+    'marketplace': '/marketplace',
+    'learning hub': '/learning-hub',
+    'take me to': '',  // Special case handled below
+    'navigate to': '', // Special case handled below
+    'open': '', // Special case handled below
+  };
+  
+  // First check for specific navigation phrases
+  for (const [phrase, route] of Object.entries(navigationMappings)) {
+    if (route && lowerMessage.includes(phrase)) {
+      return route;
+    }
   }
+  
+  // Then handle special cases with more complex parsing
+  const specialPhrases = ['take me to', 'navigate to', 'open'];
+  for (const phrase of specialPhrases) {
+    if (lowerMessage.includes(phrase)) {
+      // Extract what comes after the phrase
+      const parts = lowerMessage.split(phrase);
+      if (parts.length > 1 && parts[1].trim()) {
+        const destination = parts[1].trim();
+        
+        // Map common destinations
+        if (destination.includes('profile')) return '/profile';
+        if (destination.includes('studio')) return '/ai-studio';
+        if (destination.includes('tools')) return '/ai-tools';
+        if (destination.includes('learning')) return '/learning-hub';
+        if (destination.includes('community')) return '/community';
+        if (destination.includes('marketplace')) return '/marketplace';
+        if (destination.includes('pricing')) return '/pricing';
+        if (destination.includes('discovery')) return '/discovery';
+      }
+    }
+  }
+  
+  return null;
 }

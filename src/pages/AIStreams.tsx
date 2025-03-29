@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -43,6 +42,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { AIStream } from '@/types/AIStreams';
 import { useTier } from '@/context/TierContext';
+import { createMockAIStream } from '@/utils/dataConverters';
 
 const AIStreams = () => {
   const [streams, setStreams] = useState<AIStream[]>([]);
@@ -64,71 +64,52 @@ const AIStreams = () => {
       // This is a mock implementation since the ai_streams table doesn't exist yet
       // We'll create mock data instead
       const mockAIStreams: AIStream[] = [
-        {
-          id: "1",
-          user_id: "123",
-          title: "Building an NLP Model from Scratch",
-          description: "Learn how to create a natural language processing model using Python and TensorFlow",
-          category: "tutorial",
-          duration: "45:22",
-          views: 1250,
-          created_at: new Date().toISOString(),
-          is_flagged: false,
-          author: {
-            id: "123",
-            username: "ai_enthusiast",
-            avatar_url: "https://i.pravatar.cc/150?img=1"
-          }
-        },
-        {
-          id: "2",
-          user_id: "456",
-          title: "Live Demo: Computer Vision Object Detection",
-          description: "Watch as we demonstrate a real-time object detection system using computer vision",
-          category: "demo",
-          duration: "32:15",
-          views: 876,
-          created_at: new Date(Date.now() - 86400000).toISOString(),
-          is_flagged: false,
-          author: {
-            id: "456",
-            username: "vision_expert",
-            avatar_url: "https://i.pravatar.cc/150?img=2"
-          }
-        },
-        {
-          id: "3",
-          user_id: "789",
-          title: "Research Presentation: Advances in Generative AI",
-          description: "A detailed presentation about the latest breakthroughs in generative artificial intelligence",
-          category: "research",
-          duration: "1:12:45",
-          views: 2140,
-          created_at: new Date(Date.now() - 172800000).toISOString(),
-          is_flagged: false,
-          author: {
-            id: "789",
-            username: "research_lead",
-            avatar_url: "https://i.pravatar.cc/150?img=3"
-          }
-        },
-        {
-          id: "4",
-          user_id: "101",
-          title: "Live Coding: Building a Recommender System",
-          description: "Join us for a live coding session where we build a movie recommender system",
-          category: "live",
-          duration: "1:05:30",
-          views: 1872,
-          created_at: new Date(Date.now() - 259200000).toISOString(),
-          is_flagged: false,
-          author: {
-            id: "101",
-            username: "code_pro",
-            avatar_url: "https://i.pravatar.cc/150?img=4"
-          }
-        },
+        createMockAIStream("1", "Building an NLP Model from Scratch", "123"),
+        createMockAIStream("2", "Live Demo: Computer Vision Object Detection", "456"),
+        createMockAIStream("3", "Research Presentation: Advances in Generative AI", "789"),
+        createMockAIStream("4", "Live Coding: Building a Recommender System", "101")
       ];
+      
+      // Add more details to our mock data
+      mockAIStreams[0].description = "Learn how to create a natural language processing model using Python and TensorFlow";
+      mockAIStreams[0].category = "tutorial";
+      mockAIStreams[0].duration = "45:22";
+      mockAIStreams[0].views = 1250;
+      mockAIStreams[0].author = {
+        id: "123",
+        username: "ai_enthusiast",
+        avatar_url: "https://i.pravatar.cc/150?img=1"
+      };
+      
+      mockAIStreams[1].description = "Watch as we demonstrate a real-time object detection system using computer vision";
+      mockAIStreams[1].category = "demo";
+      mockAIStreams[1].duration = "32:15";
+      mockAIStreams[1].views = 876;
+      mockAIStreams[1].author = {
+        id: "456",
+        username: "vision_expert",
+        avatar_url: "https://i.pravatar.cc/150?img=2"
+      };
+      
+      mockAIStreams[2].description = "A detailed presentation about the latest breakthroughs in generative artificial intelligence";
+      mockAIStreams[2].category = "research";
+      mockAIStreams[2].duration = "1:12:45";
+      mockAIStreams[2].views = 2140;
+      mockAIStreams[2].author = {
+        id: "789",
+        username: "research_lead",
+        avatar_url: "https://i.pravatar.cc/150?img=3"
+      };
+      
+      mockAIStreams[3].description = "Join us for a live coding session where we build a movie recommender system";
+      mockAIStreams[3].category = "live";
+      mockAIStreams[3].duration = "1:05:30";
+      mockAIStreams[3].views = 1872;
+      mockAIStreams[3].author = {
+        id: "101",
+        username: "code_pro",
+        avatar_url: "https://i.pravatar.cc/150?img=4"
+      };
       
       setStreams(mockAIStreams);
       setFeaturedStreams(mockAIStreams.slice(0, 2));

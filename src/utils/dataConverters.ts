@@ -64,6 +64,39 @@ export const convertToAIStream = (dbStream: any): AIStream => {
     code_snippets: dbStream.code_snippets,
     image_url: dbStream.image_url,
     is_flagged: dbStream.is_flagged,
-    author: dbStream.author
+    author: dbStream.author || {
+      id: dbStream.user_id || 'unknown',
+      username: dbStream.username || 'unknown user',
+      avatar_url: dbStream.avatar_url
+    }
+  };
+};
+
+/**
+ * Safely converts an array of data from the database to the appropriate type
+ */
+export const convertArrayToType = <T>(dataArray: any[], converter: (item: any) => T): T[] => {
+  if (!dataArray || !Array.isArray(dataArray)) return [];
+  return dataArray.map(item => converter(item));
+};
+
+/**
+ * Creates a mock AIStream for the AIStreams page when actual data isn't available
+ */
+export const createMockAIStream = (id: string, title: string, authorId: string): AIStream => {
+  return {
+    id,
+    user_id: authorId,
+    title,
+    description: "Mock description for AI stream",
+    category: "tutorial",
+    duration: "30:00",
+    views: 100,
+    created_at: new Date().toISOString(),
+    is_flagged: false,
+    author: {
+      id: authorId,
+      username: "mock_user"
+    }
   };
 };

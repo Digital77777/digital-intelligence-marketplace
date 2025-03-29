@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Sparkles, X, Send, MessageCircle, ChevronUp, ChevronDown } from 'lucide-react';
 import { Avatar } from '@/components/ui/avatar';
-import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
 import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
@@ -13,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useTier } from '@/context/TierContext';
 import ChatContainer, { ChatMessage } from '@/components/chat/ChatContainer';
 import ProChatAssistant from './ProChatAssistant';
+import ChatInput from './chat/ChatInput';
 
 const ChatAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -43,8 +43,8 @@ const ChatAssistant: React.FC = () => {
     setIsOpen(!isOpen);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
+  const handleInputChange = (value: string) => {
+    setInputValue(value);
   };
 
   const handleSendMessage = async () => {
@@ -96,12 +96,6 @@ const ChatAssistant: React.FC = () => {
       });
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSendMessage();
     }
   };
 
@@ -181,33 +175,23 @@ const ChatAssistant: React.FC = () => {
           
           {/* Chat input */}
           <div className="p-3 border-t bg-background">
-            <div className="flex gap-2">
-              <Input
-                value={inputValue}
-                onChange={handleInputChange}
-                onKeyPress={handleKeyPress}
-                placeholder={
-                  currentTier === 'freemium' 
-                    ? `Ask a question (${5 - messages.filter(m => m.role === 'user').length}/5 remaining)`
-                    : "Type your message..."
-                }
-                disabled={isLoading}
-                className="flex-1"
-              />
-              <Button 
-                size="icon" 
-                onClick={handleSendMessage} 
-                disabled={isLoading || !inputValue.trim()}
-              >
-                {isLoading ? <Spinner size="sm" /> : <Send size={18} />}
-              </Button>
-            </div>
+            <ChatInput
+              value={inputValue}
+              onChange={handleInputChange}
+              onSubmit={handleSendMessage}
+              isLoading={isLoading}
+              placeholder={
+                currentTier === 'freemium' 
+                  ? `Ask a question (${5 - messages.filter(m => m.role === 'user').length}/5 remaining)`
+                  : "Type your message..."
+              }
+            />
             {currentTier === 'freemium' && (
               <div className="text-xs text-muted-foreground mt-2 text-center">
                 Freemium users are limited to 5 questions. <Button variant="link" className="h-auto p-0 text-xs" onClick={() => upgradePrompt('basic')}>Upgrade</Button> for unlimited questions.
               </div>
             )}
-            {currentTier !== 'pro' && (
+            {(currentTier === 'freemium' || currentTier === 'basic') && (
               <div className="mt-3 bg-muted/40 rounded-md p-2 text-xs border border-border/50">
                 <div className="flex items-center gap-1 font-medium text-primary mb-1">
                   <Sparkles className="h-3 w-3" />
