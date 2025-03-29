@@ -29,7 +29,7 @@ const ChatAssistant: React.FC = () => {
         {
           id: uuidv4(),
           role: 'assistant',
-          content: "Hi there! I'm the chat assistant for this platform. How can I help you today?",
+          content: "Hi there! I'm the chat assistant for the Digital Intelligence Marketplace. How can I help you today?",
           timestamp: new Date()
         }
       ]);
@@ -93,7 +93,7 @@ const ChatAssistant: React.FC = () => {
       }
     } catch (error) {
       console.error("Error sending message:", error);
-      toast("Could not get a response. Please try again.");
+      toast.error("Could not get a response. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -104,7 +104,7 @@ const ChatAssistant: React.FC = () => {
     message = message.toLowerCase();
     
     if (message.includes('hello') || message.includes('hi ') || message.includes('hey')) {
-      return "Hello! How can I assist you today with our AI platform?";
+      return "Hello! How can I assist you today with our Digital Intelligence Marketplace?";
     }
     
     if (message.includes('account') || message.includes('login') || message.includes('sign up')) {
@@ -124,7 +124,7 @@ const ChatAssistant: React.FC = () => {
     }
     
     if (message.includes('thank')) {
-      return "You're welcome! Feel free to ask if you have any other questions.";
+      return "You're welcome! Feel free to ask if you have any other questions about the Digital Intelligence Marketplace.";
     }
     
     if (message.includes('pro') || message.includes('advance')) {
@@ -132,7 +132,7 @@ const ChatAssistant: React.FC = () => {
     }
     
     // Default response
-    return "I'm here to help you navigate our AI platform. You can ask me about courses, tools, account settings, or pricing plans. For more advanced assistance, consider upgrading to our Pro tier which includes a more powerful AI assistant!";
+    return "I'm here to help you navigate our Digital Intelligence Marketplace. You can ask me about courses, tools, account settings, or pricing plans. For more advanced assistance, consider upgrading to our Pro tier which includes a more powerful AI assistant!";
   };
 
   return (
@@ -142,7 +142,7 @@ const ChatAssistant: React.FC = () => {
         onClick={toggleChat}
         variant="default"
         size="icon"
-        className="fixed bottom-4 right-4 rounded-full p-3 shadow-lg bg-primary text-primary-foreground hover:bg-primary/90 z-50"
+        className="fixed bottom-4 right-4 rounded-full p-3 shadow-lg bg-[#0071c2] text-primary-foreground hover:bg-[#00487a] z-50"
       >
         {isOpen ? <X size={22} /> : <MessageCircle size={22} />}
       </Button>
@@ -151,13 +151,13 @@ const ChatAssistant: React.FC = () => {
       {isOpen && (
         <Card className="fixed bottom-16 right-4 w-80 sm:w-96 h-96 flex flex-col rounded-lg border shadow-lg z-50 overflow-hidden">
           {/* Chat header */}
-          <div className="bg-primary text-primary-foreground p-3 flex items-center justify-between">
+          <div className="bg-[#003580] text-primary-foreground p-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Avatar className="h-8 w-8 bg-primary-foreground/10">
+              <Avatar className="h-8 w-8 bg-[#0071c2]">
                 <MessageCircle className="h-4 w-4 text-primary-foreground" />
               </Avatar>
               <div>
-                <h3 className="font-medium text-sm">Chat Assistant</h3>
+                <h3 className="font-medium text-sm">Digital Intelligence Assistant</h3>
               </div>
             </div>
             <div className="flex gap-1">
@@ -193,7 +193,7 @@ const ChatAssistant: React.FC = () => {
             )}
             {(currentTier === 'freemium' || currentTier === 'basic') && (
               <div className="mt-3 bg-muted/40 rounded-md p-2 text-xs border border-border/50">
-                <div className="flex items-center gap-1 font-medium text-primary mb-1">
+                <div className="flex items-center gap-1 font-medium text-[#0071c2] mb-1">
                   <Sparkles className="h-3 w-3" />
                   <span>Pro Tier Upgrade</span>
                 </div>

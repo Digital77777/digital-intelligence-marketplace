@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 14% 10%;
 
-    --primary: 220 70% 50%;
+    --primary: 210 100% 38%;  /* booking.com blue */
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -33,7 +33,7 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
-    --radius: 1rem;
+    --radius: 0.5rem;  /* booking.com uses less rounded corners */
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -43,6 +43,11 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* booking.com colors */
+    --booking-blue: #0071c2;
+    --booking-dark-blue: #003580;
+    --booking-yellow: #f5a623;
     
     /* Pro Tier Accent Colors */
     --pro-accent: 200 100% 70%; /* #6AC8FF */
@@ -59,7 +64,7 @@
     --popover: 220 14% 10%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 220 70% 50%;
+    --primary: 210 100% 38%;  /* booking.com blue */
     --primary-foreground: 210 40% 98%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -123,6 +128,39 @@
   
   .pro-shadow {
     @apply shadow-lg shadow-[#6AC8FF]/5;
+  }
+
+  /* Booking.com inspired utilities */
+  .booking-blue-gradient {
+    @apply bg-gradient-to-r from-[#0071c2] to-[#00487a];
+  }
+  
+  .booking-card {
+    @apply bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+  
+  .booking-input {
+    @apply border border-gray-300 rounded-md px-4 py-2 focus:ring-[#0071c2] focus:border-[#0071c2] outline-none;
+  }
+  
+  .booking-btn {
+    @apply bg-[#0071c2] hover:bg-[#00487a] text-white font-medium py-2 px-4 rounded-sm transition-colors duration-200;
+  }
+  
+  .booking-btn-secondary {
+    @apply bg-[#f5a623] hover:bg-[#e09612] text-white font-medium py-2 px-4 rounded-sm transition-colors duration-200;
+  }
+}
+
+/* Apply top-margin to account for the double navbar */
+main {
+  margin-top: 7.5rem;
+}
+
+/* At mobile sizes, remove the secondary navbar */
+@media (max-width: 767px) {
+  main {
+    margin-top: 4rem;
   }
 }
 
