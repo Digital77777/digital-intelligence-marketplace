@@ -6,48 +6,38 @@ import { Sparkles, X, Send, MessageCircle, ChevronUp, ChevronDown } from 'lucide
 import { Avatar } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
 import { saveChatMessage } from '@/utils/chatUtils';
-import ChatBubble from '@/components/chat/ChatBubble';
+import { v4 as uuidv4 } from 'uuid';
+import { useTier } from '@/context/TierContext';
+import ChatContainer, { ChatMessage } from '@/components/chat/ChatContainer';
+import ProChatAssistant from './ProChatAssistant';
 
-interface ChatAssistantProps {}
-
-interface Message {
-  id: string;
-  content: string;
-  isUser: boolean;
-  timestamp: Date;
-}
-
-const ChatAssistant: React.FC<ChatAssistantProps> = () => {
+const ChatAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useUser();
+  const { currentTier, upgradePrompt } = useTier();
+
+  // Check if user has Pro tier to show Pro Chat Assistant instead
+  if (currentTier === 'pro') {
+    return <ProChatAssistant />;
+  }
 
   // Initial welcome message
   useEffect(() => {
     setMessages([
       {
-        id: '1',
+        id: uuidv4(),
+        role: 'assistant',
         content: "Hi there! I'm the chat assistant for this platform. How can I help you today?",
-        isUser: false,
         timestamp: new Date()
       }
     ]);
   }, []);
-
-  // Scroll to bottom when messages change
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
@@ -60,36 +50,47 @@ const ChatAssistant: React.FC<ChatAssistantProps> = () => {
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
-    const userMessage = {
-      id: Date.now().toString(),
-      content: inputValue,
-      isUser: true,
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
-    setIsLoading(true);
-
+    if (currentTier === 'freemium' && messages.filter(m => m.role === 'user').length >= 5) {
+      upgradePrompt('basic');
+      return;
+    }
+    
     try {
-      // Get response from assistant (simulated)
-      const response = await getAssistantResponse(inputValue);
+      setIsLoading(true);
       
-      const assistantMessage = {
-        id: (Date.now() + 1).toString(),
-        content: response,
-        isUser: false,
+      // Create user message
+      const userMessage: ChatMessage = {
+        id: uuidv4(),
+        role: 'user',
+        content: inputValue,
         timestamp: new Date()
       };
-
+      
+      // Add to UI
+      setMessages(prev => [...prev, userMessage]);
+      setInputValue('');
+      
+      // Get response (simulated for Freemium/Basic tiers)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const responseContent = generateBasicResponse(inputValue);
+      
+      const assistantMessage: ChatMessage = {
+        id: uuidv4(),
+        role: 'assistant',
+        content: responseContent,
+        timestamp: new Date()
+      };
+      
+      // Add AI response to UI
       setMessages(prev => [...prev, assistantMessage]);
       
       // Save to history if user is logged in
       if (user) {
-        await saveChatMessage(userMessage.content, response, { type: 'chat_assistant' });
+        await saveChatMessage(userMessage.content, responseContent, { type: 'chat_assistant' });
       }
     } catch (error) {
-      console.error("Error getting response:", error);
+      console.error("Error sending message:", error);
       toast({
         title: "Error",
         description: "Could not get a response. Please try again.",
@@ -106,11 +107,8 @@ const ChatAssistant: React.FC<ChatAssistantProps> = () => {
     }
   };
 
-  // Simulated assistant response - replace with real API in production
-  const getAssistantResponse = async (message: string): Promise<string> => {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+  // Simple response generator for basic/freemium tiers
+  const generateBasicResponse = (message: string): string => {
     message = message.toLowerCase();
     
     if (message.includes('hello') || message.includes('hi ') || message.includes('hey')) {
@@ -137,8 +135,12 @@ const ChatAssistant: React.FC<ChatAssistantProps> = () => {
       return "You're welcome! Feel free to ask if you have any other questions.";
     }
     
+    if (message.includes('pro') || message.includes('advance')) {
+      return "The Pro tier unlocks advanced features like the AI Studio, custom model training, business insights, and personalized AI assistance. You'll also get priority support and access to all our premium tools. Would you like to upgrade?";
+    }
+    
     // Default response
-    return "I'm here to help you navigate our AI platform. You can ask me about courses, tools, account settings, or pricing plans. What would you like to know more about?";
+    return "I'm here to help you navigate our AI platform. You can ask me about courses, tools, account settings, or pricing plans. For more advanced assistance, consider upgrading to our Pro tier which includes a more powerful AI assistant!";
   };
 
   return (
@@ -160,7 +162,7 @@ const ChatAssistant: React.FC<ChatAssistantProps> = () => {
           <div className="bg-primary text-primary-foreground p-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8 bg-primary-foreground/10">
-                <Sparkles className="h-4 w-4 text-primary-foreground" />
+                <MessageCircle className="h-4 w-4 text-primary-foreground" />
               </Avatar>
               <div>
                 <h3 className="font-medium text-sm">Chat Assistant</h3>
@@ -177,17 +179,7 @@ const ChatAssistant: React.FC<ChatAssistantProps> = () => {
           </div>
           
           {/* Chat messages */}
-          <div className="flex-1 overflow-y-auto p-3 bg-gray-50 dark:bg-gray-900/50">
-            {messages.map((message) => (
-              <ChatBubble
-                key={message.id}
-                message={message.content}
-                isUser={message.isUser}
-                timestamp={message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              />
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
+          <ChatContainer messages={messages} isLoading={isLoading} />
           
           {/* Chat input */}
           <div className="p-3 border-t bg-background">
@@ -196,7 +188,11 @@ const ChatAssistant: React.FC<ChatAssistantProps> = () => {
                 value={inputValue}
                 onChange={handleInputChange}
                 onKeyPress={handleKeyPress}
-                placeholder="Type your message..."
+                placeholder={
+                  currentTier === 'freemium' 
+                    ? `Ask a question (${5 - messages.filter(m => m.role === 'user').length}/5 remaining)`
+                    : "Type your message..."
+                }
                 disabled={isLoading}
                 className="flex-1"
               />
@@ -208,6 +204,25 @@ const ChatAssistant: React.FC<ChatAssistantProps> = () => {
                 {isLoading ? <Spinner size="sm" /> : <Send size={18} />}
               </Button>
             </div>
+            {currentTier === 'freemium' && (
+              <div className="text-xs text-muted-foreground mt-2 text-center">
+                Freemium users are limited to 5 questions. <Button variant="link" className="h-auto p-0 text-xs" onClick={() => upgradePrompt('basic')}>Upgrade</Button> for unlimited questions.
+              </div>
+            )}
+            {currentTier !== 'pro' && (
+              <div className="mt-3 bg-muted/40 rounded-md p-2 text-xs border border-border/50">
+                <div className="flex items-center gap-1 font-medium text-primary mb-1">
+                  <Sparkles className="h-3 w-3" />
+                  <span>Pro Tier Upgrade</span>
+                </div>
+                <p className="text-muted-foreground">
+                  Upgrade to Pro for our advanced AI assistant with context awareness, voice commands, and personalized insights.
+                </p>
+                <Button size="sm" variant="link" className="text-xs p-0 h-auto mt-1" onClick={() => upgradePrompt('pro')}>
+                  Learn more
+                </Button>
+              </div>
+            )}
           </div>
         </Card>
       )}

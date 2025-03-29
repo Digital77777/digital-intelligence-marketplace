@@ -81,3 +81,34 @@ const generateDemoResponse = (userMessage: string, chatType: 'general' | 'pro'):
   
   return 'I understand your question about "' + userMessage + '". How else can I assist you today?';
 };
+
+// Save chat message to Supabase
+export const saveChatMessage = async (message: string, botResponse: string, metadata: any = {}) => {
+  try {
+    const { data: session } = await supabase.auth.getSession();
+    
+    if (!session.session) {
+      throw new Error('No active session');
+    }
+    
+    // Use Supabase Edge Function to save the chat
+    const { error } = await supabase.functions.invoke('pro-chat/history', {
+      headers: {
+        Authorization: `Bearer ${session.session.access_token}`,
+      },
+      body: { 
+        message, 
+        botResponse, 
+        metadata 
+      },
+      method: 'POST',
+    });
+    
+    if (error) throw error;
+    
+    return true;
+  } catch (error) {
+    console.error('Error saving chat message:', error);
+    return false;
+  }
+};

@@ -2,16 +2,19 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Avatar } from '@/components/ui/avatar';
-import { User, Bot } from 'lucide-react';
+import { User, Bot, Sparkles } from 'lucide-react';
+import { ChatMessage } from './ChatContainer';
 
 interface ChatBubbleProps {
-  message: string;
-  isUser: boolean;
-  timestamp?: string;
-  avatar?: string;
+  message: ChatMessage;
 }
 
-const ChatBubble = ({ message, isUser, timestamp, avatar }: ChatBubbleProps) => {
+const ChatBubble: React.FC<ChatBubbleProps> = ({ message }) => {
+  const isUser = message.role === 'user';
+  const formattedTimestamp = message.timestamp 
+    ? new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+    : '';
+
   return (
     <div className={cn(
       "flex gap-3 mb-4",
@@ -20,7 +23,7 @@ const ChatBubble = ({ message, isUser, timestamp, avatar }: ChatBubbleProps) => 
       {!isUser && (
         <div className="flex-shrink-0">
           <Avatar className="h-8 w-8 bg-primary/10 border border-primary/20">
-            <Bot className="h-4 w-4 text-primary" />
+            <Sparkles className="h-4 w-4 text-primary" />
           </Avatar>
         </div>
       )}
@@ -31,13 +34,13 @@ const ChatBubble = ({ message, isUser, timestamp, avatar }: ChatBubbleProps) => 
           ? "bg-primary text-primary-foreground" 
           : "bg-muted dark:bg-muted/40"
       )}>
-        <div className="whitespace-pre-wrap">{message}</div>
-        {timestamp && (
+        <div className="whitespace-pre-wrap">{message.content}</div>
+        {formattedTimestamp && (
           <div className={cn(
             "text-xs mt-1", 
             isUser ? "text-primary-foreground/70" : "text-muted-foreground"
           )}>
-            {timestamp}
+            {formattedTimestamp}
           </div>
         )}
       </div>
@@ -45,11 +48,7 @@ const ChatBubble = ({ message, isUser, timestamp, avatar }: ChatBubbleProps) => 
       {isUser && (
         <div className="flex-shrink-0">
           <Avatar className="h-8 w-8 bg-primary">
-            {avatar ? (
-              <img src={avatar} alt="User" />
-            ) : (
-              <User className="h-4 w-4 text-white" />
-            )}
+            <User className="h-4 w-4 text-white" />
           </Avatar>
         </div>
       )}
