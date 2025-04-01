@@ -1,164 +1,203 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { 
-  Zap, 
-  Code, 
-  LineChart, 
-  GitBranch, 
-  Users, 
-  ShieldCheck, 
-  MessageSquareText, 
-  BookText,
-  ArrowRight,
-  Check
-} from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Sparkles, GraduationCap, BarChart3, FileText, ArrowRight, Brain } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { LearningAcademyCourse } from '@/utils/learningAcademyService';
+import { BusinessInsight } from '@/utils/businessInsightsService';
 
-const ProTierContent = () => {
+interface ProTierContentProps {
+  isLoggedIn?: boolean;
+  featuredCourses?: LearningAcademyCourse[];
+  businessInsights?: BusinessInsight[];
+  isLoading?: boolean;
+}
+
+const ProTierContent: React.FC<ProTierContentProps> = ({ 
+  isLoggedIn = false,
+  featuredCourses = [],
+  businessInsights = [],
+  isLoading = false
+}) => {
+  const navigate = useNavigate();
+
   return (
-    <div className="py-10">
-      <div className="mb-12 text-center">
-        <Badge variant="outline" className="mb-4 px-3 py-1 bg-purple-100/50 backdrop-blur-sm border-purple-200/50 dark:bg-purple-900/30 dark:border-purple-800/50">
-          <Zap className="h-3.5 w-3.5 mr-1.5 text-[#00AAFF]" />
-          <span className="text-purple-800 dark:text-purple-300">Pro Tier Access</span>
+    <div className="space-y-12">
+      <div className="text-center mb-10">
+        <Badge variant="outline" className="mb-4 px-3 py-1 bg-[#00AAFF]/10 backdrop-blur-sm border-[#00AAFF]/30">
+          <Sparkles className="h-3.5 w-3.5 mr-1.5 text-[#00AAFF]" />
+          <span className="text-[#00AAFF]">Pro Tier</span>
         </Badge>
         <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-          Welcome to the <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-[#00AAFF]">Pro Experience</span>
+          Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00AAFF] to-[#0066cc]">Pro Tier</span> Experience
         </h2>
-        <p className="mt-4 text-xl text-foreground/70 max-w-3xl mx-auto">
-          Unlock enterprise-grade features, custom AI models, and advanced analytics
+        <p className="mt-4 text-xl text-muted-foreground max-w-3xl mx-auto">
+          Unlock advanced AI tools, exclusive learning resources, and professional insights
         </p>
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-        {[
-          {
-            icon: <Code className="h-8 w-8 text-[#00AAFF]" />,
-            title: "AI Studio",
-            description: "Build and train custom AI models with a visual interface",
-            link: "/ai-studio"
-          },
-          {
-            icon: <Zap className="h-8 w-8 text-pink-500" />,
-            title: "Model Marketplace",
-            description: "Access 250+ premium AI models and tools",
-            link: "/model-marketplace"
-          },
-          {
-            icon: <GitBranch className="h-8 w-8 text-purple-500" />,
-            title: "Pipeline Designer",
-            description: "Create advanced data and AI pipelines",
-            link: "/pipeline-designer"
-          },
-          {
-            icon: <Users className="h-8 w-8 text-indigo-500" />,
-            title: "Team Workspace",
-            description: "Collaborate with unlimited team members",
-            link: "/team-workspace"
-          },
-          {
-            icon: <ShieldCheck className="h-8 w-8 text-green-500" />,
-            title: "Compliance Center",
-            description: "Ensure GDPR/HIPAA compliance for your AI projects",
-            link: "/compliance-center"
-          },
-          {
-            icon: <LineChart className="h-8 w-8 text-amber-500" />,
-            title: "Business Insights",
-            description: "Generate reports and analytics for stakeholders",
-            link: "/business-insights"
-          }
-        ].map((feature, index) => (
-          <Link 
-            key={index}
-            to={feature.link}
-            className="bg-gray-900/80 backdrop-blur-sm rounded-xl p-6 border border-gray-800/70 hover:border-[#00AAFF]/30 hover:shadow-lg hover:shadow-[#00AAFF]/5 transition-all duration-300 flex flex-col h-full group"
-          >
-            <div className="h-14 w-14 bg-gray-800/80 rounded-lg flex items-center justify-center mb-4 group-hover:bg-gray-800 transition-colors">
-              {feature.icon}
+
+      {/* Pro Features Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Learning Academy Card */}
+        <Card className="bg-gradient-to-b from-slate-950 to-slate-900 border border-slate-800 hover:border-[#00AAFF]/30 transition-all duration-300 overflow-hidden group">
+          <CardHeader className="pb-2">
+            <div className="mb-2 w-12 h-12 rounded-lg bg-[#00AAFF]/10 flex items-center justify-center">
+              <GraduationCap className="h-6 w-6 text-[#00AAFF]" />
             </div>
-            <h3 className="text-xl font-semibold mb-2 text-white group-hover:text-[#00AAFF] transition-colors">{feature.title}</h3>
-            <p className="text-gray-400">{feature.description}</p>
-            <div className="mt-4 flex justify-end">
-              <ArrowRight className="h-5 w-5 text-[#00AAFF] opacity-0 group-hover:opacity-100 transform translate-x-0 group-hover:translate-x-1 transition-all" />
-            </div>
-          </Link>
-        ))}
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-        <div className="relative col-span-1 md:col-span-2">
-          <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-[#00AAFF] to-indigo-600 rounded-2xl blur-lg opacity-20"></div>
-          <div className="relative bg-gray-900/90 backdrop-blur-xl rounded-2xl p-8 shadow-xl border border-gray-800">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-              <div className="md:col-span-8">
-                <h3 className="text-2xl font-bold mb-4 text-white">Pro-Exclusive Features</h3>
-                <p className="text-lg text-gray-300 mb-6">
-                  As a Pro tier member, you have access to our complete suite of enterprise-grade tools, unlimited team members, dedicated support, and custom AI model development.
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                  {[
-                    "Custom AI Models", 
-                    "Unlimited Team Members", 
-                    "Dedicated Support", 
-                    "Advanced Security", 
-                    "Business Analytics", 
-                    "API Access"
-                  ].map((feature, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <Check className="h-5 w-5 text-[#00AAFF]" />
-                      <span className="text-gray-300">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="md:col-span-4 flex items-center justify-center">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#00AAFF] to-purple-600 rounded-full blur-md opacity-40 animate-pulse"></div>
-                  <div className="relative h-40 w-40 bg-gradient-to-br from-[#00AAFF] to-purple-600 rounded-full flex items-center justify-center shadow-inner">
-                    <div className="text-3xl font-bold text-white flex flex-col items-center">
-                      <span>250+</span>
-                      <span className="text-sm font-medium mt-1">Premium Tools</span>
-                    </div>
+            <CardTitle className="text-xl text-white">Learning Academy</CardTitle>
+            <CardDescription>
+              Advanced AI courses and certifications
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-sm text-slate-300">
+            <ul className="space-y-1">
+              <li className="flex items-center">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#00AAFF] mr-2"></div>
+                Expert-led workshops and training
+              </li>
+              <li className="flex items-center">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#00AAFF] mr-2"></div>
+                Industry-recognized certifications
+              </li>
+              <li className="flex items-center">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#00AAFF] mr-2"></div>
+                Hands-on projects and assessments
+              </li>
+            </ul>
+
+            {isLoading ? (
+              <div className="mt-4 h-8 bg-slate-800 animate-pulse rounded"></div>
+            ) : featuredCourses.length > 0 ? (
+              <div className="mt-4 space-y-2">
+                <p className="font-medium text-white">Featured courses:</p>
+                {featuredCourses.slice(0, 2).map(course => (
+                  <div key={course.id} className="text-xs text-slate-300 flex items-center">
+                    <Brain className="h-3 w-3 mr-1.5 flex-shrink-0 text-[#00AAFF]" />
+                    {course.title}
                   </div>
-                </div>
+                ))}
               </div>
+            ) : null}
+          </CardContent>
+          <CardFooter>
+            <Button 
+              className="w-full bg-gradient-to-r from-[#00AAFF] to-[#0066cc] hover:from-[#0088cc] hover:to-[#0055bb] group-hover:shadow-[0_0_15px_rgba(0,170,255,0.5)] transition-all"
+              onClick={() => navigate('/learning-academy')}
+            >
+              Explore Academy
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </CardFooter>
+        </Card>
+
+        {/* Business Insights Card */}
+        <Card className="bg-gradient-to-b from-slate-950 to-slate-900 border border-slate-800 hover:border-[#00AAFF]/30 transition-all duration-300 overflow-hidden group">
+          <CardHeader className="pb-2">
+            <div className="mb-2 w-12 h-12 rounded-lg bg-[#00AAFF]/10 flex items-center justify-center">
+              <BarChart3 className="h-6 w-6 text-[#00AAFF]" />
             </div>
-          </div>
-        </div>
-        
-        <div className="bg-gray-900/80 backdrop-blur-sm rounded-xl p-6 border border-gray-800/70 hover:border-[#00AAFF]/30 transition-all duration-300">
-          <div className="flex items-center gap-3 mb-4">
-            <MessageSquareText className="h-8 w-8 text-[#00AAFF]" />
-            <h3 className="text-xl font-semibold text-white">Pro AI Assistant</h3>
-          </div>
-          <p className="text-gray-400 mb-4">
-            Our dedicated AI assistant is ready to help you with any questions about the platform, AI models, or your projects.
-          </p>
-          <Link to="/pro-chatbot">
-            <Button variant="outline" className="w-full border-[#00AAFF]/30 text-[#00AAFF] hover:bg-[#00AAFF]/10">
-              Launch AI Assistant
+            <CardTitle className="text-xl text-white">Business Insights</CardTitle>
+            <CardDescription>
+              Data-driven market intelligence
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-sm text-slate-300">
+            <ul className="space-y-1">
+              <li className="flex items-center">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#00AAFF] mr-2"></div>
+                Exclusive industry reports and analysis
+              </li>
+              <li className="flex items-center">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#00AAFF] mr-2"></div>
+                AI market trends and forecasts
+              </li>
+              <li className="flex items-center">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#00AAFF] mr-2"></div>
+                ROI calculators and benchmarking tools
+              </li>
+            </ul>
+
+            {isLoading ? (
+              <div className="mt-4 h-8 bg-slate-800 animate-pulse rounded"></div>
+            ) : businessInsights.length > 0 ? (
+              <div className="mt-4 space-y-2">
+                <p className="font-medium text-white">Latest insights:</p>
+                {businessInsights.slice(0, 2).map(insight => (
+                  <div key={insight.id} className="text-xs text-slate-300 flex items-center">
+                    <FileText className="h-3 w-3 mr-1.5 flex-shrink-0 text-[#00AAFF]" />
+                    {insight.title}
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </CardContent>
+          <CardFooter>
+            <Button 
+              className="w-full bg-gradient-to-r from-[#00AAFF] to-[#0066cc] hover:from-[#0088cc] hover:to-[#0055bb] group-hover:shadow-[0_0_15px_rgba(0,170,255,0.5)] transition-all"
+              onClick={() => navigate('/business-insights')}
+            >
+              View Insights
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-          </Link>
-        </div>
-        
-        <div className="bg-gray-900/80 backdrop-blur-sm rounded-xl p-6 border border-gray-800/70 hover:border-[#00AAFF]/30 transition-all duration-300">
-          <div className="flex items-center gap-3 mb-4">
-            <BookText className="h-8 w-8 text-[#00AAFF]" />
-            <h3 className="text-xl font-semibold text-white">Learning Academy</h3>
-          </div>
-          <p className="text-gray-400 mb-4">
-            Access advanced courses, certifications, and expert-led workshops on AI development, MLOps, and more.
-          </p>
-          <Link to="/learning-academy">
-            <Button variant="outline" className="w-full border-[#00AAFF]/30 text-[#00AAFF] hover:bg-[#00AAFF]/10">
-              Browse Courses
+          </CardFooter>
+        </Card>
+
+        {/* AI Studio Card */}
+        <Card className="bg-gradient-to-b from-slate-950 to-slate-900 border border-slate-800 hover:border-[#00AAFF]/30 transition-all duration-300 overflow-hidden group">
+          <CardHeader className="pb-2">
+            <div className="mb-2 w-12 h-12 rounded-lg bg-[#00AAFF]/10 flex items-center justify-center">
+              <Sparkles className="h-6 w-6 text-[#00AAFF]" />
+            </div>
+            <CardTitle className="text-xl text-white">AI Studio</CardTitle>
+            <CardDescription>
+              Advanced model training and deployment
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-sm text-slate-300">
+            <ul className="space-y-1">
+              <li className="flex items-center">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#00AAFF] mr-2"></div>
+                Custom AI model development
+              </li>
+              <li className="flex items-center">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#00AAFF] mr-2"></div>
+                Fine-tuning for specialized tasks
+              </li>
+              <li className="flex items-center">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#00AAFF] mr-2"></div>
+                Enterprise-ready deployment options
+              </li>
+              <li className="flex items-center">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#00AAFF] mr-2"></div>
+                Performance analytics and monitoring
+              </li>
+            </ul>
+          </CardContent>
+          <CardFooter>
+            <Button 
+              className="w-full bg-gradient-to-r from-[#00AAFF] to-[#0066cc] hover:from-[#0088cc] hover:to-[#0055bb] group-hover:shadow-[0_0_15px_rgba(0,170,255,0.5)] transition-all"
+              onClick={() => navigate('/ai-studio')}
+            >
+              Open Studio
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-          </Link>
-        </div>
+          </CardFooter>
+        </Card>
       </div>
+
+      {!isLoggedIn && (
+        <div className="mt-8 p-6 rounded-lg border border-slate-800 bg-slate-900/50 text-center">
+          <p className="text-slate-300 mb-4">Sign in to access all your Pro tier features and benefits</p>
+          <Button 
+            className="bg-gradient-to-r from-[#00AAFF] to-[#0066cc] hover:from-[#0088cc] hover:to-[#0055bb]"
+            onClick={() => navigate('/auth')}
+          >
+            Sign In
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

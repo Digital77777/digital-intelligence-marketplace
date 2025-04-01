@@ -9,6 +9,105 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      ai_streams: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          description: string | null
+          duration: string | null
+          id: string
+          is_featured: boolean | null
+          is_public: boolean | null
+          likes: number | null
+          tags: string[] | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          views: number | null
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          description?: string | null
+          duration?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_public?: boolean | null
+          likes?: number | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          views?: number | null
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          description?: string | null
+          duration?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_public?: boolean | null
+          likes?: number | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          views?: number | null
+        }
+        Relationships: []
+      }
+      ai_streams_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          parent_id: string | null
+          stream_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          stream_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          stream_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_streams_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_streams_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_streams_comments_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "ai_streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_tools: {
         Row: {
           category: string
@@ -47,6 +146,74 @@ export type Database = {
           use_cases?: string[] | null
         }
         Relationships: []
+      }
+      business_insights: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          description: string | null
+          id: string
+          industry: string | null
+          is_public: boolean | null
+          metrics: Json | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          industry?: string | null
+          is_public?: boolean | null
+          metrics?: Json | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          industry?: string | null
+          is_public?: boolean | null
+          metrics?: Json | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      business_insights_access: {
+        Row: {
+          created_at: string
+          id: string
+          insight_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          insight_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          insight_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_insights_access_insight_id_fkey"
+            columns: ["insight_id"]
+            isOneToOne: false
+            referencedRelation: "business_insights"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       course_feedback: {
         Row: {
@@ -233,6 +400,139 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "forum_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_academy: {
+        Row: {
+          category: string
+          certification_available: boolean | null
+          content: string
+          created_at: string
+          description: string | null
+          difficulty: string
+          duration: number
+          id: string
+          image_url: string | null
+          instructor_id: string | null
+          is_featured: boolean | null
+          prerequisites: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          certification_available?: boolean | null
+          content: string
+          created_at?: string
+          description?: string | null
+          difficulty: string
+          duration: number
+          id?: string
+          image_url?: string | null
+          instructor_id?: string | null
+          is_featured?: boolean | null
+          prerequisites?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          certification_available?: boolean | null
+          content?: string
+          created_at?: string
+          description?: string | null
+          difficulty?: string
+          duration?: number
+          id?: string
+          image_url?: string | null
+          instructor_id?: string | null
+          is_featured?: boolean | null
+          prerequisites?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      learning_academy_certifications: {
+        Row: {
+          certificate_id: string
+          course_id: string
+          id: string
+          issued_at: string
+          metadata: Json | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          certificate_id: string
+          course_id: string
+          id?: string
+          issued_at?: string
+          metadata?: Json | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          certificate_id?: string
+          course_id?: string
+          id?: string
+          issued_at?: string
+          metadata?: Json | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_academy_certifications_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "learning_academy"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_academy_progress: {
+        Row: {
+          completed: boolean | null
+          completion_percent: number | null
+          course_id: string
+          created_at: string
+          id: string
+          last_accessed: string | null
+          notes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          completion_percent?: number | null
+          course_id: string
+          created_at?: string
+          id?: string
+          last_accessed?: string | null
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          completion_percent?: number | null
+          course_id?: string
+          created_at?: string
+          id?: string
+          last_accessed?: string | null
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_academy_progress_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "learning_academy"
             referencedColumns: ["id"]
           },
         ]
@@ -444,7 +744,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_access_pro_features: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
+      }
+      get_user_tier: {
+        Args: {
+          user_id: string
+        }
+        Returns: string
+      }
+      increment_ai_stream_views: {
+        Args: {
+          stream_id: string
+        }
+        Returns: undefined
+      }
+      toggle_ai_stream_like: {
+        Args: {
+          stream_id: string
+          is_liked: boolean
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

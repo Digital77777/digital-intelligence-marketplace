@@ -2,11 +2,19 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Search, Bell } from 'lucide-react';
+import { Search, Bell, Zap } from 'lucide-react';
 import { toast } from 'sonner';
+import { useUser } from '@/context/UserContext';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const NavbarActions = () => {
   const navigate = useNavigate();
+  const { profile } = useUser();
   const [notificationCount, setNotificationCount] = useState(3);
 
   const handleNotificationClick = () => {
@@ -14,8 +22,41 @@ const NavbarActions = () => {
     setNotificationCount(0);
   };
 
+  const handleProClick = () => {
+    if (profile?.tier !== 'pro') {
+      navigate('/pricing');
+      toast("Upgrade required", {
+        description: "This feature is available for Pro tier users only"
+      });
+    } else {
+      navigate('/learning-academy');
+    }
+  };
+
   return (
     <div className="flex items-center gap-2 md:gap-4">
+      {/* Pro Feature Button - Only visible for non-Pro users */}
+      {profile?.tier !== 'pro' && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                className="hidden md:flex items-center gap-1.5 h-9 px-3 rounded-full text-white bg-gradient-to-r from-[#00AAFF] to-[#0066cc] hover:opacity-90"
+                onClick={handleProClick}
+              >
+                <Zap className="h-3.5 w-3.5" />
+                <span className="text-xs font-medium">Go Pro</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Upgrade to Pro for more features</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+      
+      {/* Search Button */}
       <Button 
         variant="ghost" 
         size="icon" 
@@ -26,6 +67,7 @@ const NavbarActions = () => {
         <Search className="h-4 w-4" />
       </Button>
       
+      {/* Notification Button */}
       <Button 
         variant="ghost" 
         size="icon" 
@@ -35,7 +77,7 @@ const NavbarActions = () => {
       >
         <Bell className="h-4 w-4" />
         {notificationCount > 0 && (
-          <span className="absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium">
+          <span className="absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-r from-[#00AAFF] to-[#0066cc] text-[10px] font-medium text-white">
             {notificationCount}
           </span>
         )}
