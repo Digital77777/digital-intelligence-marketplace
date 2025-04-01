@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/sheet"
 import { Menu, Sparkles, User, Settings, LogOut, Search, Bell, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const Navbar = () => {
   const { user, profile, logout } = useUser();
@@ -32,6 +33,7 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollable, setScrollable] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(3);
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -39,6 +41,11 @@ const Navbar = () => {
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleNotificationClick = () => {
+    toast.success("Notifications cleared");
+    setNotificationCount(0);
   };
 
   // Check if the nav is scrollable
@@ -56,6 +63,7 @@ const Navbar = () => {
 
   // Navigation items based on current tier
   const getNavItems = () => {
+    // Base items for freemium users
     const baseItems = [
       {
         title: "AI Tools Directory",
@@ -63,23 +71,13 @@ const Navbar = () => {
         visible: true
       },
       {
-        title: "Learning Hub",
-        path: "/learning-hub",
+        title: "Community Forums",
+        path: "/forums",
         visible: true
       },
       {
         title: "Marketplace",
         path: "/marketplace",
-        visible: true
-      },
-      {
-        title: "AI Streams",
-        path: "/ai-streams",
-        visible: true
-      },
-      {
-        title: "Community Forums",
-        path: "/forums",
         visible: true
       },
       {
@@ -89,9 +87,19 @@ const Navbar = () => {
       }
     ];
 
-    // Add tier-specific items
-    if (currentTier === 'basic') {
+    // Add items based on tier
+    if (currentTier === 'basic' || currentTier === 'pro') {
       baseItems.push(
+        {
+          title: "Learning Hub",
+          path: "/learning-hub",
+          visible: true
+        },
+        {
+          title: "AI Streams",
+          path: "/ai-streams",
+          visible: true
+        },
         {
           title: "Team Dashboard",
           path: "/team-dashboard",
@@ -115,6 +123,16 @@ const Navbar = () => {
         {
           title: "Business Insights",
           path: "/business-insights",
+          visible: true
+        },
+        {
+          title: "Pipeline Designer",
+          path: "/pipeline-designer",
+          visible: true
+        },
+        {
+          title: "Compliance Center",
+          path: "/compliance-center",
           visible: true
         },
         {
@@ -154,10 +172,16 @@ const Navbar = () => {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-9 w-9 rounded-full text-white hover:bg-white/20"
+              className="h-9 w-9 rounded-full text-white hover:bg-white/20 relative"
+              onClick={handleNotificationClick}
               title="Notifications"
             >
               <Bell className="h-4 w-4" />
+              {notificationCount > 0 && (
+                <span className="absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium">
+                  {notificationCount}
+                </span>
+              )}
             </Button>
             
             {user ? (

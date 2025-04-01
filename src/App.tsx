@@ -37,6 +37,8 @@ import AIStudio from "./pages/AIStudio";
 import ModelMarketplace from "./pages/ModelMarketplace";
 import BusinessInsights from "./pages/BusinessInsights";
 import AIAssistant from "./pages/AIAssistant";
+import PipelineDesigner from "./pages/PipelineDesigner";
+import ComplianceCenter from "./pages/ComplianceCenter";
 // Import AI Streams pages
 import AIStreams from "./pages/AIStreams";
 import AIStreamDetail from "./pages/AIStreamDetail";
@@ -98,6 +100,8 @@ const App = () => (
                 <Route path="/model-marketplace" element={<ModelMarketplace />} />
                 <Route path="/business-insights" element={<BusinessInsights />} />
                 <Route path="/ai-assistant" element={<AIAssistant />} />
+                <Route path="/pipeline-designer" element={<PipelineDesigner />} />
+                <Route path="/compliance-center" element={<ComplianceCenter />} />
                 
                 {/* AI Streams Routes */}
                 <Route path="/ai-streams" element={<AIStreams />} />

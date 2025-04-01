@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { toast } from 'sonner';
 
@@ -87,12 +88,11 @@ const tierFeaturesMap: Record<TierType, TierFeatures> = {
 // Features available in each tier
 const tierFeatureAccess: Record<string, TierType[]> = {
   // Freemium accessible features
-  'core-tools': ['freemium', 'basic', 'pro'],
-  'basic-forum': ['freemium', 'basic', 'pro'],
-  'basic-learning': ['freemium', 'basic', 'pro'],
+  'ai-tools-directory': ['freemium', 'basic', 'pro'],
+  'forums': ['freemium', 'basic', 'pro'],
+  'marketplace': ['freemium', 'basic', 'pro'],
   'profile-management': ['freemium', 'basic', 'pro'],
   'starter-api': ['freemium', 'basic', 'pro'],
-  'marketplace': ['freemium', 'basic', 'pro'],
   
   // Basic tier features
   'team-dashboard': ['basic', 'pro'],
@@ -105,7 +105,8 @@ const tierFeatureAccess: Record<string, TierType[]> = {
   'priority-support': ['basic', 'pro'],
   'learning-hub-pro': ['basic', 'pro'],
   'api-calls-5000': ['basic', 'pro'],
-  'ai-tools-directory': ['basic', 'pro'],
+  'ai-streams': ['basic', 'pro'],
+  'learning-hub': ['basic', 'pro'],
   
   // Pro tier features
   'custom-models': ['pro'],
