@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import {
   BookOpen,
   Play,
-  Certificate,
+  Award,  // Replaced Certificate with Award
   Clock,
   User,
   Star,
