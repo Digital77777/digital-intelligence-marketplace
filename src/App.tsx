@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -43,9 +42,10 @@ import ComplianceCenter from "./pages/ComplianceCenter";
 import AIStreams from "./pages/AIStreams";
 import AIStreamDetail from "./pages/AIStreamDetail";
 // Import Chat Assistant
-import ChatAssistant from "./components/ChatAssistant";
+import ChatAssistant from "@/components/ChatAssistant";
 // Import Discovery Page
 import DiscoveryPage from "./pages/DiscoveryPage";
+import LearningAcademy from "./pages/LearningAcademy";
 
 const queryClient = new QueryClient();
 
@@ -102,6 +102,7 @@ const App = () => (
                 <Route path="/ai-assistant" element={<AIAssistant />} />
                 <Route path="/pipeline-designer" element={<PipelineDesigner />} />
                 <Route path="/compliance-center" element={<ComplianceCenter />} />
+                <Route path="/learning-academy" element={<LearningAcademy />} />
                 
                 {/* AI Streams Routes */}
                 <Route path="/ai-streams" element={<AIStreams />} />

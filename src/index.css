@@ -13,7 +13,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 14% 10%;
 
-    --primary: 210 100% 38%;  /* booking.com blue */
+    --primary: 210 100% 50%;  /* electric blue */
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -32,7 +32,7 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
-    --radius: 0.5rem;  /* booking.com uses less rounded corners */
+    --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -43,13 +43,18 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
     
-    /* booking.com colors */
-    --booking-blue: #0071c2;
-    --booking-dark-blue: #003580;
+    /* electric blue colors */
+    --electric-blue: #0088ff;
+    --electric-blue-dark: #0066cc;
+    --electric-blue-light: #66bbff;
+    
+    /* booking.com colors - updated to match electric blue theme */
+    --booking-blue: #0088ff;
+    --booking-dark-blue: #0066cc;
     --booking-yellow: #f5a623;
     
-    /* Pro Tier Accent Colors */
-    --pro-accent: 200 100% 70%; /* #6AC8FF */
+    /* Pro Tier Accent Colors - updated to electric blue theme */
+    --pro-accent: 195 100% 60%; /* #00AAFF */
     --pro-accent-foreground: 240 5.9% 10%;
   }
 
@@ -122,19 +127,19 @@
   }
   
   .pro-gradient {
-    @apply bg-gradient-to-br from-[#6AC8FF] to-purple-600;
+    @apply bg-gradient-to-br from-[#00AAFF] to-purple-600;
   }
   
   .pro-text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-[#6AC8FF] to-purple-600;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[#00AAFF] to-purple-600;
   }
   
   .pro-border {
-    @apply border border-[#6AC8FF]/30;
+    @apply border border-[#00AAFF]/30;
   }
   
   .pro-shadow {
-    @apply shadow-lg shadow-[#6AC8FF]/5;
+    @apply shadow-lg shadow-[#00AAFF]/5;
   }
 
   .booking-blue-gradient {
