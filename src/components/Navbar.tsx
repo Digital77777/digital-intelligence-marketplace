@@ -71,6 +71,16 @@ const Navbar = () => {
         visible: true
       },
       {
+        title: "Learning Hub",
+        path: "/learning-hub",
+        visible: true
+      },
+      {
+        title: "AI Streams",
+        path: "/ai-streams",
+        visible: true
+      },
+      {
         title: "Community Forums",
         path: "/forums",
         visible: true
@@ -90,16 +100,6 @@ const Navbar = () => {
     // Add items based on tier
     if (currentTier === 'basic' || currentTier === 'pro') {
       baseItems.push(
-        {
-          title: "Learning Hub",
-          path: "/learning-hub",
-          visible: true
-        },
-        {
-          title: "AI Streams",
-          path: "/ai-streams",
-          visible: true
-        },
         {
           title: "Team Dashboard",
           path: "/team-dashboard",

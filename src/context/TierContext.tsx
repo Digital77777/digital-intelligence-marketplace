@@ -93,6 +93,8 @@ const tierFeatureAccess: Record<string, TierType[]> = {
   'marketplace': ['freemium', 'basic', 'pro'],
   'profile-management': ['freemium', 'basic', 'pro'],
   'starter-api': ['freemium', 'basic', 'pro'],
+  'learning-hub': ['freemium', 'basic', 'pro'],
+  'ai-streams': ['freemium', 'basic', 'pro'],
   
   // Basic tier features
   'team-dashboard': ['basic', 'pro'],
@@ -105,8 +107,6 @@ const tierFeatureAccess: Record<string, TierType[]> = {
   'priority-support': ['basic', 'pro'],
   'learning-hub-pro': ['basic', 'pro'],
   'api-calls-5000': ['basic', 'pro'],
-  'ai-streams': ['basic', 'pro'],
-  'learning-hub': ['basic', 'pro'],
   
   // Pro tier features
   'custom-models': ['pro'],

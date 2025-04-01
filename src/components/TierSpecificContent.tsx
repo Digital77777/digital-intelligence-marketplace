@@ -19,7 +19,9 @@ import {
   ShieldCheck,
   BookText,
   MessageSquareText,
-  ShoppingBag
+  ShoppingBag,
+  Play,
+  FileText
 } from 'lucide-react';
 
 const TierSpecificContent = () => {
@@ -36,7 +38,7 @@ const TierSpecificContent = () => {
           Discover the Power of <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">AI Tools</span>
         </h2>
         <p className="mt-4 text-xl text-foreground/70 max-w-3xl mx-auto">
-          Explore our core AI tools and community features for free. Upgrade to unlock premium features.
+          Explore our core AI tools, learning resources, and community features for free. Upgrade to unlock premium features.
         </p>
       </div>
       
@@ -46,21 +48,43 @@ const TierSpecificContent = () => {
             icon: <ShoppingBag className="h-10 w-10 text-amber-500" />,
             title: "AI Marketplace",
             description: "Access our marketplace of AI tools and services",
-            available: true
+            available: true,
+            link: "/marketplace"
           },
           {
-            icon: <Users className="h-10 w-10 text-purple-500" />,
+            icon: <BookText className="h-10 w-10 text-blue-500" />,
+            title: "Learning Hub",
+            description: "Learn about AI with our comprehensive guides and tutorials",
+            available: true,
+            link: "/learning-hub"
+          },
+          {
+            icon: <Play className="h-10 w-10 text-purple-500" />,
+            title: "AI Streams",
+            description: "Watch live and recorded AI demonstrations and tutorials",
+            available: true,
+            link: "/ai-streams"
+          },
+          {
+            icon: <Users className="h-10 w-10 text-emerald-500" />,
             title: "Team Collaboration",
             description: "Collaborate with your team on projects and workflows",
             available: false,
             requiredTier: "Basic"
           },
           {
-            icon: <BarChart3 className="h-10 w-10 text-blue-500" />,
+            icon: <BarChart3 className="h-10 w-10 text-indigo-500" />,
             title: "Usage Analytics",
             description: "Track your API usage and tool performance",
             available: false,
             requiredTier: "Basic"
+          },
+          {
+            icon: <FileText className="h-10 w-10 text-rose-500" />,
+            title: "Compliance Tools",
+            description: "Ensure your AI solutions meet regulatory requirements",
+            available: false,
+            requiredTier: "Pro"
           }
         ].map((feature, index) => (
           <div 
@@ -77,10 +101,11 @@ const TierSpecificContent = () => {
               
               <div className="mt-auto">
                 {feature.available ? (
-                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800/60 flex items-center w-fit">
-                    <Check className="h-3.5 w-3.5 mr-1.5" />
-                    Available
-                  </Badge>
+                  <Link to={feature.link || "#"} className="w-full">
+                    <Button variant="outline" className="w-full">
+                      Explore Now
+                    </Button>
+                  </Link>
                 ) : (
                   <div className="flex flex-col gap-2">
                     <Badge variant="outline" className="border-amber-300 text-amber-700 dark:text-amber-400 flex items-center w-fit">
