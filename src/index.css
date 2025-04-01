@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -113,7 +112,15 @@
     text-wrap: balance;
   }
   
-  /* Pro Tier Utilities */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  
   .pro-gradient {
     @apply bg-gradient-to-br from-[#6AC8FF] to-purple-600;
   }
@@ -130,7 +137,6 @@
     @apply shadow-lg shadow-[#6AC8FF]/5;
   }
 
-  /* Booking.com inspired utilities */
   .booking-blue-gradient {
     @apply bg-gradient-to-r from-[#0071c2] to-[#00487a];
   }
@@ -152,15 +158,13 @@
   }
 }
 
-/* Apply top-margin to account for the double navbar */
 main {
-  margin-top: 7.5rem;
+  margin-top: 6.5rem;
 }
 
-/* At mobile sizes, remove the secondary navbar */
 @media (max-width: 767px) {
   main {
-    margin-top: 4rem;
+    margin-top: 6rem;
   }
 }
 
