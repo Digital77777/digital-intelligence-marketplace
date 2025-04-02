@@ -19,7 +19,8 @@ import {
   Lock, 
   Sparkles,
   Shield,
-  Plus 
+  Plus,
+  Globe 
 } from 'lucide-react';
 import { useTier } from '@/context/TierContext';
 import { toast } from 'sonner';
@@ -61,7 +62,11 @@ export const ForumCard: React.FC<ForumCardProps> = ({
   canAccess
 }) => {
   const navigate = useNavigate();
-  const canAccessCategory = canAccess(category.required_tier);
+  const { currentTier } = useTier();
+  const isFreemium = currentTier === 'freemium';
+  
+  // All users can access discussions - but freemium users only in public mode
+  const canAccessCategory = true;
 
   const getTierBadge = (tier: string) => {
     if (tier === 'pro') {
@@ -83,19 +88,24 @@ export const ForumCard: React.FC<ForumCardProps> = ({
   };
 
   return (
-    <Card className={`overflow-hidden ${!canAccessCategory ? 'opacity-80' : ''}`}>
+    <Card className="overflow-hidden">
       <CardHeader className="bg-muted/30 pb-4">
         <div className="flex justify-between items-start">
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <CardTitle>{category.name}</CardTitle>
               {category.required_tier !== 'freemium' && getTierBadge(category.required_tier)}
+              {isFreemium && (
+                <Badge variant="outline" className="bg-green-900/60 text-green-200 border-green-700 px-3 py-1 flex items-center gap-1.5">
+                  <Globe className="h-3.5 w-3.5" />
+                  <span>PUBLIC</span>
+                </Badge>
+              )}
             </div>
             <CardDescription className="mt-1">{category.description}</CardDescription>
           </div>
           <Button 
             onClick={() => handleCreateTopic(category.id)}
-            disabled={!canAccessCategory}
             className="gap-1"
           >
             <Plus className="h-4 w-4" />
@@ -104,18 +114,7 @@ export const ForumCard: React.FC<ForumCardProps> = ({
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        {!canAccessCategory ? (
-          <div className="p-8 flex flex-col items-center justify-center text-center">
-            <Lock className="h-10 w-10 text-muted-foreground mb-3" />
-            <h3 className="text-lg font-medium mb-2">Restricted Access</h3>
-            <p className="text-muted-foreground mb-4">
-              This forum requires {category.required_tier} tier access.
-            </p>
-            <Button onClick={() => navigate('/pricing')}>
-              Upgrade Now
-            </Button>
-          </div>
-        ) : topics.length === 0 ? (
+        {topics.length === 0 ? (
           <div className="p-8 flex flex-col items-center justify-center text-center">
             <MessageSquare className="h-10 w-10 text-muted-foreground mb-3" />
             <h3 className="text-lg font-medium mb-2">No Topics Yet</h3>
@@ -139,6 +138,9 @@ export const ForumCard: React.FC<ForumCardProps> = ({
                       )}
                       {topic.is_locked && (
                         <Badge variant="outline" className="text-xs">Locked</Badge>
+                      )}
+                      {isFreemium && (
+                        <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300 text-xs">Public</Badge>
                       )}
                     </div>
                     <div className="flex items-center gap-3 text-sm text-muted-foreground">

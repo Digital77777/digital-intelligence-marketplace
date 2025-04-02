@@ -95,6 +95,7 @@ const tierFeatureAccess: Record<string, TierType[]> = {
   'starter-api': ['freemium', 'basic', 'pro'],
   'learning-hub': ['freemium', 'basic', 'pro'],
   'ai-streams': ['freemium', 'basic', 'pro'],
+  'community-discussions': ['freemium', 'basic', 'pro'], // Added this feature for freemium
   
   // Basic tier features
   'team-dashboard': ['basic', 'pro'],
@@ -107,6 +108,7 @@ const tierFeatureAccess: Record<string, TierType[]> = {
   'priority-support': ['basic', 'pro'],
   'learning-hub-pro': ['basic', 'pro'],
   'api-calls-5000': ['basic', 'pro'],
+  'private-discussions': ['basic', 'pro'], // Added this feature
   
   // Pro tier features
   'custom-models': ['pro'],

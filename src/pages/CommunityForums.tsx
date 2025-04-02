@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -74,7 +73,6 @@ const CommunityForums = () => {
   
   const fetchTopicsByCategory = async (categoryId: string) => {
     try {
-      // First get the topics
       const { data: topics, error } = await supabase
         .from('forum_topics')
         .select('*')
@@ -87,10 +85,8 @@ const CommunityForums = () => {
       
       if (!topics) return;
       
-      // Get the reply counts
       const topicsWithCounts = await Promise.all(
         topics.map(async (topic) => {
-          // Get reply count
           const { count: replyCount, error: replyError } = await supabase
             .from('forum_replies')
             .select('*', { count: 'exact', head: true })
@@ -98,7 +94,6 @@ const CommunityForums = () => {
             
           if (replyError) throw replyError;
           
-          // Get author username
           const { data: userData, error: userError } = await supabase
             .from('profiles')
             .select('username')
@@ -131,18 +126,6 @@ const CommunityForums = () => {
         action: {
           label: "Sign In",
           onClick: () => navigate('/auth')
-        }
-      });
-      return;
-    }
-    
-    const category = categories.find(c => c.id === categoryId);
-    if (category && !canAccess(category.required_tier)) {
-      toast.error("Access restricted", {
-        description: `This forum requires ${category.required_tier} tier access`,
-        action: {
-          label: "Upgrade",
-          onClick: () => navigate('/pricing')
         }
       });
       return;

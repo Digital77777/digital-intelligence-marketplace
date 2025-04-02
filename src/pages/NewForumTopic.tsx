@@ -12,11 +12,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Globe } from "lucide-react";
 import { useUser } from '@/context/UserContext';
+import { useTier } from '@/context/TierContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { TopicForm } from '@/components/forums/TopicForm';
+import { Badge } from "@/components/ui/badge";
 
 const formSchema = z.object({
   title: z.string()
@@ -30,8 +32,10 @@ const NewForumTopic = () => {
   const { categoryId } = useParams();
   const navigate = useNavigate();
   const { user } = useUser();
+  const { currentTier } = useTier();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [categoryName, setCategoryName] = React.useState('');
+  const isFreemium = currentTier === 'freemium';
   
   React.useEffect(() => {
     if (!user) {
@@ -75,14 +79,18 @@ const NewForumTopic = () => {
     setIsSubmitting(true);
     
     try {
+      // For freemium users, always set is_public to true
+      const topicData = {
+        title: data.title,
+        content: data.content,
+        user_id: user.id,
+        category_id: categoryId,
+        is_public: isFreemium ? true : undefined // Only set for freemium users
+      };
+      
       const { data: newTopic, error } = await supabase
         .from('forum_topics')
-        .insert({
-          title: data.title,
-          content: data.content,
-          user_id: user.id,
-          category_id: categoryId
-        })
+        .insert(topicData)
         .select('id')
         .single();
         
@@ -123,12 +131,27 @@ const NewForumTopic = () => {
           
           <Card>
             <CardHeader>
-              <CardTitle>Create New Topic</CardTitle>
-              <CardDescription>
-                {categoryName ? `Posting in: ${categoryName}` : 'Start a new discussion'}
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Create New Topic</CardTitle>
+                  <CardDescription>
+                    {categoryName ? `Posting in: ${categoryName}` : 'Start a new discussion'}
+                  </CardDescription>
+                </div>
+                {isFreemium && (
+                  <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300 flex items-center gap-1.5 px-3 py-1">
+                    <Globe className="h-3.5 w-3.5" />
+                    <span>Public Topic</span>
+                  </Badge>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
+              {isFreemium && (
+                <div className="mb-4 p-3 bg-green-50 text-green-800 rounded-md text-sm">
+                  Note: As a freemium user, your topic will be visible to all community members.
+                </div>
+              )}
               <TopicForm 
                 onSubmit={onSubmit} 
                 onCancel={() => navigate('/community')} 
