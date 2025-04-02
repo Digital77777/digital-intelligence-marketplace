@@ -53,12 +53,13 @@ const CollaborationHub = () => {
     },
   ];
 
+  // Fixed mockTasks to use proper status literals that match the Task type
   const mockTasks = [
-    { id: 1, title: "Optimize model training pipeline", assignee: "Mike Chen", status: "In Progress", due: "Tomorrow" },
-    { id: 2, title: "Review dataset quality", assignee: "Sarah Williams", status: "Done", due: "Yesterday" },
-    { id: 3, title: "Deploy updated API to staging", assignee: "Chris Taylor", status: "In Progress", due: "Friday" },
-    { id: 4, title: "Prepare presentation for client meeting", assignee: "Alex Johnson", status: "Not Started", due: "Next Week" },
-    { id: 5, title: "Fix UI bugs in dashboard", assignee: "Emily Davis", status: "In Progress", due: "Wednesday" },
+    { id: 1, title: "Optimize model training pipeline", assignee: "Mike Chen", status: "In Progress" as const, due: "Tomorrow" },
+    { id: 2, title: "Review dataset quality", assignee: "Sarah Williams", status: "Done" as const, due: "Yesterday" },
+    { id: 3, title: "Deploy updated API to staging", assignee: "Chris Taylor", status: "In Progress" as const, due: "Friday" },
+    { id: 4, title: "Prepare presentation for client meeting", assignee: "Alex Johnson", status: "Not Started" as const, due: "Next Week" },
+    { id: 5, title: "Fix UI bugs in dashboard", assignee: "Emily Davis", status: "In Progress" as const, due: "Wednesday" },
   ];
 
   const mockFiles = [
