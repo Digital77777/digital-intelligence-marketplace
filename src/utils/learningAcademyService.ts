@@ -38,7 +38,7 @@ export const fetchLearningAcademyCourses = async (): Promise<LearningAcademyCour
     throw error;
   }
 
-  return data || [];
+  return data as unknown as LearningAcademyCourse[] || [];
 };
 
 // Fetch a single course by ID
@@ -54,7 +54,7 @@ export const fetchCourseById = async (courseId: string): Promise<LearningAcademy
     throw error;
   }
 
-  return data;
+  return data as unknown as LearningAcademyCourse;
 };
 
 // Fetch user progress for all courses
@@ -71,7 +71,7 @@ export const fetchUserProgress = async (userId: string): Promise<Record<string, 
 
   // Convert to a map of courseId -> progress
   const progressMap: Record<string, UserProgress> = {};
-  (data || []).forEach(progress => {
+  (data || []).forEach((progress: any) => {
     progressMap[progress.course_id] = {
       course_id: progress.course_id,
       completion_percent: progress.completion_percent || 0,

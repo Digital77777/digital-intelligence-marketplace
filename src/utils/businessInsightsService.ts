@@ -28,7 +28,7 @@ export const fetchBusinessInsights = async (): Promise<BusinessInsight[]> => {
     throw error;
   }
 
-  return data || [];
+  return data as unknown as BusinessInsight[] || [];
 };
 
 // Fetch a single business insight by ID
@@ -44,7 +44,7 @@ export const fetchInsightById = async (insightId: string): Promise<BusinessInsig
     throw error;
   }
 
-  return data;
+  return data as unknown as BusinessInsight;
 };
 
 // Grant access to a business insight for a specific user
