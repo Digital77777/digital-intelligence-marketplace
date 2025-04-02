@@ -1,8 +1,7 @@
-
 import {
   AreaChart, ArrowRight, BarChart3, Bot, BookOpen, BrainCircuit, 
   CheckCircle, Code, CoinsIcon, Columns, Database, Eye, FileSpreadsheet, 
-  FileText, Flask, GitFork, Globe, Hammer, Layers, LayoutDashboard, 
+  FileText, Beaker, GitFork, Globe, Hammer, Layers, LayoutDashboard, 
   LineChart, Lock, MessageSquare, Microscope, Router, ScrollText, 
   Search, Server, Settings, Shield, ShieldCheck, Sparkles, Users, 
   Workflow, Zap
@@ -138,7 +137,7 @@ export const aiTools: AIToolItem[] = [
     name: 'AI Basics Simulator',
     description: 'Interactive sandbox to test beginner AI models with guided explanations',
     category: 'learning',
-    icon: React.createElement(Flask, { className: "h-5 w-5" }),
+    icon: React.createElement(Beaker, { className: "h-5 w-5" }),
     tier: 'freemium',
     uniqueSellingPoint: 'Hands-on learning with guided tutorials; no coding required',
     demoAvailable: true,
