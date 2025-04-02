@@ -1,3 +1,4 @@
+
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -171,6 +172,9 @@ const App = () => (
                     
                     {/* Learning Routes */}
                     <Route path="/learning/:courseId" element={<LearningHub />} />
+                    <Route path="/learning-path/:pathId" element={<LearningHub />} />
+                    <Route path="/certification/:certId" element={<LearningHub />} />
+                    <Route path="/event/:eventId" element={<LearningHub />} />
                     
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />

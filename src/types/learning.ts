@@ -52,3 +52,43 @@ export interface UserXP {
   current_level: string;
   last_updated: string;
 }
+
+export interface LearningPath {
+  id: string;
+  title: string;
+  description: string;
+  courses: string[];
+  category: string;
+  difficulty: string;
+  required_tier: string;
+  total_duration: number;
+  image_url?: string;
+  badge_name?: string;
+  created_at: string;
+}
+
+export interface Certification {
+  id: string;
+  title: string;
+  description: string;
+  requirements: string[];
+  badge_image: string;
+  required_tier: string;
+  is_industry_recognized: boolean;
+  expiration_period?: number; // in months
+  created_at: string;
+}
+
+export interface LiveEvent {
+  id: string;
+  title: string;
+  description: string;
+  event_type: 'webinar' | 'workshop' | 'masterclass' | 'ama' | 'summit';
+  datetime: string;
+  duration: number; // in minutes
+  host_name: string;
+  required_tier: string;
+  max_participants?: number;
+  registration_deadline?: string;
+  image_url?: string;
+}
