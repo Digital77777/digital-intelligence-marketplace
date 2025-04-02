@@ -1,128 +1,115 @@
 
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useTier } from '@/context/TierContext';
+import { toast } from 'sonner';
+import { aiTools, AIToolTier, getTierBadgeColor, getTierIcon, getTierLabel } from '@/data/ai-tools-tiers';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   ArrowLeft,
-  CheckCircle,
-  Download,
+  Check,
   ExternalLink,
-  Globe,
-  Lightbulb,
-  Lock,
-  Share2,
-  Shield,
-  Sparkles,
-  Zap,
-  Copy,
-  PlayCircle,
   Info,
-  BookOpen,
-  Code
+  Lock,
+  Sparkles,
 } from 'lucide-react';
-import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
-import { useTier } from '@/context/TierContext';
-import { AITool } from '@/types/tools';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery } from '@tanstack/react-query';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 
 const ToolDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const [tool, setTool] = useState<AITool | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('overview');
-  const { currentTier, canAccess, upgradePrompt } = useTier();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchToolDetails();
-  }, [id]);
-
-  const fetchToolDetails = async () => {
-    try {
-      setIsLoading(true);
-      
-      const { data, error } = await supabase
-        .from('ai_tools')
-        .select('*')
-        .eq('id', id)
-        .single();
-        
-      if (error) throw error;
-      
-      setTool(data);
-      
-      // Check access rights
-      if (data && !hasAccessToTool(data.required_tier)) {
-        upgradePrompt(data.required_tier as any);
-        navigate('/ai-tools-directory');
+  const { currentTier, upgradePrompt } = useTier();
+  
+  const { data: tool, isLoading, error } = useQuery({
+    queryKey: ['aiTool', id],
+    queryFn: () => {
+      const foundTool = aiTools.find(t => t.id === id);
+      if (!foundTool) {
+        throw new Error('Tool not found');
       }
-    } catch (error) {
-      console.error('Error fetching tool details:', error);
-      toast.error('Failed to load tool details');
+      return foundTool;
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+  
+  const hasAccess = tool ? (
+    (tool.tier === 'freemium') ||
+    (tool.tier === 'basic' && (currentTier === 'basic' || currentTier === 'pro')) ||
+    (tool.tier === 'pro' && currentTier === 'pro')
+  ) : false;
+  
+  useEffect(() => {
+    if (error) {
+      toast.error("Tool not found", {
+        description: "The requested tool does not exist or has been removed",
+      });
       navigate('/ai-tools-directory');
-    } finally {
-      setIsLoading(false);
+    }
+  }, [error, navigate]);
+  
+  const handleUpgrade = () => {
+    if (tool) {
+      upgradePrompt(tool.tier as AIToolTier);
+      navigate('/pricing');
     }
   };
-
-  // Check if user has access to this tool based on required tier
-  const hasAccessToTool = (requiredTier: string): boolean => {
-    if (requiredTier === 'freemium') return true;
-    if (requiredTier === 'basic') return currentTier === 'basic' || currentTier === 'pro';
-    if (requiredTier === 'pro') return currentTier === 'pro';
-    return false;
-  };
-
-  const getTierBadge = (tier: string) => {
-    if (tier === 'pro') {
-      return (
-        <Badge variant="outline" className="bg-purple-900/60 text-purple-200 border-purple-700 px-3 py-1 flex items-center gap-1.5">
-          <Sparkles className="h-3.5 w-3.5 text-[#6AC8FF]" />
-          <span>PRO</span>
-        </Badge>
-      );
-    } else if (tier === 'basic') {
-      return (
-        <Badge variant="outline" className="bg-blue-900/60 text-blue-200 border-blue-700 px-3 py-1 flex items-center gap-1.5">
-          <Shield className="h-3.5 w-3.5" />
-          <span>BASIC</span>
-        </Badge>
-      );
-    }
-    return null;
-  };
-
+  
+  const renderLoading = () => (
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="flex items-center gap-4 mb-6">
+        <Skeleton className="h-12 w-12 rounded-full" />
+        <div>
+          <Skeleton className="h-8 w-60 mb-2" />
+          <Skeleton className="h-4 w-32" />
+        </div>
+      </div>
+      <Skeleton className="h-5 w-full max-w-2xl mb-6" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 space-y-4">
+          <Skeleton className="h-64 w-full rounded-lg mb-4" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-5/6" />
+          <Skeleton className="h-4 w-4/6" />
+        </div>
+        <div className="space-y-4">
+          <Skeleton className="h-40 w-full rounded-lg" />
+          <Skeleton className="h-12 w-full rounded-lg" />
+        </div>
+      </div>
+    </div>
+  );
+  
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-1 pt-28 px-6 pb-12 flex items-center justify-center">
-          <div className="animate-pulse flex flex-col items-center">
-            <div className="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
-            <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded"></div>
-          </div>
+        <main className="flex-1 pt-24 px-4 md:px-6 pb-12">
+          {renderLoading()}
         </main>
         <Footer />
       </div>
     );
   }
-
+  
   if (!tool) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-1 pt-28 px-6 pb-12 flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold mb-2">Tool Not Found</h1>
-            <p className="text-muted-foreground mb-6">This AI tool doesn't exist or has been removed.</p>
+        <main className="flex-1 pt-24 px-4 md:px-6 pb-12">
+          <div className="max-w-4xl mx-auto px-4 py-8 text-center">
+            <h1 className="text-2xl font-bold mb-4">Tool Not Found</h1>
+            <p className="mb-6">The tool you are looking for does not exist or has been removed.</p>
             <Button onClick={() => navigate('/ai-tools-directory')}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Tools Directory
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Return to AI Tools Directory
             </Button>
           </div>
         </main>
@@ -130,213 +117,285 @@ const ToolDetail = () => {
       </div>
     );
   }
-
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 pt-24 px-4 md:px-6 pb-12">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-6">
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate('/ai-tools-directory')}
-              className="mb-4 text-sm"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Tools
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-4">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/ai-tools-directory')}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Directory
             </Button>
-            
-            <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
-              <div className="flex items-start gap-4">
-                <div className="text-4xl">{tool.icon}</div>
+          </div>
+          
+          <div className="flex flex-col md:flex-row justify-between items-start gap-6">
+            <div className="flex-grow md:max-w-[70%]">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  {tool.icon}
+                </div>
                 <div>
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <h1 className="text-2xl md:text-3xl font-bold">{tool.name}</h1>
-                    {getTierBadge(tool.required_tier)}
+                  <h1 className="text-2xl md:text-3xl font-bold">{tool.name}</h1>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Badge variant="outline" className="text-xs">
+                      {tool.category}
+                    </Badge>
+                    <Badge 
+                      variant="outline" 
+                      className={`${getTierBadgeColor(tool.tier as AIToolTier)} px-2 py-0.5 text-xs flex items-center gap-1.5`}
+                    >
+                      {getTierIcon(tool.tier as AIToolTier)}
+                      <span>{getTierLabel(tool.tier as AIToolTier)} Tier</span>
+                    </Badge>
+                    {tool.demoAvailable && (
+                      <Badge variant="secondary" className="text-xs">
+                        Demo Available
+                      </Badge>
+                    )}
                   </div>
-                  <p className="text-muted-foreground mt-1 text-sm md:text-base">
-                    {tool.category} • {new Date(tool.created_at).toLocaleDateString()}
-                  </p>
                 </div>
               </div>
               
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="gap-1">
-                  <Share2 className="h-4 w-4" />
-                  <span className="hidden sm:inline">Share</span>
-                </Button>
-                <Button size="sm" className="gap-1">
-                  <Download className="h-4 w-4" />
-                  <span>Use Tool</span>
-                </Button>
-              </div>
+              <p className="text-lg mb-8">
+                {tool.description}
+              </p>
+              
+              {!hasAccess ? (
+                <Alert className="mb-8 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800">
+                  <Lock className="h-4 w-4" />
+                  <AlertTitle>Subscription Required</AlertTitle>
+                  <AlertDescription>
+                    This tool requires a {getTierLabel(tool.tier as AIToolTier)} subscription. 
+                    Upgrade your plan to access this and other premium features.
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <Alert className="mb-8 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
+                  <Check className="h-4 w-4 text-green-500" />
+                  <AlertTitle>You Have Access</AlertTitle>
+                  <AlertDescription>
+                    You can use this tool with your current {getTierLabel(currentTier)} subscription.
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              <Tabs defaultValue="features" className="mb-10">
+                <TabsList className="mb-6">
+                  <TabsTrigger value="features">Features</TabsTrigger>
+                  <TabsTrigger value="usage">Usage Guide</TabsTrigger>
+                  <TabsTrigger value="integrations">Integrations</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="features">
+                  <div className="space-y-4">
+                    <div className="bg-muted/50 p-5 rounded-lg border">
+                      <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                        <Sparkles className="h-5 w-5 text-amber-500" />
+                        Unique Selling Point
+                      </h2>
+                      <p>{tool.uniqueSellingPoint}</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Example features */}
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-base">Core Functionality</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ul className="space-y-2">
+                            {[1, 2, 3].map((_, i) => (
+                              <li key={i} className="flex items-start gap-2">
+                                <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                                <span className="text-sm">
+                                  {tool.tier === 'freemium' 
+                                    ? ['Basic visualization tools', 'Data import from CSV', 'Up to 3 datasets'][i]
+                                    : tool.tier === 'basic'
+                                    ? ['Advanced analytics dashboard', 'Custom chart creation', 'Export options'][i]
+                                    : ['Enterprise data integration', 'Real-time predictive modeling', 'Custom API access'][i]
+                                  }
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-base">Limitations & Usage</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          {tool.usageLimit ? (
+                            <div className="flex items-start gap-2 mb-3">
+                              <Info className="h-4 w-4 text-muted-foreground mt-0.5" />
+                              <p className="text-sm">{tool.usageLimit}</p>
+                            </div>
+                          ) : (
+                            <p className="text-sm">No usage limitations for your current tier.</p>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="usage">
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Getting Started</CardTitle>
+                        <CardDescription>
+                          Follow these steps to start using {tool.name}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <ol className="space-y-4 list-decimal list-inside">
+                          <li className="pl-2">Click the "Launch Tool" button to open the tool interface</li>
+                          <li className="pl-2">Follow the onboarding wizard to set up your initial preferences</li>
+                          <li className="pl-2">Import your data or use the provided templates to get started</li>
+                          <li className="pl-2">Configure your settings and begin using the features</li>
+                        </ol>
+                      </CardContent>
+                    </Card>
+                    
+                    {hasAccess && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Interactive Tutorial</CardTitle>
+                          <CardDescription>
+                            Walk through an interactive guide to understand all features
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <Button className="gap-2" disabled={!hasAccess}>
+                            Start Tutorial
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="integrations">
+                  {tool.integrations && tool.integrations.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {tool.integrations.map((integration, idx) => (
+                        <Card key={idx}>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-base">{integration}</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-sm text-muted-foreground mb-3">
+                              Connect {tool.name} with {integration} for enhanced functionality.
+                            </p>
+                            {hasAccess && (
+                              <Button variant="outline" size="sm" className="w-full">
+                                Configure Integration
+                              </Button>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">No integrations available for this tool.</p>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
             </div>
             
-            <Separator className="my-6" />
-            
-            <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="mb-6">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="documentation">Documentation</TabsTrigger>
-                <TabsTrigger value="examples">Examples</TabsTrigger>
-                <TabsTrigger value="integrations">Integrations</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="overview" className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="md:col-span-2">
-                    <div className="bg-card rounded-lg border p-6">
-                      <h2 className="text-xl font-semibold mb-4">About this Tool</h2>
-                      <p className="text-muted-foreground mb-6">{tool.description}</p>
-                      
-                      <h3 className="font-medium mb-3 flex items-center gap-2 text-lg">
-                        <Zap className="h-5 w-5 text-amber-500" />
-                        Key Use Cases
-                      </h3>
-                      <ul className="space-y-3 mb-6">
-                        {tool.use_cases.map((useCase, index) => (
-                          <li key={index} className="flex items-start gap-3">
-                            <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
-                            <span>{useCase}</span>
-                          </li>
-                        ))}
-                      </ul>
-                      
-                      {tool.rationale && (
-                        <>
-                          <h3 className="font-medium mb-3 flex items-center gap-2 text-lg">
-                            <Lightbulb className="h-5 w-5 text-blue-500" />
-                            Why Use This Tool
-                          </h3>
-                          <p className="text-muted-foreground">{tool.rationale}</p>
-                        </>
+            <div className="w-full md:w-[30%] flex-shrink-0">
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle className="text-lg">Tier Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">Subscription Level</span>
+                      <Badge 
+                        variant="outline" 
+                        className={`${getTierBadgeColor(tool.tier as AIToolTier)} px-2 py-0.5 text-xs flex items-center gap-1.5`}
+                      >
+                        {getTierIcon(tool.tier as AIToolTier)}
+                        <span>{getTierLabel(tool.tier as AIToolTier)}</span>
+                      </Badge>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">Your Current Tier</span>
+                      <Badge 
+                        variant="outline" 
+                        className={`${getTierBadgeColor(currentTier)} px-2 py-0.5 text-xs flex items-center gap-1.5`}
+                      >
+                        {getTierIcon(currentTier)}
+                        <span>{getTierLabel(currentTier)}</span>
+                      </Badge>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">Access Status</span>
+                      {hasAccess ? (
+                        <Badge variant="outline" className="bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800">
+                          <Check className="h-3.5 w-3.5 mr-1" />
+                          Available
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 border-amber-200 dark:border-amber-800">
+                          <Lock className="h-3.5 w-3.5 mr-1" />
+                          Locked
+                        </Badge>
                       )}
                     </div>
                   </div>
-                  
-                  <div className="space-y-6">
-                    <div className="bg-card rounded-lg border p-6">
-                      <h3 className="font-medium mb-4">Quick Start</h3>
-                      <div className="space-y-3">
-                        <Button className="w-full justify-start gap-2" size="sm">
-                          <PlayCircle className="h-4 w-4" />
-                          Launch Tool
-                        </Button>
-                        <Button variant="outline" className="w-full justify-start gap-2" size="sm">
-                          <BookOpen className="h-4 w-4" />
-                          View Tutorial
-                        </Button>
-                        <Button variant="outline" className="w-full justify-start gap-2" size="sm">
-                          <Code className="h-4 w-4" />
-                          API Reference
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-card rounded-lg border p-6">
-                      <h3 className="font-medium mb-4">Tool Information</h3>
-                      <div className="space-y-3 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Category</span>
-                          <span className="font-medium">{tool.category}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Required Tier</span>
-                          <span className="font-medium capitalize">{tool.required_tier}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Added</span>
-                          <span className="font-medium">{new Date(tool.created_at).toLocaleDateString()}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">API Access</span>
-                          <span className="font-medium">Yes</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-card rounded-lg border p-6">
-                      <h3 className="font-medium mb-4">Community</h3>
-                      <div className="space-y-3">
-                        <Button variant="outline" className="w-full justify-start gap-2" size="sm">
-                          <Globe className="h-4 w-4" />
-                          Community Forum
-                        </Button>
-                        <Button variant="outline" className="w-full justify-start gap-2" size="sm">
-                          <ExternalLink className="h-4 w-4" />
-                          Documentation
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
+                </CardContent>
+              </Card>
               
-              <TabsContent value="documentation" className="space-y-6">
-                <div className="bg-card rounded-lg border p-6">
-                  <h2 className="text-xl font-semibold mb-4">Documentation</h2>
-                  <div className="prose prose-sm dark:prose-invert max-w-none">
-                    <p>Comprehensive documentation for {tool.name} will be available here, including:</p>
-                    <ul>
-                      <li>Step-by-step guides</li>
-                      <li>API references</li>
-                      <li>Best practices</li>
-                      <li>Troubleshooting</li>
-                    </ul>
-                    <p>This section is currently under development. Check back soon for complete documentation.</p>
-                  </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="examples" className="space-y-6">
-                <div className="bg-card rounded-lg border p-6">
-                  <h2 className="text-xl font-semibold mb-4">Usage Examples</h2>
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="font-medium mb-2">Example 1: Basic Usage</h3>
-                      <div className="bg-muted rounded-md p-4 relative">
-                        <pre className="text-sm overflow-x-auto"><code>// Example code or configuration will be displayed here</code></pre>
-                        <Button size="sm" variant="ghost" className="absolute top-2 right-2 h-8 w-8 p-0" onClick={() => toast.success('Code copied to clipboard')}>
-                          <Copy className="h-4 w-4" />
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Tool Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {hasAccess ? (
+                    <>
+                      <Button className="w-full gap-2">
+                        Launch Tool
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                      
+                      <Button variant="outline" className="w-full">
+                        View Documentation
+                      </Button>
+                      
+                      {tool.demoAvailable && (
+                        <Button variant="secondary" className="w-full">
+                          Watch Demo
                         </Button>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h3 className="font-medium mb-2">Example 2: Advanced Configuration</h3>
-                      <div className="bg-muted rounded-md p-4 relative">
-                        <pre className="text-sm overflow-x-auto"><code>// Advanced usage examples will be shown here</code></pre>
-                        <Button size="sm" variant="ghost" className="absolute top-2 right-2 h-8 w-8 p-0" onClick={() => toast.success('Code copied to clipboard')}>
-                          <Copy className="h-4 w-4" />
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <Button onClick={handleUpgrade} className="w-full gap-2">
+                        Upgrade to {getTierLabel(tool.tier as AIToolTier)}
+                        <Lock className="h-4 w-4" />
+                      </Button>
+                      
+                      {tool.demoAvailable && (
+                        <Button variant="outline" className="w-full">
+                          Preview Demo
                         </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="integrations" className="space-y-6">
-                <div className="bg-card rounded-lg border p-6">
-                  <h2 className="text-xl font-semibold mb-4">Integrations</h2>
-                  <p className="text-muted-foreground mb-6">
-                    {tool.name} works seamlessly with the following platforms and tools:
-                  </p>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {['API Integration', 'Data Export', 'Third-party Services'].map((integration, index) => (
-                      <div key={index} className="border rounded-lg p-4 flex items-start gap-3">
-                        <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
-                          <Info className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium">{integration}</h3>
-                          <p className="text-sm text-muted-foreground">Integration details will be listed here.</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </TabsContent>
-            </Tabs>
+                      )}
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </main>

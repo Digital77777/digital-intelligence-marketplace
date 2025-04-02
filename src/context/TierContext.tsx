@@ -20,6 +20,7 @@ export interface TierFeatures {
   unlimitedTeamMembers: boolean;
   dedicatedSupport: boolean;
   complianceTools: boolean;
+  monetization: boolean;
 }
 
 interface TierContextType {
@@ -36,7 +37,7 @@ const tierFeaturesMap: Record<TierType, TierFeatures> = {
     maxTeamMembers: 1,
     maxProjects: 3,
     apiCallsLimit: 100,
-    toolAccess: 10,
+    toolAccess: 5,
     supportResponse: "Community support",
     storage: "500MB",
     analytics: false,
@@ -47,13 +48,14 @@ const tierFeaturesMap: Record<TierType, TierFeatures> = {
     aiStudio: false,
     unlimitedTeamMembers: false,
     dedicatedSupport: false,
-    complianceTools: false
+    complianceTools: false,
+    monetization: false
   },
   basic: {
     maxTeamMembers: 10,
     maxProjects: 20,
     apiCallsLimit: 5000,
-    toolAccess: 100,
+    toolAccess: 10,
     supportResponse: "24-48 hours",
     storage: "10GB",
     analytics: true,
@@ -64,13 +66,14 @@ const tierFeaturesMap: Record<TierType, TierFeatures> = {
     aiStudio: false,
     unlimitedTeamMembers: false,
     dedicatedSupport: false,
-    complianceTools: false
+    complianceTools: false,
+    monetization: false
   },
   pro: {
     maxTeamMembers: 50,
     maxProjects: 100,
     apiCallsLimit: 50000,
-    toolAccess: 250,
+    toolAccess: 50,
     supportResponse: "4-8 hours",
     storage: "100GB",
     analytics: true,
@@ -81,7 +84,8 @@ const tierFeaturesMap: Record<TierType, TierFeatures> = {
     aiStudio: true,
     unlimitedTeamMembers: true,
     dedicatedSupport: true,
-    complianceTools: true
+    complianceTools: true,
+    monetization: true
   }
 };
 
@@ -95,7 +99,11 @@ const tierFeatureAccess: Record<string, TierType[]> = {
   'starter-api': ['freemium', 'basic', 'pro'],
   'learning-hub': ['freemium', 'basic', 'pro'],
   'ai-streams': ['freemium', 'basic', 'pro'],
-  'community-discussions': ['freemium', 'basic', 'pro'], // Added this feature for freemium
+  'community-discussions': ['freemium', 'basic', 'pro'],
+  'basic-analytics': ['freemium', 'basic', 'pro'],
+  'basic-automation': ['freemium', 'basic', 'pro'],
+  'content-creation': ['freemium', 'basic', 'pro'],
+  'learning-tools': ['freemium', 'basic', 'pro'],
   
   // Basic tier features
   'team-dashboard': ['basic', 'pro'],
@@ -108,7 +116,10 @@ const tierFeatureAccess: Record<string, TierType[]> = {
   'priority-support': ['basic', 'pro'],
   'learning-hub-pro': ['basic', 'pro'],
   'api-calls-5000': ['basic', 'pro'],
-  'private-discussions': ['basic', 'pro'], // Added this feature
+  'private-discussions': ['basic', 'pro'],
+  'seo-optimization': ['basic', 'pro'],
+  'intermediate-analytics': ['basic', 'pro'],
+  'intermediate-automation': ['basic', 'pro'],
   
   // Pro tier features
   'custom-models': ['pro'],
@@ -124,7 +135,11 @@ const tierFeatureAccess: Record<string, TierType[]> = {
   'business-insights': ['pro'],
   'pro-chatbot': ['pro'],
   'learning-academy': ['pro'],
-  'api-calls-50000': ['pro']
+  'api-calls-50000': ['pro'],
+  'monetization-tools': ['pro'],
+  'enterprise-integration': ['pro'],
+  'advanced-analytics': ['pro'],
+  'advanced-automation': ['pro']
 };
 
 // Create the context with default values
@@ -139,10 +154,10 @@ export const TierProvider = ({ children }: { children: ReactNode }) => {
       const tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
       toast.success(`Switched to ${tierName} tier!`, {
         description: tier === 'freemium' 
-          ? "You now have access to basic features and 10 core AI tools."
+          ? "You now have access to basic features and 5 core AI tools."
           : tier === 'basic'
-          ? "You now have access to team collaboration features and 100+ AI tools!"
-          : "You now have access to all premium features and 250+ AI tools!"
+          ? "You now have access to team collaboration features and 10+ AI tools!"
+          : "You now have access to all premium features and 50+ AI tools!"
       });
     }
     setCurrentTier(tier);
