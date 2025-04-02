@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { TierProvider } from "@/context/TierContext";
 import { UserProvider } from "@/context/UserContext";
 import { useEffect } from "react";
+import React from 'react'; // Add explicit React import
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { Spinner } from "@/components/ui/spinner";
@@ -55,7 +56,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
-      cacheTime: 1000 * 60 * 30, // 30 minutes
+      gcTime: 1000 * 60 * 30, // 30 minutes (replacing cacheTime which is deprecated)
       retry: 1,
       refetchOnWindowFocus: false,
     },
@@ -73,18 +74,26 @@ const ScrollToTop = () => {
   return null;
 };
 
-// Error boundary component
-class ErrorBoundary extends React.Component {
-  constructor(props) {
+// Error boundary component with proper TypeScript interface
+interface ErrorBoundaryState {
+  hasError: boolean;
+}
+
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+}
+
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true };
   }
 
-  componentDidCatch(error, errorInfo) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error("Error caught by boundary:", error, errorInfo);
   }
 
