@@ -1,8 +1,6 @@
 
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -10,27 +8,15 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useUser } from '@/context/UserContext';
-import { useTier } from '@/context/TierContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { TopicForm } from '@/components/forums/TopicForm';
 
 const formSchema = z.object({
   title: z.string()
@@ -46,14 +32,6 @@ const NewForumTopic = () => {
   const { user } = useUser();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [categoryName, setCategoryName] = React.useState('');
-  
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: '',
-      content: ''
-    }
-  });
   
   React.useEffect(() => {
     if (!user) {
@@ -151,68 +129,11 @@ const NewForumTopic = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Topic Title</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter a descriptive title" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          Choose a clear and specific title for your topic
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="content"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Content</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Write your post content here..." 
-                            className="min-h-32"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Provide details, questions, or points for discussion
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <div className="flex justify-end gap-4">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => navigate('/community')}
-                    >
-                      Cancel
-                    </Button>
-                    <Button 
-                      type="submit"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Creating...
-                        </>
-                      ) : 'Create Topic'}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
+              <TopicForm 
+                onSubmit={onSubmit} 
+                onCancel={() => navigate('/community')} 
+                isSubmitting={isSubmitting} 
+              />
             </CardContent>
           </Card>
         </div>
