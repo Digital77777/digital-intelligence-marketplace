@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -6,8 +7,10 @@ import { useUser } from '@/context/UserContext';
 import { useTier } from '@/context/TierContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery } from '@tanstack/react-query';
 
-// Import our new components
+// Import our components
 import { ForumCard } from '@/components/forums/ForumCard';
 import { ForumSearch } from '@/components/forums/ForumSearch';
 
@@ -33,91 +36,94 @@ interface ForumTopic {
 }
 
 const CommunityForums = () => {
-  const [categories, setCategories] = useState<ForumCategory[]>([]);
-  const [topicsByCategory, setTopicsByCategory] = useState<{[key: string]: ForumTopic[]}>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const { user, profile } = useUser();
+  const { user } = useUser();
   const { currentTier, canAccess } = useTier();
   const navigate = useNavigate();
   
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-  
-  useEffect(() => {
-    if (categories.length > 0) {
-      categories.forEach(category => {
-        fetchTopicsByCategory(category.id);
-      });
-    }
-  }, [categories]);
-  
-  const fetchCategories = async () => {
-    try {
+  // Fetch categories with React Query
+  const { 
+    data: categories = [], 
+    isLoading: categoriesLoading 
+  } = useQuery({
+    queryKey: ['forumCategories'],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('forum_categories')
         .select('*')
         .order('created_at', { ascending: true });
         
       if (error) throw error;
-      
-      setCategories(data || []);
-      if (data && data.length > 0) {
-        setSelectedCategory(data[0].id);
-      }
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
-  };
+      return data || [];
+    },
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+  });
   
-  const fetchTopicsByCategory = async (categoryId: string) => {
-    try {
-      const { data: topics, error } = await supabase
-        .from('forum_topics')
-        .select('*')
-        .eq('category_id', categoryId)
-        .order('is_pinned', { ascending: false })
-        .order('created_at', { ascending: false })
-        .limit(5);
-        
-      if (error) throw error;
+  // Initialize selected category after categories are loaded
+  useEffect(() => {
+    if (categories.length > 0 && !selectedCategory) {
+      setSelectedCategory(categories[0].id);
+    }
+  }, [categories, selectedCategory]);
+  
+  // Fetch topics by category with React Query
+  const { 
+    data: topicsByCategory = {}, 
+    isLoading: topicsLoading 
+  } = useQuery({
+    queryKey: ['forumTopics', categories],
+    queryFn: async () => {
+      const result: Record<string, ForumTopic[]> = {};
       
-      if (!topics) return;
-      
-      const topicsWithCounts = await Promise.all(
-        topics.map(async (topic) => {
-          const { count: replyCount, error: replyError } = await supabase
-            .from('forum_replies')
-            .select('*', { count: 'exact', head: true })
-            .eq('topic_id', topic.id);
+      await Promise.all(
+        categories.map(async (category: ForumCategory) => {
+          const { data: topics, error } = await supabase
+            .from('forum_topics')
+            .select('*')
+            .eq('category_id', category.id)
+            .order('is_pinned', { ascending: false })
+            .order('created_at', { ascending: false })
+            .limit(5);
             
-          if (replyError) throw replyError;
+          if (error) throw error;
           
-          const { data: userData, error: userError } = await supabase
-            .from('profiles')
-            .select('username')
-            .eq('id', topic.user_id)
-            .single();
-            
-          if (userError && userError.code !== 'PGRST116') throw userError;
+          if (!topics) return;
           
-          return {
-            ...topic,
-            reply_count: replyCount || 0,
-            author_username: userData?.username || 'Anonymous'
-          };
+          const topicsWithCounts = await Promise.all(
+            topics.map(async (topic) => {
+              const { count: replyCount, error: replyError } = await supabase
+                .from('forum_replies')
+                .select('*', { count: 'exact', head: true })
+                .eq('topic_id', topic.id);
+                
+              if (replyError) throw replyError;
+              
+              const { data: userData, error: userError } = await supabase
+                .from('profiles')
+                .select('username')
+                .eq('id', topic.user_id)
+                .single();
+                
+              if (userError && userError.code !== 'PGRST116') throw userError;
+              
+              return {
+                ...topic,
+                reply_count: replyCount || 0,
+                author_username: userData?.username || 'Anonymous'
+              };
+            })
+          );
+          
+          result[category.id] = topicsWithCounts;
         })
       );
       
-      setTopicsByCategory(prev => ({
-        ...prev,
-        [categoryId]: topicsWithCounts
-      }));
-    } catch (error) {
-      console.error('Error fetching topics:', error);
-    }
-  };
+      return result;
+    },
+    staleTime: 1000 * 60 * 1, // Cache for 1 minute
+    enabled: categories.length > 0,
+  });
   
   const handleCreateTopic = (categoryId: string) => {
     if (!user) {
@@ -144,17 +150,22 @@ const CommunityForums = () => {
   };
   
   const filteredCategories = searchQuery.trim() !== '' 
-    ? categories.filter(cat => cat.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    ? categories.filter((cat: ForumCategory) => 
+        cat.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        cat.description.toLowerCase().includes(searchQuery.toLowerCase())
+      )
     : categories;
+  
+  const isLoading = categoriesLoading || topicsLoading;
   
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 pt-24 px-6 pb-12">
+      <main className="flex-1 pt-24 px-4 md:px-6 pb-12">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
-              <h1 className="text-3xl font-bold">Community Forums</h1>
+              <h1 className="text-3xl font-bold text-blue-800 dark:text-blue-400 animate-fade-in">Community Forums</h1>
               <p className="text-muted-foreground mt-1">
                 Join the conversation with other AI enthusiasts
               </p>
@@ -163,16 +174,52 @@ const CommunityForums = () => {
           </div>
           
           <div className="grid grid-cols-1 gap-6">
-            {filteredCategories.map((category) => (
-              <ForumCard
-                key={category.id}
-                category={category}
-                topics={topicsByCategory[category.id] || []}
-                handleCreateTopic={handleCreateTopic}
-                formatDate={formatDate}
-                canAccess={canAccess}
-              />
-            ))}
+            {isLoading ? (
+              // Loading skeletons
+              Array(3).fill(0).map((_, i) => (
+                <div key={i} className="border rounded-lg p-6 animate-pulse">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <Skeleton className="h-7 w-40 mb-2" />
+                      <Skeleton className="h-4 w-64" />
+                    </div>
+                    <Skeleton className="h-9 w-32" />
+                  </div>
+                  <div className="mt-6">
+                    {Array(3).fill(0).map((_, j) => (
+                      <div key={j} className="py-3 border-b last:border-0 flex justify-between items-center">
+                        <div>
+                          <Skeleton className="h-5 w-56 mb-2" />
+                          <Skeleton className="h-4 w-32" />
+                        </div>
+                        <Skeleton className="h-4 w-24" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
+            ) : filteredCategories.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-lg text-gray-500">No categories found matching your search.</p>
+                <button 
+                  onClick={() => setSearchQuery('')} 
+                  className="mt-4 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                >
+                  Clear search
+                </button>
+              </div>
+            ) : (
+              filteredCategories.map((category: ForumCategory) => (
+                <ForumCard
+                  key={category.id}
+                  category={category}
+                  topics={topicsByCategory[category.id] || []}
+                  handleCreateTopic={handleCreateTopic}
+                  formatDate={formatDate}
+                  canAccess={canAccess}
+                />
+              ))
+            )}
           </div>
         </div>
       </main>
