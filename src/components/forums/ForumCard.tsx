@@ -71,16 +71,16 @@ export const ForumCard: React.FC<ForumCardProps> = ({
   const getTierBadge = (tier: string) => {
     if (tier === 'pro') {
       return (
-        <Badge className="bg-purple-900/60 text-purple-200 border-purple-700 px-3 py-1 flex items-center gap-1.5">
-          <Sparkles className="h-3.5 w-3.5 text-[#00FF88]" />
-          <span>PRO</span>
+        <Badge className="bg-[#FF007F]/20 text-[#FF007F] border-[#FF007F]/50 px-3 py-1 flex items-center gap-1.5">
+          <Sparkles className="h-3.5 w-3.5 text-[#00FFFF]" />
+          <span>NEO</span>
         </Badge>
       );
     } else if (tier === 'basic') {
       return (
-        <Badge className="bg-blue-900/60 text-blue-200 border-blue-700 px-3 py-1 flex items-center gap-1.5">
+        <Badge className="bg-[#8000FF]/20 text-[#8000FF] border-[#8000FF]/50 px-3 py-1 flex items-center gap-1.5">
           <Shield className="h-3.5 w-3.5" />
-          <span>BASIC</span>
+          <span>ADVANCED</span>
         </Badge>
       );
     }
@@ -88,77 +88,77 @@ export const ForumCard: React.FC<ForumCardProps> = ({
   };
 
   return (
-    <Card className="overflow-hidden bg-gray-800 border-gray-700">
-      <CardHeader className="bg-gray-900/50 pb-4">
+    <Card className="overflow-hidden bg-black border-[#00FFFF]/30 hover:border-[#00FFFF]/60 transition-all duration-300 shadow-sm hover:shadow-[0_0_15px_rgba(0,255,255,0.2)]">
+      <CardHeader className="bg-gradient-to-r from-black to-[#00FFFF]/5 pb-4">
         <div className="flex justify-between items-start">
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <CardTitle className="text-white">{category.name}</CardTitle>
               {category.required_tier !== 'freemium' && getTierBadge(category.required_tier)}
               {isFreemium && (
-                <Badge className="bg-green-900/60 text-green-200 border-green-700 px-3 py-1 flex items-center gap-1.5">
+                <Badge className="bg-[#00FFFF]/20 text-[#00FFFF] border-[#00FFFF]/50 px-3 py-1 flex items-center gap-1.5">
                   <Globe className="h-3.5 w-3.5" />
                   <span>PUBLIC</span>
                 </Badge>
               )}
             </div>
-            <CardDescription className="mt-1 text-gray-300">{category.description}</CardDescription>
+            <CardDescription className="mt-1 text-gray-400">{category.description}</CardDescription>
           </div>
           <Button 
             onClick={() => handleCreateTopic(category.id)}
-            className="gap-1 bg-[#2A5C8D] hover:bg-blue-700 text-white"
+            className="gap-1 bg-[#00FFFF] hover:bg-[#00D6D6] text-black font-bold"
           >
             <Plus className="h-4 w-4" />
-            New Topic
+            NEW
           </Button>
         </div>
       </CardHeader>
       <CardContent className="p-0">
         {topics.length === 0 ? (
           <div className="p-8 flex flex-col items-center justify-center text-center">
-            <MessageSquare className="h-10 w-10 text-gray-400 mb-3" />
-            <h3 className="text-lg font-medium mb-2 text-white">No Topics Yet</h3>
+            <MessageSquare className="h-10 w-10 text-[#00FFFF]/50 mb-3" />
+            <h3 className="text-lg font-medium mb-2 text-white">NO DATA FOUND</h3>
             <p className="text-gray-400 mb-4">
-              Be the first to start a discussion in this category.
+              Be the first to initialize a discussion thread in this sector.
             </p>
-            <Button onClick={() => handleCreateTopic(category.id)} className="bg-[#2A5C8D] hover:bg-blue-700 text-white">
-              Create Topic
+            <Button onClick={() => handleCreateTopic(category.id)} className="bg-[#00FFFF] hover:bg-[#00D6D6] text-black font-bold">
+              CREATE THREAD
             </Button>
           </div>
         ) : (
-          <div className="divide-y divide-gray-700">
+          <div className="divide-y divide-[#00FFFF]/10">
             {topics.map((topic) => (
-              <div key={topic.id} className="p-4 hover:bg-gray-700/20 transition-colors cursor-pointer" onClick={() => navigate(`/community/topic/${topic.id}`)}>
+              <div key={topic.id} className="p-4 hover:bg-[#00FFFF]/5 transition-colors cursor-pointer" onClick={() => navigate(`/community/topic/${topic.id}`)}>
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-medium text-white">{topic.title}</h3>
                       {topic.is_pinned && (
-                        <Badge variant="secondary" className="text-xs bg-blue-900 text-blue-200">Pinned</Badge>
+                        <Badge variant="secondary" className="text-xs bg-[#00FFFF]/20 text-[#00FFFF] border-[#00FFFF]/50">PINNED</Badge>
                       )}
                       {topic.is_locked && (
-                        <Badge variant="outline" className="text-xs border-amber-700 text-amber-200">Locked</Badge>
+                        <Badge variant="outline" className="text-xs border-[#FF007F]/50 text-[#FF007F]">LOCKED</Badge>
                       )}
                       {isFreemium && (
-                        <Badge variant="outline" className="bg-green-900/40 text-green-200 border-green-700 text-xs">Public</Badge>
+                        <Badge variant="outline" className="bg-[#00FFFF]/10 text-[#00FFFF] border-[#00FFFF]/30 text-xs">PUBLIC</Badge>
                       )}
                     </div>
                     <div className="flex items-center gap-3 text-sm text-gray-400">
                       <div className="flex items-center gap-1">
-                        <Users className="h-4 w-4" />
+                        <Users className="h-4 w-4 text-[#00FFFF]/70" />
                         <span>{topic.author_username}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <MessageSquare className="h-4 w-4" />
+                        <MessageSquare className="h-4 w-4 text-[#00FFFF]/70" />
                         <span>{topic.reply_count} replies</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
+                        <Clock className="h-4 w-4 text-[#00FFFF]/70" />
                         <span>{formatDate(topic.created_at)}</span>
                       </div>
                     </div>
                   </div>
-                  <ChevronRight className="h-5 w-5 text-gray-400" />
+                  <ChevronRight className="h-5 w-5 text-[#00FFFF]" />
                 </div>
               </div>
             ))}
@@ -166,10 +166,10 @@ export const ForumCard: React.FC<ForumCardProps> = ({
         )}
       </CardContent>
       {canAccessCategory && topics.length > 0 && (
-        <CardFooter className="bg-gray-900/50 p-4 flex justify-between">
-          <span className="text-sm text-gray-400">Showing {topics.length} topics</span>
-          <Button variant="ghost" size="sm" onClick={() => navigate(`/community/category/${category.id}`)} className="text-[#00FF88] hover:text-green-300 hover:bg-gray-700">
-            View All
+        <CardFooter className="bg-gradient-to-r from-black to-[#00FFFF]/5 p-4 flex justify-between">
+          <span className="text-sm text-gray-400">Displaying {topics.length} threads</span>
+          <Button variant="ghost" size="sm" onClick={() => navigate(`/community/category/${category.id}`)} className="text-[#00FFFF] hover:text-[#4DFFFF] hover:bg-[#00FFFF]/10">
+            VIEW ALL
           </Button>
         </CardFooter>
       )}
