@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -141,6 +142,7 @@ const CommunityForums = () => {
                 handleCreateTopic={handleCreateTopic}
                 formatDate={formatDate}
                 canAccess={canAccess}
+                setSearchQuery={setSearchQuery} // Pass the setSearchQuery function
               />
             </TabsContent>
             
@@ -238,7 +240,8 @@ const ForumBeginnerQuestionsTab: React.FC<{
   handleCreateTopic: (categoryId: string) => void;
   formatDate: (date: string) => string;
   canAccess: (tier: string) => boolean;
-}> = ({ categories, topicsByCategory, isLoading, handleCreateTopic, formatDate, canAccess }) => {
+  setSearchQuery: (query: string) => void; // Add the setSearchQuery prop
+}> = ({ categories, topicsByCategory, isLoading, handleCreateTopic, formatDate, canAccess, setSearchQuery }) => {
   return (
     <div className="grid grid-cols-1 gap-6">
       {isLoading ? (
