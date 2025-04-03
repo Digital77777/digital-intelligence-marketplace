@@ -66,14 +66,14 @@ export const ForumGroupCard: React.FC<ForumGroupCardProps> = ({
   const getTierBadge = () => {
     if (group.tier_required === 'pro') {
       return (
-        <Badge variant="outline" className="bg-purple-900/60 text-purple-200 border-purple-700 px-3 py-1 flex items-center gap-1.5">
-          <Sparkles className="h-3.5 w-3.5 text-[#6AC8FF]" />
+        <Badge className="bg-purple-900/60 text-purple-200 border-purple-700 px-3 py-1 flex items-center gap-1.5">
+          <Sparkles className="h-3.5 w-3.5 text-[#00FF88]" />
           <span>PRO</span>
         </Badge>
       );
     } else if (group.tier_required === 'basic') {
       return (
-        <Badge variant="outline" className="bg-blue-900/60 text-blue-200 border-blue-700 px-3 py-1 flex items-center gap-1.5">
+        <Badge className="bg-blue-900/60 text-blue-200 border-blue-700 px-3 py-1 flex items-center gap-1.5">
           <ShieldCheck className="h-3.5 w-3.5" />
           <span>BASIC</span>
         </Badge>
@@ -86,33 +86,33 @@ export const ForumGroupCard: React.FC<ForumGroupCardProps> = ({
   
   return (
     <Card 
-      className={`overflow-hidden transition-all duration-200 hover:shadow-md ${!canViewGroup ? 'opacity-70' : ''}`}
+      className={`overflow-hidden transition-all duration-200 hover:shadow-md bg-gray-800 border-gray-700 ${!canViewGroup ? 'opacity-70' : ''}`}
       onClick={handleGroupClick}
     >
-      <CardHeader className="bg-muted/30 pb-4">
+      <CardHeader className="bg-gray-900/50 pb-4">
         <div className="flex justify-between items-start">
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
-              <CardTitle>{group.name}</CardTitle>
+              <CardTitle className="text-white">{group.name}</CardTitle>
               {getTierBadge()}
               {group.is_private ? (
-                <Badge variant="outline" className="bg-amber-900/60 text-amber-200 border-amber-700 px-3 py-1 flex items-center gap-1.5">
+                <Badge className="bg-amber-900/60 text-amber-200 border-amber-700 px-3 py-1 flex items-center gap-1.5">
                   <Lock className="h-3.5 w-3.5" />
                   <span>PRIVATE</span>
                 </Badge>
               ) : (
-                <Badge variant="outline" className="bg-green-900/60 text-green-200 border-green-700 px-3 py-1 flex items-center gap-1.5">
+                <Badge className="bg-green-900/60 text-green-200 border-green-700 px-3 py-1 flex items-center gap-1.5">
                   <Globe className="h-3.5 w-3.5" />
                   <span>PUBLIC</span>
                 </Badge>
               )}
             </div>
-            <CardDescription className="mt-1">{group.description}</CardDescription>
+            <CardDescription className="mt-1 text-gray-300">{group.description}</CardDescription>
           </div>
           <Button 
             onClick={(e) => handleJoinGroup(e, group.id)}
             variant="outline"
-            className="gap-1"
+            className="gap-1 bg-[#2A5C8D] hover:bg-blue-700 text-white border-blue-700"
             disabled={!canViewGroup}
           >
             <UserPlus className="h-4 w-4" />
@@ -122,7 +122,7 @@ export const ForumGroupCard: React.FC<ForumGroupCardProps> = ({
       </CardHeader>
       <CardContent className="p-4">
         <div className="flex justify-between items-center">
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-4 text-sm text-gray-400">
             <div className="flex items-center gap-1">
               <Users className="h-4 w-4" />
               <span>{group.member_count} members</span>
@@ -132,17 +132,17 @@ export const ForumGroupCard: React.FC<ForumGroupCardProps> = ({
               <span>Category: {group.category}</span>
             </div>
           </div>
-          <div className="text-xs text-muted-foreground">
+          <div className="text-xs text-gray-400">
             Created {formatDate(group.created_at)}
           </div>
         </div>
       </CardContent>
-      <CardFooter className="bg-muted/30 p-4 flex justify-between">
-        <span className="text-sm text-muted-foreground">
+      <CardFooter className="bg-gray-900/50 p-4 flex justify-between">
+        <span className="text-sm text-gray-400">
           {group.is_private ? 'Private discussions' : 'Public threads and discussions'}
         </span>
         {canViewGroup && (
-          <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          <ChevronRight className="h-5 w-5 text-gray-400" />
         )}
       </CardFooter>
     </Card>
