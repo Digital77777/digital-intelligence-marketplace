@@ -1,13 +1,15 @@
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
-import { useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
+// Types for forum data
 export interface ForumCategory {
   id: string;
   name: string;
-  description: string;
   slug: string;
+  description: string | null;
   required_tier: string;
   created_at: string;
 }
@@ -15,14 +17,17 @@ export interface ForumCategory {
 export interface ForumTopic {
   id: string;
   title: string;
+  content: string;
   user_id: string;
+  category_id: string;
   created_at: string;
+  updated_at: string;
   views: number;
   is_pinned: boolean;
   is_locked: boolean;
-  is_public?: boolean;
-  reply_count?: number;
-  author_username?: string;
+  replies?: number;
+  username?: string;
+  avatar_url?: string;
 }
 
 export interface ForumGroup {
@@ -30,148 +35,162 @@ export interface ForumGroup {
   name: string;
   description: string;
   category: string;
-  tier_required: 'freemium' | 'basic' | 'pro';
+  tier_required: string;
   is_private: boolean;
   created_at: string;
   member_count: number;
   created_by: string;
 }
 
-export const useForumData = (categoryId?: string) => {
-  // For categories list
-  const { 
-    data: categories = [], 
-    isLoading: categoriesLoading,
-    error: categoriesError,
-    refetch: refetchCategories
-  } = useQuery({
-    queryKey: ['forumCategories'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('forum_categories')
-        .select('*')
-        .order('created_at', { ascending: true });
-        
-      if (error) throw error;
-      return data || [];
-    },
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-  });
+interface TopicsByCategory {
+  [categoryId: string]: ForumTopic[];
+}
+
+export const useForumData = () => {
+  const [categories, setCategories] = useState<ForumCategory[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   
-  // For topics by category
-  const { 
-    data: topicsByCategory = {}, 
-    isLoading: topicsLoading,
-    error: topicsError,
-    refetch: refetchTopics
-  } = useQuery({
-    queryKey: ['forumTopics', categories, categoryId],
-    queryFn: async () => {
-      const result: Record<string, ForumTopic[]> = {};
-      
-      // If categoryId is provided, only fetch topics for that category
-      const categoriesToFetch = categoryId 
-        ? categories.filter((cat: ForumCategory) => cat.id === categoryId)
-        : categories;
-      
-      await Promise.all(
-        categoriesToFetch.map(async (category: ForumCategory) => {
-          const { data: topics, error } = await supabase
-            .from('forum_topics')
-            .select('*')
-            .eq('category_id', category.id)
-            .order('is_pinned', { ascending: false })
-            .order('created_at', { ascending: false })
-            .limit(5);
-            
-          if (error) throw error;
-          
-          if (!topics) return;
-          
-          const topicsWithCounts = await Promise.all(
-            topics.map(async (topic) => {
-              const { count: replyCount, error: replyError } = await supabase
-                .from('forum_replies')
-                .select('*', { count: 'exact', head: true })
-                .eq('topic_id', topic.id);
-                
-              if (replyError) throw replyError;
-              
-              const { data: userData, error: userError } = await supabase
-                .from('profiles')
-                .select('username')
-                .eq('id', topic.user_id)
-                .single();
-                
-              if (userError && userError.code !== 'PGRST116') throw userError;
-              
-              return {
-                ...topic,
-                reply_count: replyCount || 0,
-                author_username: userData?.username || 'Anonymous'
-              };
-            })
-          );
-          
-          result[category.id] = topicsWithCounts;
-        })
-      );
-      
-      return result;
-    },
-    staleTime: 1000 * 60 * 1, // Cache for 1 minute
-    enabled: categories.length > 0,
-  });
+  const [topicsByCategory, setTopicsByCategory] = useState<TopicsByCategory>({});
+  const [topicsLoading, setTopicsLoading] = useState(true);
   
-  // For forum groups - Using raw query to avoid TypeScript errors
-  const {
-    data: forumGroups = [],
-    isLoading: groupsLoading,
-    error: groupsError,
-    refetch: refetchGroups
-  } = useQuery({
-    queryKey: ['forumGroups'],
-    queryFn: async () => {
-      // Using raw query instead of from() to bypass TypeScript checking
-      // until types are updated
-      const { data, error } = await supabase.rpc('get_forum_groups');
-      
-      if (error) {
-        // Fallback to direct query if RPC doesn't exist
-        const { data: directData, error: directError } = await supabase
-          .from('forum_groups')
-          .select('*')
-          .order('created_at', { ascending: false });
-          
-        if (directError) {
-          console.error("Error fetching forum groups:", directError);
-          return [];
-        }
-        
-        return directData || [];
-      }
-      
-      return data || [];
-    },
-    staleTime: 1000 * 60 * 5 // Cache for 5 minutes
-  });
+  const [forumGroups, setForumGroups] = useState<ForumGroup[]>([]);
+  const [groupsLoading, setGroupsLoading] = useState(true);
+  
+  // Combined loading state
+  const isLoading = categoriesLoading || topicsLoading;
   
   // Format date helper
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    try {
+      return format(new Date(dateString), 'MMM d, yyyy');
+    } catch (error) {
+      console.error('Date formatting error:', error);
+      return 'Invalid date';
+    }
   };
   
-  // Refetch all data
-  const refetchAll = () => {
-    refetchCategories();
-    refetchTopics();
-    refetchGroups();
-  };
+  // Fetch Categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('forum_categories')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          throw error;
+        }
+        
+        if (data) {
+          setCategories(data);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        toast.error('Failed to load forum categories');
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+    
+    fetchCategories();
+  }, []);
+  
+  // Fetch Topics for each category
+  useEffect(() => {
+    const fetchTopics = async () => {
+      if (categories.length === 0) return;
+      
+      try {
+        setTopicsLoading(true);
+        const result: TopicsByCategory = {};
+        
+        for (const category of categories) {
+          const { data, error } = await supabase
+            .from('forum_topics')
+            .select(`
+              *,
+              profiles:user_id (username, avatar_url),
+              replies:forum_replies (count)
+            `)
+            .eq('category_id', category.id)
+            .order('created_at', { ascending: false })
+            .limit(5);
+          
+          if (error) {
+            throw error;
+          }
+          
+          if (data) {
+            // Transform data to include reply count and user info
+            const transformedTopics = data.map(topic => ({
+              ...topic,
+              replies: topic.replies?.[0]?.count || 0,
+              username: topic.profiles?.username || 'Anonymous',
+              avatar_url: topic.profiles?.avatar_url || null
+            }));
+            
+            result[category.id] = transformedTopics;
+          }
+        }
+        
+        setTopicsByCategory(result);
+      } catch (error) {
+        console.error('Error fetching topics:', error);
+        toast.error('Failed to load forum topics');
+      } finally {
+        setTopicsLoading(false);
+      }
+    };
+    
+    fetchTopics();
+  }, [categories]);
+  
+  // Fetch Forum Groups
+  useEffect(() => {
+    const fetchForumGroups = async () => {
+      try {
+        setGroupsLoading(true);
+        
+        // Check if the edge function exists and use it
+        let data;
+        let error;
+        
+        try {
+          // First try the direct table approach
+          const response = await supabase
+            .from('forum_groups')
+            .select('*')
+            .order('created_at', { ascending: false });
+            
+          data = response.data;
+          error = response.error;
+        } catch (err) {
+          console.error('Error accessing forum_groups table directly:', err);
+          // If direct access fails, we'll log the error but continue
+          // We'll return an empty array later if both methods fail
+        }
+        
+        if (error) {
+          console.error('Error fetching forum groups:', error);
+          toast.error('Failed to load community groups');
+          setForumGroups([]);
+        } else if (data) {
+          setForumGroups(data);
+        } else {
+          setForumGroups([]);
+        }
+      } catch (error) {
+        console.error('Error in fetchForumGroups:', error);
+        toast.error('Failed to load community groups');
+        setForumGroups([]);
+      } finally {
+        setGroupsLoading(false);
+      }
+    };
+    
+    fetchForumGroups();
+  }, []);
   
   return {
     categories,
@@ -180,11 +199,7 @@ export const useForumData = (categoryId?: string) => {
     categoriesLoading,
     topicsLoading,
     groupsLoading,
-    isLoading: categoriesLoading || topicsLoading || groupsLoading,
-    error: categoriesError || topicsError || groupsError,
-    formatDate,
-    refetchAll
+    isLoading,
+    formatDate
   };
 };
-
-export default useForumData;

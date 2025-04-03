@@ -1,8 +1,9 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowDown, Sparkles, Brain, Zap, Bot, Rocket, ChevronRight } from 'lucide-react';
+import { ArrowDown, Brain, Zap, Bot, Rocket, ChevronRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -48,7 +49,7 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-16 px-4">
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-16 px-4 font-inter">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div 
@@ -83,7 +84,9 @@ const HeroSection = () => {
           <Bot className="text-emerald-500/60 h-14 w-14 filter blur-[1px]" />
         </div>
         <div className="absolute top-[20%] right-[25%] animate-float" style={{ animationDelay: '0.5s' }}>
-          <Sparkles className="text-amber-500/60 h-8 w-8 filter blur-[1px]" />
+          <svg className="text-amber-500/60 h-8 w-8 filter blur-[1px]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 3L14.39 8.25L20 9.27L16 13.14L16.94 18.76L12 16.09L7.06 18.76L8 13.14L4 9.27L9.61 8.25L12 3Z" fill="currentColor"/>
+          </svg>
         </div>
         <div className="absolute bottom-[30%] right-[10%] animate-float" style={{ animationDelay: '2s' }}>
           <Rocket className="text-pink-500/60 h-9 w-9 filter blur-[1px]" />
@@ -93,102 +96,61 @@ const HeroSection = () => {
       <div className="max-w-7xl mx-auto w-full z-10 relative">
         <div className="flex flex-col items-center text-center space-y-8 py-12 animate-fade-in">
           <Badge variant="outline" className="px-4 py-1.5 text-sm bg-white/10 backdrop-blur-sm border-blue-300/20 shadow-md">
-            <Sparkles className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
+            <svg className="h-3.5 w-3.5 mr-1.5 text-blue-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 3L14.39 8.25L20 9.27L16 13.14L16.94 18.76L12 16.09L7.06 18.76L8 13.14L4 9.27L9.61 8.25L12 3Z" fill="currentColor"/>
+            </svg>
             <span className="text-blue-600 dark:text-blue-400 font-medium">Discover the Future of AI Technology</span>
           </Badge>
           
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-tight">
             <span className="block mb-2">
-              <span className="inline-block px-4 py-1.5 bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-10 border border-gray-200/20 rounded-lg shadow-lg">Unleash</span>
+              <span className="inline-block px-4 py-1.5 bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-10 border border-gray-200/20 rounded-lg shadow-lg">Empower</span>
               {" "}
               <span className="relative">
-                <span className="inline-block">Your Potential</span>
+                <span className="inline-block">Your AI Journey</span>
                 <span className="absolute -bottom-1 left-0 right-0 h-[5px] bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"></span>
               </span>
             </span>
-            <span className="block my-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+            <span className="block my-4 text-transparent bg-clip-text bg-gradient-to-r from-[#2A5C8D] via-indigo-600 to-purple-600">
               with Digital Intelligence
             </span>
             <div className="relative h-20 md:h-24 flex items-center justify-center overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-pulse" style={{ animationDuration: '3s' }}></div>
-              <span className="relative z-10 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 shadow-text inline-flex items-center">
-                <Sparkles className="h-8 w-8 mr-2 text-blue-400" />
+              <span className="relative z-10 bg-clip-text text-transparent bg-gradient-to-r from-[#2A5C8D] to-[#00FF88] shadow-text inline-flex items-center">
+                <Bot className="h-8 w-8 mr-2 text-[#00FF88]" />
                 {aiTool}
               </span>
             </div>
           </h1>
           
           <p className="text-xl md:text-2xl text-foreground/70 max-w-3xl mx-auto mt-6 animate-slide-up leading-relaxed">
-            Access cutting-edge AI tools, comprehensive learning resources, and join a thriving community of innovators — all in one platform.
+            Access cutting-edge AI tools, learn from experts, and join a global community—all for free.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 mt-8 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-            <Button size="lg" className="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-md">
-              Start for Free
-              <ChevronRight className="ml-1 h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="lg" className="font-semibold group border-blue-200 dark:border-blue-900 shadow-sm backdrop-blur-sm hover:bg-white/10">
-              Explore Features
-              <ArrowDown className="ml-2 h-4 w-4 transition-transform group-hover:translate-y-1" />
-            </Button>
-          </div>
-          
-          <div className="mt-20 w-full max-w-5xl px-4 relative animate-fade-in" style={{ animationDelay: '0.5s' }}>
-            <div className="relative">
-              {/* Glow effect */}
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl blur-xl opacity-75 animate-pulse" style={{ animationDuration: '4s' }}></div>
-              
-              <div className="relative bg-white/5 dark:bg-black/60 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden">
-                <div className="aspect-[16/9] bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl overflow-hidden">
-                  {/* Mock dashboard UI */}
-                  <div className="w-full h-full p-4 relative">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="flex justify-center">
-                          <div className="relative">
-                            <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full animate-pulse"></div>
-                            <Sparkles className="h-16 w-16 text-blue-400 mb-4 relative z-10" />
-                          </div>
-                        </div>
-                        <h3 className="text-3xl font-bold text-white mb-2 drop-shadow-md">Digital Intelligence Hub</h3>
-                        <p className="text-gray-300 max-w-lg mx-auto">Your Gateway to AI-Powered Tools and Learning</p>
-                        <div className="mt-6">
-                          <Button variant="outline" className="bg-white/10 hover:bg-white/20 border-white/20 text-white">
-                            <Sparkles className="mr-2 h-4 w-4" />
-                            Launch Demo
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* UI mockup elements */}
-                    <div className="absolute top-4 left-4 right-4 h-8 flex items-center space-x-2">
-                      <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                      <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                      <div className="ml-4 h-6 w-64 bg-gray-700 rounded-md"></div>
-                    </div>
-                    
-                    <div className="absolute bottom-4 left-4 right-4 h-16 flex justify-between">
-                      <div className="w-32 h-full bg-gray-700/50 rounded-md"></div>
-                      <div className="w-32 h-full bg-gray-700/50 rounded-md"></div>
-                      <div className="w-32 h-full bg-blue-500/30 rounded-md backdrop-blur-sm border border-blue-400/20"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <Link to="/learning-hub">
+              <Button size="lg" className="font-semibold bg-gradient-to-r from-[#2A5C8D] to-purple-600 hover:shadow-lg hover:from-[#2A5C8D]/90 hover:to-purple-700 transition-all duration-300 shadow-md">
+                Start Learning Free
+                <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
+            </Link>
+            <Link to="/pricing">
+              <Button variant="outline" size="lg" className="font-semibold group border-blue-200 dark:border-blue-900 shadow-sm backdrop-blur-sm hover:bg-white/10">
+                Compare Plans
+                <ArrowDown className="ml-2 h-4 w-4 transition-transform group-hover:translate-y-1" />
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
       
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
         <a 
-          href="#pricing" 
+          href="#featured-resources" 
           className="flex flex-col items-center text-foreground/60 hover:text-foreground transition-colors"
-          aria-label="Scroll to pricing"
+          aria-label="Scroll to featured resources"
         >
-          <span className="text-sm mb-2 font-medium">View Pricing</span>
+          <span className="text-sm mb-2 font-medium">Explore Resources</span>
           <ArrowDown className="h-5 w-5" />
         </a>
       </div>
