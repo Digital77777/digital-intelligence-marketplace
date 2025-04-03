@@ -123,12 +123,23 @@ export const useForumData = () => {
           
           if (data) {
             // Transform data to include reply count and user info
-            const transformedTopics = data.map(topic => ({
-              ...topic,
-              replies: topic.replies?.[0]?.count || 0,
-              username: topic.profiles?.username || 'Anonymous',
-              avatar_url: topic.profiles?.avatar_url || null
-            }));
+            const transformedTopics = data.map(topic => {
+              // TypeScript fix: Check if profiles exists and has the expected properties
+              const username = topic.profiles && 'username' in topic.profiles 
+                ? topic.profiles.username as string 
+                : 'Anonymous';
+                
+              const avatarUrl = topic.profiles && 'avatar_url' in topic.profiles 
+                ? topic.profiles.avatar_url as string | null 
+                : null;
+                
+              return {
+                ...topic,
+                replies: topic.replies?.[0]?.count || 0,
+                username: username,
+                avatar_url: avatarUrl
+              };
+            });
             
             result[category.id] = transformedTopics;
           }
