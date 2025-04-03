@@ -25,6 +25,18 @@ export interface ForumTopic {
   author_username?: string;
 }
 
+export interface ForumGroup {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  tier_required: 'freemium' | 'basic' | 'pro';
+  is_private: boolean;
+  created_at: string;
+  member_count: number;
+  created_by: string;
+}
+
 export const useForumData = (categoryId?: string) => {
   // For categories list
   const { 
@@ -111,6 +123,26 @@ export const useForumData = (categoryId?: string) => {
     enabled: categories.length > 0,
   });
   
+  // For forum groups
+  const {
+    data: forumGroups = [],
+    isLoading: groupsLoading,
+    error: groupsError,
+    refetch: refetchGroups
+  } = useQuery({
+    queryKey: ['forumGroups'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('forum_groups')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 1000 * 60 * 5 // Cache for 5 minutes
+  });
+  
   // Format date helper
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -125,15 +157,18 @@ export const useForumData = (categoryId?: string) => {
   const refetchAll = () => {
     refetchCategories();
     refetchTopics();
+    refetchGroups();
   };
   
   return {
     categories,
     topicsByCategory,
+    forumGroups,
     categoriesLoading,
     topicsLoading,
-    isLoading: categoriesLoading || topicsLoading,
-    error: categoriesError || topicsError,
+    groupsLoading,
+    isLoading: categoriesLoading || topicsLoading || groupsLoading,
+    error: categoriesError || topicsError || groupsError,
     formatDate,
     refetchAll
   };

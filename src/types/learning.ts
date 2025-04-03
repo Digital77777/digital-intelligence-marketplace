@@ -1,4 +1,3 @@
-
 export interface LearningContent {
   id: string;
   title: string;
@@ -91,4 +90,49 @@ export interface LiveEvent {
   max_participants?: number;
   registration_deadline?: string;
   image_url?: string;
+}
+
+export interface ForumMember {
+  id: string;
+  user_id: string;
+  forum_id: string;
+  role: 'member' | 'moderator' | 'admin';
+  joined_at: string;
+}
+
+export interface PrivateDiscussion {
+  id: string;
+  group_id: string;
+  title: string;
+  content: string;
+  user_id: string;
+  is_pinned: boolean;
+  is_locked: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ForumGroup {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  tier_required: 'freemium' | 'basic' | 'pro';
+  is_private: boolean;
+  created_at: string;
+  member_count: number;
+  created_by: string;
+}
+
+export interface ForumEvent {
+  id: string;
+  title: string;
+  description: string;
+  event_type: 'ama' | 'webinar' | 'workshop' | 'networking';
+  tier_required: 'basic' | 'pro';
+  max_participants: number;
+  event_date: string;
+  duration: number; // in minutes
+  host_name: string;
+  host_id: string;
 }
