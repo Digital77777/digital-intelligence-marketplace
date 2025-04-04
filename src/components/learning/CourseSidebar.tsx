@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -11,9 +12,10 @@ interface CourseSidebarProps {
   course: any;
   progress: number;
   onMarkComplete: () => void;
+  onTabChange?: (tab: string) => void; // Add the optional onTabChange prop
 }
 
-const CourseSidebar: React.FC<CourseSidebarProps> = ({ course, progress, onMarkComplete }) => {
+const CourseSidebar: React.FC<CourseSidebarProps> = ({ course, progress, onMarkComplete, onTabChange }) => {
   const isCompleted = progress === 100;
   
   const handleCertificateClick = () => {

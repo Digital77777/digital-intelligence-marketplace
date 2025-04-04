@@ -54,11 +54,7 @@ const CourseDiscussion: React.FC<CourseDiscussionProps> = ({ courseId }) => {
         setComments(formattedComments);
       } catch (error) {
         console.error('Error fetching comments:', error);
-        toast({
-          title: "Failed to load comments",
-          description: "There was a problem loading the discussion thread.",
-          variant: "destructive",
-        });
+        toast("Failed to load comments. There was a problem loading the discussion thread.");
       }
     };
 
@@ -69,20 +65,12 @@ const CourseDiscussion: React.FC<CourseDiscussionProps> = ({ courseId }) => {
 
   const handleSubmitComment = async () => {
     if (!user) {
-      toast({
-        title: "Login Required",
-        description: "You need to sign in to participate in discussions.",
-        variant: "destructive",
-      });
+      toast("Login Required. You need to sign in to participate in discussions.");
       return;
     }
 
     if (!newComment.trim()) {
-      toast({
-        title: "Empty comment",
-        description: "Please write something before submitting.",
-        variant: "destructive",
-      });
+      toast("Empty comment. Please write something before submitting.");
       return;
     }
 
@@ -115,18 +103,11 @@ const CourseDiscussion: React.FC<CourseDiscussionProps> = ({ courseId }) => {
         
         setComments([newCommentObj, ...comments]);
         setNewComment('');
-        toast({
-          title: "Comment posted",
-          description: "Your comment has been added to the discussion.",
-        });
+        toast("Comment posted. Your comment has been added to the discussion.");
       }
     } catch (error) {
       console.error('Error posting comment:', error);
-      toast({
-        title: "Failed to post comment",
-        description: "There was a problem submitting your comment.",
-        variant: "destructive",
-      });
+      toast("Failed to post comment. There was a problem submitting your comment.");
     } finally {
       setIsSubmitting(false);
     }

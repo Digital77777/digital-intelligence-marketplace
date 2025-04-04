@@ -37,6 +37,7 @@ export default function App() {
               <Route path="/learning/:courseId" element={<CourseDetails />} />
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/community" element={<CommunityForums />} />
+              <Route path="/forums" element={<CommunityForums />} /> {/* Added forums route to redirect to CommunityForums */}
               <Route path="/community/topic/:topicId" element={<TopicDetails />} />
               <Route path="/community/new-topic/:categoryId" element={<NewTopic />} />
               <Route path="/community/new-group" element={<NewGroup />} />

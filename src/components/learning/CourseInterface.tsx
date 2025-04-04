@@ -45,7 +45,7 @@ const CourseInterface = () => {
         
         // Check if user can access this course based on tier
         if (courseData?.required_tier && !canAccess(courseData.required_tier)) {
-          toast.error(`This course requires ${courseData.required_tier} tier access`);
+          toast(`This course requires ${courseData.required_tier} tier access`);
           return;
         }
         
@@ -93,7 +93,7 @@ const CourseInterface = () => {
         
       } catch (err: any) {
         console.error('Error loading course:', err);
-        toast.error('Failed to load course details');
+        toast('Failed to load course details');
       } finally {
         setLoading(false);
       }
@@ -190,7 +190,7 @@ const CourseInterface = () => {
         <CourseSidebar 
           course={course} 
           progress={userProgress} 
-          onTabChange={(tab) => setActiveTab(tab)}
+          onMarkComplete={() => updateProgress(100)}
         />
       </div>
     </div>
