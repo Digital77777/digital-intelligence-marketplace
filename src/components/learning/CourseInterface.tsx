@@ -1,180 +1,233 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { AlertCircle, BookOpen, MessageSquare, FileText, ArrowLeft } from 'lucide-react';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useUser } from '@/context/UserContext';
+import { useTier } from '@/context/TierContext';
+import CourseSidebar from './CourseSidebar';
 import CourseContent from './CourseContent';
 import CourseDiscussion from './CourseDiscussion';
 import CourseResources from './CourseResources';
-import CourseSidebar from './CourseSidebar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
-import { useUser } from '@/context/UserContext';
 
 const CourseInterface = () => {
   const { courseId } = useParams<{ courseId: string }>();
-  const [activeTab, setActiveTab] = useState<string>('content');
-  const [course, setCourse] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [progress, setProgress] = useState<number>(0);
-  const navigate = useNavigate();
   const { user } = useUser();
-
-  // Fetch course data
+  const { canAccess, upgradePrompt } = useTier();
+  
+  const [course, setCourse] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [userProgress, setUserProgress] = useState<number>(0);
+  const [activeTab, setActiveTab] = useState('content');
+  const [courseResources, setCourseResources] = useState<any[]>([]);
+  
   useEffect(() => {
+    if (!courseId) return;
+    
     const fetchCourse = async () => {
       try {
-        if (!courseId) return;
-
-        // Fetch course data - ensure courseId is parsed as number if needed
-        const numericCourseId = parseInt(courseId, 10);
+        setLoading(true);
+        
+        // Fetch course by ID
         const { data: courseData, error: courseError } = await supabase
           .from('courses')
           .select('*')
-          .eq('id', numericCourseId)
+          .eq('id', parseInt(courseId, 10))
           .single();
-
+          
         if (courseError) throw courseError;
-        if (!courseData) throw new Error('Course not found');
-
         setCourse(courseData);
         
-        // Fetch user progress if logged in
+        // Check if user can access this course based on tier
+        if (courseData?.required_tier && !canAccess(courseData.required_tier)) {
+          toast.error(`This course requires ${courseData.required_tier} tier access`);
+          return;
+        }
+        
+        // Fetch user's progress if logged in
         if (user) {
           const { data: progressData, error: progressError } = await supabase
             .from('user_progress')
             .select('*')
-            .eq('course_id', numericCourseId)
             .eq('user_id', user.id)
+            .eq('course_id', parseInt(courseId, 10))
             .single();
-
+            
           if (!progressError && progressData) {
-            setProgress(progressData.completion_percent || 0);
+            setUserProgress(progressData.completion_percent || 0);
           } else {
-            setProgress(0);
+            // Initialize progress record for the user
+            if (user) {
+              await supabase.from('user_progress').insert({
+                user_id: user.id,
+                course_id: parseInt(courseId, 10),
+                completion_percent: 0
+              });
+            }
           }
         }
-
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error fetching course:', error);
-        toast({
-          title: "Error loading course",
-          description: "There was a problem loading the course content.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
+        
+        // Here we would fetch course resources
+        // For now, using sample data
+        setCourseResources([
+          {
+            id: '1',
+            title: 'Course Syllabus',
+            description: 'Complete course outline and learning objectives',
+            type: 'pdf',
+            url: '#'
+          },
+          {
+            id: '2',
+            title: 'Project Repository',
+            description: 'Access the GitHub repository with sample code',
+            type: 'code',
+            url: 'https://github.com/example/course-repo'
+          }
+        ]);
+        
+      } catch (err: any) {
+        console.error('Error loading course:', err);
+        toast.error('Failed to load course details');
+      } finally {
+        setLoading(false);
       }
     };
-
+    
     fetchCourse();
-  }, [courseId, user]);
-
-  const handleMarkComplete = async () => {
-    if (!user || !course) return;
+  }, [courseId, user, canAccess]);
+  
+  const updateProgress = async (progress: number) => {
+    if (!user || !courseId) return;
     
     try {
-      // Update progress to 100%
-      const newProgress = 100;
-      const numericCourseId = parseInt(courseId!, 10);
+      setUserProgress(progress);
       
-      const { data, error } = await supabase
-        .from('user_progress')
-        .upsert({
-          user_id: user.id,
-          course_id: numericCourseId,
-          completion_percent: newProgress,
-          last_accessed: new Date().toISOString()
-        }, {
-          onConflict: 'user_id,course_id'
-        });
-
-      if (error) throw error;
-      
-      // Update local state
-      setProgress(newProgress);
-      
-      toast({
-        title: "Progress Updated",
-        description: "Course marked as complete!",
-        variant: "default",
-      });
+      if (user) {
+        await supabase
+          .from('user_progress')
+          .update({ completion_percent: progress })
+          .eq('user_id', user.id)
+          .eq('course_id', parseInt(courseId, 10));
+      }
     } catch (error) {
       console.error('Error updating progress:', error);
-      toast({
-        title: "Error updating progress",
-        description: "There was a problem saving your progress.",
-        variant: "destructive",
-      });
     }
   };
-
-  const goBack = () => navigate('/learning-hub');
-
-  if (isLoading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading course...</div>;
+  
+  if (loading) {
+    return <CourseLoadingSkeleton />;
   }
-
+  
   if (!course) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <h2 className="text-2xl font-semibold mb-4">Course not found</h2>
-        <Button onClick={goBack}>Go back to Learning Hub</Button>
+      <div className="p-8 text-center">
+        <AlertCircle className="h-12 w-12 mx-auto text-yellow-500 mb-4" />
+        <h2 className="text-2xl font-bold mb-2">Course Not Found</h2>
+        <p className="text-muted-foreground mb-4">
+          The course you're looking for doesn't exist or has been removed.
+        </p>
+        <Button asChild>
+          <a href="/learning-hub">
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Learning Hub
+          </a>
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <Button 
-        variant="ghost" 
-        onClick={goBack} 
-        className="mb-6"
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" /> Back to Learning Hub
-      </Button>
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="lg:col-span-3">
+        <Card>
+          <CardContent className="p-0">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="w-full grid grid-cols-3 rounded-none border-b">
+                <TabsTrigger value="content" className="rounded-none data-[state=active]:bg-muted/50">
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Content
+                </TabsTrigger>
+                <TabsTrigger value="discussion" className="rounded-none data-[state=active]:bg-muted/50">
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Discussion
+                </TabsTrigger>
+                <TabsTrigger value="resources" className="rounded-none data-[state=active]:bg-muted/50">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Resources
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="content" className="p-6">
+                <CourseContent 
+                  content={course.content} 
+                  onProgressUpdate={updateProgress} 
+                  course={course}
+                />
+              </TabsContent>
+              
+              <TabsContent value="discussion" className="p-6">
+                <CourseDiscussion courseId={courseId || ''} />
+              </TabsContent>
+              
+              <TabsContent value="resources" className="p-6">
+                <CourseResources 
+                  title={course.title} 
+                  resources={courseResources} 
+                  course={course}
+                />
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main content */}
-        <div className="lg:col-span-2 space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold">{course.title}</h1>
-            <p className="text-muted-foreground mt-2">{course.description}</p>
+      <div className="col-span-1 order-first lg:order-last">
+        <CourseSidebar 
+          course={course} 
+          progress={userProgress} 
+          onTabChange={(tab) => setActiveTab(tab)}
+        />
+      </div>
+    </div>
+  );
+};
+
+// Loading skeleton for better UX
+const CourseLoadingSkeleton = () => {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="lg:col-span-3">
+        <Card>
+          <CardContent className="p-0">
+            <div className="border-b p-4 flex space-x-4">
+              <Skeleton className="h-8 w-24" />
+              <Skeleton className="h-8 w-24" />
+              <Skeleton className="h-8 w-24" />
+            </div>
+            <div className="p-6 space-y-4">
+              <Skeleton className="h-8 w-2/3" />
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      <div className="col-span-1 order-first lg:order-last">
+        <Card className="p-4">
+          <div className="space-y-4">
+            <Skeleton className="h-32 w-full rounded-md" />
+            <Skeleton className="h-6 w-2/3" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-8 w-full rounded-md" />
           </div>
-          
-          <Separator />
-          
-          <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-3 mb-6">
-              <TabsTrigger value="content">Course Content</TabsTrigger>
-              <TabsTrigger value="discussion">Discussion</TabsTrigger>
-              <TabsTrigger value="resources">Resources</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="content">
-              <CourseContent content={course.content} onProgressUpdate={(progress) => setProgress(progress)} />
-            </TabsContent>
-            
-            <TabsContent value="discussion">
-              <CourseDiscussion courseId={courseId || ''} />
-            </TabsContent>
-            
-            <TabsContent value="resources">
-              <CourseResources resources={course.resources || []} title={course.title} />
-            </TabsContent>
-          </Tabs>
-        </div>
-        
-        {/* Sidebar */}
-        <div className="lg:col-span-1">
-          <CourseSidebar 
-            course={course}
-            progress={progress}
-            onMarkComplete={handleMarkComplete}
-          />
-        </div>
+        </Card>
       </div>
     </div>
   );

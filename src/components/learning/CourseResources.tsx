@@ -15,7 +15,7 @@ interface Resource {
 interface CourseResourcesProps {
   resources: Resource[];
   title: string;
-  course?: any; // Add optional course prop
+  course?: any; // Optional course prop
 }
 
 const CourseResources: React.FC<CourseResourcesProps> = ({ resources, title, course }) => {

@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 interface CourseContentProps {
   content: string;
   onProgressUpdate: (progress: number) => void;
-  course?: any; // Add optional course prop
+  course?: any; // Optional course prop
 }
 
 const CourseContent: React.FC<CourseContentProps> = ({ content, onProgressUpdate, course }) => {
@@ -36,83 +36,117 @@ const CourseContent: React.FC<CourseContentProps> = ({ content, onProgressUpdate
       toast.success("You've reached the end of this course!");
     }
   };
-  
-  const renderSectionList = () => {
-    return (
-      <div className="mb-6 border rounded-lg overflow-hidden">
-        {sections.map((section, index) => (
-          <div 
-            key={index} 
-            className={`
-              border-b last:border-b-0 p-3 flex justify-between items-center cursor-pointer
-              ${currentSection === index ? 'bg-muted' : ''}
-              hover:bg-muted/50 transition-colors
-            `}
-            onClick={() => setCurrentSection(index)}
-          >
-            <div className="flex items-center">
-              <div className={`
-                w-6 h-6 rounded-full mr-3 flex items-center justify-center 
-                ${readSections.includes(index) 
-                  ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' 
-                  : 'bg-muted text-muted-foreground'
-                }
-              `}>
-                {readSections.includes(index) 
-                  ? <CheckCircle className="h-4 w-4" /> 
-                  : index + 1
-                }
-              </div>
-              <span className="text-sm">Section {index + 1}</span>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </div>
-        ))}
-      </div>
-    );
-  };
-  
-  const renderCurrentSection = () => {
-    const section = sections[currentSection];
-    
-    return (
-      <div className="prose prose-lg dark:prose-invert max-w-none">
-        <h2>Section {currentSection + 1}</h2>
-        <div dangerouslySetInnerHTML={{ __html: section }} />
-        
-        <div className="flex justify-between mt-8">
-          <Button 
-            variant="outline" 
-            onClick={() => {
-              if (currentSection > 0) {
-                setCurrentSection(currentSection - 1);
-              }
-            }}
-            disabled={currentSection === 0}
-          >
-            Previous Section
-          </Button>
-          
-          <Button
-            onClick={() => {
-              markSectionAsRead(currentSection);
-              if (currentSection < sections.length - 1) {
-                setCurrentSection(currentSection + 1);
-              }
-            }}
-          >
-            {currentSection < sections.length - 1 ? 'Next Section' : 'Complete Course'}
-          </Button>
-        </div>
-      </div>
-    );
-  };
-  
+
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4">Course Content</h2>
-      {renderSectionList()}
-      {renderCurrentSection()}
+      <SectionList 
+        sections={sections}
+        currentSection={currentSection} 
+        readSections={readSections}
+        setCurrentSection={setCurrentSection}
+      />
+      <CurrentSection 
+        sections={sections}
+        currentSection={currentSection} 
+        markSectionAsRead={markSectionAsRead}
+        setCurrentSection={setCurrentSection}
+      />
+    </div>
+  );
+};
+
+interface SectionListProps {
+  sections: string[];
+  currentSection: number;
+  readSections: number[];
+  setCurrentSection: (index: number) => void;
+}
+
+const SectionList: React.FC<SectionListProps> = ({ 
+  sections, 
+  currentSection, 
+  readSections, 
+  setCurrentSection 
+}) => {
+  return (
+    <div className="mb-6 border rounded-lg overflow-hidden">
+      {sections.map((section, index) => (
+        <div 
+          key={index} 
+          className={`
+            border-b last:border-b-0 p-3 flex justify-between items-center cursor-pointer
+            ${currentSection === index ? 'bg-muted' : ''}
+            hover:bg-muted/50 transition-colors
+          `}
+          onClick={() => setCurrentSection(index)}
+        >
+          <div className="flex items-center">
+            <div className={`
+              w-6 h-6 rounded-full mr-3 flex items-center justify-center 
+              ${readSections.includes(index) 
+                ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' 
+                : 'bg-muted text-muted-foreground'
+              }
+            `}>
+              {readSections.includes(index) 
+                ? <CheckCircle className="h-4 w-4" /> 
+                : index + 1
+              }
+            </div>
+            <span className="text-sm">Section {index + 1}</span>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        </div>
+      ))}
+    </div>
+  );
+};
+
+interface CurrentSectionProps {
+  sections: string[];
+  currentSection: number;
+  markSectionAsRead: (index: number) => void;
+  setCurrentSection: (index: number) => void;
+}
+
+const CurrentSection: React.FC<CurrentSectionProps> = ({
+  sections,
+  currentSection,
+  markSectionAsRead,
+  setCurrentSection
+}) => {
+  const section = sections[currentSection];
+  
+  return (
+    <div className="prose prose-lg dark:prose-invert max-w-none">
+      <h2>Section {currentSection + 1}</h2>
+      <div dangerouslySetInnerHTML={{ __html: section }} />
+      
+      <div className="flex justify-between mt-8">
+        <Button 
+          variant="outline" 
+          onClick={() => {
+            if (currentSection > 0) {
+              setCurrentSection(currentSection - 1);
+            }
+          }}
+          disabled={currentSection === 0}
+        >
+          Previous Section
+        </Button>
+        
+        <Button
+          onClick={() => {
+            markSectionAsRead(currentSection);
+            if (currentSection < sections.length - 1) {
+              setCurrentSection(currentSection + 1);
+            }
+          }}
+        >
+          {currentSection < sections.length - 1 ? 'Next Section' : 'Complete Course'}
+        </Button>
+      </div>
     </div>
   );
 };
