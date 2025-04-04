@@ -7,9 +7,10 @@ import { toast } from 'sonner';
 interface CourseContentProps {
   content: string;
   onProgressUpdate: (progress: number) => void;
+  course?: any; // Add optional course prop
 }
 
-const CourseContent: React.FC<CourseContentProps> = ({ content, onProgressUpdate }) => {
+const CourseContent: React.FC<CourseContentProps> = ({ content, onProgressUpdate, course }) => {
   const [currentSection, setCurrentSection] = useState(0);
   const [readSections, setReadSections] = useState<number[]>([]);
   

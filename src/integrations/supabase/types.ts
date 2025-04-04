@@ -215,6 +215,44 @@ export type Database = {
           },
         ]
       }
+      course_comments: {
+        Row: {
+          content: string
+          course_id: number
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          user_id: string
+          user_name: string | null
+        }
+        Insert: {
+          content: string
+          course_id: number
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+          user_name?: string | null
+        }
+        Update: {
+          content?: string
+          course_id?: number
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+          user_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_comments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_feedback: {
         Row: {
           comment: string | null

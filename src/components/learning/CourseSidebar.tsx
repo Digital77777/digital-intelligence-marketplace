@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -22,6 +21,7 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({ course, progress, onMarkC
     toast({
       title: "Certificate Generated",
       description: "Your certificate has been generated and added to your profile.",
+      variant: "default",
     });
   };
   

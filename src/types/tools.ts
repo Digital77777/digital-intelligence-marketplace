@@ -1,4 +1,3 @@
-
 export interface AITool {
   id: string;
   name: string;
@@ -15,5 +14,13 @@ export interface AITool {
 export interface ToolCategory {
   id: string;
   name: string;
+  count: number;
+}
+
+export interface ToolCategoryInfo {
+  id: string;
+  name: string;
+  description: string;
+  icon: React.ReactNode;
   count: number;
 }

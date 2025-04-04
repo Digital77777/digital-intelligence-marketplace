@@ -15,9 +15,10 @@ interface Resource {
 interface CourseResourcesProps {
   resources: Resource[];
   title: string;
+  course?: any; // Add optional course prop
 }
 
-const CourseResources: React.FC<CourseResourcesProps> = ({ resources, title }) => {
+const CourseResources: React.FC<CourseResourcesProps> = ({ resources, title, course }) => {
   // If no resources provided, use default empty array
   const courseResources = resources || [];
 

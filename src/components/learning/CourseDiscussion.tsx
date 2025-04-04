@@ -32,9 +32,9 @@ const CourseDiscussion: React.FC<CourseDiscussionProps> = ({ courseId }) => {
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        // Use the course_feedback table which exists in the database
+        // Use the course_comments table which exists in the database
         const { data, error } = await supabase
-          .from('course_feedback')
+          .from('course_comments')
           .select('*')
           .eq('course_id', parseInt(courseId, 10))
           .order('created_at', { ascending: false });
@@ -44,10 +44,10 @@ const CourseDiscussion: React.FC<CourseDiscussionProps> = ({ courseId }) => {
         // Transform data to match our Comment interface
         const formattedComments: Comment[] = (data || []).map(item => ({
           id: item.id,
-          content: item.comment || '',
+          content: item.content || '',
           created_at: item.created_at || new Date().toISOString(),
           user_id: item.user_id,
-          user_name: `User ${item.user_id.substring(0, 4)}`, // Generate a username since we don't have one
+          user_name: item.user_name || `User ${item.user_id.substring(0, 4)}`,
           user_avatar: undefined
         }));
         
@@ -89,14 +89,15 @@ const CourseDiscussion: React.FC<CourseDiscussionProps> = ({ courseId }) => {
     setIsSubmitting(true);
 
     try {
+      const userName = user.email ? user.email.split('@')[0] : 'Anonymous';
+      
       const { data, error } = await supabase
-        .from('course_feedback')
+        .from('course_comments')
         .insert({
           course_id: parseInt(courseId, 10),
           user_id: user.id,
-          comment: newComment,
-          rating: 5, // Default rating since it's required in the table
-          created_at: new Date().toISOString()
+          content: newComment,
+          user_name: userName
         })
         .select();
 
@@ -106,11 +107,10 @@ const CourseDiscussion: React.FC<CourseDiscussionProps> = ({ courseId }) => {
       if (data && data[0]) {
         const newCommentObj: Comment = {
           id: data[0].id,
-          content: data[0].comment || '',
+          content: data[0].content,
           created_at: data[0].created_at,
           user_id: data[0].user_id,
-          user_name: user.email?.split('@')[0] || 'Anonymous',
-          user_avatar: undefined
+          user_name: data[0].user_name || userName
         };
         
         setComments([newCommentObj, ...comments]);
