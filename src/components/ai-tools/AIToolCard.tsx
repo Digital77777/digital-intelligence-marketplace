@@ -24,9 +24,10 @@ import {
 interface AIToolCardProps {
   tool: AIToolItem;
   compact?: boolean;
+  onSelect?: (tool: AIToolItem) => void;
 }
 
-const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false }) => {
+const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect }) => {
   const navigate = useNavigate();
   const { currentTier, upgradePrompt } = useTier();
   
@@ -38,7 +39,11 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false }) => {
 
   const handleToolAction = () => {
     if (hasAccess) {
-      navigate(`/tool/${tool.id}`);
+      if (onSelect) {
+        onSelect(tool);
+      } else {
+        navigate(`/tool/${tool.id}`);
+      }
     } else {
       upgradePrompt(tool.tier);
     }
@@ -147,7 +152,7 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false }) => {
             onClick={handleToolAction}
             className="gap-1.5"
           >
-            {hasAccess ? "Use Tool" : `Upgrade to ${getTierLabel(tool.tier)}`}
+            {hasAccess ? (onSelect ? "Launch Tool" : "View Details") : `Upgrade to ${getTierLabel(tool.tier)}`}
             {hasAccess ? <ExternalLink className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
           </Button>
         </div>

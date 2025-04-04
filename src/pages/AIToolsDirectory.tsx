@@ -3,23 +3,25 @@ import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AIToolItem, AIToolTier, aiTools, getTierLabel, toolCategories } from '@/data/ai-tools-tiers';
-import AIToolCard from '@/components/ai-tools/AIToolCard';
-import ToolsFilter from '@/components/ai-tools/ToolsFilter';
+import { AIToolItem, AIToolTier, aiTools, toolCategories } from '@/data/ai-tools-tiers';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useQuery } from '@tanstack/react-query';
-import { Spinner } from '@/components/ui/spinner';
-import CategoryToolsSection from '@/components/ai-tools/CategoryToolsSection';
-import TierToolsSection from '@/components/ai-tools/TierToolsSection';
-import ToolTierComparison from '@/components/ai-tools/ToolTierComparison';
+import { Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Info, SearchX } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import AllToolsTab from '@/components/ai-tools/AllToolsTab';
+import ToolsTabContent from '@/components/ai-tools/ToolsTabContent';
+import ToolTierComparison from '@/components/ai-tools/ToolTierComparison';
+import TierToolsSection from '@/components/ai-tools/TierToolsSection';
+import ToolInterfaceModal from '@/components/ai-tools/ToolInterfaceModal';
 
 const AIToolsDirectory = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Modal state
+  const [selectedTool, setSelectedTool] = useState<AIToolItem | null>(null);
+  const [toolModalOpen, setToolModalOpen] = useState(false);
   
   // Get initial filter values from URL params
   const initialCategory = searchParams.get('category') || 'all';
@@ -99,18 +101,18 @@ const AIToolsDirectory = () => {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
   
-  // Group tools by category for the Categories tab
-  const toolsByCategory = toolCategories.map(category => {
-    const categoryTools = aiTools.filter(tool => tool.category === category.id);
-    return { category, tools: categoryTools };
-  });
-  
   // Group tools by tier for the Tiers tab
   const tierGroups: AIToolTier[] = ['freemium', 'basic', 'pro'];
   const toolsByTier = tierGroups.map(tier => {
     const tierTools = aiTools.filter(tool => tool.tier === tier);
     return { tier, tools: tierTools };
   });
+
+  // Handle tool selection
+  const handleToolSelect = (tool: AIToolItem) => {
+    setSelectedTool(tool);
+    setToolModalOpen(true);
+  };
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -161,7 +163,9 @@ const AIToolsDirectory = () => {
             
             {/* All Tools Tab */}
             <TabsContent value="all" className="mt-0">
-              <ToolsFilter 
+              <AllToolsTab
+                isLoading={isLoading}
+                filteredTools={filteredTools}
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
                 selectedCategory={selectedCategory}
@@ -171,168 +175,63 @@ const AIToolsDirectory = () => {
                 viewType={viewType}
                 setViewType={setViewType}
                 totalTools={aiTools.length}
-                filteredCount={filteredTools?.length || 0}
+                onToolSelect={handleToolSelect}
               />
-              
-              {isLoading ? (
-                <div className="flex justify-center py-12">
-                  <Spinner size="lg" />
-                </div>
-              ) : filteredTools && filteredTools.length > 0 ? (
-                <div className={viewType === 'grid' 
-                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
-                  : "space-y-4"
-                }>
-                  {filteredTools.map(tool => (
-                    <AIToolCard key={tool.id} tool={tool} compact={viewType === 'list'} />
-                  ))}
-                </div>
-              ) : (
-                <div className="py-12 text-center">
-                  <SearchX className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h2 className="text-xl font-bold mb-2">No tools found</h2>
-                  <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
-                    We couldn't find any AI tools matching your search criteria. 
-                    Try adjusting your filters or search terms.
-                  </p>
-                  <Button onClick={() => {
-                    setSearchQuery('');
-                    setSelectedCategory('all');
-                    setSelectedTier('all');
-                  }}>
-                    Clear Filters
-                  </Button>
-                </div>
-              )}
             </TabsContent>
             
             {/* Popular Tab */}
             <TabsContent value="popular" className="mt-0">
-              <Alert className="mb-6">
-                <AlertTitle>Popular Tools</AlertTitle>
-                <AlertDescription>
-                  These are the most widely used tools across all subscription tiers
-                </AlertDescription>
-              </Alert>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {isLoading ? (
-                  Array(6).fill(0).map((_, i) => (
-                    <div key={i} className="h-[300px] rounded-lg bg-muted animate-pulse"></div>
-                  ))
-                ) : filteredTools && filteredTools.length > 0 ? (
-                  filteredTools.map(tool => (
-                    <AIToolCard key={tool.id} tool={tool} />
-                  ))
-                ) : (
-                  <div className="col-span-3 py-12 text-center">
-                    <p>No popular tools found with the current filters.</p>
-                  </div>
-                )}
-              </div>
+              <ToolsTabContent
+                isLoading={isLoading}
+                filteredTools={filteredTools}
+                title="Popular Tools"
+                description="These are the most widely used tools across all subscription tiers"
+                onToolSelect={handleToolSelect}
+              />
             </TabsContent>
             
             {/* Freemium Tab */}
             <TabsContent value="freemium" className="mt-0">
-              <Alert className="mb-6 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800">
-                <AlertTitle className="flex items-center gap-2">
-                  Freemium Tools
-                  <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded">
-                    Free
-                  </span>
-                </AlertTitle>
-                <AlertDescription>
-                  These tools are available to all users with a free account, designed to help you get started with AI
-                </AlertDescription>
-              </Alert>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {isLoading ? (
-                  Array(5).fill(0).map((_, i) => (
-                    <div key={i} className="h-[300px] rounded-lg bg-muted animate-pulse"></div>
-                  ))
-                ) : filteredTools && filteredTools.length > 0 ? (
-                  filteredTools.map(tool => (
-                    <AIToolCard key={tool.id} tool={tool} />
-                  ))
-                ) : (
-                  <div className="col-span-3 py-12 text-center">
-                    <p>No freemium tools found with the current filters.</p>
-                  </div>
-                )}
-              </div>
+              <ToolsTabContent
+                isLoading={isLoading}
+                filteredTools={filteredTools}
+                title="Freemium Tools"
+                description="These tools are available to all users with a free account, designed to help you get started with AI"
+                alertColor="bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800"
+                onToolSelect={handleToolSelect}
+              />
             </TabsContent>
             
             {/* Basic Tab */}
             <TabsContent value="basic" className="mt-0">
-              <Alert className="mb-6 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
-                <AlertTitle className="flex items-center gap-2">
-                  Basic Tier Tools
-                  <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-2 py-0.5 rounded">
-                    $29/month
-                  </span>
-                </AlertTitle>
-                <AlertDescription>
-                  Professional tools for individuals and small teams with expanded functionality
-                </AlertDescription>
-              </Alert>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {isLoading ? (
-                  Array(5).fill(0).map((_, i) => (
-                    <div key={i} className="h-[300px] rounded-lg bg-muted animate-pulse"></div>
-                  ))
-                ) : filteredTools && filteredTools.length > 0 ? (
-                  filteredTools.map(tool => (
-                    <AIToolCard key={tool.id} tool={tool} />
-                  ))
-                ) : (
-                  <div className="col-span-3 py-12 text-center">
-                    <p>No basic tier tools found with the current filters.</p>
-                  </div>
-                )}
-              </div>
+              <ToolsTabContent
+                isLoading={isLoading}
+                filteredTools={filteredTools}
+                title="Basic Tier Tools"
+                description="Professional tools for individuals and small teams with expanded functionality"
+                alertColor="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800"
+                onToolSelect={handleToolSelect}
+              />
             </TabsContent>
             
             {/* Pro Tab */}
             <TabsContent value="pro" className="mt-0">
-              <Alert className="mb-6 bg-purple-50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-800">
-                <AlertTitle className="flex items-center gap-2">
-                  Pro Tier Tools
-                  <span className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 px-2 py-0.5 rounded">
-                    $79/month
-                  </span>
-                </AlertTitle>
-                <AlertDescription>
-                  Enterprise-grade tools with advanced features, integrations, and scalability
-                </AlertDescription>
-              </Alert>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {isLoading ? (
-                  Array(6).fill(0).map((_, i) => (
-                    <div key={i} className="h-[300px] rounded-lg bg-muted animate-pulse"></div>
-                  ))
-                ) : filteredTools && filteredTools.length > 0 ? (
-                  filteredTools.map(tool => (
-                    <AIToolCard key={tool.id} tool={tool} />
-                  ))
-                ) : (
-                  <div className="col-span-3 py-12 text-center">
-                    <p>No pro tier tools found with the current filters.</p>
-                  </div>
-                )}
-              </div>
+              <ToolsTabContent
+                isLoading={isLoading}
+                filteredTools={filteredTools}
+                title="Pro Tier Tools"
+                description="Enterprise-grade tools with advanced features, integrations, and scalability"
+                alertColor="bg-purple-50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-800"
+                onToolSelect={handleToolSelect}
+              />
             </TabsContent>
             
             {/* Compare Tab */}
             <TabsContent value="compare" className="mt-0">
-              <Alert className="mb-6">
-                <AlertTitle>Tier Comparison</AlertTitle>
-                <AlertDescription>
-                  Compare features across different subscription tiers
-                </AlertDescription>
-              </Alert>
+              <div className="mb-6 p-5 bg-[#00FFFF]/5 border border-[#00FFFF]/20 rounded-md">
+                <h2 className="text-xl font-semibold mb-2">Tier Comparison</h2>
+                <p>Compare features across different subscription tiers</p>
+              </div>
               
               <ToolTierComparison />
               
@@ -343,6 +242,7 @@ const AIToolsDirectory = () => {
                     tier={tier}
                     tools={tools}
                     limit={3}
+                    onToolSelect={handleToolSelect}
                   />
                 ))}
               </div>
@@ -350,6 +250,14 @@ const AIToolsDirectory = () => {
           </Tabs>
         </div>
       </main>
+      
+      {/* Tool Interface Modal */}
+      <ToolInterfaceModal
+        open={toolModalOpen}
+        onOpenChange={setToolModalOpen}
+        tool={selectedTool}
+      />
+      
       <Footer />
     </div>
   );

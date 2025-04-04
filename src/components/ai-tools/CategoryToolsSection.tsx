@@ -1,59 +1,60 @@
 
 import React from 'react';
-import { ToolCategoryInfo, AIToolItem } from '@/data/ai-tools-tiers';
+import { AIToolItem } from '@/data/ai-tools-tiers';
+import { ToolCategoryInfo } from '@/data/ai-tools-tiers';
 import AIToolCard from './AIToolCard';
-import { Button } from "@/components/ui/button";
-import { ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { ChevronRight } from 'lucide-react';
 
 interface CategoryToolsSectionProps {
   category: ToolCategoryInfo;
   tools: AIToolItem[];
-  compact?: boolean;
   limit?: number;
+  onToolSelect?: (tool: AIToolItem) => void;
 }
 
 const CategoryToolsSection: React.FC<CategoryToolsSectionProps> = ({ 
   category, 
   tools,
-  compact = false,
-  limit
+  limit,
+  onToolSelect
 }) => {
   const navigate = useNavigate();
   const displayTools = limit ? tools.slice(0, limit) : tools;
-  const hasMore = limit && tools.length > limit;
-
+  
+  const handleViewMore = () => {
+    navigate(`/ai-tools-directory?category=${category.id}`);
+  };
+  
   return (
-    <div className="mb-10">
+    <div>
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 bg-primary/10 rounded-full">
+          <div className="bg-primary/10 p-2 rounded-full">
             {category.icon}
           </div>
           <h2 className="text-xl font-semibold">{category.name}</h2>
+          <span className="text-sm text-muted-foreground ml-2">
+            ({tools.length} tools)
+          </span>
         </div>
-        
-        {hasMore && (
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="flex items-center gap-1 text-sm"
-            onClick={() => navigate(`/ai-tools-directory?category=${category.id}`)}
-          >
-            View All
-            <ChevronRight className="h-4 w-4" />
+        {limit && tools.length > limit && (
+          <Button variant="outline" size="sm" onClick={handleViewMore}>
+            View All <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
         )}
       </div>
       
-      <p className="text-muted-foreground mb-5">{category.description}</p>
+      <p className="text-muted-foreground mb-4">{category.description}</p>
       
-      <div className={compact 
-        ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" 
-        : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
-      }>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {displayTools.map(tool => (
-          <AIToolCard key={tool.id} tool={tool} compact={compact} />
+          <AIToolCard 
+            key={tool.id} 
+            tool={tool}
+            onSelect={onToolSelect}
+          />
         ))}
       </div>
     </div>
