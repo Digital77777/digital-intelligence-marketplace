@@ -1,12 +1,13 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { ThemeProvider } from '@/components/theme-provider';
-import { Toaster } from '@/components/ui/toaster';
+import { ThemeProvider } from './components/theme-provider';
+import { Toaster } from './components/ui/toaster';
 import { TierProvider } from '@/context/TierContext';
 import { UserProvider } from '@/context/UserContext';
 
 // Pages
-import Home from '@/pages/Home';
+import Home from './pages/Home';
 import Pricing from '@/pages/Pricing';
 import About from '@/pages/About';
 import AITools from '@/pages/AITools';

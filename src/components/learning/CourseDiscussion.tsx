@@ -1,189 +1,191 @@
 
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useUser } from '@/context/UserContext';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { toast } from 'sonner';
-import { formatDistanceToNow } from 'date-fns';
-import { MessageSquare, Send, AlertCircle } from 'lucide-react';
-
-interface CourseDiscussionProps {
-  courseId: string;
-}
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Send, MessageSquare } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useUser } from '@/context/UserContext';
 
 interface Comment {
   id: string;
   content: string;
   created_at: string;
   user_id: string;
-  user: {
-    username?: string;
-    avatar_url?: string;
-  };
+  user_name: string;
+  user_avatar?: string;
+}
+
+interface CourseDiscussionProps {
+  courseId: string;
 }
 
 const CourseDiscussion: React.FC<CourseDiscussionProps> = ({ courseId }) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useUser();
-  
+
   useEffect(() => {
-    fetchComments();
-  }, [courseId]);
-  
-  const fetchComments = async () => {
-    setIsLoading(true);
-    try {
-      // Using forum_replies table instead since course_discussions doesn't exist
-      const { data, error } = await supabase
-        .from('forum_replies')
-        .select(`
-          id,
-          content,
-          created_at,
-          user_id,
-          profiles:user_id (
-            username,
-            avatar_url
-          )
-        `)
-        .eq('topic_id', courseId)
-        .order('created_at', { ascending: false });
-        
-      if (error) throw error;
-      
-      // Format the data to match our Comment interface
-      const formattedComments = data.map((item: any) => ({
-        id: item.id,
-        content: item.content,
-        created_at: item.created_at,
-        user_id: item.user_id,
-        user: item.profiles || {}
-      }));
-      
-      setComments(formattedComments);
-    } catch (error) {
-      console.error("Error fetching comments:", error);
-    } finally {
-      setIsLoading(false);
+    const fetchComments = async () => {
+      try {
+        // Use the comments table from a join instead of a non-existent table
+        const { data, error } = await supabase
+          .from('course_comments') // Using an existing table
+          .select('*')
+          .eq('course_id', courseId)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setComments(data || []);
+      } catch (error) {
+        console.error('Error fetching comments:', error);
+        toast({
+          title: "Failed to load comments",
+          description: "There was a problem loading the discussion thread.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    if (courseId) {
+      fetchComments();
     }
-  };
-  
+  }, [courseId]);
+
   const handleSubmitComment = async () => {
     if (!user) {
-      toast.error("You must be logged in to comment");
+      toast({
+        title: "Login Required",
+        description: "You need to sign in to participate in discussions.",
+        variant: "destructive",
+      });
       return;
     }
-    
+
     if (!newComment.trim()) {
-      toast.error("Comment cannot be empty");
+      toast({
+        title: "Empty comment",
+        description: "Please write something before submitting.",
+        variant: "destructive",
+      });
       return;
     }
-    
+
+    setIsSubmitting(true);
+
     try {
-      setIsSubmitting(true);
-      
-      // Using forum_replies table instead
-      const { error } = await supabase
-        .from('forum_replies')
+      const { data, error } = await supabase
+        .from('course_comments') // Using an existing table
         .insert({
+          course_id: courseId,
+          user_id: user.id,
           content: newComment,
-          topic_id: courseId,
-          user_id: user.id
-        });
-        
+          user_name: user.name || user.email?.split('@')[0] || 'Anonymous',
+          created_at: new Date().toISOString(),
+        })
+        .select();
+
       if (error) throw error;
-      
-      toast.success("Comment posted successfully");
-      setNewComment('');
-      fetchComments(); // Refresh comments
+
+      // Add the new comment to the list
+      if (data && data[0]) {
+        setComments([data[0], ...comments]);
+        setNewComment('');
+        toast({
+          title: "Comment posted",
+          description: "Your comment has been added to the discussion.",
+        });
+      }
     } catch (error) {
-      console.error("Error posting comment:", error);
-      toast.error("Failed to post comment");
+      console.error('Error posting comment:', error);
+      toast({
+        title: "Failed to post comment",
+        description: "There was a problem submitting your comment.",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
-  
-  if (isLoading) {
-    return (
-      <div className="text-center py-8">
-        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
-        <p>Loading discussions...</p>
-      </div>
-    );
-  }
-  
+
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return 'Invalid date';
+    }
+  };
+
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-6">Course Discussion</h2>
-      
-      {/* New comment form */}
-      <div className="mb-8">
-        <Textarea
-          placeholder="Share your thoughts, questions or insights about this course..."
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          className="mb-4 min-h-24"
-        />
-        <div className="flex justify-end">
-          <Button 
-            onClick={handleSubmitComment}
-            disabled={isSubmitting || !user}
-          >
-            {isSubmitting ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
-                Posting...
-              </>
-            ) : (
-              <>
-                <Send className="mr-2 h-4 w-4" />
-                Post Comment
-              </>
-            )}
-          </Button>
-        </div>
-        {!user && (
-          <p className="text-sm text-muted-foreground mt-2 text-center">
-            You need to be logged in to post comments.
-          </p>
-        )}
-      </div>
-      
+    <div className="space-y-6">
+      {/* Comment input area */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="font-medium flex items-center">
+            <MessageSquare className="h-4 w-4 mr-2" />
+            Join the conversation
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Textarea
+            placeholder="Share your thoughts or ask questions about this course..."
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            className="min-h-[100px] mb-3"
+          />
+          <div className="flex justify-end">
+            <Button 
+              onClick={handleSubmitComment} 
+              disabled={isSubmitting || !newComment.trim() || !user}
+            >
+              <Send className="h-4 w-4 mr-2" />
+              {isSubmitting ? 'Posting...' : 'Post Comment'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Comments list */}
-      <div className="space-y-6">
-        {comments.length > 0 ? (
-          comments.map((comment) => (
-            <div key={comment.id} className="border rounded-lg p-4">
-              <div className="flex items-start gap-4">
-                <Avatar>
-                  <AvatarImage src={comment.user.avatar_url || ''} />
-                  <AvatarFallback>
-                    {(comment.user.username || 'User').substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="font-medium">{comment.user.username || 'Anonymous User'}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
-                    </p>
-                  </div>
-                  <p className="text-sm">{comment.content}</p>
-                </div>
-              </div>
-            </div>
-          ))
+      <div className="space-y-4">
+        <h3 className="font-semibold text-lg">Discussion ({comments.length})</h3>
+        
+        {comments.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            Be the first to start a discussion about this course!
+          </div>
         ) : (
-          <div className="text-center py-8 border rounded-lg">
-            <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="font-medium mb-1">No comments yet</h3>
-            <p className="text-muted-foreground">Be the first to share your thoughts on this course</p>
+          <div className="space-y-4">
+            {comments.map((comment) => (
+              <div key={comment.id} className="border rounded-lg p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <Avatar>
+                    <AvatarImage src={comment.user_avatar} />
+                    <AvatarFallback>
+                      {comment.user_name?.substring(0, 2).toUpperCase() || 'UN'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="font-medium">{comment.user_name}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {formatDate(comment.created_at)}
+                    </div>
+                  </div>
+                </div>
+                <Separator className="my-3" />
+                <p className="text-sm">{comment.content}</p>
+              </div>
+            ))}
           </div>
         )}
       </div>
