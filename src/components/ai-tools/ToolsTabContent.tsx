@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { AIToolItem } from '@/data/ai-tools-tiers';
+import { AIToolItem, AIToolTier } from '@/data/ai-tools-tiers';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import AIToolCard from '@/components/ai-tools/AIToolCard';
 import { Spinner } from '@/components/ui/spinner';

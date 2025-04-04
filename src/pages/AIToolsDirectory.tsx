@@ -33,7 +33,7 @@ const AIToolsDirectory = () => {
   // State for filters
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
-  const [selectedTier, setSelectedTier] = useState(initialTier);
+  const [selectedTier, setSelectedTier] = useState<AIToolTier | 'all'>(initialTier);
   const [viewType, setViewType] = useState<'grid' | 'list'>(initialView);
   const [activeTab, setActiveTab] = useState(initialTabValue);
   

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { AIToolItem } from '@/data/ai-tools-tiers';
+import { AIToolItem, AIToolTier } from '@/data/ai-tools-tiers';
 import AIToolCard from '@/components/ai-tools/AIToolCard';
 import ToolsFilter from '@/components/ai-tools/ToolsFilter';
 import { Button } from '@/components/ui/button';
@@ -14,8 +14,8 @@ interface AllToolsTabProps {
   setSearchQuery: (query: string) => void;
   selectedCategory: string;
   setSelectedCategory: (category: string) => void;
-  selectedTier: string;
-  setSelectedTier: (tier: string) => void;
+  selectedTier: AIToolTier | 'all';
+  setSelectedTier: (tier: AIToolTier | 'all') => void;
   viewType: 'grid' | 'list';
   setViewType: (viewType: 'grid' | 'list') => void;
   totalTools: number;
