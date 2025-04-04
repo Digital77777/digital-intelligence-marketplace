@@ -1,130 +1,131 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Clock, 
-  Calendar, 
-  BookOpen, 
-  Award,
-  CheckCircle, 
-  BarChart,
-  Download
-} from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { Progress } from '@/components/ui/progress';
+import { Clock, Calendar, BarChart3, CheckCircle, BookOpen, Award } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { toast } from '@/hooks/use-toast';
 
 interface CourseSidebarProps {
-  course: {
-    title: string;
-    description: string;
-    category: string;
-    difficulty: string;
-    duration: number;
-    image_url?: string;
-    created_at: string;
-  };
+  course: any;
   progress: number;
   onMarkComplete: () => void;
 }
 
-const CourseSidebar: React.FC<CourseSidebarProps> = ({
-  course,
-  progress,
-  onMarkComplete
-}) => {
+const CourseSidebar: React.FC<CourseSidebarProps> = ({ course, progress, onMarkComplete }) => {
+  const isCompleted = progress === 100;
+  
+  const handleCertificateClick = () => {
+    // In a real application, this would generate or display the certificate
+    toast({
+      title: "Certificate Generated",
+      description: "Your certificate has been generated and added to your profile.",
+    });
+  };
+  
   return (
     <div className="space-y-6">
-      {/* Course image */}
-      <div className="aspect-video w-full rounded-lg overflow-hidden bg-muted">
-        {course.image_url ? (
-          <img 
-            src={course.image_url} 
-            alt={course.title}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full bg-gradient-to-br from-primary/20 to-primary/5">
-            <BookOpen className="h-12 w-12 text-primary/40" />
+      {/* Progress Card */}
+      <Card>
+        <CardHeader className="pb-3">
+          <h3 className="text-lg font-medium">Your Progress</h3>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-sm text-muted-foreground">
+                {progress}% complete
+              </span>
+              {isCompleted && (
+                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
+                  <CheckCircle className="mr-1 h-3 w-3" />
+                  Completed
+                </Badge>
+              )}
+            </div>
+            <Progress value={progress} className="h-2" />
+            
+            {!isCompleted && (
+              <Button 
+                className="w-full mt-2" 
+                onClick={onMarkComplete}
+              >
+                Mark as Complete
+              </Button>
+            )}
+            
+            {isCompleted && (
+              <Button 
+                variant="outline" 
+                className="w-full mt-2" 
+                onClick={handleCertificateClick}
+              >
+                <Award className="mr-2 h-4 w-4" />
+                Get Certificate
+              </Button>
+            )}
           </div>
-        )}
-      </div>
+        </CardContent>
+      </Card>
       
-      {/* Progress */}
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-medium">Progress</span>
-          <span className="text-sm font-medium">{progress}%</span>
-        </div>
-        <Progress value={progress} className="h-2" />
-        
-        {progress < 100 ? (
-          <Button 
-            onClick={onMarkComplete}
-            variant="outline" 
-            size="sm"
-            className="w-full mt-2"
-          >
-            <CheckCircle className="mr-2 h-4 w-4" /> Mark as Complete
-          </Button>
-        ) : (
-          <Badge variant="secondary" className="w-full flex items-center justify-center mt-2 py-1 bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
-            <CheckCircle className="mr-2 h-4 w-4" /> Completed
-          </Badge>
-        )}
-      </div>
-      
-      {/* Course details */}
-      <div className="space-y-4 border-t border-b py-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <div className="flex items-center text-sm text-muted-foreground mb-1">
-              <Clock className="h-3.5 w-3.5 mr-1.5" />
+      {/* Course Info Card */}
+      <Card>
+        <CardHeader className="pb-3">
+          <h3 className="text-lg font-medium">Course Information</h3>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center text-sm">
+              <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
               Duration
             </div>
-            <div className="font-medium">{course.duration} mins</div>
+            <span className="font-medium">{course.duration} minutes</span>
           </div>
-          <div>
-            <div className="flex items-center text-sm text-muted-foreground mb-1">
-              <Calendar className="h-3.5 w-3.5 mr-1.5" />
-              Added
+          
+          <div className="flex items-center justify-between">
+            <div className="flex items-center text-sm">
+              <BarChart3 className="h-4 w-4 mr-2 text-muted-foreground" />
+              Difficulty
             </div>
-            <div className="font-medium">
-              {formatDistanceToNow(new Date(course.created_at), { addSuffix: true })}
+            <Badge variant="secondary">
+              {course.difficulty}
+            </Badge>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div className="flex items-center text-sm">
+              <BookOpen className="h-4 w-4 mr-2 text-muted-foreground" />
+              Category
+            </div>
+            <Badge>
+              {course.category}
+            </Badge>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div className="flex items-center text-sm">
+              <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+              Last Updated
+            </div>
+            <span className="text-sm text-muted-foreground">
+              {new Date(course.updated_at).toLocaleDateString()}
+            </span>
+          </div>
+        </CardContent>
+        <Separator />
+        <CardFooter className="pt-4">
+          <div className="w-full">
+            <h4 className="text-sm font-medium mb-2">Share this course</h4>
+            <div className="flex space-x-2">
+              <Button variant="outline" size="sm" className="flex-1">
+                Copy Link
+              </Button>
             </div>
           </div>
-        </div>
-        
-        <div>
-          <div className="flex items-center text-sm text-muted-foreground mb-1">
-            <BarChart className="h-3.5 w-3.5 mr-1.5" />
-            Difficulty
-          </div>
-          <Badge variant="outline" className="bg-muted/50">
-            {course.difficulty}
-          </Badge>
-        </div>
-        
-        <div>
-          <div className="flex items-center text-sm text-muted-foreground mb-1">
-            <BookOpen className="h-3.5 w-3.5 mr-1.5" />
-            Category
-          </div>
-          <Badge variant="outline" className="bg-muted/50">
-            {course.category}
-          </Badge>
-        </div>
-      </div>
-      
-      {/* Actions */}
-      <div className="flex flex-col gap-2">
-        <Button variant="outline" size="sm" className="w-full">
-          <Download className="mr-2 h-4 w-4" /> Download Materials
-        </Button>
-        <Button variant="outline" size="sm" className="w-full">
-          <Award className="mr-2 h-4 w-4" /> View Certificate
-        </Button>
-      </div>
+        </CardFooter>
+      </Card>
     </div>
   );
 };

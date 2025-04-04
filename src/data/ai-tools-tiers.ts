@@ -60,7 +60,8 @@ export const toolCategories = [
 export interface ToolCategoryInfo {
   id: string;
   name: string;
-  icon: string;
+  icon: React.ReactNode;
+  description?: string;
 }
 
 export const aiTools: AIToolItem[] = [

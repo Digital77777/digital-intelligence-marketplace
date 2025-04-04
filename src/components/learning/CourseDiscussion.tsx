@@ -32,15 +32,26 @@ const CourseDiscussion: React.FC<CourseDiscussionProps> = ({ courseId }) => {
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        // Use the comments table from a join instead of a non-existent table
+        // Use the course_feedback table which exists in the database
         const { data, error } = await supabase
-          .from('course_comments') // Using an existing table
+          .from('course_feedback')
           .select('*')
-          .eq('course_id', courseId)
+          .eq('course_id', parseInt(courseId, 10))
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-        setComments(data || []);
+        
+        // Transform data to match our Comment interface
+        const formattedComments: Comment[] = (data || []).map(item => ({
+          id: item.id,
+          content: item.comment || '',
+          created_at: item.created_at || new Date().toISOString(),
+          user_id: item.user_id,
+          user_name: `User ${item.user_id.substring(0, 4)}`, // Generate a username since we don't have one
+          user_avatar: undefined
+        }));
+        
+        setComments(formattedComments);
       } catch (error) {
         console.error('Error fetching comments:', error);
         toast({
@@ -79,13 +90,13 @@ const CourseDiscussion: React.FC<CourseDiscussionProps> = ({ courseId }) => {
 
     try {
       const { data, error } = await supabase
-        .from('course_comments') // Using an existing table
+        .from('course_feedback')
         .insert({
-          course_id: courseId,
+          course_id: parseInt(courseId, 10),
           user_id: user.id,
-          content: newComment,
-          user_name: user.name || user.email?.split('@')[0] || 'Anonymous',
-          created_at: new Date().toISOString(),
+          comment: newComment,
+          rating: 5, // Default rating since it's required in the table
+          created_at: new Date().toISOString()
         })
         .select();
 
@@ -93,7 +104,16 @@ const CourseDiscussion: React.FC<CourseDiscussionProps> = ({ courseId }) => {
 
       // Add the new comment to the list
       if (data && data[0]) {
-        setComments([data[0], ...comments]);
+        const newCommentObj: Comment = {
+          id: data[0].id,
+          content: data[0].comment || '',
+          created_at: data[0].created_at,
+          user_id: data[0].user_id,
+          user_name: user.email?.split('@')[0] || 'Anonymous',
+          user_avatar: undefined
+        };
+        
+        setComments([newCommentObj, ...comments]);
         setNewComment('');
         toast({
           title: "Comment posted",

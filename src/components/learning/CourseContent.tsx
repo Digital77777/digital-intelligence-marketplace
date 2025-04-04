@@ -23,7 +23,7 @@ const CourseContent: React.FC<CourseContentProps> = ({ content, onProgressUpdate
     if (readSections.length > 0) {
       onProgressUpdate(progress);
     }
-  }, [readSections]);
+  }, [readSections, sections.length, onProgressUpdate]);
   
   const markSectionAsRead = (index: number) => {
     if (!readSections.includes(index)) {

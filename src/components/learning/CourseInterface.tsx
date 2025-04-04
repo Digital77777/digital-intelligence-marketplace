@@ -28,11 +28,12 @@ const CourseInterface = () => {
       try {
         if (!courseId) return;
 
-        // Fetch course data
+        // Fetch course data - ensure courseId is parsed as number if needed
+        const numericCourseId = parseInt(courseId, 10);
         const { data: courseData, error: courseError } = await supabase
           .from('courses')
           .select('*')
-          .eq('id', courseId)
+          .eq('id', numericCourseId)
           .single();
 
         if (courseError) throw courseError;
@@ -45,7 +46,7 @@ const CourseInterface = () => {
           const { data: progressData, error: progressError } = await supabase
             .from('user_progress')
             .select('*')
-            .eq('course_id', courseId)
+            .eq('course_id', numericCourseId)
             .eq('user_id', user.id)
             .single();
 
@@ -77,12 +78,13 @@ const CourseInterface = () => {
     try {
       // Update progress to 100%
       const newProgress = 100;
+      const numericCourseId = parseInt(courseId!, 10);
       
       const { data, error } = await supabase
         .from('user_progress')
         .upsert({
           user_id: user.id,
-          course_id: courseId,
+          course_id: numericCourseId,
           completion_percent: newProgress,
           last_accessed: new Date().toISOString()
         }, {
@@ -152,7 +154,7 @@ const CourseInterface = () => {
             </TabsList>
             
             <TabsContent value="content">
-              <CourseContent course={course} />
+              <CourseContent content={course.content} onProgressUpdate={(progress) => setProgress(progress)} />
             </TabsContent>
             
             <TabsContent value="discussion">
@@ -160,7 +162,7 @@ const CourseInterface = () => {
             </TabsContent>
             
             <TabsContent value="resources">
-              <CourseResources course={course} />
+              <CourseResources resources={course.resources || []} title={course.title} />
             </TabsContent>
           </Tabs>
         </div>
