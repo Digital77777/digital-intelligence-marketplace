@@ -38,8 +38,9 @@ const CourseDiscussion: React.FC<CourseDiscussionProps> = ({ courseId }) => {
   const fetchComments = async () => {
     setIsLoading(true);
     try {
+      // Using forum_replies table instead since course_discussions doesn't exist
       const { data, error } = await supabase
-        .from('course_discussions')
+        .from('forum_replies')
         .select(`
           id,
           content,
@@ -50,7 +51,7 @@ const CourseDiscussion: React.FC<CourseDiscussionProps> = ({ courseId }) => {
             avatar_url
           )
         `)
-        .eq('course_id', courseId)
+        .eq('topic_id', courseId)
         .order('created_at', { ascending: false });
         
       if (error) throw error;
@@ -86,11 +87,12 @@ const CourseDiscussion: React.FC<CourseDiscussionProps> = ({ courseId }) => {
     try {
       setIsSubmitting(true);
       
+      // Using forum_replies table instead
       const { error } = await supabase
-        .from('course_discussions')
+        .from('forum_replies')
         .insert({
           content: newComment,
-          course_id: courseId,
+          topic_id: courseId,
           user_id: user.id
         });
         

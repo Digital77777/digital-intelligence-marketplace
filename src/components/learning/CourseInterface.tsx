@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTier } from '@/context/TierContext';
@@ -86,6 +85,11 @@ const CourseInterface = () => {
           
         if (courseError) throw courseError;
         data = courseData;
+      }
+      
+      // Ensure data.id is a string since that's what our interface expects
+      if (data && typeof data.id === 'number') {
+        data.id = String(data.id);
       }
       
       setCourse(data);

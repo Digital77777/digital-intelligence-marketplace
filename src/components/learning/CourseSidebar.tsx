@@ -68,7 +68,7 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
             <CheckCircle className="mr-2 h-4 w-4" /> Mark as Complete
           </Button>
         ) : (
-          <Badge variant="success" className="w-full flex items-center justify-center mt-2 py-1 bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
+          <Badge variant="secondary" className="w-full flex items-center justify-center mt-2 py-1 bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
             <CheckCircle className="mr-2 h-4 w-4" /> Completed
           </Badge>
         )}
