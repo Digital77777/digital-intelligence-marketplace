@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { aiTools } from '@/data/ai-tools-tiers';
 
 type CoreTool = {
   id: number;
@@ -105,11 +106,18 @@ const AITools = () => {
   const { currentTier } = useTier();
   const navigate = useNavigate();
   
+  // Get the freemium tools from aiTools array
+  const freemiumTools = aiTools.filter(tool => tool.tier === 'freemium').slice(0, 5);
+  
   const handleViewAllTools = () => {
     navigate('/marketplace');
   };
   
   const handleToolClick = (id: number) => {
+    navigate(`/tool/${id}`);
+  };
+  
+  const handleFreemiumToolClick = (id: string) => {
     navigate(`/tool/${id}`);
   };
   
@@ -188,6 +196,64 @@ const AITools = () => {
                     </CardFooter>
                   </Card>
                 ))}
+              </div>
+              
+              {/* Added section for freemium tools from the directory */}
+              <div className="mt-8">
+                <h2 className="text-2xl font-semibold mb-4">Featured Freemium Tools</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {freemiumTools.map((tool) => (
+                    <Card key={tool.id} className="overflow-hidden hover:shadow-md transition-shadow border group">
+                      <CardHeader className="pb-2">
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-center gap-3">
+                            <div className="text-3xl">{tool.icon}</div>
+                            <CardTitle className="text-lg">{tool.name}</CardTitle>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pb-2">
+                        <p className="text-muted-foreground mb-3">{tool.description}</p>
+                        
+                        {tool.use_cases && tool.use_cases.length > 0 && (
+                          <div className="mb-3">
+                            <h4 className="text-sm font-medium mb-1">Use Cases:</h4>
+                            <div className="flex flex-wrap gap-1">
+                              {tool.use_cases.map((useCase, index) => (
+                                <Badge key={index} variant="secondary" className="mr-1 mb-1">
+                                  {useCase}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {tool.rationale && (
+                          <div>
+                            <h4 className="text-sm font-medium mb-1">Why It Matters:</h4>
+                            <p className="text-sm text-muted-foreground">{tool.rationale}</p>
+                          </div>
+                        )}
+                      </CardContent>
+                      <CardFooter className="pt-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => handleFreemiumToolClick(tool.id)}
+                        >
+                          <ExternalLink size={16} className="mr-2" /> Explore Tool
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  ))}
+                </div>
+                
+                <div className="mt-6 text-center">
+                  <Button onClick={() => navigate('/ai-tools-directory')} variant="outline">
+                    View All Freemium Tools <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
               </div>
               
               <div className="mt-10 p-6 bg-primary/5 rounded-lg border border-primary/20">
