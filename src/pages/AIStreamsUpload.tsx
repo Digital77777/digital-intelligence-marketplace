@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -18,7 +17,7 @@ import { Upload, FileVideo, ChevronRight } from 'lucide-react';
 import LoadingIndicator from '@/components/ui/loading-indicator';
 
 const AIStreamsUpload = () => {
-  const { user } = useUser();
+  const { user, profile } = useUser();
   const { currentTier } = useTier();
   const navigate = useNavigate();
   
@@ -99,8 +98,8 @@ const AIStreamsUpload = () => {
         is_flagged: false,
         author: {
           id: user.id,
-          username: user.username || user.email.split('@')[0],
-          avatar_url: user.avatar_url
+          username: profile?.username || user.email?.split('@')[0] || 'Anonymous',
+          avatar_url: profile?.avatar_url
         }
       };
       
