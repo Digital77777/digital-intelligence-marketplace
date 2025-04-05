@@ -9,10 +9,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { AIToolItem, getTierBadgeColor, getTierIcon, getTierLabel } from '@/data/ai-tools-tiers';
-import { Check, ExternalLink, Info, Lock } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Check, Info, Lock } from 'lucide-react';
 import { useTier } from '@/context/TierContext';
 import {
   Tooltip,
@@ -20,6 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import ToolActionButton from './ToolActionButton';
 
 interface AIToolCardProps {
   tool: AIToolItem;
@@ -28,30 +27,14 @@ interface AIToolCardProps {
 }
 
 const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect }) => {
-  const navigate = useNavigate();
-  const { currentTier, upgradePrompt } = useTier();
+  const { currentTier } = useTier();
   
-  // Updated access logic to ensure proper tier access:
-  // - Freemium users can access only freemium tools
-  // - Basic users can access basic and freemium tools
-  // - Pro users can access all tools (pro, basic, freemium)
+  // Access logic to ensure proper tier access
   const hasAccess = (
     (tool.tier === 'freemium') || 
     (tool.tier === 'basic' && (currentTier === 'basic' || currentTier === 'pro')) ||
     (tool.tier === 'pro' && currentTier === 'pro')
   );
-
-  const handleToolAction = () => {
-    if (hasAccess) {
-      if (onSelect) {
-        onSelect(tool);
-      } else {
-        navigate(`/tool/${tool.id}`);
-      }
-    } else {
-      upgradePrompt(tool.tier);
-    }
-  };
 
   if (compact) {
     return (
@@ -69,16 +52,20 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
             <span>{getTierLabel(tool.tier)}</span>
           </Badge>
         </div>
-        <div className="px-4 pb-4">
-          <Button
-            variant={hasAccess ? "default" : "outline"}
-            size="sm"
-            className="w-full"
-            onClick={handleToolAction}
-          >
-            {hasAccess ? "Use Tool" : `Upgrade to ${getTierLabel(tool.tier)}`}
-            {hasAccess ? <ExternalLink className="h-3.5 w-3.5 ml-1.5" /> : <Lock className="h-3.5 w-3.5 ml-1.5" />}
-          </Button>
+        <div className="px-4 pb-4 flex gap-2">
+          <ToolActionButton
+            tool={tool}
+            compact={true}
+            action="view"
+            className="flex-1"
+          />
+          <ToolActionButton
+            tool={tool}
+            compact={true}
+            action="launch"
+            onSelect={onSelect}
+            className="flex-1"
+          />
         </div>
       </Card>
     );
@@ -150,15 +137,20 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
             </Tooltip>
           </TooltipProvider>
           
-          <Button
-            variant={hasAccess ? "default" : "outline"}
-            size="sm"
-            onClick={handleToolAction}
-            className="gap-1.5"
-          >
-            {hasAccess ? (onSelect ? "Launch Tool" : "View Details") : `Upgrade to ${getTierLabel(tool.tier)}`}
-            {hasAccess ? <ExternalLink className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
-          </Button>
+          <div className="flex gap-2">
+            <ToolActionButton 
+              tool={tool}
+              action="view"
+              size="sm"
+              variant="outline"
+            />
+            <ToolActionButton 
+              tool={tool}
+              action="launch"
+              size="sm"
+              onSelect={onSelect}
+            />
+          </div>
         </div>
       </CardFooter>
     </Card>

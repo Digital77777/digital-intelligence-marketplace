@@ -40,3 +40,17 @@ export const formatDate = (dateString: string): string => {
     day: 'numeric'
   }).format(date);
 };
+
+// Added tool utils
+export const getToolAccessText = (toolTier: string, userTier: string): string => {
+  if (toolTier === 'freemium') return 'Available to all users';
+  if (toolTier === 'basic') {
+    if (userTier === 'basic' || userTier === 'pro') return 'Available with your subscription';
+    return 'Requires Basic subscription';
+  }
+  if (toolTier === 'pro') {
+    if (userTier === 'pro') return 'Available with your subscription';
+    return 'Requires Pro subscription';
+  }
+  return 'Subscription required';
+};
