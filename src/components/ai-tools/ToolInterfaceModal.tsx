@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useTier } from '@/context/TierContext';
 import { toast } from 'sonner';
 import { Loader2, Rocket, Lock } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ToolInterfaceModalProps {
   open: boolean;
@@ -29,14 +30,14 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
   const { currentTier, upgradePrompt } = useTier();
   const [loading, setLoading] = useState(false);
   const [launched, setLaunched] = useState(false);
+  const isMobile = useIsMobile();
   
   if (!tool) {
     return null;
   }
   
   // Check if user can access this tool based on tier
-  // Updated access logic to match AIToolCard component
-  const canAccessTool = () => {
+  const canAccessTool = useCallback(() => {
     switch (tool.tier) {
       case 'freemium': 
         return true; // All users can access freemium tools
@@ -47,7 +48,7 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
       default:
         return false;
     }
-  };
+  }, [tool.tier, currentTier]);
   
   const handleLaunchTool = () => {
     if (!canAccessTool()) {
@@ -153,14 +154,14 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className={`${isMobile ? 'max-w-[95%]' : 'sm:max-w-2xl'}`}>
         <DialogHeader>
-          <div className="flex items-start justify-between">
+          <div className="flex items-start justify-between flex-wrap gap-2">
             <div>
               <DialogTitle className="text-xl">{tool?.name}</DialogTitle>
               <DialogDescription className="mt-1.5 text-sm">{tool?.description}</DialogDescription>
             </div>
-            <Badge className={`${getTierColor()} ml-2`}>
+            <Badge className={`${getTierColor()} ${isMobile ? 'mr-0' : 'ml-2'}`}>
               {getTierLabel()}
             </Badge>
           </div>

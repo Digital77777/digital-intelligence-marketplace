@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { TierProvider } from '@/context/TierContext';
 import { UserProvider } from '@/context/UserContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import ErrorBoundary from '@/components/ErrorBoundary';
 // Pages
 import Home from '@/pages/Home';
 import Pricing from '@/pages/Pricing';
@@ -21,37 +22,60 @@ import TopicDetails from '@/pages/TopicDetails';
 import NewTopic from '@/pages/NewTopic';
 import NewGroup from '@/pages/NewGroup';
 
-// Create a client
-const queryClient = new QueryClient();
+// Create a client with better error handling, retry logic, and caching
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+      staleTime: 60000, // 1 minute
+      gcTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false,
+      refetchOnMount: true,
+      onError: (error) => {
+        console.error('Query error:', error);
+        // You could also report to an error tracking service here
+      },
+    },
+    mutations: {
+      onError: (error) => {
+        console.error('Mutation error:', error);
+        // You could also report to an error tracking service here
+      }
+    },
+  },
+});
 
 export default function App() {
   return (
-    <ThemeProvider defaultTheme="light" storageKey="ui-theme">
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <TierProvider>
-            <UserProvider>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/pricing" element={<Pricing />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/ai-tools" element={<AITools />} />
-                <Route path="/ai-tools-directory" element={<AIToolsDirectory />} />
-                <Route path="/tool/:id" element={<ToolDetails />} />
-                <Route path="/learning-hub" element={<LearningHub />} />
-                <Route path="/learning/:courseId" element={<CourseDetails />} />
-                <Route path="/marketplace" element={<Marketplace />} />
-                <Route path="/community" element={<CommunityForums />} />
-                <Route path="/forums" element={<CommunityForums />} /> {/* Added forums route to redirect to CommunityForums */}
-                <Route path="/community/topic/:topicId" element={<TopicDetails />} />
-                <Route path="/community/new-topic/:categoryId" element={<NewTopic />} />
-                <Route path="/community/new-group" element={<NewGroup />} />
-              </Routes>
-            </UserProvider>
-          </TierProvider>
-        </BrowserRouter>
-      </QueryClientProvider>
+    <ErrorBoundary>
+      <ThemeProvider defaultTheme="light" storageKey="ui-theme">
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <TierProvider>
+              <UserProvider>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/pricing" element={<Pricing />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/ai-tools" element={<AITools />} />
+                  <Route path="/ai-tools-directory" element={<AIToolsDirectory />} />
+                  <Route path="/tool/:id" element={<ToolDetails />} />
+                  <Route path="/learning-hub" element={<LearningHub />} />
+                  <Route path="/learning/:courseId" element={<CourseDetails />} />
+                  <Route path="/marketplace" element={<Marketplace />} />
+                  <Route path="/community" element={<CommunityForums />} />
+                  <Route path="/forums" element={<CommunityForums />} /> 
+                  <Route path="/community/topic/:topicId" element={<TopicDetails />} />
+                  <Route path="/community/new-topic/:categoryId" element={<NewTopic />} />
+                  <Route path="/community/new-group" element={<NewGroup />} />
+                </Routes>
+              </UserProvider>
+            </TierProvider>
+          </BrowserRouter>
+        </QueryClientProvider>
+      </ThemeProvider>
       <Toaster />
-    </ThemeProvider>
+    </ErrorBoundary>
   );
 }

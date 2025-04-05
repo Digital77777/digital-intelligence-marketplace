@@ -1,7 +1,7 @@
 
 import { ZodError, ZodSchema } from 'zod';
 
-// Generic form validation helper
+// Generic form validation helper with improved error handling
 export const validateForm = <T>(
   schema: ZodSchema<T>,
   data: unknown
@@ -33,47 +33,73 @@ export const validateForm = <T>(
   }
 };
 
-// HTML sanitization function to prevent XSS attacks
+// Enhanced HTML sanitization function to prevent XSS attacks
 export const sanitizeHtml = (html: string): string => {
-  // Basic XSS prevention by removing script tags and on* attributes
+  if (!html) return '';
+  
+  // More comprehensive XSS prevention
   return html
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
     .replace(/on\w+="[^"]*"/gi, '')
     .replace(/on\w+='[^']*'/gi, '')
-    .replace(/on\w+=\w+/gi, '');
+    .replace(/on\w+=\w+/gi, '')
+    .replace(/javascript:/gi, 'removed:')
+    .replace(/data:/gi, 'removed:')
+    .replace(/vbscript:/gi, 'removed:');
 };
 
-// Function to escape user input to prevent SQL injection
+// Enhanced function to escape user input to prevent SQL injection
 export const escapeInput = (input: string): string => {
-  if (!input) return input;
+  if (!input) return '';
   
   return input
     .replace(/'/g, "''") // Escape single quotes
-    .replace(/\\/g, '\\\\'); // Escape backslashes
+    .replace(/\\/g, '\\\\') // Escape backslashes
+    .replace(/\u0000/g, '') // Remove null bytes
+    .replace(/\x00/g, '') // Remove hex null bytes
+    .replace(/\x1a/g, ''); // Remove substitute characters
 };
 
-// Security helper to prevent prototype pollution
+// Security helper to prevent prototype pollution with more checks
 export const safelyParseJSON = (json: string): unknown => {
   try {
-    const parsed = JSON.parse(json);
-    
-    // If it's an object, freeze it to prevent modification
-    if (parsed && typeof parsed === 'object') {
-      return Object.freeze(parsed);
+    if (typeof json !== 'string') {
+      return null;
     }
     
-    return parsed;
+    // Basic check for potential dangerous patterns
+    if (/^[\],:{}\s]*$/.test(json.replace(/\\["\\\/bfnrtu]/g, '@')
+      .replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']')
+      .replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
+      
+      const parsed = JSON.parse(json);
+      
+      // If it's an object, freeze it to prevent modification
+      if (parsed && typeof parsed === 'object') {
+        return Object.freeze(parsed);
+      }
+      
+      return parsed;
+    }
+    
+    return null;
   } catch (e) {
     console.error('Failed to parse JSON:', e);
     return null;
   }
 };
 
-// Helper to safely update localStorage
+// Enhanced helper to safely update localStorage with error handling and data validation
 export const safeStorage = {
-  set: (key: string, value: unknown): void => {
+  set: (key: string, value: unknown, expiresInMinutes?: number): void => {
     try {
-      const serialized = JSON.stringify(value);
+      // Add expiration functionality
+      const data = expiresInMinutes
+        ? { value, expires: Date.now() + expiresInMinutes * 60 * 1000 }
+        : { value };
+        
+      const serialized = JSON.stringify(data);
       localStorage.setItem(key, serialized);
     } catch (e) {
       console.error('Error saving to localStorage:', e);
@@ -84,7 +110,16 @@ export const safeStorage = {
     try {
       const serialized = localStorage.getItem(key);
       if (serialized === null) return defaultValue;
-      return safelyParseJSON(serialized) as T;
+      
+      const data = safelyParseJSON(serialized) as { value: T; expires?: number } | null;
+      
+      // Check if data has expired
+      if (data && data.expires && Date.now() > data.expires) {
+        localStorage.removeItem(key);
+        return defaultValue;
+      }
+      
+      return data?.value ?? defaultValue;
     } catch (e) {
       console.error('Error reading from localStorage:', e);
       return defaultValue;
@@ -97,5 +132,60 @@ export const safeStorage = {
     } catch (e) {
       console.error('Error removing from localStorage:', e);
     }
+  },
+  
+  // Add method to check if item exists
+  has: (key: string): boolean => {
+    try {
+      return localStorage.getItem(key) !== null;
+    } catch (e) {
+      console.error('Error checking localStorage:', e);
+      return false;
+    }
+  },
+  
+  // Add method to clear expired items
+  clearExpired: (): void => {
+    try {
+      Object.keys(localStorage).forEach(key => {
+        const serialized = localStorage.getItem(key);
+        if (serialized) {
+          const data = safelyParseJSON(serialized) as { expires?: number } | null;
+          if (data?.expires && Date.now() > data.expires) {
+            localStorage.removeItem(key);
+          }
+        }
+      });
+    } catch (e) {
+      console.error('Error clearing expired localStorage items:', e);
+    }
   }
+};
+
+// Add function to debounce user input for better performance
+export const debounce = <F extends (...args: any[]) => any>(func: F, waitFor: number) => {
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+
+  return (...args: Parameters<F>): void => {
+    if (timeout !== null) {
+      clearTimeout(timeout);
+    }
+    
+    timeout = setTimeout(() => func(...args), waitFor);
+  };
+};
+
+// Add function to throttle frequent events
+export const throttle = <F extends (...args: any[]) => any>(func: F, limit: number) => {
+  let inThrottle: boolean = false;
+  
+  return (...args: Parameters<F>): void => {
+    if (!inThrottle) {
+      func(...args);
+      inThrottle = true;
+      setTimeout(() => {
+        inThrottle = false;
+      }, limit);
+    }
+  };
 };
