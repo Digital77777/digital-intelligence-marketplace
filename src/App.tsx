@@ -21,6 +21,7 @@ import CommunityForums from '@/pages/CommunityForums';
 import TopicDetails from '@/pages/TopicDetails';
 import NewTopic from '@/pages/NewTopic';
 import NewGroup from '@/pages/NewGroup';
+import AIStreamsUpload from '@/pages/AIStreamsUpload';
 
 // Create a client with better error handling, retry logic, and caching
 const queryClient = new QueryClient({
@@ -32,16 +33,20 @@ const queryClient = new QueryClient({
       gcTime: 5 * 60 * 1000, // 5 minutes
       refetchOnWindowFocus: false,
       refetchOnMount: true,
-      onError: (error) => {
-        console.error('Query error:', error);
-        // You could also report to an error tracking service here
+      meta: {
+        onError: (error) => {
+          console.error('Query error:', error);
+          // You could also report to an error tracking service here
+        },
       },
     },
     mutations: {
-      onError: (error) => {
-        console.error('Mutation error:', error);
-        // You could also report to an error tracking service here
-      }
+      meta: {
+        onError: (error) => {
+          console.error('Mutation error:', error);
+          // You could also report to an error tracking service here
+        }
+      },
     },
   },
 });
@@ -69,6 +74,7 @@ export default function App() {
                   <Route path="/community/topic/:topicId" element={<TopicDetails />} />
                   <Route path="/community/new-topic/:categoryId" element={<NewTopic />} />
                   <Route path="/community/new-group" element={<NewGroup />} />
+                  <Route path="/ai-streams/upload" element={<AIStreamsUpload />} />
                 </Routes>
               </UserProvider>
             </TierProvider>

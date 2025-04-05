@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -13,8 +13,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTier } from '@/context/TierContext';
 import { toast } from 'sonner';
-import { Loader2, Rocket, Lock } from 'lucide-react';
+import { Loader2, Rocket, Lock, Info, Package, Grid3X3, Code, ExternalLink } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 
 interface ToolInterfaceModalProps {
   open: boolean;
@@ -30,7 +32,17 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
   const { currentTier, upgradePrompt } = useTier();
   const [loading, setLoading] = useState(false);
   const [launched, setLaunched] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
   const isMobile = useIsMobile();
+  
+  // Reset state when modal closes or tool changes
+  useEffect(() => {
+    if (!open) {
+      setLaunched(false);
+      setLoading(false);
+      setActiveTab('overview');
+    }
+  }, [open, tool]);
   
   if (!tool) {
     return null;
@@ -57,6 +69,7 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
     }
     
     setLoading(true);
+    setActiveTab('interface');
     
     // Simulate launching the tool
     setTimeout(() => {
@@ -151,6 +164,89 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
       </div>
     );
   };
+
+  const renderOverview = () => {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-lg font-medium mb-2">Description</h3>
+          <p className="text-foreground/80">{tool.description}</p>
+        </div>
+        
+        {tool.rationale && (
+          <div>
+            <h3 className="text-lg font-medium mb-2">Why Use This Tool</h3>
+            <p className="text-foreground/80">{tool.rationale}</p>
+          </div>
+        )}
+        
+        {tool.usageLimit && (
+          <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
+            <Info className="h-5 w-5 text-primary shrink-0" />
+            <p className="text-sm">{tool.usageLimit}</p>
+          </div>
+        )}
+        
+        {tool.use_cases && tool.use_cases.length > 0 && (
+          <div>
+            <h3 className="text-lg font-medium mb-2">Use Cases</h3>
+            <ul className="space-y-2">
+              {tool.use_cases.map((useCase, index) => (
+                <li key={index} className="flex items-start">
+                  <div className="mr-2 mt-1 text-primary">•</div>
+                  <p>{useCase}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        
+        {tool.uniqueSellingPoint && (
+          <div className="p-4 bg-primary/10 rounded-lg">
+            <h3 className="text-lg font-medium mb-2">Unique Selling Point</h3>
+            <p className="text-foreground/80">{tool.uniqueSellingPoint}</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+  
+  const renderIntegrations = () => {
+    if (!tool.integrations || tool.integrations.length === 0) {
+      return (
+        <div className="p-8 text-center text-muted-foreground">
+          <Package className="h-12 w-12 mx-auto mb-3 opacity-50" />
+          <p>No integrations available for this tool</p>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="space-y-6">
+        <h3 className="text-lg font-medium">Available Integrations</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {tool.integrations.map((integration, index) => (
+            <div 
+              key={index} 
+              className="border rounded-lg p-3 flex flex-col items-center justify-center text-center hover:bg-muted/50 transition-colors"
+            >
+              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mb-2">
+                <Code className="h-5 w-5 text-primary" />
+              </div>
+              <p className="text-sm font-medium">{integration}</p>
+            </div>
+          ))}
+        </div>
+        
+        <div className="bg-muted/30 p-4 rounded-lg text-sm">
+          <h4 className="font-medium mb-1">How integrations work</h4>
+          <p className="text-muted-foreground">
+            Integrations allow this tool to work with other software and services, expanding its capabilities and improving your workflow.
+          </p>
+        </div>
+      </div>
+    );
+  };
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -167,12 +263,42 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
           </div>
         </DialogHeader>
         
-        {renderToolInterface()}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid grid-cols-3 mb-4">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="integrations">Integrations</TabsTrigger>
+            <TabsTrigger value="interface">Interface</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="overview">
+            {renderOverview()}
+          </TabsContent>
+          
+          <TabsContent value="integrations">
+            {renderIntegrations()}
+          </TabsContent>
+          
+          <TabsContent value="interface">
+            {renderToolInterface()}
+          </TabsContent>
+        </Tabs>
+        
+        <Separator className="my-1" />
         
         <DialogFooter className="flex flex-col sm:flex-row gap-2">
           <div className="text-xs text-muted-foreground sm:mr-auto">
             Category: {tool.category}
           </div>
+          {activeTab !== "interface" && canAccessTool() && (
+            <Button 
+              variant="default" 
+              size="sm"
+              onClick={handleLaunchTool}
+              className="flex items-center gap-1.5"
+            >
+              <Rocket className="h-4 w-4" /> Launch Tool
+            </Button>
+          )}
           <Button 
             variant="outline" 
             size="sm"
