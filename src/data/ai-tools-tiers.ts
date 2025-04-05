@@ -54,7 +54,14 @@ export const toolCategories = [
   { id: 'marketing', name: 'Marketing', icon: '📊' },
   { id: 'video-editing', name: 'Video Editing', icon: '🎬' },
   { id: 'music', name: 'Music', icon: '🎵' },
-  { id: 'voice', name: 'Voice', icon: '🎤' }
+  { id: 'voice', name: 'Voice', icon: '🎤' },
+  { id: 'data-analysis', name: 'Data Analysis', icon: '📊' },
+  { id: 'automation', name: 'Automation', icon: '⚙️' },
+  { id: 'collaboration', name: 'Collaboration', icon: '👥' },
+  { id: 'machine-learning', name: 'Machine Learning', icon: '🧠' },
+  { id: 'seo', name: 'SEO', icon: '🔍' },
+  { id: 'ethics', name: 'AI Ethics', icon: '🛡️' },
+  { id: 'cloud', name: 'Cloud Integration', icon: '☁️' }
 ];
 
 export interface ToolCategoryInfo {
@@ -246,4 +253,292 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Vocaloid', 'Synthesia', 'Deep Voice'],
     demoAvailable: true
   },
+  {
+    id: '11',
+    name: 'InsightLite',
+    description: 'Basic data visualization and insights tool for small datasets.',
+    category: 'Data Analysis',
+    tier: 'freemium',
+    icon: '📊',
+    use_cases: [
+      'Visualize simple data trends',
+      'Create basic reports',
+      'Analyze small datasets'
+    ],
+    rationale: 'Makes data analysis accessible to everyone without technical skills.',
+    usageLimit: '5MB data limit',
+    uniqueSellingPoint: 'One-click insights from CSV and Excel files',
+    integrations: ['Excel', 'Google Sheets', 'CSV'],
+    demoAvailable: true
+  },
+  {
+    id: '12',
+    name: 'TaskBot Mini',
+    description: 'Simple task automation assistant for repetitive work.',
+    category: 'Automation',
+    tier: 'freemium',
+    icon: '🤖',
+    use_cases: [
+      'Automate data entry',
+      'Schedule reminders',
+      'Simple workflow automation'
+    ],
+    rationale: 'Save time on repetitive tasks without coding skills.',
+    usageLimit: '50 automated tasks per month',
+    uniqueSellingPoint: 'No-code automation for everyday tasks',
+    integrations: ['Gmail', 'Google Calendar', 'Trello'],
+    demoAvailable: true
+  },
+  {
+    id: '13',
+    name: 'CopyCraft Free',
+    description: 'Generate basic marketing copy and content ideas.',
+    category: 'Text Tools',
+    tier: 'freemium',
+    icon: '✍️',
+    use_cases: [
+      'Create social media captions',
+      'Write email subject lines',
+      'Generate blog ideas'
+    ],
+    rationale: 'Help small businesses create engaging content quickly.',
+    usageLimit: '500 words per day',
+    uniqueSellingPoint: 'AI-powered content inspiration for beginners',
+    integrations: ['WordPress', 'Buffer', 'Mailchimp'],
+    demoAvailable: true
+  },
+  {
+    id: '14',
+    name: 'AI Basic Simulator',
+    description: 'Simple AI concept simulator to understand machine learning basics.',
+    category: 'Machine Learning',
+    tier: 'freemium',
+    icon: '🧩',
+    use_cases: [
+      'Learn AI concepts',
+      'Visualize simple algorithms',
+      'Educational demonstrations'
+    ],
+    rationale: 'Makes AI concepts accessible to beginners and students.',
+    usageLimit: '10 simulations per day',
+    uniqueSellingPoint: 'Visual learning tool for AI fundamentals',
+    integrations: ['Educational platforms', 'Learning management systems'],
+    demoAvailable: true
+  },
+  {
+    id: '15',
+    name: 'Forum Assistant',
+    description: 'AI-powered forum moderation and response suggestion tool.',
+    category: 'Collaboration',
+    tier: 'freemium',
+    icon: '💬',
+    use_cases: [
+      'Auto-moderate comments',
+      'Suggest responses to questions',
+      'Summarize forum discussions'
+    ],
+    rationale: 'Helps community managers maintain healthy online discussions.',
+    usageLimit: '100 suggestions per day',
+    uniqueSellingPoint: 'Smart content moderation for small communities',
+    integrations: ['Discourse', 'Reddit', 'WordPress forums'],
+    demoAvailable: true
+  },
+  {
+    id: '16',
+    name: 'DataFlow Pro',
+    description: 'Advanced data processing and visualization platform.',
+    category: 'Data Analysis',
+    tier: 'basic',
+    icon: '📈',
+    use_cases: [
+      'Create interactive dashboards',
+      'Process large datasets',
+      'Generate business reports'
+    ],
+    rationale: 'Transform complex data into actionable insights.',
+    usageLimit: '50MB data processing',
+    uniqueSellingPoint: 'Drag-and-drop interface for complex data analysis',
+    integrations: ['SQL databases', 'CSV', 'Excel', 'Tableau'],
+    demoAvailable: true
+  },
+  {
+    id: '17',
+    name: 'AutoPilot Studio',
+    description: 'Comprehensive workflow automation suite for businesses.',
+    category: 'Automation',
+    tier: 'basic',
+    icon: '⚙️',
+    use_cases: [
+      'Create complex automations',
+      'Integrate multiple systems',
+      'Build custom workflows'
+    ],
+    rationale: 'Increase productivity through intelligent process automation.',
+    usageLimit: '1,000 automations per month',
+    uniqueSellingPoint: 'Visual workflow builder with conditional logic',
+    integrations: ['Salesforce', 'HubSpot', 'Zapier', 'Slack'],
+    demoAvailable: true
+  },
+  {
+    id: '18',
+    name: 'ModelMaker Lite',
+    description: 'User-friendly platform for creating and deploying AI models.',
+    category: 'Machine Learning',
+    tier: 'basic',
+    icon: '🧠',
+    use_cases: [
+      'Build custom classifiers',
+      'Train prediction models',
+      'Deploy ML solutions'
+    ],
+    rationale: 'Makes machine learning accessible to non-technical users.',
+    usageLimit: '5 active models',
+    uniqueSellingPoint: 'No-code ML model creation and deployment',
+    integrations: ['AWS', 'Google Cloud', 'Azure'],
+    demoAvailable: true
+  },
+  {
+    id: '19',
+    name: 'SEO Boost AI',
+    description: 'AI-powered SEO optimization and content enhancement.',
+    category: 'SEO',
+    tier: 'basic',
+    icon: '🔍',
+    use_cases: [
+      'Optimize website content',
+      'Analyze competitors',
+      'Generate SEO recommendations'
+    ],
+    rationale: 'Improve search rankings with AI-assisted optimization.',
+    usageLimit: '25 pages analyzed per day',
+    uniqueSellingPoint: 'Real-time content optimization suggestions',
+    integrations: ['WordPress', 'Shopify', 'Google Analytics'],
+    demoAvailable: false
+  },
+  {
+    id: '20',
+    name: 'TeamSync AI',
+    description: 'AI-enhanced team collaboration and project management.',
+    category: 'Collaboration',
+    tier: 'basic',
+    icon: '👥',
+    use_cases: [
+      'Automate meeting notes',
+      'Track project progress',
+      'Enhance team communication'
+    ],
+    rationale: 'Streamline team workflows and boost productivity.',
+    usageLimit: '10 team members',
+    uniqueSellingPoint: 'AI assistant for team coordination and task management',
+    integrations: ['Microsoft Teams', 'Slack', 'Asana', 'Trello'],
+    demoAvailable: true
+  },
+  {
+    id: '21',
+    name: 'Predictirix Enterprise',
+    description: 'Advanced predictive analytics and forecasting platform.',
+    category: 'Data Analysis',
+    tier: 'pro',
+    icon: '📉',
+    use_cases: [
+      'Forecast business trends',
+      'Predict customer behavior',
+      'Perform risk analysis'
+    ],
+    rationale: 'Make data-driven decisions with predictive intelligence.',
+    usageLimit: 'Unlimited data processing',
+    uniqueSellingPoint: 'Enterprise-grade predictive modeling with 99% accuracy',
+    integrations: ['SAP', 'Oracle', 'Salesforce', 'Tableau'],
+    demoAvailable: true
+  },
+  {
+    id: '22',
+    name: 'NeuroForge Pro',
+    description: 'Enterprise neural network design and deployment platform.',
+    category: 'Machine Learning',
+    tier: 'pro',
+    icon: '🧠',
+    use_cases: [
+      'Design custom neural networks',
+      'Train models on proprietary data',
+      'Deploy AI at scale'
+    ],
+    rationale: 'Build advanced AI systems without deep ML expertise.',
+    usageLimit: 'Unlimited models',
+    uniqueSellingPoint: 'Visual neural network architecture designer with performance optimization',
+    integrations: ['TensorFlow', 'PyTorch', 'CUDA', 'Cloud GPUs'],
+    demoAvailable: true
+  },
+  {
+    id: '23',
+    name: 'OmniFlow AI',
+    description: 'Enterprise-grade automation platform for complex workflows.',
+    category: 'Automation',
+    tier: 'pro',
+    icon: '⚙️',
+    use_cases: [
+      'Automate enterprise processes',
+      'Create complex decision systems',
+      'Build intelligent business operations'
+    ],
+    rationale: 'Transform business operations with intelligent automation.',
+    usageLimit: 'Unlimited automations',
+    uniqueSellingPoint: 'Advanced process mining and optimization with predictive capabilities',
+    integrations: ['SAP', 'Oracle', 'ServiceNow', 'Workday'],
+    demoAvailable: true
+  },
+  {
+    id: '24',
+    name: 'AI Marketplace Publisher',
+    description: 'Create and monetize your own AI models and applications.',
+    category: 'Development',
+    tier: 'pro',
+    icon: '🏪',
+    use_cases: [
+      'Publish custom AI solutions',
+      'Monetize AI models',
+      'Build AI application marketplace'
+    ],
+    rationale: 'Turn AI expertise into revenue streams.',
+    usageLimit: 'Unlimited publishing',
+    uniqueSellingPoint: 'End-to-end platform for AI model monetization and distribution',
+    integrations: ['Stripe', 'PayPal', 'AWS Marketplace', 'Docker'],
+    demoAvailable: false
+  },
+  {
+    id: '25',
+    name: 'EthicsGuard AI',
+    description: 'Enterprise AI governance and ethical compliance platform.',
+    category: 'Ethics',
+    tier: 'pro',
+    icon: '🛡️',
+    use_cases: [
+      'Monitor AI bias',
+      'Ensure ethical AI deployment',
+      'Generate compliance reports'
+    ],
+    rationale: 'Maintain ethical standards and regulatory compliance in AI systems.',
+    usageLimit: 'Unlimited monitoring',
+    uniqueSellingPoint: 'Comprehensive AI governance with regulatory compliance frameworks',
+    integrations: ['Custom AI systems', 'Cloud AI services', 'Enterprise data environments'],
+    demoAvailable: true
+  },
+  {
+    id: '26',
+    name: 'CloudBridge AI',
+    description: 'Enterprise AI integration platform for multi-cloud environments.',
+    category: 'Cloud',
+    tier: 'pro',
+    icon: '☁️',
+    use_cases: [
+      'Unify multi-cloud AI services',
+      'Orchestrate distributed AI workloads',
+      'Manage enterprise AI infrastructure'
+    ],
+    rationale: 'Simplify complex cloud AI deployments across providers.',
+    usageLimit: 'Unlimited connections',
+    uniqueSellingPoint: 'Seamless integration of AI services across AWS, Azure, and Google Cloud',
+    integrations: ['AWS', 'Azure', 'Google Cloud', 'IBM Cloud', 'Oracle Cloud'],
+    demoAvailable: false
+  }
 ];

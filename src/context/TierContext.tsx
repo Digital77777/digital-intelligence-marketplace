@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { toast } from 'sonner';
 
@@ -37,7 +36,7 @@ const tierFeaturesMap: Record<TierType, TierFeatures> = {
     maxTeamMembers: 1,
     maxProjects: 3,
     apiCallsLimit: 100,
-    toolAccess: 5,
+    toolAccess: 9,
     supportResponse: "Community support",
     storage: "500MB",
     analytics: false,
@@ -55,7 +54,7 @@ const tierFeaturesMap: Record<TierType, TierFeatures> = {
     maxTeamMembers: 10,
     maxProjects: 20,
     apiCallsLimit: 5000,
-    toolAccess: 10,
+    toolAccess: 17,
     supportResponse: "24-48 hours",
     storage: "10GB",
     analytics: true,
@@ -73,7 +72,7 @@ const tierFeaturesMap: Record<TierType, TierFeatures> = {
     maxTeamMembers: 50,
     maxProjects: 100,
     apiCallsLimit: 50000,
-    toolAccess: 50,
+    toolAccess: 26,
     supportResponse: "4-8 hours",
     storage: "100GB",
     analytics: true,
@@ -89,9 +88,7 @@ const tierFeaturesMap: Record<TierType, TierFeatures> = {
   }
 };
 
-// Features available in each tier
 const tierFeatureAccess: Record<string, TierType[]> = {
-  // Freemium accessible features
   'ai-tools-directory': ['freemium', 'basic', 'pro'],
   'forums': ['freemium', 'basic', 'pro'],
   'marketplace': ['freemium', 'basic', 'pro'],
@@ -105,7 +102,6 @@ const tierFeatureAccess: Record<string, TierType[]> = {
   'content-creation': ['freemium', 'basic', 'pro'],
   'learning-tools': ['freemium', 'basic', 'pro'],
   
-  // Basic tier features
   'team-dashboard': ['basic', 'pro'],
   'collaboration-hub': ['basic', 'pro'],
   'workflow-designer': ['basic', 'pro'],
@@ -121,7 +117,6 @@ const tierFeatureAccess: Record<string, TierType[]> = {
   'intermediate-analytics': ['basic', 'pro'],
   'intermediate-automation': ['basic', 'pro'],
   
-  // Pro tier features
   'custom-models': ['pro'],
   'advanced-api': ['pro'],
   'white-labeling': ['pro'],
@@ -142,22 +137,20 @@ const tierFeatureAccess: Record<string, TierType[]> = {
   'advanced-automation': ['pro']
 };
 
-// Create the context with default values
 const TierContext = createContext<TierContextType | undefined>(undefined);
 
 export const TierProvider = ({ children }: { children: ReactNode }) => {
   const [currentTier, setCurrentTier] = useState<TierType>('freemium');
 
   const setTier = (tier: TierType) => {
-    // Only show a toast if the tier is actually changing
     if (tier !== currentTier) {
       const tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
       toast.success(`Switched to ${tierName} tier!`, {
         description: tier === 'freemium' 
-          ? "You now have access to basic features and 5 core AI tools."
+          ? "You now have access to basic features and 9 core AI tools."
           : tier === 'basic'
-          ? "You now have access to team collaboration features and 10+ AI tools!"
-          : "You now have access to all premium features and 50+ AI tools!"
+          ? "You now have access to team collaboration features and 17 AI tools!"
+          : "You now have access to all premium features and all 26 AI tools!"
       });
     }
     setCurrentTier(tier);
@@ -185,7 +178,6 @@ export const TierProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  // Persist tier selection to localStorage
   useEffect(() => {
     const savedTier = localStorage.getItem('userTier');
     if (savedTier && (savedTier === 'freemium' || savedTier === 'basic' || savedTier === 'pro')) {

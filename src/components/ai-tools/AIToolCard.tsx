@@ -31,6 +31,10 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
   const navigate = useNavigate();
   const { currentTier, upgradePrompt } = useTier();
   
+  // Updated access logic to ensure proper tier access:
+  // - Freemium users can access only freemium tools
+  // - Basic users can access basic and freemium tools
+  // - Pro users can access all tools (pro, basic, freemium)
   const hasAccess = (
     (tool.tier === 'freemium') || 
     (tool.tier === 'basic' && (currentTier === 'basic' || currentTier === 'pro')) ||

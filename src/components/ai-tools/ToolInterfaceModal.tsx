@@ -35,6 +35,7 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
   }
   
   // Check if user can access this tool based on tier
+  // Updated access logic to match AIToolCard component
   const canAccessTool = () => {
     switch (tool.tier) {
       case 'freemium': 
