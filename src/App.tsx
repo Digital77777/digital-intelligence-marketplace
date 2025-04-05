@@ -22,6 +22,7 @@ import TopicDetails from '@/pages/TopicDetails';
 import NewTopic from '@/pages/NewTopic';
 import NewGroup from '@/pages/NewGroup';
 import AIStreamsUpload from '@/pages/AIStreamsUpload';
+import AIStreams from '@/pages/AIStreams';
 
 // Create a client with better error handling, retry logic, and caching
 const queryClient = new QueryClient({
@@ -74,6 +75,7 @@ export default function App() {
                   <Route path="/community/topic/:topicId" element={<TopicDetails />} />
                   <Route path="/community/new-topic/:categoryId" element={<NewTopic />} />
                   <Route path="/community/new-group" element={<NewGroup />} />
+                  <Route path="/ai-streams" element={<AIStreams />} />
                   <Route path="/ai-streams/upload" element={<AIStreamsUpload />} />
                 </Routes>
               </UserProvider>
