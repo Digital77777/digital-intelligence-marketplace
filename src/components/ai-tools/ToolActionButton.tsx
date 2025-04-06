@@ -1,16 +1,20 @@
 
 import React from 'react';
-import { Button, ButtonProps } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { AIToolItem } from '@/data/ai-tools-tiers';
 import { ExternalLink, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTier } from '@/context/TierContext';
 
-interface ToolActionButtonProps extends ButtonProps {
+// Define our own props interface without extending ButtonProps
+interface ToolActionButtonProps {
   tool: AIToolItem;
   compact?: boolean;
   action: 'view' | 'launch';
   onSelect?: (tool: AIToolItem) => void;
+  className?: string;
+  size?: "default" | "sm" | "lg" | "icon" | null | undefined;
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | null | undefined;
 }
 
 export const ToolActionButton: React.FC<ToolActionButtonProps> = ({ 
@@ -18,7 +22,9 @@ export const ToolActionButton: React.FC<ToolActionButtonProps> = ({
   compact = false, 
   action,
   onSelect,
-  ...props
+  className,
+  size,
+  variant,
 }) => {
   const navigate = useNavigate();
   const { currentTier, upgradePrompt } = useTier();
@@ -49,7 +55,7 @@ export const ToolActionButton: React.FC<ToolActionButtonProps> = ({
 
   // View button should always be accessible
   const isViewButton = action === 'view';
-  const buttonVariant = isViewButton ? "outline" : (hasAccess ? "default" : "outline");
+  const buttonVariant = variant || (isViewButton ? "outline" : (hasAccess ? "default" : "outline"));
 
   const getLabelText = () => {
     if (isViewButton) return "View Tool";
@@ -59,8 +65,8 @@ export const ToolActionButton: React.FC<ToolActionButtonProps> = ({
   return (
     <Button
       variant={buttonVariant}
-      size={compact ? "sm" : props.size || "default"}
-      className={`${props.className || ''} ${compact ? 'w-full' : ''}`}
+      size={compact ? "sm" : size || "default"}
+      className={`${className || ''} ${compact ? 'w-full' : ''}`}
       onClick={handleAction}
     >
       {isViewButton ? 
