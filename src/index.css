@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -164,12 +165,12 @@
 }
 
 main {
-  margin-top: 6.5rem;
+  margin-top: 12rem; /* Increased to accommodate the larger header */
 }
 
 @media (max-width: 767px) {
   main {
-    margin-top: 6rem;
+    margin-top: 14rem; /* Even larger on mobile due to stacked elements */
   }
 }
 
