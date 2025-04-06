@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import BasicTierLayout from '@/components/layouts/BasicTierLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useScrollToTop } from '@/hooks/useScrollToTop';
+import useScrollToTop from '@/hooks/useScrollToTop';
 
 // Import our new components
 import { TeamMembersList } from '@/components/collaboration/TeamMembersList';

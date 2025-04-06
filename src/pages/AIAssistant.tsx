@@ -12,7 +12,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ChatContainer, { ChatMessage } from '@/components/chat/ChatContainer';
 import ChatInput from '@/components/chat/ChatInput';
-import { useScrollToTop } from '@/hooks/useScrollToTop';
+import useScrollToTop from '@/hooks/useScrollToTop';
 
 const AIAssistant: React.FC = () => {
   useScrollToTop(); // Add scroll to top on navigation
