@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useTier } from '@/context/TierContext';
 import { useNavigate } from 'react-router-dom';
 import NavbarBrand from './navbar/NavbarBrand';
@@ -57,7 +57,7 @@ const Navbar = () => {
   }
 
   // Secondary navigation items are the ones that were previously in the dropdown
-  const getNavItems = () => {
+  const getNavItems = useCallback(() => {
     // Base items for freemium users
     const baseItems = [
       {
@@ -126,17 +126,17 @@ const Navbar = () => {
     });
 
     return baseItems;
-  };
+  }, [currentTier, canAccess]);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     navigate(`/discovery?q=${encodeURIComponent(searchQuery)}`);
-  };
+  }, [searchQuery, navigate]);
 
   const navItems = getNavItems();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 bg-[#0071c2] text-white">
+    <header className="fixed top-0 left-0 right-0 z-40 bg-[#0071c2] text-white shadow-md">
       {/* Top bar with brand and actions */}
       <div className="container px-4 py-3">
         <div className="flex items-center justify-between">
@@ -165,45 +165,6 @@ const Navbar = () => {
               </Button>
             ))}
           </div>
-        </div>
-      </div>
-      
-      {/* Search container */}
-      <div className="bg-[#ffb700] py-4">
-        <div className="container px-4">
-          <form onSubmit={handleSearch} className="max-w-4xl mx-auto">
-            {/* Search fields */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-              <div className="bg-white rounded-md flex items-center p-3">
-                <Search className="text-gray-500 h-5 w-5 mr-2" />
-                <input 
-                  type="text" 
-                  placeholder="Search for tools, courses, or content..." 
-                  className="flex-1 outline-none text-black"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <div className="bg-white rounded-md flex items-center p-3">
-                <CalendarDays className="text-gray-500 h-5 w-5 mr-2" />
-                <div className="text-gray-600 text-sm">Today - Tomorrow</div>
-              </div>
-              <div className="bg-white rounded-md flex items-center p-3">
-                <Users className="text-gray-500 h-5 w-5 mr-2" />
-                <div className="text-gray-600 text-sm">1 user • Freemium</div>
-              </div>
-            </div>
-            
-            {/* Search button */}
-            <div className="mt-2">
-              <Button 
-                type="submit"
-                className="w-full bg-[#0071c2] hover:bg-[#00487a] text-white font-medium text-lg py-3"
-              >
-                Search
-              </Button>
-            </div>
-          </form>
         </div>
       </div>
     </header>
