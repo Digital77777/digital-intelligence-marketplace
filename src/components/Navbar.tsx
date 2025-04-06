@@ -1,4 +1,5 @@
-import React, { useState, useCallback, memo } from 'react';
+
+import React, { useState, useCallback, memo, useEffect } from 'react';
 import { useTier } from '@/context/TierContext';
 import { useNavigate } from 'react-router-dom';
 import NavbarBrand from './navbar/NavbarBrand';
@@ -6,14 +7,29 @@ import NavbarActions from './navbar/NavbarActions';
 import NavbarUserMenu from './navbar/NavbarUserMenu';
 import NavbarMobileMenu from './navbar/NavbarMobileMenu';
 import { Button } from '@/components/ui/button';
-import { Search, CalendarDays, Users } from 'lucide-react';
 import useScrollToTop from '@/hooks/useScrollToTop';
 
 const Navbar = () => {
   const { currentTier, canAccess } = useTier();
   const navigate = useNavigate();
+  const [isScrolled, setIsScrolled] = useState(false);
+  
   // Use the scroll to top hook
   useScrollToTop();
+  
+  // Handle scroll effect for navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setIsScrolled(scrollPosition > 10);
+    };
+
+    // Use passive listener for better performance
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
   
   // Primary Navigation Items (shown as tabs/pills)
   const primaryNavItems = [
@@ -128,15 +144,17 @@ const Navbar = () => {
   const navItems = getNavItems();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-r from-[#005ea8] to-[#0071c2] text-white shadow-lg">
+    <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${isScrolled ? 'shadow-lg' : ''}`}>
       {/* Top bar with brand and actions */}
-      <div className="container px-4 py-3">
-        <div className="flex items-center justify-between">
-          <NavbarBrand />
-          <div className="flex items-center gap-2">
-            <NavbarActions />
-            <NavbarUserMenu />
-            <NavbarMobileMenu navItems={navItems} />
+      <div className="bg-gradient-to-r from-[#005ea8] to-[#0071c2] text-white">
+        <div className="container px-4 py-3">
+          <div className="flex items-center justify-between">
+            <NavbarBrand />
+            <div className="flex items-center gap-2">
+              <NavbarActions />
+              <NavbarUserMenu />
+              <NavbarMobileMenu navItems={navItems} />
+            </div>
           </div>
         </div>
       </div>

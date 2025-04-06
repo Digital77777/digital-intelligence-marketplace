@@ -4,11 +4,18 @@ import { Link } from 'react-router-dom';
 
 const NavbarBrand = () => {
   return (
-    <Link to="/" className="flex items-center">
-      <span className="text-white font-bold tracking-tight">
-        DIGITAL<span className="opacity-85 text-sm font-normal ml-0.5">INTELLIGENCE</span>
-        <span className="text-xs font-normal opacity-70 ml-1.5">Marketplace</span>
-      </span>
+    <Link to="/" className="flex items-center group">
+      <div className="bg-white/10 p-1.5 rounded-lg mr-2 group-hover:bg-white/20 transition-all">
+        <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-md flex items-center justify-center">
+          <span className="text-xs font-bold text-white">DI</span>
+        </div>
+      </div>
+      <div className="flex flex-col items-start">
+        <span className="text-white font-bold tracking-tight leading-none text-lg">
+          DIGITAL<span className="opacity-85 text-sm font-normal ml-0.5">INTELLIGENCE</span>
+        </span>
+        <span className="text-xs font-normal text-blue-100 opacity-80 leading-none mt-0.5">Marketplace for AI Solutions</span>
+      </div>
     </Link>
   );
 };

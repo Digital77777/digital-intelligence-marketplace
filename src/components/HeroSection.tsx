@@ -1,14 +1,17 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowDown, Brain, Zap, Bot, Rocket, ChevronRight } from 'lucide-react';
+import { ArrowDown, Brain, Zap, Bot, Rocket, ChevronRight, Search } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useUser } from '@/context/UserContext';
 
 const HeroSection = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const [aiTool, setAiTool] = useState('AI Assistants');
-
+  const { user, profile } = useUser();
+  const navigate = useNavigate();
+  
   // List of AI tools to cycle through
   const aiTools = [
     'AI Assistants',
@@ -49,7 +52,40 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-16 px-4 font-inter">
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden pt-0 pb-16 px-4 font-inter">
+      {/* Welcome back banner for logged in users */}
+      {user && profile && (
+        <div className="absolute top-0 left-0 right-0 z-10 py-3 px-6 bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm">
+          <div className="max-w-7xl mx-auto flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <span className="text-white">👋 Welcome back, <span className="font-semibold">{profile.username || 'User'}</span></span>
+              <Badge variant="outline" className="bg-blue-500/20 border-blue-300/30">
+                {new Date().toLocaleDateString('en-US', { weekday: 'long' })}
+              </Badge>
+            </div>
+            <div className="hidden md:flex gap-3">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-white hover:bg-white/20" 
+                onClick={() => navigate('/ai-tools-directory')}
+              >
+                <Search className="h-4 w-4 mr-1" />
+                Discover Tools
+              </Button>
+              <Button 
+                size="sm" 
+                className="bg-white/20 text-white hover:bg-white/30"
+                onClick={() => navigate('/ai-assistant')}
+              >
+                <Bot className="h-4 w-4 mr-1" />
+                AI Assistant
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div 
@@ -158,4 +194,4 @@ const HeroSection = () => {
   );
 };
 
-export default HeroSection;
+export default React.memo(HeroSection);
