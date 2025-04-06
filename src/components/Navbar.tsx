@@ -1,5 +1,4 @@
-
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { useTier } from '@/context/TierContext';
 import { useNavigate } from 'react-router-dom';
 import NavbarBrand from './navbar/NavbarBrand';
@@ -16,8 +15,6 @@ const Navbar = () => {
   // Use the scroll to top hook
   useScrollToTop();
   
-  const [searchQuery, setSearchQuery] = useState('');
-
   // Primary Navigation Items (shown as tabs/pills)
   const primaryNavItems = [
     {
@@ -128,15 +125,10 @@ const Navbar = () => {
     return baseItems;
   }, [currentTier, canAccess]);
 
-  const handleSearch = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    navigate(`/discovery?q=${encodeURIComponent(searchQuery)}`);
-  }, [searchQuery, navigate]);
-
   const navItems = getNavItems();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 bg-[#0071c2] text-white shadow-md">
+    <header className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-r from-[#005ea8] to-[#0071c2] text-white shadow-lg">
       {/* Top bar with brand and actions */}
       <div className="container px-4 py-3">
         <div className="flex items-center justify-between">
@@ -150,14 +142,14 @@ const Navbar = () => {
       </div>
       
       {/* Main navigation tabs */}
-      <div className="bg-[#0071c2] px-4">
+      <div className="bg-[#0071c2]/90 backdrop-blur-sm px-4 border-t border-white/10">
         <div className="container overflow-x-auto scrollbar-none">
           <div className="flex space-x-2 py-3">
             {primaryNavItems.filter(item => item.visible).map((item) => (
               <Button
                 key={item.path}
                 variant="ghost"
-                className="rounded-full bg-white/10 hover:bg-white/20 text-white py-2 px-4 min-w-fit flex items-center whitespace-nowrap"
+                className="rounded-full bg-white/10 hover:bg-white/20 text-white py-2 px-4 min-w-fit flex items-center whitespace-nowrap transition-all"
                 onClick={() => navigate(item.path)}
               >
                 {item.icon}
@@ -171,4 +163,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default memo(Navbar);

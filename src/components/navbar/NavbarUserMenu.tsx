@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { User, Settings, LogOut } from 'lucide-react';
+import { User, Settings, LogOut, Shield } from 'lucide-react';
 
 const NavbarUserMenu = () => {
   const { user, profile, logout } = useUser();
@@ -23,8 +23,21 @@ const NavbarUserMenu = () => {
   if (!user) {
     return (
       <div className="hidden md:flex items-center gap-2">
-        <Button variant="ghost" onClick={() => navigate('/auth')} size="sm" className="text-white hover:bg-white/20">Sign In</Button>
-        <Button onClick={() => navigate('/auth')} size="sm" className="bg-[#ffffff] text-[#0088ff] hover:bg-white/90">Get Started</Button>
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate('/auth')} 
+          size="sm" 
+          className="text-white hover:bg-white/20 transition-colors"
+        >
+          Sign In
+        </Button>
+        <Button 
+          onClick={() => navigate('/auth')} 
+          size="sm" 
+          className="bg-gradient-to-r from-[#ffffff] to-[#f0f0f0] text-[#0088ff] hover:from-[#f0f0f0] hover:to-[#e0e0e0] transition-colors shadow-sm"
+        >
+          Get Started
+        </Button>
       </div>
     );
   }
@@ -40,7 +53,7 @@ const NavbarUserMenu = () => {
               <AvatarFallback className="bg-[#0066cc] text-white">{profile?.username?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
             )}
           </Avatar>
-          <span className="text-sm hidden sm:inline">{profile?.username || "Account"}</span>
+          <span className="text-sm hidden sm:inline font-medium">{profile?.username || "Account"}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
@@ -58,8 +71,13 @@ const NavbarUserMenu = () => {
           <span>Profile</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate('/pricing')}>
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Subscription ({currentTier})</span>
+          <Shield className="mr-2 h-4 w-4" />
+          <span className="flex items-center gap-1.5">
+            Subscription 
+            <span className="text-xs bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded-full font-medium capitalize">
+              {currentTier}
+            </span>
+          </span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={logout}>

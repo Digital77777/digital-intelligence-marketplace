@@ -25,6 +25,7 @@ import AIStreamsUpload from '@/pages/AIStreamsUpload';
 import AIStreams from '@/pages/AIStreams';
 import CollaborationHub from '@/pages/CollaborationHub';
 import AIAssistant from '@/pages/AIAssistant';
+import Auth from '@/pages/Auth';
 
 // Create a client with better error handling, retry logic, and caching
 const queryClient = new QueryClient({
@@ -82,6 +83,7 @@ export default function App() {
                   <Route path="/ai-streams/upload" element={<AIStreamsUpload />} />
                   <Route path="/collaboration-hub" element={<CollaborationHub />} />
                   <Route path="/ai-assistant" element={<AIAssistant />} />
+                  <Route path="/auth" element={<Auth />} />
                 </Routes>
               </UserProvider>
             </TierProvider>
