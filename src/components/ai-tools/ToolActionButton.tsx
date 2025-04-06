@@ -37,6 +37,9 @@ export const ToolActionButton: React.FC<ToolActionButtonProps> = ({
   );
   
   const handleAction = () => {
+    // Always scroll to top before any action
+    window.scrollTo(0, 0);
+    
     if (action === 'view') {
       // Always navigate to tool details regardless of access
       navigate(`/tool/${tool.id}`);
@@ -45,7 +48,7 @@ export const ToolActionButton: React.FC<ToolActionButtonProps> = ({
         if (onSelect) {
           onSelect(tool);
         } else {
-          navigate(`/tool/${tool.id}`);
+          navigate(`/tool/${tool.id}/interface`);
         }
       } else {
         upgradePrompt(tool.tier);

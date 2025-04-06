@@ -2,27 +2,35 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Paperclip } from 'lucide-react';
+import { MessageCircle, CalendarPlus, FileUp, Settings, Users } from 'lucide-react';
 
 export const QuickActions: React.FC = () => {
   return (
-    <Card className="mt-6">
-      <CardHeader>
-        <CardTitle className="text-base">Quick Actions</CardTitle>
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg">Quick Actions</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
           <Button variant="outline" className="w-full justify-start">
-            <Plus className="h-4 w-4 mr-2" />
+            <MessageCircle className="h-4 w-4 mr-2" />
             New Discussion
           </Button>
           <Button variant="outline" className="w-full justify-start">
-            <Plus className="h-4 w-4 mr-2" />
-            Create Task
+            <CalendarPlus className="h-4 w-4 mr-2" />
+            Schedule Meeting
           </Button>
           <Button variant="outline" className="w-full justify-start">
-            <Paperclip className="h-4 w-4 mr-2" />
-            Upload File
+            <FileUp className="h-4 w-4 mr-2" />
+            Share Document
+          </Button>
+          <Button variant="outline" className="w-full justify-start">
+            <Users className="h-4 w-4 mr-2" />
+            Manage Team
+          </Button>
+          <Button variant="outline" className="w-full justify-start">
+            <Settings className="h-4 w-4 mr-2" />
+            Project Settings
           </Button>
         </div>
       </CardContent>

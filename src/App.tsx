@@ -23,6 +23,8 @@ import NewTopic from '@/pages/NewTopic';
 import NewGroup from '@/pages/NewGroup';
 import AIStreamsUpload from '@/pages/AIStreamsUpload';
 import AIStreams from '@/pages/AIStreams';
+import CollaborationHub from '@/pages/CollaborationHub';
+import AIAssistant from '@/pages/AIAssistant';
 
 // Create a client with better error handling, retry logic, and caching
 const queryClient = new QueryClient({
@@ -67,6 +69,7 @@ export default function App() {
                   <Route path="/ai-tools" element={<AITools />} />
                   <Route path="/ai-tools-directory" element={<AIToolsDirectory />} />
                   <Route path="/tool/:id" element={<ToolDetails />} />
+                  <Route path="/tool/:id/interface" element={<ToolDetails />} />
                   <Route path="/learning-hub" element={<LearningHub />} />
                   <Route path="/learning/:courseId" element={<CourseDetails />} />
                   <Route path="/marketplace" element={<Marketplace />} />
@@ -77,6 +80,8 @@ export default function App() {
                   <Route path="/community/new-group" element={<NewGroup />} />
                   <Route path="/ai-streams" element={<AIStreams />} />
                   <Route path="/ai-streams/upload" element={<AIStreamsUpload />} />
+                  <Route path="/collaboration-hub" element={<CollaborationHub />} />
+                  <Route path="/ai-assistant" element={<AIAssistant />} />
                 </Routes>
               </UserProvider>
             </TierProvider>

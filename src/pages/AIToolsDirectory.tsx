@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -14,8 +13,11 @@ import ToolsTabContent from '@/components/ai-tools/ToolsTabContent';
 import ToolTierComparison from '@/components/ai-tools/ToolTierComparison';
 import TierToolsSection from '@/components/ai-tools/TierToolsSection';
 import ToolInterfaceModal from '@/components/ai-tools/ToolInterfaceModal';
+import { useScrollToTop } from '@/hooks/useScrollToTop';
 
 const AIToolsDirectory = () => {
+  useScrollToTop(); // Add scroll to top on navigation
+  
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   

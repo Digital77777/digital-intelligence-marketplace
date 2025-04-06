@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import BasicTierLayout from '@/components/layouts/BasicTierLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useScrollToTop } from '@/hooks/useScrollToTop';
 
 // Import our new components
 import { TeamMembersList } from '@/components/collaboration/TeamMembersList';
@@ -11,6 +12,8 @@ import { TasksTab } from '@/components/collaboration/TasksTab';
 import { FilesTab } from '@/components/collaboration/FilesTab';
 
 const CollaborationHub = () => {
+  useScrollToTop(); // Add scroll to top on navigation
+  
   // Mock data setup
   const mockTeamMembers = [
     { id: 1, name: "Alex Johnson", role: "Team Lead", avatar: "https://i.pravatar.cc/150?img=1", online: true },

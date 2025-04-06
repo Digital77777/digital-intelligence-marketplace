@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useScrollToTop } from '@/hooks/useScrollToTop';
 import {
   Sheet,
   SheetContent,
@@ -42,6 +43,8 @@ import {
 import { marketplaceTools } from '@/data/marketplace-tools';
 
 const Marketplace = () => {
+  useScrollToTop(); // Add scroll to top on navigation
+  
   const { currentTier } = useTier();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
