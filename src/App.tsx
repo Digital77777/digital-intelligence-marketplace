@@ -26,6 +26,7 @@ import AIStreams from '@/pages/AIStreams';
 import CollaborationHub from '@/pages/CollaborationHub';
 import AIAssistant from '@/pages/AIAssistant';
 import Auth from '@/pages/Auth';
+import LearningAcademy from '@/pages/LearningAcademy';
 
 // Create a client with better error handling, retry logic, and caching
 const queryClient = new QueryClient({
@@ -84,6 +85,14 @@ export default function App() {
                   <Route path="/collaboration-hub" element={<CollaborationHub />} />
                   <Route path="/ai-assistant" element={<AIAssistant />} />
                   <Route path="/auth" element={<Auth />} />
+                  <Route path="/learning-academy" element={<LearningAcademy />} />
+                  <Route path="/team-dashboard" element={<CollaborationHub />} />
+                  <Route path="/workflow-designer" element={<CollaborationHub />} />
+                  <Route path="/ai-studio" element={<CollaborationHub />} />
+                  <Route path="/business-insights" element={<CollaborationHub />} />
+                  <Route path="/pipeline-designer" element={<CollaborationHub />} />
+                  <Route path="/compliance-center" element={<CollaborationHub />} />
+                  <Route path="/discovery" element={<CollaborationHub />} />
                 </Routes>
               </UserProvider>
             </TierProvider>

@@ -6,8 +6,10 @@ import NavbarBrand from './navbar/NavbarBrand';
 import NavbarActions from './navbar/NavbarActions';
 import NavbarUserMenu from './navbar/NavbarUserMenu';
 import NavbarMobileMenu from './navbar/NavbarMobileMenu';
+import NavbarNavigation from './navbar/NavbarNavigation';
 import { Button } from '@/components/ui/button';
 import useScrollToTop from '@/hooks/useScrollToTop';
+import { Search } from 'lucide-react';
 
 const Navbar = () => {
   const { currentTier, canAccess } = useTier();
@@ -69,9 +71,9 @@ const Navbar = () => {
     });
   }
 
-  // Secondary navigation items are the ones that were previously in the dropdown
-  const getNavItems = useCallback(() => {
-    // Base items for freemium users
+  // Secondary navigation items - enhanced based on the image provided
+  const getSecondaryNavItems = useCallback(() => {
+    // Base items for all tiers (freemium, basic, and pro)
     const baseItems = [
       {
         title: "Forums",
@@ -85,7 +87,7 @@ const Navbar = () => {
       }
     ];
 
-    // Add items based on tier
+    // Items for Basic and Pro tiers
     if (currentTier === 'basic' || currentTier === 'pro') {
       baseItems.push(
         {
@@ -101,6 +103,7 @@ const Navbar = () => {
       );
     }
 
+    // Pro tier exclusive items
     if (currentTier === 'pro') {
       baseItems.push(
         {
@@ -131,17 +134,25 @@ const Navbar = () => {
       );
     }
 
-    // Add AI Assistant to all tiers
-    baseItems.push({
-      title: "AI Assistant",
-      path: "/ai-assistant",
-      visible: true
-    });
+    // Add AI Assistant and Search to all tiers - always visible at the end
+    baseItems.push(
+      {
+        title: "AI Assistant",
+        path: "/ai-assistant",
+        visible: true
+      },
+      {
+        title: "Search",
+        path: "/discovery",
+        icon: <Search className="h-4 w-4 mr-1.5" />,
+        visible: true
+      }
+    );
 
     return baseItems;
   }, [currentTier, canAccess]);
 
-  const navItems = getNavItems();
+  const secondaryNavItems = getSecondaryNavItems();
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${isScrolled ? 'shadow-lg' : ''}`}>
@@ -153,7 +164,7 @@ const Navbar = () => {
             <div className="flex items-center gap-2">
               <NavbarActions />
               <NavbarUserMenu />
-              <NavbarMobileMenu navItems={navItems} />
+              <NavbarMobileMenu navItems={secondaryNavItems} />
             </div>
           </div>
         </div>
@@ -177,6 +188,9 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+      
+      {/* Secondary navigation - scrollable horizontal menu */}
+      <NavbarNavigation navItems={secondaryNavItems} />
     </header>
   );
 };

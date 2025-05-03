@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -164,12 +165,12 @@
 }
 
 main {
-  margin-top: 8rem; /* Reduced from 12rem to remove the gap */
+  margin-top: 11.25rem; /* Adjusted for the new three-level navbar */
 }
 
 @media (max-width: 767px) {
   main {
-    margin-top: 10rem; /* Reduced from 14rem to remove the gap */
+    margin-top: 13rem; /* Adjusted for mobile */
   }
 }
 
