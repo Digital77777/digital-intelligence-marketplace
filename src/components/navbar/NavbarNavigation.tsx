@@ -31,7 +31,7 @@ interface NavbarNavigationProps {
     title: string;
     path: string;
     visible: boolean;
-    icon?: React.ReactNode;
+    icon?: React.ReactNode;  // Added icon as optional property
   }[];
 }
 
