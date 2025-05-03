@@ -11,6 +11,14 @@ import { Button } from '@/components/ui/button';
 import useScrollToTop from '@/hooks/useScrollToTop';
 import { Search } from 'lucide-react';
 
+// Define interface for navigation items to ensure type consistency
+interface NavItem {
+  title: string;
+  path: string;
+  visible: boolean;
+  icon?: React.ReactNode;
+}
+
 const Navbar = () => {
   const { currentTier, canAccess } = useTier();
   const navigate = useNavigate();
@@ -34,7 +42,7 @@ const Navbar = () => {
   }, []);
   
   // Primary Navigation Items (shown as tabs/pills)
-  const primaryNavItems = [
+  const primaryNavItems: NavItem[] = [
     {
       title: "AI Tools",
       path: "/ai-tools-directory",
@@ -72,9 +80,9 @@ const Navbar = () => {
   }
 
   // Secondary navigation items - enhanced based on the image provided
-  const getSecondaryNavItems = useCallback(() => {
+  const getSecondaryNavItems = useCallback((): NavItem[] => {
     // Base items for all tiers (freemium, basic, and pro)
-    const baseItems = [
+    const baseItems: NavItem[] = [
       {
         title: "Forums",
         path: "/forums",
