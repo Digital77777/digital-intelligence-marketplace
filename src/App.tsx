@@ -27,6 +27,11 @@ import CollaborationHub from '@/pages/CollaborationHub';
 import AIAssistant from '@/pages/AIAssistant';
 import Auth from '@/pages/Auth';
 import LearningAcademy from '@/pages/LearningAcademy';
+import BusinessInsights from '@/pages/BusinessInsights';
+import PipelineDesigner from '@/pages/PipelineDesigner';
+import ComplianceCenter from '@/pages/ComplianceCenter';
+import WorkflowDesigner from '@/pages/WorkflowDesigner';
+import DiscoveryPage from '@/pages/DiscoveryPage';
 
 // Create a client with better error handling, retry logic, and caching
 const queryClient = new QueryClient({
@@ -87,12 +92,12 @@ export default function App() {
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/learning-academy" element={<LearningAcademy />} />
                   <Route path="/team-dashboard" element={<CollaborationHub />} />
-                  <Route path="/workflow-designer" element={<CollaborationHub />} />
+                  <Route path="/workflow-designer" element={<WorkflowDesigner />} />
                   <Route path="/ai-studio" element={<CollaborationHub />} />
-                  <Route path="/business-insights" element={<CollaborationHub />} />
-                  <Route path="/pipeline-designer" element={<CollaborationHub />} />
-                  <Route path="/compliance-center" element={<CollaborationHub />} />
-                  <Route path="/discovery" element={<CollaborationHub />} />
+                  <Route path="/business-insights" element={<BusinessInsights />} />
+                  <Route path="/pipeline-designer" element={<PipelineDesigner />} />
+                  <Route path="/compliance-center" element={<ComplianceCenter />} />
+                  <Route path="/discovery" element={<DiscoveryPage />} />
                 </Routes>
               </UserProvider>
             </TierProvider>
