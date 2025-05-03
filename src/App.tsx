@@ -63,48 +63,50 @@ const queryClient = new QueryClient({
 
 export default function App() {
   return (
-    <ErrorBoundary>
-      <ThemeProvider defaultTheme="light" storageKey="ui-theme">
-        <QueryClientProvider client={queryClient}>
-          <BrowserRouter>
-            <TierProvider>
-              <UserProvider>
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/pricing" element={<Pricing />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/ai-tools" element={<AITools />} />
-                  <Route path="/ai-tools-directory" element={<AIToolsDirectory />} />
-                  <Route path="/tool/:id" element={<ToolDetails />} />
-                  <Route path="/tool/:id/interface" element={<ToolDetails />} />
-                  <Route path="/learning-hub" element={<LearningHub />} />
-                  <Route path="/learning/:courseId" element={<CourseDetails />} />
-                  <Route path="/marketplace" element={<Marketplace />} />
-                  <Route path="/community" element={<CommunityForums />} />
-                  <Route path="/forums" element={<CommunityForums />} /> 
-                  <Route path="/community/topic/:topicId" element={<TopicDetails />} />
-                  <Route path="/community/new-topic/:categoryId" element={<NewTopic />} />
-                  <Route path="/community/new-group" element={<NewGroup />} />
-                  <Route path="/ai-streams" element={<AIStreams />} />
-                  <Route path="/ai-streams/upload" element={<AIStreamsUpload />} />
-                  <Route path="/collaboration-hub" element={<CollaborationHub />} />
-                  <Route path="/ai-assistant" element={<AIAssistant />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/learning-academy" element={<LearningAcademy />} />
-                  <Route path="/team-dashboard" element={<CollaborationHub />} />
-                  <Route path="/workflow-designer" element={<WorkflowDesigner />} />
-                  <Route path="/ai-studio" element={<CollaborationHub />} />
-                  <Route path="/business-insights" element={<BusinessInsights />} />
-                  <Route path="/pipeline-designer" element={<PipelineDesigner />} />
-                  <Route path="/compliance-center" element={<ComplianceCenter />} />
-                  <Route path="/discovery" element={<DiscoveryPage />} />
-                </Routes>
-              </UserProvider>
-            </TierProvider>
-          </BrowserRouter>
-        </QueryClientProvider>
-      </ThemeProvider>
-      <Toaster />
-    </ErrorBoundary>
+    <React.StrictMode>
+      <ErrorBoundary>
+        <ThemeProvider defaultTheme="light" storageKey="ui-theme">
+          <QueryClientProvider client={queryClient}>
+            <BrowserRouter>
+              <TierProvider>
+                <UserProvider>
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/pricing" element={<Pricing />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/ai-tools" element={<AITools />} />
+                    <Route path="/ai-tools-directory" element={<AIToolsDirectory />} />
+                    <Route path="/tool/:id" element={<ToolDetails />} />
+                    <Route path="/tool/:id/interface" element={<ToolDetails />} />
+                    <Route path="/learning-hub" element={<LearningHub />} />
+                    <Route path="/learning/:courseId" element={<CourseDetails />} />
+                    <Route path="/marketplace" element={<Marketplace />} />
+                    <Route path="/community" element={<CommunityForums />} />
+                    <Route path="/forums" element={<CommunityForums />} /> 
+                    <Route path="/community/topic/:topicId" element={<TopicDetails />} />
+                    <Route path="/community/new-topic/:categoryId" element={<NewTopic />} />
+                    <Route path="/community/new-group" element={<NewGroup />} />
+                    <Route path="/ai-streams" element={<AIStreams />} />
+                    <Route path="/ai-streams/upload" element={<AIStreamsUpload />} />
+                    <Route path="/collaboration-hub" element={<CollaborationHub />} />
+                    <Route path="/ai-assistant" element={<AIAssistant />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/learning-academy" element={<LearningAcademy />} />
+                    <Route path="/team-dashboard" element={<CollaborationHub />} />
+                    <Route path="/workflow-designer" element={<WorkflowDesigner />} />
+                    <Route path="/ai-studio" element={<CollaborationHub />} />
+                    <Route path="/business-insights" element={<BusinessInsights />} />
+                    <Route path="/pipeline-designer" element={<PipelineDesigner />} />
+                    <Route path="/compliance-center" element={<ComplianceCenter />} />
+                    <Route path="/discovery" element={<DiscoveryPage />} />
+                  </Routes>
+                  <Toaster />
+                </UserProvider>
+              </TierProvider>
+            </BrowserRouter>
+          </QueryClientProvider>
+        </ThemeProvider>
+      </ErrorBoundary>
+    </React.StrictMode>
   );
 }

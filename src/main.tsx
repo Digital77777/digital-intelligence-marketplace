@@ -1,9 +1,9 @@
 
-import { createRoot } from 'react-dom/client'
-import { StrictMode } from 'react'
-import App from './App.tsx'
-import './index.css'
-import { initializePerformanceMonitoring } from './utils/performanceMonitoring.ts'
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App.tsx';
+import './index.css';
+import { initializePerformanceMonitoring } from './utils/performanceMonitoring.ts';
 
 // Initialize performance monitoring
 initializePerformanceMonitoring();
@@ -70,11 +70,7 @@ if (!rootElement) {
   // Execute prefetching after initial render
   setTimeout(prefetchResources, 1000);
   
-  root.render(
-    <StrictMode>
-      <App />
-    </StrictMode>
-  );
+  root.render(<App />);
   
   // Log successful render
   console.log('Application successfully rendered');
