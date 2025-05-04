@@ -9,6 +9,33 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      course_feedback: {
+        Row: {
+          comment: string | null
+          course_id: number
+          created_at: string
+          id: string
+          rating: number | null
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          course_id: number
+          created_at?: string
+          id?: string
+          rating?: number | null
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          course_id?: number
+          created_at?: string
+          id?: string
+          rating?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           created_at: string
@@ -29,6 +56,157 @@ export type Database = {
           id?: string
         }
         Relationships: []
+      }
+      forum_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          required_tier: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          required_tier?: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          required_tier?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      forum_groups: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          is_private: boolean
+          member_count: number
+          name: string
+          tier_required: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by: string
+          description: string
+          id?: string
+          is_private?: boolean
+          member_count?: number
+          name: string
+          tier_required?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string
+          description?: string
+          id?: string
+          is_private?: boolean
+          member_count?: number
+          name?: string
+          tier_required?: string
+        }
+        Relationships: []
+      }
+      forum_replies: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_solution: boolean
+          topic_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_solution?: boolean
+          topic_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_solution?: boolean
+          topic_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_replies_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "forum_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      forum_topics: {
+        Row: {
+          category_id: string
+          content: string
+          created_at: string
+          id: string
+          is_locked: boolean
+          is_pinned: boolean
+          is_public: boolean
+          title: string
+          updated_at: string
+          user_id: string
+          views: number
+        }
+        Insert: {
+          category_id: string
+          content: string
+          created_at?: string
+          id?: string
+          is_locked?: boolean
+          is_pinned?: boolean
+          is_public?: boolean
+          title: string
+          updated_at?: string
+          user_id: string
+          views?: number
+        }
+        Update: {
+          category_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_locked?: boolean
+          is_pinned?: boolean
+          is_public?: boolean
+          title?: string
+          updated_at?: string
+          user_id?: string
+          views?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_topics_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "forum_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       likes: {
         Row: {

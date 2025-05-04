@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -31,7 +32,6 @@ const CourseDiscussion: React.FC<CourseDiscussionProps> = ({ courseId }) => {
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        // Use the course_feedback table which exists in the database
         const { data, error } = await supabase
           .from('course_feedback')
           .select('*')
