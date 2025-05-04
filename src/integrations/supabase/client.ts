@@ -61,6 +61,25 @@ type CourseFeedback = {
   created_at: string;
 };
 
+// Add the missing Course and UserProgress types
+type Course = {
+  id: number;
+  title: string;
+  description: string | null;
+  content: string | null;
+  required_tier: string;
+  created_at: string;
+  updated_at: string;
+};
+
+type UserProgress = {
+  id: string;
+  user_id: string;
+  course_id: number;
+  completion_percent: number;
+  last_accessed: string | null;
+};
+
 // Extend the original Database type to include our new tables
 export type ExtendedDatabase = Database & {
   public: {
@@ -92,6 +111,17 @@ export type ExtendedDatabase = Database & {
         Row: CourseFeedback;
         Insert: Omit<CourseFeedback, 'id' | 'created_at'> & { id?: string; created_at?: string };
         Update: Partial<Omit<CourseFeedback, 'id' | 'created_at'>>;
+      };
+      courses: {
+        Row: Course;
+        Insert: Omit<Course, 'id' | 'created_at' | 'updated_at'> & 
+                { id?: number; created_at?: string; updated_at?: string };
+        Update: Partial<Omit<Course, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      user_progress: {
+        Row: UserProgress;
+        Insert: Omit<UserProgress, 'id'> & { id?: string };
+        Update: Partial<Omit<UserProgress, 'id'>>;
       };
     } & Database['public']['Tables'];
   };

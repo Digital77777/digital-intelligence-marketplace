@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,20 +6,20 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle, BookOpen, MessageSquare, FileText, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/context/UserContext';
 import { useTier } from '@/context/TierContext';
 import CourseSidebar from './CourseSidebar';
 import CourseContent from './CourseContent';
 import CourseDiscussion from './CourseDiscussion';
 import CourseResources from './CourseResources';
+import { fetchCourseById, getOrInitUserProgress, updateUserProgress, Course } from '@/utils/courseService';
 
 const CourseInterface = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const { user } = useUser();
   const { canAccess, upgradePrompt } = useTier();
   
-  const [course, setCourse] = useState<any>(null);
+  const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [userProgress, setUserProgress] = useState<number>(0);
   const [activeTab, setActiveTab] = useState('content');
@@ -29,18 +28,17 @@ const CourseInterface = () => {
   useEffect(() => {
     if (!courseId) return;
     
-    const fetchCourse = async () => {
+    const loadCourseData = async () => {
       try {
         setLoading(true);
         
         // Fetch course by ID
-        const { data: courseData, error: courseError } = await supabase
-          .from('courses')
-          .select('*')
-          .eq('id', parseInt(courseId, 10))
-          .single();
+        const courseData = await fetchCourseById(courseId);
+        if (!courseData) {
+          toast("Course not found");
+          return;
+        }
           
-        if (courseError) throw courseError;
         setCourse(courseData);
         
         // Check if user can access this course based on tier
@@ -51,24 +49,9 @@ const CourseInterface = () => {
         
         // Fetch user's progress if logged in
         if (user) {
-          const { data: progressData, error: progressError } = await supabase
-            .from('user_progress')
-            .select('*')
-            .eq('user_id', user.id)
-            .eq('course_id', parseInt(courseId, 10))
-            .single();
-            
-          if (!progressError && progressData) {
-            setUserProgress(progressData.completion_percent || 0);
-          } else {
-            // Initialize progress record for the user
-            if (user) {
-              await supabase.from('user_progress').insert({
-                user_id: user.id,
-                course_id: parseInt(courseId, 10),
-                completion_percent: 0
-              });
-            }
+          const progress = await getOrInitUserProgress(user.id, courseData.id);
+          if (progress) {
+            setUserProgress(progress.completion_percent || 0);
           }
         }
         
@@ -99,24 +82,24 @@ const CourseInterface = () => {
       }
     };
     
-    fetchCourse();
+    loadCourseData();
   }, [courseId, user, canAccess]);
   
-  const updateProgress = async (progress: number) => {
-    if (!user || !courseId) return;
+  const handleUpdateProgress = async (progress: number) => {
+    if (!user || !courseId || !course) return;
     
     try {
       setUserProgress(progress);
       
       if (user) {
-        await supabase
-          .from('user_progress')
-          .update({ completion_percent: progress })
-          .eq('user_id', user.id)
-          .eq('course_id', parseInt(courseId, 10));
+        const success = await updateUserProgress(user.id, course.id, progress);
+        if (!success) {
+          throw new Error("Failed to update progress");
+        }
       }
     } catch (error) {
       console.error('Error updating progress:', error);
+      toast("Failed to update progress");
     }
   };
   
@@ -165,7 +148,7 @@ const CourseInterface = () => {
               <TabsContent value="content" className="p-6">
                 <CourseContent 
                   content={course.content} 
-                  onProgressUpdate={updateProgress} 
+                  onProgressUpdate={handleUpdateProgress} 
                   course={course}
                 />
               </TabsContent>
@@ -190,7 +173,7 @@ const CourseInterface = () => {
         <CourseSidebar 
           course={course} 
           progress={userProgress} 
-          onMarkComplete={() => updateProgress(100)}
+          onMarkComplete={() => handleUpdateProgress(100)}
         />
       </div>
     </div>

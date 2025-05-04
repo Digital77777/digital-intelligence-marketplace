@@ -50,14 +50,17 @@ const CreateTopicForm: React.FC<CreateTopicFormProps> = ({ categoryId, onCancel 
         return;
       }
       
-      // Insert the topic
+      // Insert the topic with all required fields
       const { data: newTopic, error } = await supabase
         .from('forum_topics')
         .insert({
           title: data.title,
           content: data.content,
           user_id: user.id,
-          category_id: categoryId
+          category_id: categoryId,
+          is_pinned: false,
+          is_locked: false,
+          is_public: true
         })
         .select('id')
         .single();
