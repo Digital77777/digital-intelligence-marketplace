@@ -105,7 +105,7 @@ const PricingTiers = () => {
             <TierCard
               type="basic"
               name="Basic"
-              price="$29"
+              price="$21"
               features={basicFeatures}
               popular={true}
             />
@@ -115,7 +115,7 @@ const PricingTiers = () => {
             <TierCard
               type="pro"
               name="Pro"
-              price="$79"
+              price="$46"
               features={proFeatures}
             />
           </div>

@@ -21,9 +21,9 @@ const comparisonFeatures: FeatureComparisonItem[] = [
     feature: 'AI Tools Access',
     description: 'Number of tools available',
     tiers: {
-      freemium: '5 tools',
-      basic: '10 tools',
-      pro: 'All tools'
+      freemium: '10 tools',
+      basic: '100+ tools',
+      pro: '250+ tools'
     }
   },
   {
@@ -58,7 +58,7 @@ const comparisonFeatures: FeatureComparisonItem[] = [
     description: 'Work together on AI projects',
     tiers: {
       freemium: false,
-      basic: '5 team members',
+      basic: '10 team members',
       pro: 'Unlimited members'
     }
   },
@@ -133,6 +133,19 @@ const ToolTierComparison: React.FC = () => {
     }
     return <span className="text-sm">{value}</span>;
   };
+
+  const getTierPrice = (tier: AIToolTier): string => {
+    switch (tier) {
+      case 'freemium': 
+        return 'Free';
+      case 'basic': 
+        return '$21/mo';
+      case 'pro': 
+        return '$46/mo';
+      default: 
+        return '';
+    }
+  };
   
   return (
     <div className="rounded-xl overflow-hidden border shadow-sm bg-white dark:bg-gray-950">
@@ -155,13 +168,7 @@ const ToolTierComparison: React.FC = () => {
                 {getTierIcon(tier)}
                 <span>{getTierLabel(tier)}</span>
               </div>
-              {tier === 'freemium' ? (
-                <span className="font-semibold">Free</span>
-              ) : tier === 'basic' ? (
-                <span className="font-semibold">$29/mo</span>
-              ) : (
-                <span className="font-semibold">$79/mo</span>
-              )}
+              <span className="font-semibold">{getTierPrice(tier)}</span>
             </div>
           </div>
         ))}
