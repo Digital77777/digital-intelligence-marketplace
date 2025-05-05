@@ -32,6 +32,7 @@ import PipelineDesigner from '@/pages/PipelineDesigner';
 import ComplianceCenter from '@/pages/ComplianceCenter';
 import WorkflowDesigner from '@/pages/WorkflowDesigner';
 import DiscoveryPage from '@/pages/DiscoveryPage';
+import AIStudio from '@/pages/AIStudio';
 
 // Create a client with better error handling, retry logic, and caching
 const queryClient = new QueryClient({
@@ -94,7 +95,7 @@ export default function App() {
                     <Route path="/learning-academy" element={<LearningAcademy />} />
                     <Route path="/team-dashboard" element={<CollaborationHub />} />
                     <Route path="/workflow-designer" element={<WorkflowDesigner />} />
-                    <Route path="/ai-studio" element={<CollaborationHub />} />
+                    <Route path="/ai-studio" element={<AIStudio />} />
                     <Route path="/business-insights" element={<BusinessInsights />} />
                     <Route path="/pipeline-designer" element={<PipelineDesigner />} />
                     <Route path="/compliance-center" element={<ComplianceCenter />} />
