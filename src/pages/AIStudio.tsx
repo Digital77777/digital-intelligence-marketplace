@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
 import { Save, Play } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import useScrollToTop from '@/hooks/useScrollToTop';
 
 // Import custom components
 import ModelDesigner from '@/components/ai-studio/ModelDesigner';
@@ -12,77 +13,40 @@ import ComponentsSidebar from '@/components/ai-studio/ComponentsSidebar';
 import ModelDetails from '@/components/ai-studio/ModelDetails';
 import VersionHistory from '@/components/ai-studio/VersionHistory';
 import PipelineDesignerView from '@/components/ai-studio/PipelineDesignerView';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 // Import utilities
 import { getSampleVersionHistory, saveModel } from '@/utils/modelService';
 import { ModelComponent } from '@/components/ai-studio/ModelDesigner';
 
+// Custom hook to manage model state
+import useModelState from '@/hooks/useModelState';
+
 const AIStudio = () => {
   const { toast } = useToast();
-  const [modelName, setModelName] = useState("My Custom Model");
-  const [modelVersion, setModelVersion] = useState("1.0.0");
-  const [modelDescription, setModelDescription] = useState("");
-  const [modelComponents, setModelComponents] = useState<ModelComponent[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isRunning, setIsRunning] = useState(false);
-
-  const handleAddComponent = (componentType: string) => {
-    const newComponent: ModelComponent = {
-      id: `component-${Date.now()}`,
-      type: componentType,
-      name: `New ${componentType}`,
-      position: { x: 200, y: 200 },
-      connections: []
-    };
-    
-    setModelComponents([...modelComponents, newComponent]);
-    toast({
-      title: "Component Added",
-      description: `Added ${componentType} component to your model.`,
-    });
-  };
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      await saveModel({
-        name: modelName,
-        version: modelVersion,
-        description: modelDescription,
-        components: modelComponents,
-      });
-      
-      toast({
-        title: "Model Saved",
-        description: "Your model has been saved successfully.",
-      });
-    } catch (error) {
-      toast({
-        title: "Save Failed",
-        description: "There was an error saving your model.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleRun = () => {
-    setIsRunning(true);
-    
-    // Simulate a training process
-    setTimeout(() => {
-      setIsRunning(false);
-      toast({
-        title: "Training Complete",
-        description: `Model "${modelName}" has been trained successfully.`,
-      });
-    }, 2000);
-  };
+  // Use our custom scroll hook
+  useScrollToTop();
+  
+  // Use the extracted model state management
+  const {
+    modelName,
+    setModelName,
+    modelVersion,
+    setModelVersion,
+    modelDescription, 
+    setModelDescription,
+    modelComponents,
+    setModelComponents,
+    handleAddComponent,
+    handleSave,
+    handleRun,
+    isSaving,
+    isRunning
+  } = useModelState();
 
   return (
     <ProTierLayout pageTitle="AI Studio" requiredFeature="ai-studio">
-      <div className="text-white space-y-6">
+      <ScrollArea className="text-white space-y-6 h-full">
         <Tabs defaultValue="modelTraining" className="w-full">
           <div className="flex justify-between items-center mb-4">
             <TabsList className="bg-gray-800/50 border border-gray-700">
@@ -163,7 +127,7 @@ const AIStudio = () => {
             </div>
           </TabsContent>
         </Tabs>
-      </div>
+      </ScrollArea>
     </ProTierLayout>
   );
 };

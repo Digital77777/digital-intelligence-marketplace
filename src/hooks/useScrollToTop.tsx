@@ -2,7 +2,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-// Enhanced version with better performance
 const useScrollToTop = () => {
   const { pathname, search, hash } = useLocation();
   
@@ -11,7 +10,7 @@ const useScrollToTop = () => {
     // Skip scroll if there's a hash in the URL (anchor link)
     if (hash) return;
     
-    // Use requestAnimationFrame for better performance
+    // Use requestAnimationFrame for better performance and smoother animation
     const scrollToTop = () => {
       window.scrollTo({
         top: 0,
@@ -20,13 +19,12 @@ const useScrollToTop = () => {
       });
     };
     
-    // Use requestAnimationFrame for smoother scrolling
     requestAnimationFrame(scrollToTop);
     
-    // Also implement performance monitoring
+    // Performance monitoring 
     if (typeof window !== 'undefined' && window.performance) {
       try {
-        // Record navigation timing
+        // Mark navigation timing for performance analysis
         performance.mark(`navigation-${pathname}`);
       } catch (e) {
         console.error('Performance marking failed:', e);
