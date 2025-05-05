@@ -9,6 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      business_insights: {
+        Row: {
+          category: string
+          content: string
+          date: string
+          id: string
+          image_url: string | null
+          is_premium: boolean
+          source: string
+          summary: string
+          title: string
+          trend_direction: string | null
+          trend_percentage: number | null
+        }
+        Insert: {
+          category: string
+          content: string
+          date?: string
+          id?: string
+          image_url?: string | null
+          is_premium?: boolean
+          source: string
+          summary: string
+          title: string
+          trend_direction?: string | null
+          trend_percentage?: number | null
+        }
+        Update: {
+          category?: string
+          content?: string
+          date?: string
+          id?: string
+          image_url?: string | null
+          is_premium?: boolean
+          source?: string
+          summary?: string
+          title?: string
+          trend_direction?: string | null
+          trend_percentage?: number | null
+        }
+        Relationships: []
+      }
       course_feedback: {
         Row: {
           comment: string | null

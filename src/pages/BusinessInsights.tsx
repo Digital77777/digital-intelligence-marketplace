@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import ProTierLayout from '@/components/layouts/ProTierLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,7 +63,7 @@ const BusinessInsights = () => {
   };
 
   return (
-    <ProTierLayout pageTitle="Business Insights" requiredFeature="businessInsights">
+    <ProTierLayout pageTitle="Business Insights" requiredFeature="business-insights">
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex flex-col gap-1">
