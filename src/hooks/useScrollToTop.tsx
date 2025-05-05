@@ -19,10 +19,7 @@ const useScrollToTop = () => {
       });
     };
     
-    // Use setTimeout to ensure the scrolling happens after any DOM updates
-    const timeoutId = setTimeout(() => {
-      requestAnimationFrame(scrollToTop);
-    }, 10);
+    requestAnimationFrame(scrollToTop);
     
     // Performance monitoring 
     if (typeof window !== 'undefined' && window.performance) {
@@ -33,8 +30,6 @@ const useScrollToTop = () => {
         console.error('Performance marking failed:', e);
       }
     }
-
-    return () => clearTimeout(timeoutId);
   }, [pathname, search, hash]);
 };
 

@@ -1,13 +1,12 @@
 
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { Toaster } from '@/components/ui/toaster';
 import { TierProvider } from '@/context/TierContext';
 import { UserProvider } from '@/context/UserContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import { TooltipProvider } from '@/components/ui/tooltip';
 // Pages
 import Home from '@/pages/Home';
 import Pricing from '@/pages/Pricing';
@@ -67,7 +66,7 @@ const queryClient = new QueryClient({
 // App content with global chat assistant
 const AppContent = () => {
   return (
-    <TooltipProvider>
+    <>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/pricing" element={<Pricing />} />
@@ -90,7 +89,7 @@ const AppContent = () => {
         <Route path="/ai-assistant" element={<AIAssistant />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/learning-academy" element={<LearningAcademy />} />
-        <Route path="/team-dashboard" element={<TeamDashboard />} />
+        <Route path="/team-dashboard" element={<CollaborationHub />} />
         <Route path="/workflow-designer" element={<WorkflowDesigner />} />
         <Route path="/ai-studio" element={<AIStudio />} />
         <Route path="/business-insights" element={<BusinessInsights />} />
@@ -100,7 +99,7 @@ const AppContent = () => {
       </Routes>
       <Toaster />
       <ProChatAssistant />
-    </TooltipProvider>
+    </>
   );
 };
 
