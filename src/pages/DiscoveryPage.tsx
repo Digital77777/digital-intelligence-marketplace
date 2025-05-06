@@ -1,17 +1,19 @@
 
 import React, { useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import BasicTierLayout from '@/components/layouts/BasicTierLayout';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Search, X } from 'lucide-react';
 import useScrollToTop from '@/hooks/useScrollToTop';
 import { useSearch, SearchResultType } from '@/hooks/useSearch';
 import SearchResults from '@/components/search/SearchResults';
+import SearchInput from '@/components/search/SearchInput';
 
 const DiscoveryPage = () => {
   useScrollToTop();
+  const [searchParams] = useSearchParams();
   
   const { 
     searchQuery, 
@@ -24,6 +26,14 @@ const DiscoveryPage = () => {
     clearSearch 
   } = useSearch();
 
+  // Get search query from URL if present
+  useEffect(() => {
+    const queryParam = searchParams.get('search');
+    if (queryParam) {
+      setSearchQuery(queryParam);
+    }
+  }, [searchParams, setSearchQuery]);
+
   // Search when query or type changes
   useEffect(() => {
     if (searchQuery) {
@@ -31,9 +41,12 @@ const DiscoveryPage = () => {
     }
   }, [searchQuery, selectedType, performSearch]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    performSearch(searchQuery, selectedType);
+  const handleSearch = (query: string) => {
+    performSearch(query, selectedType);
+  };
+
+  const handleClear = () => {
+    clearSearch();
   };
 
   return (
@@ -41,30 +54,14 @@ const DiscoveryPage = () => {
       <div className="space-y-6">
         <Card className="border-blue-100 dark:border-blue-900/50">
           <div className="pt-6 pb-4 px-6">
-            <form onSubmit={handleSearch} className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
-              <Input 
-                className="pl-10 pr-16 py-6 text-lg border-gray-200 dark:border-gray-700 focus-visible:ring-blue-500"
-                placeholder="Search AI tools, learning resources, communities..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={clearSearch}
-                  className="absolute right-16 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              )}
-              <Button 
-                type="submit" 
-                className="absolute right-3 top-1/2 transform -translate-y-1/2"
-              >
-                Search
-              </Button>
-            </form>
+            <SearchInput 
+              value={searchQuery}
+              onChange={setSearchQuery}
+              onSubmit={() => handleSearch(searchQuery)}
+              onClear={handleClear}
+              placeholder="Search AI tools, learning resources, communities..." 
+              className="py-6 text-lg border-gray-200 dark:border-gray-700 focus-visible:ring-blue-500"
+            />
           </div>
         </Card>
 

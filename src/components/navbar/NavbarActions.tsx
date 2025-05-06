@@ -35,7 +35,13 @@ const NavbarActions = () => {
   };
 
   const openSearch = () => {
-    setSearchOpen(true);
+    // Instead of directly setting searchOpen, we'll let the SearchCommand handle this
+    // The keyboard shortcut will activate the command dialog
+    document.dispatchEvent(new KeyboardEvent('keydown', { 
+      key: 'k',
+      ctrlKey: true,
+      bubbles: true 
+    }));
   };
 
   const openAdvancedSearch = () => {

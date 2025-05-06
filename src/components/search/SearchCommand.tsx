@@ -19,15 +19,7 @@ import {
 } from "lucide-react";
 import { useUser } from '@/context/UserContext';
 import { useTier } from '@/context/TierContext';
-
-type SearchableItem = {
-  id: string;
-  type: 'tool' | 'course' | 'forum' | 'stream' | 'doc';
-  title: string;
-  description?: string;
-  route: string;
-  icon: React.ReactNode;
-};
+import { useSearch, SearchResult } from '@/hooks/useSearch';
 
 // Demo items for search results
 const createDemoItems = (): SearchableItem[] => [
@@ -73,6 +65,15 @@ const createDemoItems = (): SearchableItem[] => [
   },
 ];
 
+type SearchableItem = {
+  id: string;
+  type: 'tool' | 'course' | 'forum' | 'stream' | 'doc';
+  title: string;
+  description?: string;
+  route: string;
+  icon: React.ReactNode;
+};
+
 // Map search result type to human readable category
 const typeLabels = {
   'tool': 'AI Tools',
@@ -89,6 +90,7 @@ export function SearchCommand() {
   const navigate = useNavigate();
   const { profile } = useUser();
   const { currentTier } = useTier();
+  const { performSearch } = useSearch();
 
   useEffect(() => {
     // In a real app, this would fetch data from an API
@@ -136,7 +138,12 @@ export function SearchCommand() {
   // For immediate navigation to advanced search
   const handleShowAll = () => {
     setOpen(false);
-    navigate('/discovery');
+    // If we have a query, bring it to discovery page
+    if (query) {
+      navigate(`/discovery?search=${encodeURIComponent(query)}`);
+    } else {
+      navigate('/discovery');
+    }
   };
 
   return (
