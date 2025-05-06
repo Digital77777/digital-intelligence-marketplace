@@ -15,7 +15,7 @@ export type SearchResult = {
   imageUrl?: string;
   tags?: string[];
   category?: string;
-  canAccess?: boolean; // Added the missing property
+  canAccess: boolean; // Whether the user can access this result based on their tier
 };
 
 export function useSearch() {
@@ -41,7 +41,8 @@ export function useSearch() {
         type: 'tools',
         url: '/tool/ai-image-generator',
         tierRequired: 'freemium',
-        category: 'Content Creation'
+        category: 'Content Creation',
+        canAccess: true
       },
       {
         id: 'tool-2',
@@ -50,7 +51,8 @@ export function useSearch() {
         type: 'tools',
         url: '/tool/text-to-speech',
         tierRequired: 'basic',
-        category: 'Audio Tools'
+        category: 'Audio Tools',
+        canAccess: currentTier === 'basic' || currentTier === 'pro'
       },
       {
         id: 'course-1',
@@ -59,7 +61,8 @@ export function useSearch() {
         type: 'learning',
         url: '/learning/ml-intro',
         tierRequired: 'freemium',
-        category: 'AI Fundamentals'
+        category: 'AI Fundamentals',
+        canAccess: true
       },
       {
         id: 'forum-1',
@@ -68,7 +71,8 @@ export function useSearch() {
         type: 'community',
         url: '/community/topic/fine-tuning',
         tierRequired: 'freemium',
-        category: 'Technical Discussions'
+        category: 'Technical Discussions',
+        canAccess: true
       },
       {
         id: 'stream-1',
@@ -77,7 +81,8 @@ export function useSearch() {
         type: 'streams',
         url: '/ai-streams/live-coding',
         tierRequired: 'basic',
-        category: 'Tutorials'
+        category: 'Tutorials',
+        canAccess: currentTier === 'basic' || currentTier === 'pro'
       },
     ];
     
@@ -97,7 +102,7 @@ export function useSearch() {
       filteredResults = filteredResults.filter(result => result.type === type);
     }
     
-    // Simulate tier restrictions
+    // Update access based on user's tier
     filteredResults = filteredResults.map(result => {
       // Mark as accessible based on user's tier
       const canAccess = 

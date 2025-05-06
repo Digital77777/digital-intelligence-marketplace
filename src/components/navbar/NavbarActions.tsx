@@ -16,7 +16,6 @@ const NavbarActions = () => {
   const navigate = useNavigate();
   const { profile } = useUser();
   const [notificationCount, setNotificationCount] = useState(3);
-  const [searchOpen, setSearchOpen] = useState(false);
 
   const handleNotificationClick = () => {
     toast.success("Notifications cleared");
@@ -35,8 +34,7 @@ const NavbarActions = () => {
   };
 
   const openSearch = () => {
-    // Instead of directly setting searchOpen, we'll let the SearchCommand handle this
-    // The keyboard shortcut will activate the command dialog
+    // Trigger keyboard shortcut to open search
     document.dispatchEvent(new KeyboardEvent('keydown', { 
       key: 'k',
       ctrlKey: true,
