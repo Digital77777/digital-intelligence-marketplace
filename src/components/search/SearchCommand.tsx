@@ -10,12 +10,12 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import {
-  AITools,
   Search as SearchIcon,
   BookOpen,
   Users,
   Video,
   FileText,
+  Settings,
 } from "lucide-react";
 import { useUser } from '@/context/UserContext';
 import { useTier } from '@/context/TierContext';
@@ -37,7 +37,7 @@ const createDemoItems = (): SearchableItem[] => [
     title: 'AI Image Generator',
     description: 'Create stunning images with AI',
     route: '/tool/ai-image-generator',
-    icon: <AITools className="h-4 w-4 mr-2" />,
+    icon: <Settings className="h-4 w-4 mr-2" />,
   },
   {
     id: 'course-1',

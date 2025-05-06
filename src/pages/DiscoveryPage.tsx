@@ -1,9 +1,10 @@
+
 import React, { useEffect } from 'react';
 import BasicTierLayout from '@/components/layouts/BasicTierLayout';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Search, X } from 'lucide-react';
 import useScrollToTop from '@/hooks/useScrollToTop';
 import { useSearch, SearchResultType } from '@/hooks/useSearch';

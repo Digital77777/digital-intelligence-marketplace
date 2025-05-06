@@ -15,6 +15,7 @@ export type SearchResult = {
   imageUrl?: string;
   tags?: string[];
   category?: string;
+  canAccess?: boolean; // Added the missing property
 };
 
 export function useSearch() {
