@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AIToolItem, getTierBadgeColor, getTierIcon, getTierLabel } from '@/data/ai-tools-tiers';
-import { Check, Info, Lock } from 'lucide-react';
+import { Check, Info, Key, Lock } from 'lucide-react';
 import { useTier } from '@/context/TierContext';
 import {
   Tooltip,
@@ -19,6 +19,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import ToolActionButton from './ToolActionButton';
+import apiConnectionManager from '@/utils/apiConnectionManager';
 
 interface AIToolCardProps {
   tool: AIToolItem;
@@ -35,6 +36,9 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
     (tool.tier === 'basic' && (currentTier === 'basic' || currentTier === 'pro')) ||
     (tool.tier === 'pro' && currentTier === 'pro')
   );
+
+  // Check if this tool has an API connection
+  const isApiConnected = apiConnectionManager.hasConnection(tool.id);
 
   if (compact) {
     return (
@@ -67,6 +71,11 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
             className="flex-1"
           />
         </div>
+        {isApiConnected && (
+          <div className="px-4 pb-2 flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
+            <Key className="h-3 w-3" /> API Connected
+          </div>
+        )}
       </Card>
     );
   }
@@ -115,6 +124,13 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
             </div>
           </div>
         )}
+        
+        {isApiConnected && (
+          <div className="mt-3 flex items-center gap-2 text-sm text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-md">
+            <Key className="h-4 w-4" />
+            <span>API Connected</span>
+          </div>
+        )}
       </CardContent>
       
       <CardFooter className="pt-2 border-t mt-auto">
@@ -125,13 +141,15 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
                 <div className="flex items-center gap-1.5">
                   <div className={`h-2.5 w-2.5 rounded-full ${hasAccess ? 'bg-green-500' : 'bg-amber-500'}`}></div>
                   <span className="text-xs text-muted-foreground">
-                    {hasAccess ? "Available" : "Requires upgrade"}
+                    {hasAccess ? (isApiConnected ? "Ready to use" : "Available") : "Requires upgrade"}
                   </span>
                 </div>
               </TooltipTrigger>
               <TooltipContent>
                 {hasAccess 
-                  ? "You have access to this tool with your current subscription" 
+                  ? (isApiConnected 
+                    ? "API connected and ready to use" 
+                    : "You have access to this tool with your current subscription") 
                   : `This tool requires a ${getTierLabel(tool.tier)} subscription`}
               </TooltipContent>
             </Tooltip>
