@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@/components/ThemeProvider';
@@ -35,6 +34,7 @@ import WorkflowDesigner from '@/pages/WorkflowDesigner';
 import DiscoveryPage from '@/pages/DiscoveryPage';
 import AIStudio from '@/pages/AIStudio';
 import ProChatAssistant from '@/components/ProChatAssistant';
+import TeamDashboard from '@/pages/TeamDashboard';
 
 // Create a client with better error handling, retry logic, and caching
 const queryClient = new QueryClient({
