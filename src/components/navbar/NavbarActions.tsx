@@ -8,14 +8,15 @@ import { useUser } from '@/context/UserContext';
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import SearchCommand from '@/components/search/SearchCommand';
 
 const NavbarActions = () => {
   const navigate = useNavigate();
   const { profile } = useUser();
   const [notificationCount, setNotificationCount] = useState(3);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const handleNotificationClick = () => {
     toast.success("Notifications cleared");
@@ -33,11 +34,19 @@ const NavbarActions = () => {
     }
   };
 
+  const openSearch = () => {
+    setSearchOpen(true);
+  };
+
+  const openAdvancedSearch = () => {
+    navigate('/discovery');
+  };
+
   return (
-    <div className="flex items-center gap-2 md:gap-4">
-      {/* Pro Feature Button - Only visible for non-Pro users */}
-      {profile?.tier !== 'pro' && (
-        <TooltipProvider>
+    <>
+      <div className="flex items-center gap-2 md:gap-4">
+        {/* Pro Feature Button - Only visible for non-Pro users */}
+        {profile?.tier !== 'pro' && (
           <Tooltip>
             <TooltipTrigger asChild>
               <Button 
@@ -53,36 +62,39 @@ const NavbarActions = () => {
               <p>Upgrade to Pro for more features</p>
             </TooltipContent>
           </Tooltip>
-        </TooltipProvider>
-      )}
-      
-      {/* Search Button */}
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        className="h-9 w-9 rounded-full text-white hover:bg-white/20"
-        onClick={() => navigate('/discovery')}
-        title="Search"
-      >
-        <Search className="h-4 w-4" />
-      </Button>
-      
-      {/* Notification Button */}
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        className="h-9 w-9 rounded-full text-white hover:bg-white/20 relative"
-        onClick={handleNotificationClick}
-        title="Notifications"
-      >
-        <Bell className="h-4 w-4" />
-        {notificationCount > 0 && (
-          <span className="absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-r from-[#00AAFF] to-[#0066cc] text-[10px] font-medium text-white">
-            {notificationCount}
-          </span>
         )}
-      </Button>
-    </div>
+        
+        {/* Search Button */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-9 w-9 rounded-full text-white hover:bg-white/20"
+          onClick={openSearch}
+          title="Quick Search (Press / or Ctrl+K)"
+        >
+          <Search className="h-4 w-4" />
+        </Button>
+        
+        {/* Notification Button */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-9 w-9 rounded-full text-white hover:bg-white/20 relative"
+          onClick={handleNotificationClick}
+          title="Notifications"
+        >
+          <Bell className="h-4 w-4" />
+          {notificationCount > 0 && (
+            <span className="absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-r from-[#00AAFF] to-[#0066cc] text-[10px] font-medium text-white">
+              {notificationCount}
+            </span>
+          )}
+        </Button>
+      </div>
+      
+      {/* Global Search Command Dialog */}
+      <SearchCommand />
+    </>
   );
 };
 

@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import SearchInput from '@/components/search/SearchInput';
 import {
   Select,
   SelectContent,
@@ -17,7 +17,7 @@ import {
   getTierLabel,
   toolCategories
 } from '@/data/ai-tools-tiers';
-import { Filter, Grid, List, Search, X } from 'lucide-react';
+import { Grid, List, X } from 'lucide-react';
 
 interface ToolsFilterProps {
   searchQuery: string;
@@ -56,21 +56,11 @@ const ToolsFilter: React.FC<ToolsFilterProps> = ({
     <div className="mb-6 space-y-4">
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-grow">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input 
-            placeholder="Search tools by name or description..." 
+          <SearchInput 
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            onChange={setSearchQuery}
+            placeholder="Search tools by name or description..."
           />
-          {searchQuery && (
-            <button 
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
         </div>
         
         <div className="flex gap-3">
