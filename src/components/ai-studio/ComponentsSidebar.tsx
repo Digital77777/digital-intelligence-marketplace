@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 
 interface ComponentsSidebarProps {
   onAddComponent: (componentType: string) => void;
@@ -23,6 +23,8 @@ const componentTypes: ComponentType[] = [
 ];
 
 const ComponentsSidebar: React.FC<ComponentsSidebarProps> = ({ onAddComponent }) => {
+  const { toast } = useToast();
+
   const handleDragStart = (e: React.DragEvent, componentType: string) => {
     e.dataTransfer.setData('componentType', componentType);
   };
