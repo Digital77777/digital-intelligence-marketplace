@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AIToolItem, getTierBadgeColor, getTierIcon, getTierLabel } from '@/data/ai-tools-tiers';
-import { Check, Info, Key, Lock } from 'lucide-react';
+import { Check, Info, Key, Lock, Server } from 'lucide-react';
 import { useTier } from '@/context/TierContext';
 import {
   Tooltip,
@@ -39,6 +39,10 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
 
   // Check if this tool has an API connection
   const isApiConnected = apiConnectionManager.hasConnection(tool.id);
+  const connectionDetails = isApiConnected ? apiConnectionManager.getConnection(tool.id) : null;
+  const hasOpenSourceOption = apiConnectionManager.hasOpenSourceAlternative(tool.id);
+  
+  const isUsingOpenSource = connectionDetails?.modelProvider === 'open-source';
 
   if (compact) {
     return (
@@ -66,14 +70,22 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
           <ToolActionButton
             tool={tool}
             compact={true}
-            action="launch"
+            action={isApiConnected ? "launch" : "connect-api"}
             onSelect={onSelect}
             className="flex-1"
           />
         </div>
         {isApiConnected && (
-          <div className="px-4 pb-2 flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
-            <Key className="h-3 w-3" /> API Connected
+          <div className="px-4 pb-2 flex items-center gap-1 text-xs">
+            {isUsingOpenSource ? (
+              <span className="text-green-600 dark:text-green-400 flex items-center gap-1">
+                <Server className="h-3 w-3" /> Open Source
+              </span>
+            ) : (
+              <span className="text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                <Key className="h-3 w-3" /> API Connected
+              </span>
+            )}
           </div>
         )}
       </Card>
@@ -112,6 +124,17 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
           <p className="text-xs text-foreground/80">{tool.uniqueSellingPoint}</p>
         </div>
         
+        {hasOpenSourceOption && (
+          <div className="bg-green-50/50 dark:bg-green-900/20 rounded-lg p-3 mb-3 border border-green-100 dark:border-green-900">
+            <h4 className="font-medium text-sm mb-1 flex items-center gap-1.5 text-green-800 dark:text-green-300">
+              <Server className="h-4 w-4" /> Open Source Available
+            </h4>
+            <p className="text-xs text-green-700 dark:text-green-400">
+              This tool can run using open source models in your browser
+            </p>
+          </div>
+        )}
+        
         {tool.integrations && tool.integrations.length > 0 && (
           <div>
             <h4 className="font-medium text-xs mb-1 text-muted-foreground">Integrations</h4>
@@ -126,9 +149,18 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
         )}
         
         {isApiConnected && (
-          <div className="mt-3 flex items-center gap-2 text-sm text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-md">
-            <Key className="h-4 w-4" />
-            <span>API Connected</span>
+          <div className="mt-3 flex items-center gap-2 text-sm">
+            {isUsingOpenSource ? (
+              <div className="text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-md flex items-center gap-2 w-full">
+                <Server className="h-4 w-4" />
+                <span>Using Open Source Models</span>
+              </div>
+            ) : (
+              <div className="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-md flex items-center gap-2 w-full">
+                <Key className="h-4 w-4" />
+                <span>API Connected</span>
+              </div>
+            )}
           </div>
         )}
       </CardContent>
@@ -148,7 +180,7 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
               <TooltipContent>
                 {hasAccess 
                   ? (isApiConnected 
-                    ? "API connected and ready to use" 
+                    ? (isUsingOpenSource ? "Using open source models" : "API connected and ready to use")
                     : "You have access to this tool with your current subscription") 
                   : `This tool requires a ${getTierLabel(tool.tier)} subscription`}
               </TooltipContent>
@@ -164,7 +196,7 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
             />
             <ToolActionButton 
               tool={tool}
-              action="launch"
+              action={isApiConnected ? "launch" : "connect-api"}
               size="sm"
               onSelect={onSelect}
             />

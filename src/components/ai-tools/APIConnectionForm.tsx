@@ -5,8 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AIToolItem } from '@/data/ai-tools-tiers';
-import { AlertCircle, CheckCircle2, Key, Lock } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Key, Lock, Server } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Switch } from '@/components/ui/switch';
+import apiConnectionManager from '@/utils/apiConnectionManager';
 
 interface APIConnectionFormProps {
   tool: AIToolItem;
@@ -23,26 +26,36 @@ const APIConnectionForm: React.FC<APIConnectionFormProps> = ({
   const [apiSecret, setApiSecret] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [modelProvider, setModelProvider] = useState<'open-source' | 'api' | 'hybrid'>('api');
+  const [useLocalModels, setUseLocalModels] = useState(false);
+  
+  const hasOpenSourceOption = apiConnectionManager.hasOpenSourceAlternative(tool.id);
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
     
+    // If using only open-source models, we don't need API key validation
+    const isApiKeyNeeded = modelProvider !== 'open-source';
+    
     // Simulate API validation
     setTimeout(() => {
-      // In a real implementation, you would validate the API key here
-      if (apiKey.length < 8) {
+      // For API or hybrid modes, validate API key
+      if (isApiKeyNeeded && apiKey.length < 8) {
         setError('Invalid API credentials. Please check and try again.');
         setIsLoading(false);
         return;
       }
       
-      // Store API key securely (in a real app, use a more secure method)
-      localStorage.setItem(`${tool.id}_api_key`, apiKey);
-      if (apiSecret) {
-        localStorage.setItem(`${tool.id}_api_secret`, apiSecret);
-      }
+      // Store connection details
+      apiConnectionManager.storeConnection(
+        tool.id, 
+        apiKey, 
+        apiSecret,
+        modelProvider,
+        useLocalModels
+      );
       
       setIsLoading(false);
       onSuccess();
@@ -54,10 +67,10 @@ const APIConnectionForm: React.FC<APIConnectionFormProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Key className="h-4 w-4" />
-          Connect to {tool.name} API
+          Connect to {tool.name}
         </CardTitle>
         <CardDescription>
-          Enter your API credentials to connect to {tool.name}
+          Set up {tool.name} with API credentials or use open-source alternatives
         </CardDescription>
       </CardHeader>
       
@@ -71,45 +84,94 @@ const APIConnectionForm: React.FC<APIConnectionFormProps> = ({
             </Alert>
           )}
           
-          <div className="space-y-2">
-            <Label htmlFor="apiKey" className="flex items-center gap-2">
-              <Lock className="h-3.5 w-3.5" /> API Key
-            </Label>
-            <Input
-              id="apiKey"
-              type="password"
-              value={apiKey}
-              onChange={e => setApiKey(e.target.value)}
-              placeholder="Enter your API key"
-              required
-              autoComplete="off"
-              className="font-mono"
-            />
-            <p className="text-xs text-muted-foreground">
-              You can find your API key in the {tool.name} dashboard
-            </p>
-          </div>
+          {hasOpenSourceOption && (
+            <div className="space-y-3 mb-2">
+              <Label>Model Provider</Label>
+              <RadioGroup 
+                defaultValue={modelProvider} 
+                onValueChange={(value) => setModelProvider(value as 'open-source' | 'api' | 'hybrid')}
+                className="flex flex-col space-y-1"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="open-source" id="open-source" />
+                  <Label htmlFor="open-source" className="cursor-pointer">Open Source Only</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="api" id="api" />
+                  <Label htmlFor="api" className="cursor-pointer">API Only</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="hybrid" id="hybrid" />
+                  <Label htmlFor="hybrid" className="cursor-pointer">Hybrid (API with Open Source fallback)</Label>
+                </div>
+              </RadioGroup>
+            </div>
+          )}
           
-          {/* Some APIs require both key and secret */}
-          <div className="space-y-2">
-            <Label htmlFor="apiSecret" className="flex items-center gap-2">
-              <Lock className="h-3.5 w-3.5" /> API Secret (Optional)
-            </Label>
-            <Input
-              id="apiSecret"
-              type="password"
-              value={apiSecret}
-              onChange={e => setApiSecret(e.target.value)}
-              placeholder="Enter your API secret if required"
-              autoComplete="off"
-              className="font-mono"
-            />
-          </div>
+          {(modelProvider === 'open-source' || modelProvider === 'hybrid') && hasOpenSourceOption && (
+            <Alert className="bg-green-50/50 border-green-200 dark:bg-green-900/20 dark:border-green-800">
+              <Server className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <AlertDescription className="text-green-800 dark:text-green-300">
+                This tool supports the open-source model: {apiConnectionManager.getOpenSourceModel(tool.id)}
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {(modelProvider === 'open-source' || modelProvider === 'hybrid') && (
+            <div className="flex items-center justify-between">
+              <Label htmlFor="use-local-models">Run models locally (requires more RAM)</Label>
+              <Switch
+                id="use-local-models"
+                checked={useLocalModels}
+                onCheckedChange={setUseLocalModels}
+              />
+            </div>
+          )}
+          
+          {modelProvider !== 'open-source' && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="apiKey" className="flex items-center gap-2">
+                  <Lock className="h-3.5 w-3.5" /> API Key
+                </Label>
+                <Input
+                  id="apiKey"
+                  type="password"
+                  value={apiKey}
+                  onChange={e => setApiKey(e.target.value)}
+                  placeholder="Enter your API key"
+                  required={modelProvider === 'api'}
+                  autoComplete="off"
+                  className="font-mono"
+                />
+                <p className="text-xs text-muted-foreground">
+                  You can find your API key in the {tool.name} dashboard
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="apiSecret" className="flex items-center gap-2">
+                  <Lock className="h-3.5 w-3.5" /> API Secret (Optional)
+                </Label>
+                <Input
+                  id="apiSecret"
+                  type="password"
+                  value={apiSecret}
+                  onChange={e => setApiSecret(e.target.value)}
+                  placeholder="Enter your API secret if required"
+                  autoComplete="off"
+                  className="font-mono"
+                />
+              </div>
+            </>
+          )}
           
           <Alert className="bg-blue-50/50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
             <CheckCircle2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
             <AlertDescription className="text-blue-800 dark:text-blue-300">
-              Your API credentials are stored securely and only used to connect to {tool.name}
+              {modelProvider === 'open-source' 
+                ? "Open-source models run in your browser and don't send data to external services" 
+                : "Your API credentials are stored securely and only used to connect to " + tool.name}
             </AlertDescription>
           </Alert>
         </form>
@@ -119,10 +181,10 @@ const APIConnectionForm: React.FC<APIConnectionFormProps> = ({
         <Button variant="outline" onClick={onCancel}>Cancel</Button>
         <Button 
           onClick={handleSubmit} 
-          disabled={isLoading || !apiKey}
+          disabled={isLoading || (modelProvider !== 'open-source' && !apiKey)}
           className="bg-blue-600 hover:bg-blue-700 text-white"
         >
-          {isLoading ? "Connecting..." : "Connect API"}
+          {isLoading ? "Connecting..." : "Connect"}
         </Button>
       </CardFooter>
     </Card>
