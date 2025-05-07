@@ -11,6 +11,37 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { pipeline, env } from '@huggingface/transformers';
 
+// Define the PipelineType for proper TypeScript integration
+type PipelineType = 
+  | 'audio-classification'
+  | 'automatic-speech-recognition'
+  | 'conversational'
+  | 'depth-estimation'
+  | 'document-question-answering'
+  | 'feature-extraction'
+  | 'fill-mask'
+  | 'image-classification'
+  | 'image-feature-extraction'
+  | 'image-segmentation'
+  | 'image-to-image'
+  | 'image-to-text'
+  | 'mask-generation'
+  | 'ner'
+  | 'object-detection'
+  | 'question-answering'
+  | 'sentiment-analysis'
+  | 'summarization'
+  | 'table-question-answering'
+  | 'text-classification'
+  | 'text-generation'
+  | 'text-to-image'
+  | 'token-classification'
+  | 'translation'
+  | 'visual-question-answering'
+  | 'zero-shot-classification'
+  | 'zero-shot-image-classification'
+  | 'zero-shot-object-detection';
+
 // Configure transformers.js to use browser cache by default
 env.allowLocalModels = true;
 env.useBrowserCache = true;
@@ -48,7 +79,7 @@ const AIToolInterface: React.FC<AIToolInterfaceProps> = ({ tool, connectionDetai
     setError(null);
     
     try {
-      let modelTask: string;
+      let modelTask: PipelineType;
       let modelId: string;
       
       // Determine which model to use based on the tool
@@ -74,8 +105,13 @@ const AIToolInterface: React.FC<AIToolInterfaceProps> = ({ tool, connectionDetai
           modelId = 'Xenova/distilgpt2';
       }
       
+      // Check for WebGPU support without directly accessing navigator.gpu
+      const hasWebGPU = typeof window !== 'undefined' && 
+                        'navigator' in window && 
+                        'gpu' in navigator;
+      
       const deviceOption = {
-        device: (connectionDetails.useLocalModels && window.navigator.gpu) ? 'webgpu' : 'cpu'
+        device: (connectionDetails.useLocalModels && hasWebGPU) ? 'webgpu' : 'cpu'
       };
       
       toast({
@@ -83,7 +119,7 @@ const AIToolInterface: React.FC<AIToolInterfaceProps> = ({ tool, connectionDetai
         description: `Loading ${modelId}. This may take a moment...`
       });
       
-      // Initialize the model
+      // Initialize the model with the correct type
       const pipelineInstance = await pipeline(modelTask, modelId, deviceOption);
       setModel(pipelineInstance);
       
