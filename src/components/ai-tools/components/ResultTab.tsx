@@ -8,6 +8,7 @@ interface ResultTabProps {
   output: string;
   setCurrentTab: (tab: string) => void;
   handleProcess: () => void;
+  handleSave: () => void;
   isProcessing: boolean;
   hasInput: boolean;
   toolCategory: string;
@@ -17,6 +18,7 @@ const ResultTab: React.FC<ResultTabProps> = ({
   output,
   setCurrentTab,
   handleProcess,
+  handleSave,
   isProcessing,
   hasInput,
   toolCategory
@@ -45,6 +47,7 @@ const ResultTab: React.FC<ResultTabProps> = ({
       <ResultActions 
         setCurrentTab={setCurrentTab}
         handleProcess={handleProcess}
+        handleSave={handleSave}
         isProcessing={isProcessing}
         hasInput={hasInput}
       />

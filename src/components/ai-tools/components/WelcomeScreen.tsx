@@ -13,6 +13,9 @@ interface WelcomeScreenProps {
 }
 
 const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ tool, handleConnectApi, handleQuickStart }) => {
+  // Check if the platform API is available for this tool
+  const hasPlatformAPI = apiConnectionManager.hasPlatformAPI(tool.id);
+
   return (
     <div className="flex flex-col items-center text-center p-6">
       <ToolDescription tool={tool} />
@@ -24,6 +27,16 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ tool, handleConnectApi, h
       />
       
       <ToolUseCases tool={tool} />
+      
+      {hasPlatformAPI && (
+        <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 rounded-lg max-w-lg">
+          <h3 className="font-semibold mb-2">Ready to use!</h3>
+          <p className="text-sm">
+            This tool is ready to use with our platform API. No setup required - just click "Quick Start" to begin.
+            Your results can be saved to your device after processing.
+          </p>
+        </div>
+      )}
     </div>
   );
 };

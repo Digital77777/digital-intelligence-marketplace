@@ -64,4 +64,11 @@ export interface ProcessResult {
   success: boolean;
   result: string;
   error?: string;
+  fileName?: string;
+  fileType?: string;
+}
+
+export interface SaveOptions {
+  fileName?: string;
+  fileType?: string;
 }

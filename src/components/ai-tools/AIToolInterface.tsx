@@ -5,6 +5,7 @@ import { AIToolItem } from '@/data/ai-tools-tiers';
 import { ConnectionDetails } from './types/tool-types';
 import { useAIModel } from './hooks/useAIModel';
 import { useToolProcessor } from './hooks/useToolProcessor';
+import { useFileSaver } from '@/utils/saveUtils';
 import ModelStatusAlerts from './components/ModelStatusAlerts';
 import InputTab from './components/InputTab';
 import ResultTab from './components/ResultTab';
@@ -21,6 +22,7 @@ const AIToolInterface: React.FC<AIToolInterfaceProps> = ({ tool, connectionDetai
   
   const { model, modelLoading, error } = useAIModel(tool, connectionDetails);
   const { processInput, isProcessing } = useToolProcessor(model, tool.category);
+  const { saveResult } = useFileSaver();
 
   const handleProcess = async () => {
     const result = await processInput(input, connectionDetails.modelProvider, tool.id);
@@ -30,6 +32,13 @@ const AIToolInterface: React.FC<AIToolInterfaceProps> = ({ tool, connectionDetai
       setCurrentTab('result');
     } else if (result.error) {
       // Error is already handled within the hook
+    }
+  };
+
+  const handleSave = async () => {
+    if (output) {
+      const isImageOutput = output.includes('<img');
+      await saveResult(output, tool.name, tool.category, isImageOutput);
     }
   };
 
@@ -97,6 +106,7 @@ const AIToolInterface: React.FC<AIToolInterfaceProps> = ({ tool, connectionDetai
             output={output}
             setCurrentTab={setCurrentTab}
             handleProcess={handleProcess}
+            handleSave={handleSave}
             isProcessing={isProcessing}
             hasInput={!!input}
             toolCategory={tool.category}

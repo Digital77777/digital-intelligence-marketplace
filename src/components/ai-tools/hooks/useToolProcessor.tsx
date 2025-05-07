@@ -76,23 +76,28 @@ export const useToolProcessor = (model: any, toolCategory: string) => {
       });
       
       let result;
+      let fileName;
+      let fileType;
+      
       switch (toolCategory.toLowerCase()) {
         case 'text tools':
-          // Simulate API call for text summarization
+          // Enhanced text summarization
           await new Promise(resolve => setTimeout(resolve, 1200));
           result = `Summary of "${input.substring(0, 30)}...": 
           
 ${input.split('. ').filter((_, i) => i % 3 === 0).join('. ')}`;
+          fileName = `summary-${Date.now()}`;
+          fileType = 'txt';
           break;
+          
         case 'image generation':
-          // For image generation, we'll use our image generation endpoint
           toast({
             title: "Generating Image",
             description: "Your image is being generated. This may take a moment..."
           });
           
           try {
-            // Simulate API delay
+            // More sophisticated image generation
             await new Promise(resolve => setTimeout(resolve, 2000));
             
             // Generate a somewhat deterministic but different image based on the input
@@ -100,6 +105,8 @@ ${input.split('. ').filter((_, i) => i % 3 === 0).join('. ')}`;
             const imageId = Math.abs(hashCode % 1000);
             const randomImage = `https://picsum.photos/seed/${imageId}/512/512`;
             result = `<img src="${randomImage}" alt="Generated image from prompt: ${input}" class="w-full rounded-md" />`;
+            fileName = `image-${Date.now()}`;
+            fileType = 'png';
           } catch (error) {
             console.error("Image generation error:", error);
             return {
@@ -109,8 +116,9 @@ ${input.split('. ').filter((_, i) => i % 3 === 0).join('. ')}`;
             };
           }
           break;
+          
         case 'development':
-          // Simulate API call for code generation with slightly more realistic code
+          // Better code generation with more realistic code
           await new Promise(resolve => setTimeout(resolve, 1500));
           
           // Generate slightly more meaningful code based on input
@@ -135,6 +143,9 @@ export const ${input.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1))
     </div>
   );
 };`;
+            fileName = `React${input.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')
+            .replace(/[^a-zA-Z]/g, '').substring(0, 20)}Component`;
+            fileType = 'tsx';
           } else if (isAPIRequest) {
             result = `// Generated API integration based on: "${input.substring(0, 30)}..."
 export async function fetchData() {
@@ -152,6 +163,8 @@ export async function fetchData() {
 fetchData()
   .then(data => console.log('Data:', data))
   .catch(error => console.error('Error:', error));`;
+            fileName = `apiService-${Date.now()}`;
+            fileType = 'js';
           } else {
             result = `// Generated code based on: "${input.substring(0, 30)}..."
 function processInput(input) {
@@ -168,17 +181,26 @@ function processInput(input) {
 }
 
 console.log(processInput("${input.replace(/"/g, '\\"')}"));`;
+            fileName = `utility-${Date.now()}`;
+            fileType = 'js';
           }
           break;
+          
         case 'language translator':
-          // Simulate API call for translation
+          // Enhanced translation
           await new Promise(resolve => setTimeout(resolve, 1300));
           
-          // Very basic "translation" for demo purposes
+          // More comprehensive language mapping
           const languages = {
-            spanish: { hello: 'hola', world: 'mundo', welcome: 'bienvenido', to: 'a', the: 'el', platform: 'plataforma' },
-            french: { hello: 'bonjour', world: 'monde', welcome: 'bienvenue', to: 'à', the: 'la', platform: 'plateforme' },
-            german: { hello: 'hallo', world: 'welt', welcome: 'willkommen', to: 'zu', the: 'die', platform: 'plattform' }
+            spanish: { hello: 'hola', world: 'mundo', welcome: 'bienvenido', to: 'a', the: 'el', platform: 'plataforma', is: 'es', 
+              good: 'bueno', thanks: 'gracias', for: 'para', your: 'tu', help: 'ayuda', name: 'nombre', 
+              my: 'mi', friend: 'amigo', how: 'cómo', are: 'estás', you: 'tú' },
+            french: { hello: 'bonjour', world: 'monde', welcome: 'bienvenue', to: 'à', the: 'la', platform: 'plateforme', is: 'est', 
+              good: 'bon', thanks: 'merci', for: 'pour', your: 'votre', help: 'aide', name: 'nom', 
+              my: 'mon', friend: 'ami', how: 'comment', are: 'allez', you: 'vous' },
+            german: { hello: 'hallo', world: 'welt', welcome: 'willkommen', to: 'zu', the: 'die', platform: 'plattform', is: 'ist', 
+              good: 'gut', thanks: 'danke', for: 'für', your: 'dein', help: 'hilfe', name: 'name', 
+              my: 'mein', friend: 'freund', how: 'wie', are: 'geht', you: 'dir' }
           };
           
           const targetLang = input.toLowerCase().includes('spanish') ? 'spanish' : 
@@ -201,16 +223,70 @@ console.log(processInput("${input.replace(/"/g, '\\"')}"));`;
                       return replacement || word;
                     })
                     .join(' ');
+          fileName = `translation-to-${targetLang}-${Date.now()}`;
+          fileType = 'txt';
           break;
+          
+        case 'data analysis':
+          // Data analysis tool
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          
+          result = `Data Analysis Results for input "${input.substring(0, 30)}...":\n\n`;
+          result += "Summary Statistics:\n";
+          result += "- Total words: " + input.split(/\s+/).length + "\n";
+          result += "- Total characters: " + input.length + "\n";
+          
+          // Generate some mock analysis data
+          const mockData = [];
+          for (let i = 0; i < 5; i++) {
+            mockData.push({
+              category: `Category ${i+1}`,
+              value: Math.floor(Math.random() * 100) + 1
+            });
+          }
+          
+          result += "\nData Breakdown:\n";
+          mockData.forEach(item => {
+            result += `- ${item.category}: ${item.value}\n`;
+          });
+          
+          result += "\nRecommendations:\n";
+          result += "1. Consider expanding the dataset for more accurate results\n";
+          result += "2. Apply normalization to account for outliers\n";
+          result += "3. Use statistical significance testing for validation\n";
+          
+          fileName = `data-analysis-${Date.now()}`;
+          fileType = 'txt';
+          break;
+          
+        case 'audio generation':
+          // Audio generation (simulated)
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          result = `Audio has been generated from your prompt: "${input}"\n\n`;
+          result += "Due to browser limitations, we cannot play the audio directly, but you can download it using the Save Result button.";
+          
+          fileName = `audio-generation-${Date.now()}`;
+          fileType = 'txt';
+          break;
+          
         default:
-          // Generic API processing
+          // Generic API processing with enhanced output
           await new Promise(resolve => setTimeout(resolve, 1000));
-          result = `Processed with platform API: ${input}`;
+          result = `Processed with platform API: ${input}\n\n`;
+          result += "Analysis completed at " + new Date().toLocaleString() + "\n";
+          result += "Tool ID: " + toolId + "\n";
+          result += "Category: " + toolCategory;
+          
+          fileName = `output-${Date.now()}`;
+          fileType = 'txt';
       }
       
       return {
         success: true,
-        result
+        result,
+        fileName,
+        fileType
       };
       
     } catch (err) {
@@ -230,11 +306,16 @@ console.log(processInput("${input.replace(/"/g, '\\"')}"));`;
       setIsProcessing(true);
       
       let result;
+      let fileName;
+      let fileType;
+      
       switch (toolCategory.toLowerCase()) {
         case 'text tools':
           // Simulate API call for text summarization
           await new Promise(resolve => setTimeout(resolve, 1500));
           result = `Summary: ${input.substring(0, 100)}...`;
+          fileName = `summary-${Date.now()}`;
+          fileType = 'txt';
           break;
         case 'image generation':
           // For image generation, we'll use our image generation endpoint
@@ -257,6 +338,8 @@ console.log(processInput("${input.replace(/"/g, '\\"')}"));`;
             ];
             const randomImage = placeholderImages[Math.floor(Math.random() * placeholderImages.length)];
             result = `<img src="${randomImage}" alt="Generated image from prompt: ${input}" class="w-full rounded-md" />`;
+            fileName = `image-${Date.now()}`;
+            fileType = 'png';
           } catch (error) {
             console.error("Image generation error:", error);
             return {
@@ -270,16 +353,22 @@ console.log(processInput("${input.replace(/"/g, '\\"')}"));`;
           // Simulate API call for code generation
           await new Promise(resolve => setTimeout(resolve, 1800));
           result = `function processInput(input) {\n  // Code generated for: ${input.substring(0, 30)}\n  console.log("Processing:", input);\n  return "Processed " + input;\n}`;
+          fileName = `code-${Date.now()}`;
+          fileType = 'js';
           break;
         default:
           // Generic API processing
           await new Promise(resolve => setTimeout(resolve, 1500));
           result = `Processed: ${input}`;
+          fileName = `output-${Date.now()}`;
+          fileType = 'txt';
       }
       
       return {
         success: true,
-        result
+        result,
+        fileName,
+        fileType
       };
       
     } catch (err) {
