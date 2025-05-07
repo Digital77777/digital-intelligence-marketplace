@@ -21,16 +21,26 @@ const ResultTab: React.FC<ResultTabProps> = ({
   hasInput,
   toolCategory
 }) => {
+  // Check if the output contains an HTML img tag
+  const isImageOutput = output?.includes('<img');
+  
   return (
     <>
       {output ? (
         <Card className="flex-1">
           <CardContent className="p-4">
-            {toolCategory.toLowerCase() === 'image generation' ? (
-              <div className="flex items-center justify-center h-full min-h-[300px] bg-muted rounded-md">
-                <p className="text-muted-foreground">{output}</p>
+            {isImageOutput ? (
+              // If it's an image, render the HTML directly
+              <div className="flex items-center justify-center h-full min-h-[300px] p-2">
+                <div dangerouslySetInnerHTML={{ __html: output }} />
+              </div>
+            ) : toolCategory.toLowerCase() === 'image generation' && !isImageOutput ? (
+              // If it's an image generation task but no image yet
+              <div className="flex items-center justify-center h-full min-h-[300px] bg-muted/30 rounded-md">
+                <p className="text-muted-foreground">{output || "Processing image generation..."}</p>
               </div>
             ) : (
+              // For text content, show pre-formatted text
               <pre className="whitespace-pre-wrap font-mono text-sm h-full min-h-[300px] overflow-auto p-4">
                 {output}
               </pre>

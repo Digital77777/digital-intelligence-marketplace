@@ -35,6 +35,16 @@ const InputTab: React.FC<InputTabProps> = ({
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Allow submitting with Enter (not in textareas)
+    if (e.key === 'Enter' && !e.shiftKey && toolCategory.toLowerCase() === 'image generation') {
+      e.preventDefault();
+      if (!isProcessing && input.trim()) {
+        handleProcess();
+      }
+    }
+  };
+
   return (
     <div className="mb-4 flex-1">
       {toolCategory.toLowerCase() === 'image generation' ? (
@@ -43,31 +53,46 @@ const InputTab: React.FC<InputTabProps> = ({
             placeholder="Enter a description of the image..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
             disabled={isProcessing}
             className="w-full"
           />
           <div className="flex flex-wrap gap-2">
             <Button 
               variant="outline" 
-              onClick={() => setInput("A mountain landscape at sunset with dramatic clouds")}
+              onClick={() => setInput("A serene mountain landscape at sunset with dramatic clouds and a reflective lake")}
               size="sm"
+              disabled={isProcessing}
             >
               Mountain sunset
             </Button>
             <Button 
               variant="outline" 
-              onClick={() => setInput("A futuristic city skyline with flying cars")}
+              onClick={() => setInput("A futuristic cyberpunk cityscape at night with neon lights and flying vehicles")}
               size="sm"
+              disabled={isProcessing}
             >
-              Futuristic city
+              Cyberpunk city
             </Button>
             <Button 
               variant="outline" 
-              onClick={() => setInput("Portrait of a smiling person with blue hair")}
+              onClick={() => setInput("A charming cottage in a magical forest with glowing mushrooms and fairy lights")}
               size="sm"
+              disabled={isProcessing}
             >
-              Portrait
+              Fantasy cottage
             </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => setInput("A colorful abstract painting with geometric shapes and vibrant colors")}
+              size="sm"
+              disabled={isProcessing}
+            >
+              Abstract art
+            </Button>
+          </div>
+          <div className="text-xs text-muted-foreground mt-2">
+            <p>Try to be specific with your descriptions. Include details about style, lighting, composition, and mood.</p>
           </div>
         </div>
       ) : (
@@ -83,7 +108,7 @@ const InputTab: React.FC<InputTabProps> = ({
       <div className="flex justify-end mt-4">
         <Button 
           onClick={handleProcess} 
-          disabled={isProcessing}
+          disabled={isProcessing || !input.trim()}
         >
           {isProcessing ? (
             <>

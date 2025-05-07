@@ -21,6 +21,13 @@ const OPEN_SOURCE_MODELS = {
   'ai-code-assistant': 'bigcode/starcoder2-15b',
   'ai-language-translator': 'facebook/mbart-large-50-many-to-many-mmt',
   'ai-music-composer': 'facebook/musicgen-small',
+  'text-to-image': 'runwayml/stable-diffusion-v1-5',
+  'image-generation': 'CompVis/stable-diffusion-v1-4',
+  'summarizer': 'facebook/bart-large-cnn',
+  'code-generator': 'bigcode/starcoder',
+  '1': 'stabilityai/stable-diffusion-xl-base-1.0', // For tool with ID 1
+  '2': 'facebook/bart-large-cnn', // For tool with ID 2
+  '3': 'bigcode/starcoder', // For tool with ID 3
 };
 
 export const apiConnectionManager = {

@@ -8,7 +8,7 @@ import { PipelineType, DeviceType, ConnectionDetails } from '../types/tool-types
 env.allowLocalModels = true;
 env.useBrowserCache = true;
 
-export const useAIModel = (tool: { category: string; name: string }, connectionDetails: ConnectionDetails) => {
+export const useAIModel = (tool: { category: string; name: string; id?: string }, connectionDetails: ConnectionDetails) => {
   const [model, setModel] = useState<any>(null);
   const [modelLoading, setModelLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,8 +61,8 @@ export const useAIModel = (tool: { category: string; name: string }, connectionD
                       'gpu' in navigator;
       
       // Set device option with the correct type
-      const deviceOption = {
-        device: (connectionDetails.useLocalModels && hasWebGPU ? 'webgpu' : 'cpu') as DeviceType
+      const deviceOption: { device: DeviceType } = {
+        device: (connectionDetails.useLocalModels && hasWebGPU ? 'webgpu' : 'cpu')
       };
       
       toast({

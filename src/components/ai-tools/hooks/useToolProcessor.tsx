@@ -29,8 +29,9 @@ export const useToolProcessor = (model: any, toolCategory: string) => {
           }
           break;
         case 'image generation':
-          // For image generation we'd generate an image and return a data URL
-          result = "Open-source image generation requires more specialized components";
+          // For image generation, we need to return a placeholder until we get the actual image
+          // In a real implementation, we'd return a data URL or an image URL
+          result = "Generating image from prompt: " + input;
           break;
         case 'development':
           result = await model(input, { 
@@ -70,22 +71,51 @@ export const useToolProcessor = (model: any, toolCategory: string) => {
     try {
       setIsProcessing(true);
       
-      // Simulate API call - in a real implementation, this would call the actual API
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Simulate response
       let result;
       switch (toolCategory.toLowerCase()) {
         case 'text tools':
-          result = `Summary: ${input.substring(0, 50)}...`;
+          // Simulate API call for text summarization
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          result = `Summary: ${input.substring(0, 100)}...`;
           break;
         case 'image generation':
-          result = "Image generation would show a preview here";
+          // For image generation, we'll use our image generation endpoint
+          toast({
+            title: "Generating Image",
+            description: "Your image is being generated. This may take a moment..."
+          });
+          
+          try {
+            // This would be a real API call to your image generation endpoint
+            await new Promise(resolve => setTimeout(resolve, 2500)); // Simulate API delay
+            
+            // For demo purposes, we're using a placeholder image
+            // In a real implementation, this would be the URL or data URL of the generated image
+            const placeholderImages = [
+              'https://source.unsplash.com/random/400x400/?abstract',
+              'https://source.unsplash.com/random/400x400/?landscape',
+              'https://source.unsplash.com/random/400x400/?portrait',
+              'https://source.unsplash.com/random/400x400/?nature'
+            ];
+            const randomImage = placeholderImages[Math.floor(Math.random() * placeholderImages.length)];
+            result = `<img src="${randomImage}" alt="Generated image from prompt: ${input}" class="w-full rounded-md" />`;
+          } catch (error) {
+            console.error("Image generation error:", error);
+            return {
+              success: false,
+              result: '',
+              error: `Error generating image: ${error.message || 'Unknown error'}`
+            };
+          }
           break;
         case 'development':
-          result = `function processInput(input) {\n  // Process ${input.substring(0, 20)}\n  return processed;\n}`;
+          // Simulate API call for code generation
+          await new Promise(resolve => setTimeout(resolve, 1800));
+          result = `function processInput(input) {\n  // Code generated for: ${input.substring(0, 30)}\n  console.log("Processing:", input);\n  return "Processed " + input;\n}`;
           break;
         default:
+          // Generic API processing
+          await new Promise(resolve => setTimeout(resolve, 1500));
           result = `Processed: ${input}`;
       }
       
