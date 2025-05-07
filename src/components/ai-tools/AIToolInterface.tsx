@@ -45,6 +45,20 @@ type PipelineType =
   | 'zero-shot-image-classification'
   | 'zero-shot-object-detection';
 
+// Define valid device types according to the Hugging Face transformers library
+type DeviceType = 
+  | 'cpu' 
+  | 'webgpu' 
+  | 'gpu' 
+  | 'auto' 
+  | 'wasm' 
+  | 'cuda' 
+  | 'dml' 
+  | 'webnn' 
+  | 'webnn-npu'
+  | 'webnn-gpu'
+  | 'webnn-cpu';
+
 // Configure transformers.js to use browser cache by default
 env.allowLocalModels = true;
 env.useBrowserCache = true;
@@ -114,8 +128,9 @@ const AIToolInterface: React.FC<AIToolInterfaceProps> = ({ tool, connectionDetai
                         'navigator' in window && 
                         'gpu' in navigator;
       
+      // Set device option with the correct type
       const deviceOption = {
-        device: (connectionDetails.useLocalModels && hasWebGPU) ? 'webgpu' : 'cpu'
+        device: (connectionDetails.useLocalModels && hasWebGPU ? 'webgpu' : 'cpu') as DeviceType
       };
       
       toast({
