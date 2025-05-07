@@ -51,7 +51,7 @@ export type DeviceType =
 
 export interface ConnectionDetails {
   apiKey: string;
-  modelProvider: 'open-source' | 'api' | 'hybrid';
+  modelProvider: 'open-source' | 'api' | 'hybrid' | 'platform';
   useLocalModels: boolean;
 }
 
