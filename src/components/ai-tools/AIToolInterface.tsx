@@ -1,288 +1,35 @@
 
-import React, { useState, useEffect } from 'react';
-import { AIToolItem } from '@/data/ai-tools-tiers';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
+import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertCircle, CheckCircle2, Loader2, Server } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useToast } from '@/hooks/use-toast';
-import { pipeline, env } from '@huggingface/transformers';
-
-// Define pipeline types more precisely based on the Hugging Face transformers library
-type PipelineType = 
-  | 'audio-classification'
-  | 'automatic-speech-recognition'
-  | 'conversational'
-  | 'depth-estimation'
-  | 'document-question-answering'
-  | 'feature-extraction'
-  | 'fill-mask'
-  | 'image-classification'
-  | 'image-feature-extraction'
-  | 'image-segmentation'
-  | 'image-to-image'
-  | 'image-to-text'
-  | 'mask-generation'
-  | 'ner'
-  | 'object-detection'
-  | 'question-answering'
-  | 'sentiment-analysis'
-  | 'summarization'
-  | 'table-question-answering'
-  | 'text-classification'
-  | 'text-generation'
-  | 'text-to-audio'
-  | 'text2text-generation' // This is what we should use instead of 'text-to-image'
-  | 'token-classification'
-  | 'translation'
-  | 'translation_xx_to_yy'
-  | 'visual-question-answering'
-  | 'vqa'
-  | 'zero-shot-classification'
-  | 'zero-shot-image-classification'
-  | 'zero-shot-object-detection';
-
-// Define valid device types according to the Hugging Face transformers library
-type DeviceType = 
-  | 'cpu' 
-  | 'webgpu' 
-  | 'gpu' 
-  | 'auto' 
-  | 'wasm' 
-  | 'cuda' 
-  | 'dml' 
-  | 'webnn' 
-  | 'webnn-npu'
-  | 'webnn-gpu'
-  | 'webnn-cpu';
-
-// Configure transformers.js to use browser cache by default
-env.allowLocalModels = true;
-env.useBrowserCache = true;
+import { AIToolItem } from '@/data/ai-tools-tiers';
+import { ConnectionDetails } from './types/tool-types';
+import { useAIModel } from './hooks/useAIModel';
+import { useToolProcessor } from './hooks/useToolProcessor';
+import ModelStatusAlerts from './components/ModelStatusAlerts';
+import InputTab from './components/InputTab';
+import ResultTab from './components/ResultTab';
 
 interface AIToolInterfaceProps {
   tool: AIToolItem;
-  connectionDetails: {
-    apiKey: string;
-    modelProvider: 'open-source' | 'api' | 'hybrid';
-    useLocalModels: boolean;
-  };
+  connectionDetails: ConnectionDetails;
 }
 
 const AIToolInterface: React.FC<AIToolInterfaceProps> = ({ tool, connectionDetails }) => {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
   const [currentTab, setCurrentTab] = useState('input');
-  const [model, setModel] = useState<any>(null);
-  const [modelLoading, setModelLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
+  
+  const { model, modelLoading, error } = useAIModel(tool, connectionDetails);
+  const { processInput, isProcessing } = useToolProcessor(model, tool.category);
 
-  // Initialize model if using open-source option
-  useEffect(() => {
-    if (connectionDetails.modelProvider === 'open-source' || connectionDetails.modelProvider === 'hybrid') {
-      loadModel();
-    }
-  }, [connectionDetails.modelProvider]);
-
-  const loadModel = async () => {
-    if (modelLoading || model) return;
+  const handleProcess = async () => {
+    const result = await processInput(input, connectionDetails.modelProvider);
     
-    setModelLoading(true);
-    setError(null);
-    
-    try {
-      let modelTask: PipelineType;
-      let modelId: string;
-      
-      // Determine which model to use based on the tool
-      switch (tool.category.toLowerCase()) {
-        case 'text tools':
-          modelTask = 'summarization';
-          modelId = 'Xenova/distilbart-cnn-6-6';
-          break;
-        case 'image generation':
-          // Use text2text-generation instead of text-to-image as it's more widely supported in transformers.js
-          modelTask = 'text2text-generation';
-          modelId = 'Xenova/stable-diffusion-onnx'; 
-          break;
-        case 'development':
-          modelTask = 'text-generation';
-          modelId = 'Xenova/codegen-350M-mono';
-          break;
-        case 'language translator':
-          modelTask = 'translation';
-          modelId = 'Xenova/m2m100_418M';
-          break;
-        default:
-          modelTask = 'text-generation';
-          modelId = 'Xenova/distilgpt2';
-      }
-      
-      // Check for WebGPU support without directly accessing navigator.gpu
-      const hasWebGPU = typeof window !== 'undefined' && 
-                        'navigator' in window && 
-                        'gpu' in navigator;
-      
-      // Set device option with the correct type
-      const deviceOption = {
-        device: (connectionDetails.useLocalModels && hasWebGPU ? 'webgpu' : 'cpu') as DeviceType
-      };
-      
-      toast({
-        title: "Loading Model",
-        description: `Loading ${modelId}. This may take a moment...`
-      });
-      
-      // Initialize the model with the correct type
-      const pipelineInstance = await pipeline(modelTask, modelId, deviceOption);
-      setModel(pipelineInstance);
-      
-      toast({
-        title: "Model Ready",
-        description: `${modelId} loaded successfully.`
-      });
-      
-    } catch (err) {
-      console.error('Error loading model:', err);
-      setError(`Error loading model: ${err.message || 'Unknown error'}`);
-      
-      toast({
-        variant: "destructive",
-        title: "Model Loading Error",
-        description: `Could not load the AI model. ${err.message || 'Please try again.'}`,
-      });
-      
-    } finally {
-      setModelLoading(false);
-    }
-  };
-
-  const processWithApi = async () => {
-    try {
-      setIsProcessing(true);
-      setError(null);
-      
-      // Simulate API call - in a real implementation, this would call the actual API
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Simulate response
-      let result;
-      switch (tool.category.toLowerCase()) {
-        case 'text tools':
-          result = `Summary: ${input.substring(0, 50)}...`;
-          break;
-        case 'image generation':
-          result = "Image generation would show a preview here";
-          break;
-        case 'development':
-          result = `function processInput(input) {\n  // Process ${input.substring(0, 20)}\n  return processed;\n}`;
-          break;
-        default:
-          result = `Processed: ${input}`;
-      }
-      
-      setOutput(result);
+    if (result.success) {
+      setOutput(result.result);
       setCurrentTab('result');
-      
-    } catch (err) {
-      console.error('API processing error:', err);
-      setError(`Error processing with API: ${err.message || 'Unknown error'}`);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const processWithModel = async () => {
-    if (!model) {
-      setError('Model not loaded. Please reload the page or try again.');
-      return;
-    }
-    
-    try {
-      setIsProcessing(true);
-      setError(null);
-      
-      let result;
-      
-      switch (tool.category.toLowerCase()) {
-        case 'text tools':
-          result = await model(input);
-          if (typeof result === 'object' && result.summary_text) {
-            result = result.summary_text;
-          }
-          break;
-        case 'image generation':
-          // For image generation we'd generate an image and return a data URL
-          result = "Open-source image generation requires more specialized components";
-          break;
-        case 'development':
-          result = await model(input, { 
-            max_new_tokens: 128,
-            do_sample: true,
-            temperature: 0.7
-          });
-          if (typeof result === 'object' && result.generated_text) {
-            result = result.generated_text;
-          }
-          break;
-        default:
-          result = await model(input, { max_new_tokens: 100 });
-          if (typeof result === 'object' && result.generated_text) {
-            result = result.generated_text;
-          }
-      }
-      
-      setOutput(typeof result === 'string' ? result : JSON.stringify(result, null, 2));
-      setCurrentTab('result');
-      
-    } catch (err) {
-      console.error('Model processing error:', err);
-      setError(`Error processing with model: ${err.message || 'Unknown error'}`);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleProcess = () => {
-    if (!input.trim()) {
-      toast({
-        title: "Empty Input",
-        description: "Please enter some text to process.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (connectionDetails.modelProvider === 'open-source') {
-      processWithModel();
-    } else if (connectionDetails.modelProvider === 'api') {
-      processWithApi();
-    } else {
-      // Hybrid approach - try the model first, fallback to API
-      try {
-        processWithModel();
-      } catch (err) {
-        console.error('Falling back to API due to error:', err);
-        processWithApi();
-      }
-    }
-  };
-
-  const getPlaceholder = () => {
-    switch (tool.category.toLowerCase()) {
-      case 'text tools':
-        return "Enter text to summarize...";
-      case 'image generation':
-        return "Describe the image you want to generate...";
-      case 'development':
-        return "Enter code or a coding problem...";
-      default:
-        return "Enter text to process...";
+    } else if (result.error) {
+      // Error is already handled within the hook
     }
   };
 
@@ -299,32 +46,17 @@ const AIToolInterface: React.FC<AIToolInterfaceProps> = ({ tool, connectionDetai
     }
   };
 
+  const isOpenSourceModel = connectionDetails.modelProvider === 'open-source';
+  const modelLoaded = !!model;
+
   return (
     <div className="flex flex-col h-full">
-      {modelLoading && (
-        <Alert className="mb-4 bg-blue-50/50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
-          <Loader2 className="h-4 w-4 text-blue-600 dark:text-blue-400 animate-spin" />
-          <AlertDescription className="text-blue-800 dark:text-blue-300">
-            Loading AI model... This may take a few moments.
-          </AlertDescription>
-        </Alert>
-      )}
-      
-      {error && (
-        <Alert className="mb-4" variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-      
-      {connectionDetails.modelProvider === 'open-source' && model && (
-        <Alert className="mb-4 bg-green-50/50 border-green-200 dark:bg-green-900/20 dark:border-green-800">
-          <Server className="h-4 w-4 text-green-600 dark:text-green-400" />
-          <AlertDescription className="text-green-800 dark:text-green-300">
-            Using open-source model running in your browser
-          </AlertDescription>
-        </Alert>
-      )}
+      <ModelStatusAlerts 
+        modelLoading={modelLoading}
+        error={error}
+        isOpenSourceModel={isOpenSourceModel}
+        modelLoaded={modelLoaded}
+      />
       
       <Tabs 
         defaultValue="input" 
@@ -338,107 +70,25 @@ const AIToolInterface: React.FC<AIToolInterfaceProps> = ({ tool, connectionDetai
         </TabsList>
         
         <TabsContent value="input" className="flex-1 flex flex-col mt-4">
-          <div className="mb-4 flex-1">
-            {tool.category.toLowerCase() === 'image generation' ? (
-              <div className="space-y-4">
-                <Input
-                  placeholder="Enter a description of the image..."
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  disabled={isProcessing}
-                  className="w-full"
-                />
-                <div className="flex flex-wrap gap-2">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setInput("A mountain landscape at sunset with dramatic clouds")}
-                    size="sm"
-                  >
-                    Mountain sunset
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setInput("A futuristic city skyline with flying cars")}
-                    size="sm"
-                  >
-                    Futuristic city
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setInput("Portrait of a smiling person with blue hair")}
-                    size="sm"
-                  >
-                    Portrait
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <Textarea
-                placeholder={getPlaceholder()}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                disabled={isProcessing}
-                className="w-full h-full min-h-[300px] font-mono"
-              />
-            )}
-          </div>
-          
-          <div className="flex justify-end">
-            <Button 
-              onClick={handleProcess} 
-              disabled={isProcessing || (connectionDetails.modelProvider === 'open-source' && !model)}
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                getButtonText()
-              )}
-            </Button>
-          </div>
+          <InputTab 
+            input={input}
+            setInput={setInput}
+            isProcessing={isProcessing}
+            handleProcess={handleProcess}
+            toolCategory={tool.category}
+            buttonText={getButtonText()}
+          />
         </TabsContent>
         
         <TabsContent value="result" className="flex-1 flex flex-col mt-4">
-          {output ? (
-            <Card className="flex-1">
-              <CardContent className="p-4">
-                {tool.category.toLowerCase() === 'image generation' ? (
-                  <div className="flex items-center justify-center h-full min-h-[300px] bg-muted rounded-md">
-                    <p className="text-muted-foreground">{output}</p>
-                  </div>
-                ) : (
-                  <pre className="whitespace-pre-wrap font-mono text-sm h-full min-h-[300px] overflow-auto p-4">
-                    {output}
-                  </pre>
-                )}
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="flex items-center justify-center h-full bg-muted/30 rounded-md">
-              <p className="text-muted-foreground">No result yet. Process some input first.</p>
-            </div>
-          )}
-          
-          <div className="flex justify-end mt-4 gap-2">
-            <Button variant="outline" onClick={() => setCurrentTab('input')}>
-              Back to Input
-            </Button>
-            <Button 
-              onClick={handleProcess} 
-              disabled={isProcessing || !input || (connectionDetails.modelProvider === 'open-source' && !model)}
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                "Process Again"
-              )}
-            </Button>
-          </div>
+          <ResultTab 
+            output={output}
+            setCurrentTab={setCurrentTab}
+            handleProcess={handleProcess}
+            isProcessing={isProcessing}
+            hasInput={!!input}
+            toolCategory={tool.category}
+          />
         </TabsContent>
       </Tabs>
     </div>
