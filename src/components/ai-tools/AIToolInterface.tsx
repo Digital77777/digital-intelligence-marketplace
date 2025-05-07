@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { pipeline, env } from '@huggingface/transformers';
 
-// Define the PipelineType for proper TypeScript integration
+// Define pipeline types more precisely based on the Hugging Face transformers library
 type PipelineType = 
   | 'audio-classification'
   | 'automatic-speech-recognition'
@@ -34,10 +34,13 @@ type PipelineType =
   | 'table-question-answering'
   | 'text-classification'
   | 'text-generation'
-  | 'text-to-image'
+  | 'text-to-audio'
+  | 'text2text-generation' // This is what we should use instead of 'text-to-image'
   | 'token-classification'
   | 'translation'
+  | 'translation_xx_to_yy'
   | 'visual-question-answering'
+  | 'vqa'
   | 'zero-shot-classification'
   | 'zero-shot-image-classification'
   | 'zero-shot-object-detection';
@@ -89,7 +92,8 @@ const AIToolInterface: React.FC<AIToolInterfaceProps> = ({ tool, connectionDetai
           modelId = 'Xenova/distilbart-cnn-6-6';
           break;
         case 'image generation':
-          modelTask = 'text-to-image';
+          // Use text2text-generation instead of text-to-image as it's more widely supported in transformers.js
+          modelTask = 'text2text-generation';
           modelId = 'Xenova/stable-diffusion-onnx'; 
           break;
         case 'development':
