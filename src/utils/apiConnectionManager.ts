@@ -10,7 +10,7 @@ interface StoredConnection {
   apiKey: string;
   apiSecret?: string;
   connectedAt: string;
-  modelProvider: 'open-source' | 'api' | 'hybrid';
+  modelProvider: 'open-source' | 'api' | 'hybrid' | 'platform';
   useLocalModels: boolean;
 }
 
@@ -30,13 +30,22 @@ const OPEN_SOURCE_MODELS = {
   '3': 'bigcode/starcoder', // For tool with ID 3
 };
 
+// Platform API keys for each tool (these would be managed by the platform)
+const PLATFORM_API_KEYS = {
+  '1': 'platform-image-generation-key-123',
+  '2': 'platform-text-summarization-key-123',
+  '3': 'platform-code-generation-key-123',
+  '4': 'platform-language-translation-key-123',
+  '5': 'platform-music-generation-key-123',
+}
+
 export const apiConnectionManager = {
   /**
    * Check if a tool has an API connection
    */
   hasConnection: (toolId: string): boolean => {
     const connection = localStorage.getItem(`${toolId}_api_key`);
-    return !!connection;
+    return !!connection || toolId in PLATFORM_API_KEYS;
   },
   
   /**
@@ -44,11 +53,22 @@ export const apiConnectionManager = {
    */
   getConnection: (toolId: string): StoredConnection | null => {
     const apiKey = localStorage.getItem(`${toolId}_api_key`);
-    if (!apiKey) return null;
+    const isPlatformKey = toolId in PLATFORM_API_KEYS;
+    
+    if (!apiKey && !isPlatformKey) return null;
+    
+    if (isPlatformKey) {
+      return {
+        apiKey: PLATFORM_API_KEYS[toolId as keyof typeof PLATFORM_API_KEYS],
+        connectedAt: new Date().toISOString(),
+        modelProvider: 'platform',
+        useLocalModels: false
+      };
+    }
     
     const apiSecret = localStorage.getItem(`${toolId}_api_secret`);
     const connectedAt = localStorage.getItem(`${toolId}_connected_at`) || new Date().toISOString();
-    const modelProvider = localStorage.getItem(`${toolId}_model_provider`) as 'open-source' | 'api' | 'hybrid' || 'api';
+    const modelProvider = localStorage.getItem(`${toolId}_model_provider`) as 'open-source' | 'api' | 'hybrid' | 'platform' || 'api';
     const useLocalModels = localStorage.getItem(`${toolId}_use_local_models`) === 'true';
     
     return {
@@ -67,7 +87,7 @@ export const apiConnectionManager = {
     toolId: string, 
     apiKey: string, 
     apiSecret?: string, 
-    modelProvider: 'open-source' | 'api' | 'hybrid' = 'api',
+    modelProvider: 'open-source' | 'api' | 'hybrid' | 'platform' = 'api',
     useLocalModels: boolean = false
   ): void => {
     localStorage.setItem(`${toolId}_api_key`, apiKey);
@@ -95,12 +115,23 @@ export const apiConnectionManager = {
    */
   listConnections: (): string[] => {
     const connections: string[] = [];
+    
+    // Add platform-connected tools
+    Object.keys(PLATFORM_API_KEYS).forEach(toolId => {
+      connections.push(toolId);
+    });
+    
+    // Add locally stored connections
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && key.endsWith('_api_key')) {
-        connections.push(key.replace('_api_key', ''));
+        const toolId = key.replace('_api_key', '');
+        if (!connections.includes(toolId)) {
+          connections.push(toolId);
+        }
       }
     }
+    
     return connections;
   },
 
@@ -108,7 +139,7 @@ export const apiConnectionManager = {
    * Get the open source model ID for a tool
    */
   getOpenSourceModel: (toolId: string): string | null => {
-    return OPEN_SOURCE_MODELS[toolId] || null;
+    return OPEN_SOURCE_MODELS[toolId as keyof typeof OPEN_SOURCE_MODELS] || null;
   },
 
   /**
@@ -116,6 +147,20 @@ export const apiConnectionManager = {
    */
   hasOpenSourceAlternative: (toolId: string): boolean => {
     return toolId in OPEN_SOURCE_MODELS;
+  },
+
+  /**
+   * Check if a tool has a platform API available
+   */
+  hasPlatformAPI: (toolId: string): boolean => {
+    return toolId in PLATFORM_API_KEYS;
+  },
+
+  /**
+   * Get the platform API key for a tool
+   */
+  getPlatformAPIKey: (toolId: string): string | null => {
+    return PLATFORM_API_KEYS[toolId as keyof typeof PLATFORM_API_KEYS] || null;
   }
 };
 

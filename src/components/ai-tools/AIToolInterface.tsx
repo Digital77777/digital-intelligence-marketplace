@@ -23,7 +23,7 @@ const AIToolInterface: React.FC<AIToolInterfaceProps> = ({ tool, connectionDetai
   const { processInput, isProcessing } = useToolProcessor(model, tool.category);
 
   const handleProcess = async () => {
-    const result = await processInput(input, connectionDetails.modelProvider);
+    const result = await processInput(input, connectionDetails.modelProvider, tool.id);
     
     if (result.success) {
       setOutput(result.result);
@@ -41,22 +41,34 @@ const AIToolInterface: React.FC<AIToolInterfaceProps> = ({ tool, connectionDetai
         return "Generate Image";
       case 'development':
         return "Generate Code";
+      case 'language translator':
+        return "Translate";
       default:
         return "Process";
     }
   };
 
   const isOpenSourceModel = connectionDetails.modelProvider === 'open-source';
-  const modelLoaded = !!model;
+  const isPlatformAPI = connectionDetails.modelProvider === 'platform';
+  const modelLoaded = !!model || isPlatformAPI;
 
   return (
     <div className="flex flex-col h-full">
-      <ModelStatusAlerts 
-        modelLoading={modelLoading}
-        error={error}
-        isOpenSourceModel={isOpenSourceModel}
-        modelLoaded={modelLoaded}
-      />
+      {!isPlatformAPI && (
+        <ModelStatusAlerts 
+          modelLoading={modelLoading}
+          error={error}
+          isOpenSourceModel={isOpenSourceModel}
+          modelLoaded={modelLoaded}
+        />
+      )}
+      
+      {isPlatformAPI && (
+        <div className="bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 p-3 rounded-md mb-4 flex items-center gap-2 text-sm">
+          <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+          <span>Using Platform API - No setup required</span>
+        </div>
+      )}
       
       <Tabs 
         defaultValue="input" 

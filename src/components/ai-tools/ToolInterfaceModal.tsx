@@ -30,7 +30,7 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
   const [showConnectionForm, setShowConnectionForm] = useState(false);
   const [connectionDetails, setConnectionDetails] = useState<null | {
     apiKey: string;
-    modelProvider: 'open-source' | 'api' | 'hybrid';
+    modelProvider: 'open-source' | 'api' | 'hybrid' | 'platform';
     useLocalModels: boolean;
   }>(null);
   const { toast } = useToast();
@@ -55,6 +55,31 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
     setShowConnectionForm(true);
   };
   
+  const handleQuickStart = () => {
+    // Set up platform API connection
+    apiConnectionManager.storeConnection(
+      tool.id,
+      apiConnectionManager.getPlatformAPIKey(tool.id) || 'platform-api-key',
+      undefined,
+      'platform',
+      false
+    );
+    
+    const connection = apiConnectionManager.getConnection(tool.id);
+    if (connection) {
+      setConnectionDetails({
+        apiKey: connection.apiKey,
+        modelProvider: connection.modelProvider,
+        useLocalModels: connection.useLocalModels
+      });
+    }
+    
+    toast({
+      title: "Ready to Use",
+      description: `${tool.name} is now set up with our platform API. No configuration needed.`,
+    });
+  };
+  
   const handleApiConnectionSuccess = () => {
     setShowConnectionForm(false);
     const connection = apiConnectionManager.getConnection(tool.id);
@@ -68,7 +93,7 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
     
     toast({
       title: "Connection Successful",
-      description: `Successfully connected to ${tool.name}${connection?.modelProvider === 'open-source' ? ' with open-source models' : ''}.`,
+      description: `Successfully connected to ${tool.name}${connection?.modelProvider === 'open-source' ? ' with open-source models' : ''}${connection?.modelProvider === 'platform' ? ' with platform API' : ''}.`,
     });
   };
 
@@ -116,6 +141,7 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
               <WelcomeScreen 
                 tool={tool}
                 handleConnectApi={handleConnectApi}
+                handleQuickStart={handleQuickStart}
               />
             )
           )}
