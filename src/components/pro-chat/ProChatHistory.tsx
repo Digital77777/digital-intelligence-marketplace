@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { History, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Loader2, ChevronLeft, MessageCircle } from 'lucide-react';
 
 interface ProChatHistoryProps {
   isHistoryLoading: boolean;
@@ -18,42 +18,43 @@ export const ProChatHistory: React.FC<ProChatHistoryProps> = ({
   handleLoadHistoryItem
 }) => {
   return (
-    <div className="w-64 border-r bg-muted/30 flex flex-col">
-      <div className="p-3 border-b bg-muted/50 font-medium flex items-center justify-between">
-        <span className="flex items-center gap-1">
-          <History size={14} />
-          Chat History
-        </span>
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={toggleHistoryPanel}>
-          <X size={14} />
+    <div className="w-64 border-r border-muted flex flex-col">
+      <div className="p-3 border-b flex items-center justify-between">
+        <h3 className="font-medium text-sm">Chat History</h3>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={toggleHistoryPanel}
+          className="h-6 w-6"
+        >
+          <ChevronLeft className="h-4 w-4" />
         </Button>
       </div>
-      <div className="flex-1 overflow-y-auto p-2">
+      <ScrollArea className="flex-1">
         {isHistoryLoading ? (
-          <div className="flex justify-center items-center h-20">
-            <Spinner size="sm" />
+          <div className="flex items-center justify-center h-full">
+            <Loader2 className="h-5 w-5 animate-spin" />
           </div>
-        ) : chatHistory.length === 0 ? (
-          <div className="text-center text-muted-foreground p-4 text-sm">
-            No chat history found
-          </div>
-        ) : (
-          <div className="space-y-2">
+        ) : chatHistory.length > 0 ? (
+          <div className="p-3 space-y-2">
             {chatHistory.map((item) => (
-              <button
+              <Button
                 key={item.id}
+                variant="ghost"
+                className="w-full justify-start text-left h-auto py-2"
                 onClick={() => handleLoadHistoryItem(item)}
-                className="w-full text-left p-2 hover:bg-muted rounded-md text-xs border border-transparent hover:border-border transition-colors"
               >
-                <div className="font-medium truncate">{item.message}</div>
-                <div className="text-muted-foreground text-xs mt-1">
-                  {new Date(item.timestamp).toLocaleString()}
-                </div>
-              </button>
+                <MessageCircle className="h-4 w-4 mr-2 flex-shrink-0" />
+                <span className="truncate text-xs">{item.message}</span>
+              </Button>
             ))}
           </div>
+        ) : (
+          <div className="p-4 text-center text-muted-foreground">
+            <p className="text-sm">No chat history</p>
+          </div>
         )}
-      </div>
+      </ScrollArea>
     </div>
   );
 };

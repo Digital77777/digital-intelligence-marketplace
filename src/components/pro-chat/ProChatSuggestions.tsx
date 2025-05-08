@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Lightbulb } from 'lucide-react';
 
 interface ProChatSuggestionsProps {
   suggestedPrompts: string[];
@@ -12,15 +13,18 @@ export const ProChatSuggestions: React.FC<ProChatSuggestionsProps> = ({
   handleSuggestedPrompt
 }) => {
   return (
-    <div className="p-3 border-t">
-      <p className="text-xs text-muted-foreground mb-2">Suggested questions:</p>
+    <div className="px-3 pt-2 pb-4">
+      <div className="text-xs font-medium text-muted-foreground flex items-center gap-1 mb-2">
+        <Lightbulb className="h-3 w-3" />
+        <span>Suggested questions</span>
+      </div>
       <div className="flex flex-wrap gap-2">
-        {suggestedPrompts.slice(0, 3).map((prompt, index) => (
+        {suggestedPrompts.map((prompt, index) => (
           <Button
             key={index}
             variant="outline"
             size="sm"
-            className="text-xs h-auto py-1 px-2 whitespace-nowrap"
+            className="text-xs"
             onClick={() => handleSuggestedPrompt(prompt)}
           >
             {prompt}

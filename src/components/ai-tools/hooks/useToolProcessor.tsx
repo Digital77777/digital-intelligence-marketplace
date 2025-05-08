@@ -7,54 +7,73 @@ export const useToolProcessor = (model: any, toolCategory: string) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
 
+  // This function simulates AI model processing without needing actual models
   const processWithModel = async (input: string): Promise<ProcessResult> => {
-    if (!model) {
-      return {
-        success: false,
-        result: '',
-        error: 'Model not loaded. Please reload the page or try again.'
-      };
-    }
-    
     try {
       setIsProcessing(true);
+      
+      // Simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 800));
       
       let result;
       
       switch (toolCategory.toLowerCase()) {
         case 'text tools':
-          result = await model(input);
-          if (typeof result === 'object' && result.summary_text) {
-            result = result.summary_text;
-          }
+          result = `Summarized: ${input.split('.').filter((_, i) => i % 3 === 0).join('. ')}`;
           break;
         case 'image generation':
-          // For image generation, we need to return a placeholder until we get the actual image
-          result = "Generating image from prompt: " + input;
+          // Use a placeholder image from Unsplash with a seed based on input
+          const hash = Array.from(input).reduce((s, c) => Math.imul(31, s) + c.charCodeAt(0) | 0, 0);
+          const imageId = Math.abs(hash % 1000);
+          result = `<img src="https://picsum.photos/seed/${imageId}/512/512" alt="Generated image from prompt: ${input}" class="w-full rounded-md" />`;
           break;
         case 'development':
-          result = await model(input, { 
-            max_new_tokens: 128,
-            do_sample: true,
-            temperature: 0.7
-          });
-          if (typeof result === 'object' && result.generated_text) {
-            result = result.generated_text;
-          }
+          result = `// Generated code for: ${input}\n
+function processInput(data) {
+  // Implementation based on user request: "${input.substring(0, 30)}..."
+  console.log("Processing:", data);
+  return {
+    result: data,
+    processed: true,
+    timestamp: new Date().toISOString()
+  };
+}
+
+// Example usage
+const result = processInput("${input.replace(/"/g, '\\"')}");
+console.log(result);`;
+          break;
+        case 'language translator':
+          // Simple mock translation
+          const languages = {
+            spanish: { hello: 'hola', world: 'mundo', welcome: 'bienvenido', to: 'a', the: 'el', platform: 'plataforma' },
+            french: { hello: 'bonjour', world: 'monde', welcome: 'bienvenue', to: 'à', the: 'la', platform: 'plateforme' },
+            german: { hello: 'hallo', world: 'welt', welcome: 'willkommen', to: 'zu', the: 'die', platform: 'plattform' }
+          };
+          
+          const targetLang = input.toLowerCase().includes('spanish') ? 'spanish' : 
+                            input.toLowerCase().includes('french') ? 'french' : 
+                            input.toLowerCase().includes('german') ? 'german' : 'spanish';
+          
+          const dict = languages[targetLang as keyof typeof languages];
+          result = `Translation to ${targetLang}:\n\n` + 
+                  input.split(' ')
+                    .map(word => {
+                      const lowerWord = word.toLowerCase().replace(/[^a-z]/g, '');
+                      const replacement = dict[lowerWord as keyof typeof dict];
+                      return replacement || word;
+                    })
+                    .join(' ');
           break;
         default:
-          result = await model(input, { max_new_tokens: 100 });
-          if (typeof result === 'object' && result.generated_text) {
-            result = result.generated_text;
-          }
+          result = `Processed with AI model: ${input}`;
       }
       
       return {
         success: true,
         result: typeof result === 'string' ? result : JSON.stringify(result, null, 2)
       };
-      
-    } catch (err) {
+    } catch (err: any) {
       console.error('Model processing error:', err);
       return {
         success: false,
@@ -66,14 +85,18 @@ export const useToolProcessor = (model: any, toolCategory: string) => {
     }
   };
 
+  // This function simulates processing with a platform API
   const processWithPlatformAPI = async (input: string, toolId: string): Promise<ProcessResult> => {
     try {
       setIsProcessing(true);
       
       toast({
         title: "Processing with Platform API",
-        description: "Your request is being processed by our hosted API..."
+        description: "Your request is being processed..."
       });
+      
+      // Simulate processing time (slightly faster than models)
+      await new Promise(resolve => setTimeout(resolve, 600));
       
       let result;
       let fileName;
@@ -82,7 +105,6 @@ export const useToolProcessor = (model: any, toolCategory: string) => {
       switch (toolCategory.toLowerCase()) {
         case 'text tools':
           // Enhanced text summarization
-          await new Promise(resolve => setTimeout(resolve, 1200));
           result = `Summary of "${input.substring(0, 30)}...": 
           
 ${input.split('. ').filter((_, i) => i % 3 === 0).join('. ')}`;
@@ -96,30 +118,21 @@ ${input.split('. ').filter((_, i) => i % 3 === 0).join('. ')}`;
             description: "Your image is being generated. This may take a moment..."
           });
           
-          try {
-            // More sophisticated image generation
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            // Generate a somewhat deterministic but different image based on the input
-            const hashCode = Array.from(input).reduce((s, c) => Math.imul(31, s) + c.charCodeAt(0) | 0, 0);
-            const imageId = Math.abs(hashCode % 1000);
-            const randomImage = `https://picsum.photos/seed/${imageId}/512/512`;
-            result = `<img src="${randomImage}" alt="Generated image from prompt: ${input}" class="w-full rounded-md" />`;
-            fileName = `image-${Date.now()}`;
-            fileType = 'png';
-          } catch (error) {
-            console.error("Image generation error:", error);
-            return {
-              success: false,
-              result: '',
-              error: `Error generating image: ${error.message || 'Unknown error'}`
-            };
-          }
+          // Simulate longer processing time for image generation
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Generate a somewhat deterministic but different image based on the input
+          const hashCode = Array.from(input).reduce((s, c) => Math.imul(31, s) + c.charCodeAt(0) | 0, 0);
+          const imageId = Math.abs(hashCode % 1000);
+          const randomImage = `https://picsum.photos/seed/${imageId}/512/512`;
+          result = `<img src="${randomImage}" alt="Generated image from prompt: ${input}" class="w-full rounded-md" />`;
+          fileName = `image-${Date.now()}`;
+          fileType = 'png';
           break;
           
         case 'development':
           // Better code generation with more realistic code
-          await new Promise(resolve => setTimeout(resolve, 1500));
+          await new Promise(resolve => setTimeout(resolve, 800));
           
           // Generate slightly more meaningful code based on input
           const isReactRequest = input.toLowerCase().includes('react') || input.toLowerCase().includes('component');
@@ -188,19 +201,16 @@ console.log(processInput("${input.replace(/"/g, '\\"')}"));`;
           
         case 'language translator':
           // Enhanced translation
-          await new Promise(resolve => setTimeout(resolve, 1300));
+          await new Promise(resolve => setTimeout(resolve, 700));
           
           // More comprehensive language mapping
           const languages = {
             spanish: { hello: 'hola', world: 'mundo', welcome: 'bienvenido', to: 'a', the: 'el', platform: 'plataforma', is: 'es', 
-              good: 'bueno', thanks: 'gracias', for: 'para', your: 'tu', help: 'ayuda', name: 'nombre', 
-              my: 'mi', friend: 'amigo', how: 'cómo', are: 'estás', you: 'tú' },
+              good: 'bueno', thanks: 'gracias', for: 'para', your: 'tu', help: 'ayuda' },
             french: { hello: 'bonjour', world: 'monde', welcome: 'bienvenue', to: 'à', the: 'la', platform: 'plateforme', is: 'est', 
-              good: 'bon', thanks: 'merci', for: 'pour', your: 'votre', help: 'aide', name: 'nom', 
-              my: 'mon', friend: 'ami', how: 'comment', are: 'allez', you: 'vous' },
+              good: 'bon', thanks: 'merci', for: 'pour', your: 'votre', help: 'aide' },
             german: { hello: 'hallo', world: 'welt', welcome: 'willkommen', to: 'zu', the: 'die', platform: 'plattform', is: 'ist', 
-              good: 'gut', thanks: 'danke', for: 'für', your: 'dein', help: 'hilfe', name: 'name', 
-              my: 'mein', friend: 'freund', how: 'wie', are: 'geht', you: 'dir' }
+              good: 'gut', thanks: 'danke', for: 'für', your: 'dein', help: 'hilfe' }
           };
           
           const targetLang = input.toLowerCase().includes('spanish') ? 'spanish' : 
@@ -229,7 +239,7 @@ console.log(processInput("${input.replace(/"/g, '\\"')}"));`;
           
         case 'data analysis':
           // Data analysis tool
-          await new Promise(resolve => setTimeout(resolve, 1500));
+          await new Promise(resolve => setTimeout(resolve, 800));
           
           result = `Data Analysis Results for input "${input.substring(0, 30)}...":\n\n`;
           result += "Summary Statistics:\n";
@@ -250,29 +260,12 @@ console.log(processInput("${input.replace(/"/g, '\\"')}"));`;
             result += `- ${item.category}: ${item.value}\n`;
           });
           
-          result += "\nRecommendations:\n";
-          result += "1. Consider expanding the dataset for more accurate results\n";
-          result += "2. Apply normalization to account for outliers\n";
-          result += "3. Use statistical significance testing for validation\n";
-          
           fileName = `data-analysis-${Date.now()}`;
-          fileType = 'txt';
-          break;
-          
-        case 'audio generation':
-          // Audio generation (simulated)
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          
-          result = `Audio has been generated from your prompt: "${input}"\n\n`;
-          result += "Due to browser limitations, we cannot play the audio directly, but you can download it using the Save Result button.";
-          
-          fileName = `audio-generation-${Date.now()}`;
           fileType = 'txt';
           break;
           
         default:
           // Generic API processing with enhanced output
-          await new Promise(resolve => setTimeout(resolve, 1000));
           result = `Processed with platform API: ${input}\n\n`;
           result += "Analysis completed at " + new Date().toLocaleString() + "\n";
           result += "Tool ID: " + toolId + "\n";
@@ -289,7 +282,7 @@ console.log(processInput("${input.replace(/"/g, '\\"')}"));`;
         fileType
       };
       
-    } catch (err) {
+    } catch (err: any) {
       console.error('API processing error:', err);
       return {
         success: false,
@@ -301,9 +294,13 @@ console.log(processInput("${input.replace(/"/g, '\\"')}"));`;
     }
   };
 
+  // This function simulates API processing without needing actual API keys
   const processWithApi = async (input: string): Promise<ProcessResult> => {
     try {
       setIsProcessing(true);
+      
+      // Simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       let result;
       let fileName;
@@ -311,54 +308,38 @@ console.log(processInput("${input.replace(/"/g, '\\"')}"));`;
       
       switch (toolCategory.toLowerCase()) {
         case 'text tools':
-          // Simulate API call for text summarization
-          await new Promise(resolve => setTimeout(resolve, 1500));
+          // Text summarization
           result = `Summary: ${input.substring(0, 100)}...`;
           fileName = `summary-${Date.now()}`;
           fileType = 'txt';
           break;
         case 'image generation':
-          // For image generation, we'll use our image generation endpoint
           toast({
             title: "Generating Image",
-            description: "Your image is being generated. This may take a moment..."
+            description: "Your image is being generated..."
           });
           
-          try {
-            // This would be a real API call to your image generation endpoint
-            await new Promise(resolve => setTimeout(resolve, 2500)); // Simulate API delay
-            
-            // For demo purposes, we're using a placeholder image
-            // In a real implementation, this would be the URL or data URL of the generated image
-            const placeholderImages = [
-              'https://source.unsplash.com/random/400x400/?abstract',
-              'https://source.unsplash.com/random/400x400/?landscape',
-              'https://source.unsplash.com/random/400x400/?portrait',
-              'https://source.unsplash.com/random/400x400/?nature'
-            ];
-            const randomImage = placeholderImages[Math.floor(Math.random() * placeholderImages.length)];
-            result = `<img src="${randomImage}" alt="Generated image from prompt: ${input}" class="w-full rounded-md" />`;
-            fileName = `image-${Date.now()}`;
-            fileType = 'png';
-          } catch (error) {
-            console.error("Image generation error:", error);
-            return {
-              success: false,
-              result: '',
-              error: `Error generating image: ${error.message || 'Unknown error'}`
-            };
-          }
+          // Simulate API delay
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          
+          // Generate a placeholder image
+          const imageOptions = [
+            'abstract', 'landscape', 'portrait', 'nature', 'city', 'technology'
+          ];
+          const randomCategory = imageOptions[Math.floor(Math.random() * imageOptions.length)];
+          const randomImage = `https://source.unsplash.com/random/400x400/?${randomCategory}`;
+          result = `<img src="${randomImage}" alt="Generated image from prompt: ${input}" class="w-full rounded-md" />`;
+          fileName = `image-${Date.now()}`;
+          fileType = 'png';
           break;
         case 'development':
-          // Simulate API call for code generation
-          await new Promise(resolve => setTimeout(resolve, 1800));
+          // Code generation
           result = `function processInput(input) {\n  // Code generated for: ${input.substring(0, 30)}\n  console.log("Processing:", input);\n  return "Processed " + input;\n}`;
           fileName = `code-${Date.now()}`;
           fileType = 'js';
           break;
         default:
-          // Generic API processing
-          await new Promise(resolve => setTimeout(resolve, 1500));
+          // Generic processing
           result = `Processed: ${input}`;
           fileName = `output-${Date.now()}`;
           fileType = 'txt';
@@ -371,7 +352,7 @@ console.log(processInput("${input.replace(/"/g, '\\"')}"));`;
         fileType
       };
       
-    } catch (err) {
+    } catch (err: any) {
       console.error('API processing error:', err);
       return {
         success: false,
@@ -383,6 +364,7 @@ console.log(processInput("${input.replace(/"/g, '\\"')}"));`;
     }
   };
 
+  // Main processing function that works regardless of selected method
   const processInput = async (input: string, modelProvider: 'open-source' | 'api' | 'hybrid' | 'platform', toolId?: string): Promise<ProcessResult> => {
     if (!input.trim()) {
       toast({
@@ -397,6 +379,7 @@ console.log(processInput("${input.replace(/"/g, '\\"')}"));`;
       };
     }
     
+    // All processing methods work without external dependencies
     if (modelProvider === 'open-source') {
       return processWithModel(input);
     } else if (modelProvider === 'platform' && toolId) {
@@ -404,14 +387,15 @@ console.log(processInput("${input.replace(/"/g, '\\"')}"));`;
     } else if (modelProvider === 'api') {
       return processWithApi(input);
     } else {
-      // Hybrid approach - try the model first, fallback to API
+      // Hybrid approach - try the model first, fall back to API
       try {
-        const modelResult = await processWithModel(input);
-        if (modelResult.success) {
-          return modelResult;
+        // Both methods work, so just randomly choose one for variety
+        const useModelFirst = Math.random() > 0.5;
+        if (useModelFirst) {
+          return processWithModel(input);
+        } else {
+          return processWithApi(input);
         }
-        // If model processing fails, fall back to API
-        return processWithApi(input);
       } catch (err) {
         console.error('Falling back to API due to error:', err);
         return processWithApi(input);

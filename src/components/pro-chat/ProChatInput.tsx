@@ -1,9 +1,8 @@
 
 import React from 'react';
-import { Send, Mic, MicOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Spinner } from '@/components/ui/spinner';
+import { Mic, Send, Loader2 } from 'lucide-react';
 
 interface ProChatInputProps {
   inputValue: string;
@@ -27,46 +26,38 @@ export const ProChatInput: React.FC<ProChatInputProps> = ({
   handleVoiceButton
 }) => {
   return (
-    <div className="p-3 border-t bg-background mt-auto">
-      <div className="flex gap-2">
-        {isVoiceMode ? (
-          <Button
-            variant={isRecording ? "destructive" : "default"}
-            size="icon"
-            className="flex-shrink-0"
-            onClick={handleVoiceButton}
-          >
-            {isRecording ? <MicOff size={18} /> : <Mic size={18} />}
-          </Button>
-        ) : (
-          <>
-            <Textarea
-              value={inputValue}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyPress}
-              placeholder="Type your message..."
-              disabled={isLoading}
-              className="flex-1 min-h-[40px] max-h-[120px] resize-none"
-            />
-            <Button 
-              variant="default"
+    <div className="p-3 border-t bg-background">
+      <div className="flex gap-2 items-end">
+        <Textarea
+          value={inputValue}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyPress}
+          placeholder="Type your message..."
+          rows={1}
+          className="min-h-10 resize-none"
+        />
+        <div className="flex gap-2">
+          {isVoiceMode && (
+            <Button
               size="icon"
-              onClick={handleSendMessage}
-              disabled={isLoading || !inputValue.trim()}
+              variant={isRecording ? "destructive" : "secondary"}
+              onClick={handleVoiceButton}
+              disabled={isLoading}
               className="flex-shrink-0"
             >
-              {isLoading ? <Spinner size="sm" /> : <Send size={18} />}
+              <Mic className="h-4 w-4" />
             </Button>
-          </>
-        )}
-      </div>
-      {isVoiceMode && (
-        <div className="mt-2 text-center text-sm text-muted-foreground">
-          {isRecording 
-            ? "Recording... Click the button again to stop." 
-            : "Click the microphone button to start speaking."}
+          )}
+          <Button
+            size="icon"
+            onClick={handleSendMessage}
+            disabled={isLoading || !inputValue.trim()}
+            className="flex-shrink-0"
+          >
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          </Button>
         </div>
-      )}
+      </div>
     </div>
   );
 };

@@ -35,19 +35,17 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
   }>(null);
   const { toast } = useToast();
   
-  // Check for existing connection on open
+  // Auto-initialize connection details when modal is opened
   useEffect(() => {
     if (open && tool) {
+      // Get or initialize a platform connection for the tool
       const connection = apiConnectionManager.getConnection(tool.id);
-      if (connection) {
-        setConnectionDetails({
-          apiKey: connection.apiKey,
-          modelProvider: connection.modelProvider,
-          useLocalModels: connection.useLocalModels
-        });
-      } else {
-        setConnectionDetails(null);
-      }
+      
+      setConnectionDetails({
+        apiKey: connection.apiKey,
+        modelProvider: connection.modelProvider,
+        useLocalModels: connection.useLocalModels
+      });
     }
   }, [open, tool]);
   
@@ -59,20 +57,18 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
     // Set up platform API connection
     apiConnectionManager.storeConnection(
       tool.id,
-      apiConnectionManager.getPlatformAPIKey(tool.id) || 'platform-api-key',
+      apiConnectionManager.getPlatformAPIKey(tool.id),
       undefined,
       'platform',
       false
     );
     
     const connection = apiConnectionManager.getConnection(tool.id);
-    if (connection) {
-      setConnectionDetails({
-        apiKey: connection.apiKey,
-        modelProvider: connection.modelProvider,
-        useLocalModels: connection.useLocalModels
-      });
-    }
+    setConnectionDetails({
+      apiKey: connection.apiKey,
+      modelProvider: connection.modelProvider,
+      useLocalModels: connection.useLocalModels
+    });
     
     toast({
       title: "Ready to Use",
@@ -138,11 +134,11 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
                 connectionDetails={connectionDetails}
               />
             ) : (
-              <WelcomeScreen 
-                tool={tool}
-                handleConnectApi={handleConnectApi}
-                handleQuickStart={handleQuickStart}
-              />
+              // Auto-initialize the tool to skip the welcome screen
+              <div className="text-center py-4">
+                <p>Initializing tool...</p>
+                {handleQuickStart()}
+              </div>
             )
           )}
         </div>

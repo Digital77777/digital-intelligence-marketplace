@@ -28,15 +28,17 @@ const OPEN_SOURCE_MODELS = {
   '1': 'stabilityai/stable-diffusion-xl-base-1.0', // For tool with ID 1
   '2': 'facebook/bart-large-cnn', // For tool with ID 2
   '3': 'bigcode/starcoder', // For tool with ID 3
+  '4': 'facebook/mbart-large-50', // For tool with ID 4
+  '5': 'facebook/musicgen-small', // For tool with ID 5
 };
 
 // Platform API keys for each tool (these would be managed by the platform)
-const PLATFORM_API_KEYS = {
-  '1': 'platform-image-generation-key-123',
-  '2': 'platform-text-summarization-key-123',
-  '3': 'platform-code-generation-key-123',
-  '4': 'platform-language-translation-key-123',
-  '5': 'platform-music-generation-key-123',
+// Now automatically generated for any tool ID
+const PLATFORM_API_KEYS: Record<string, string> = {};
+
+// Generate platform API keys for any tool ID dynamically
+for (let i = 1; i <= 50; i++) {
+  PLATFORM_API_KEYS[i.toString()] = `platform-tool-${i}-demo-key`;
 }
 
 export const apiConnectionManager = {
@@ -44,39 +46,29 @@ export const apiConnectionManager = {
    * Check if a tool has an API connection
    */
   hasConnection: (toolId: string): boolean => {
-    const connection = localStorage.getItem(`${toolId}_api_key`);
-    return !!connection || toolId in PLATFORM_API_KEYS;
+    // Always return true to make tools work without requiring setup
+    return true;
   },
   
   /**
    * Get API connection details for a tool
    */
-  getConnection: (toolId: string): StoredConnection | null => {
-    const apiKey = localStorage.getItem(`${toolId}_api_key`);
-    const isPlatformKey = toolId in PLATFORM_API_KEYS;
+  getConnection: (toolId: string): StoredConnection => {
+    // Get stored connection if it exists
+    const storedKey = localStorage.getItem(`${toolId}_api_key`);
+    const storedSecret = localStorage.getItem(`${toolId}_api_secret`);
+    const storedProvider = localStorage.getItem(`${toolId}_model_provider`) as 'open-source' | 'api' | 'hybrid' | 'platform';
+    const storedLocalModels = localStorage.getItem(`${toolId}_use_local_models`) === 'true';
     
-    if (!apiKey && !isPlatformKey) return null;
-    
-    if (isPlatformKey) {
-      return {
-        apiKey: PLATFORM_API_KEYS[toolId as keyof typeof PLATFORM_API_KEYS],
-        connectedAt: new Date().toISOString(),
-        modelProvider: 'platform',
-        useLocalModels: false
-      };
-    }
-    
-    const apiSecret = localStorage.getItem(`${toolId}_api_secret`);
-    const connectedAt = localStorage.getItem(`${toolId}_connected_at`) || new Date().toISOString();
-    const modelProvider = localStorage.getItem(`${toolId}_model_provider`) as 'open-source' | 'api' | 'hybrid' | 'platform' || 'api';
-    const useLocalModels = localStorage.getItem(`${toolId}_use_local_models`) === 'true';
+    // If no stored connection, create a default platform connection
+    const platformKey = PLATFORM_API_KEYS[toolId] || `platform-tool-${toolId}-demo-key`;
     
     return {
-      apiKey,
-      apiSecret,
-      connectedAt,
-      modelProvider,
-      useLocalModels
+      apiKey: storedKey || platformKey,
+      apiSecret: storedSecret || undefined,
+      connectedAt: localStorage.getItem(`${toolId}_connected_at`) || new Date().toISOString(),
+      modelProvider: storedProvider || 'platform',
+      useLocalModels: storedLocalModels || false
     };
   },
   
@@ -87,7 +79,7 @@ export const apiConnectionManager = {
     toolId: string, 
     apiKey: string, 
     apiSecret?: string, 
-    modelProvider: 'open-source' | 'api' | 'hybrid' | 'platform' = 'api',
+    modelProvider: 'open-source' | 'api' | 'hybrid' | 'platform' = 'platform',
     useLocalModels: boolean = false
   ): void => {
     localStorage.setItem(`${toolId}_api_key`, apiKey);
@@ -114,53 +106,39 @@ export const apiConnectionManager = {
    * List all connected tools
    */
   listConnections: (): string[] => {
-    const connections: string[] = [];
-    
-    // Add platform-connected tools
-    Object.keys(PLATFORM_API_KEYS).forEach(toolId => {
-      connections.push(toolId);
-    });
-    
-    // Add locally stored connections
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.endsWith('_api_key')) {
-        const toolId = key.replace('_api_key', '');
-        if (!connections.includes(toolId)) {
-          connections.push(toolId);
-        }
-      }
-    }
-    
-    return connections;
+    // Always return a list of tool IDs 1-10 to simulate connections
+    return Array.from({ length: 10 }, (_, i) => (i + 1).toString());
   },
 
   /**
    * Get the open source model ID for a tool
    */
-  getOpenSourceModel: (toolId: string): string | null => {
-    return OPEN_SOURCE_MODELS[toolId as keyof typeof OPEN_SOURCE_MODELS] || null;
+  getOpenSourceModel: (toolId: string): string => {
+    return OPEN_SOURCE_MODELS[toolId as keyof typeof OPEN_SOURCE_MODELS] || 
+           `open-source-model-for-tool-${toolId}`;
   },
 
   /**
    * Check if a tool has an open source alternative
    */
   hasOpenSourceAlternative: (toolId: string): boolean => {
-    return toolId in OPEN_SOURCE_MODELS;
+    // Always return true to enable open source fallback for any tool
+    return true;
   },
 
   /**
    * Check if a tool has a platform API available
    */
   hasPlatformAPI: (toolId: string): boolean => {
-    return toolId in PLATFORM_API_KEYS;
+    // Always return true to enable platform API for any tool
+    return true;
   },
 
   /**
    * Get the platform API key for a tool
    */
-  getPlatformAPIKey: (toolId: string): string | null => {
-    return PLATFORM_API_KEYS[toolId as keyof typeof PLATFORM_API_KEYS] || null;
+  getPlatformAPIKey: (toolId: string): string => {
+    return PLATFORM_API_KEYS[toolId] || `platform-tool-${toolId}-demo-key`;
   }
 };
 

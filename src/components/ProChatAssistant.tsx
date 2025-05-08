@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { MessageCircle, X } from 'lucide-react';
 import ChatContainer from '@/components/chat/ChatContainer';
 
-// Import the new modularized components
+// Import the modularized components
 import { ProChatHeader } from './pro-chat/ProChatHeader';
 import { ProChatInput } from './pro-chat/ProChatInput';
 import { ProChatHistory } from './pro-chat/ProChatHistory';
