@@ -17,6 +17,7 @@ export interface LearningAcademyCourse {
   instructor_id: string | null;
   is_featured: boolean | null;
   certification_available: boolean | null;
+  tool_categories?: string[] | null;
 }
 
 export interface UserProgress {
@@ -35,6 +36,22 @@ export const fetchLearningAcademyCourses = async (): Promise<LearningAcademyCour
 
   if (error) {
     console.error("Error fetching learning academy courses:", error);
+    throw error;
+  }
+
+  return data as unknown as LearningAcademyCourse[] || [];
+};
+
+// Fetch courses by tool category
+export const fetchCoursesByToolCategory = async (category: string): Promise<LearningAcademyCourse[]> => {
+  const { data, error } = await supabase
+    .from('learning_academy')
+    .select('*')
+    .contains('tool_categories', [category])
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error(`Error fetching courses for tool category ${category}:`, error);
     throw error;
   }
 
@@ -112,6 +129,15 @@ export const useLearningAcademyCourses = () => {
   return useQuery({
     queryKey: ['learning-academy-courses'],
     queryFn: fetchLearningAcademyCourses
+  });
+};
+
+// Custom hook to fetch courses by tool category
+export const useCoursesByToolCategory = (category: string) => {
+  return useQuery({
+    queryKey: ['courses-by-tool-category', category],
+    queryFn: () => fetchCoursesByToolCategory(category),
+    enabled: !!category
   });
 };
 

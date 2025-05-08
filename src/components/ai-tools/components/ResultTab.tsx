@@ -50,6 +50,7 @@ const ResultTab: React.FC<ResultTabProps> = ({
         handleSave={handleSave}
         isProcessing={isProcessing}
         hasInput={hasInput}
+        output={output}
       />
     </>
   );

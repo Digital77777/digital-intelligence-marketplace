@@ -37,6 +37,28 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ tool, handleConnectApi, h
           </p>
         </div>
       )}
+      
+      {tool.relatedCourses && tool.relatedCourses.length > 0 && (
+        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 rounded-lg max-w-lg">
+          <h3 className="font-semibold mb-2">Learning Resources Available</h3>
+          <p className="text-sm mb-2">
+            Enhance your skills with these related courses:
+          </p>
+          <ul className="text-sm list-disc list-inside text-left">
+            {tool.relatedCourses.map((course, index) => (
+              <li key={index} className="mb-1">{course}</li>
+            ))}
+          </ul>
+          <div className="mt-3">
+            <a 
+              href="/learning-hub" 
+              className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              Visit Learning Hub →
+            </a>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

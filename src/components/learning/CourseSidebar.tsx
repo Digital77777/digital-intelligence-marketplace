@@ -4,26 +4,61 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Clock, Calendar, BarChart3, CheckCircle, BookOpen, Award } from 'lucide-react';
+import { 
+  Clock, 
+  Calendar, 
+  BarChart3, 
+  CheckCircle, 
+  BookOpen, 
+  Award,
+  Download,
+  Share2,
+  FileText,
+  MessageCircle
+} from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface CourseSidebarProps {
   course: any;
   progress: number;
   onMarkComplete: () => void;
-  onTabChange?: (tab: string) => void; // Add the optional onTabChange prop
+  onTabChange?: (tab: string) => void;
+  onDownloadCertificate?: () => void;
 }
 
-const CourseSidebar: React.FC<CourseSidebarProps> = ({ course, progress, onMarkComplete, onTabChange }) => {
+const CourseSidebar: React.FC<CourseSidebarProps> = ({ 
+  course, 
+  progress, 
+  onMarkComplete, 
+  onTabChange,
+  onDownloadCertificate
+}) => {
   const isCompleted = progress === 100;
   
-  const handleCertificateClick = () => {
-    // In a real application, this would generate or display the certificate
-    toast({
-      title: "Certificate Generated",
-      description: "Your certificate has been generated and added to your profile.",
-      variant: "default",
+  const handleShareCourse = () => {
+    const url = window.location.href;
+    
+    if (navigator.share) {
+      navigator.share({
+        title: course.title,
+        text: `Check out this course: ${course.title}`,
+        url
+      }).catch(err => {
+        console.error('Error sharing:', err);
+        copyToClipboard(url);
+      });
+    } else {
+      copyToClipboard(url);
+    }
+  };
+  
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast.success("Course link copied to clipboard");
+    }).catch(err => {
+      console.error('Could not copy text: ', err);
+      toast.error("Failed to copy link");
     });
   };
   
@@ -58,11 +93,11 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({ course, progress, onMarkC
               </Button>
             )}
             
-            {isCompleted && (
+            {isCompleted && onDownloadCertificate && (
               <Button 
                 variant="outline" 
                 className="w-full mt-2" 
-                onClick={handleCertificateClick}
+                onClick={onDownloadCertificate}
               >
                 <Award className="mr-2 h-4 w-4" />
                 Get Certificate
@@ -118,11 +153,44 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({ course, progress, onMarkC
         </CardContent>
         <Separator />
         <CardFooter className="pt-4">
-          <div className="w-full">
-            <h4 className="text-sm font-medium mb-2">Share this course</h4>
-            <div className="flex space-x-2">
-              <Button variant="outline" size="sm" className="flex-1">
-                Copy Link
+          <div className="w-full space-y-4">
+            <h4 className="text-sm font-medium mb-2">Quick Access</h4>
+            <div className="grid grid-cols-2 gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full flex items-center justify-start"
+                onClick={() => onTabChange && onTabChange('content')}
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                Content
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="w-full flex items-center justify-start"
+                onClick={() => onTabChange && onTabChange('resources')}
+              >
+                <BookOpen className="mr-2 h-4 w-4" />
+                Resources
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="w-full flex items-center justify-start"
+                onClick={() => onTabChange && onTabChange('discussion')}
+              >
+                <MessageCircle className="mr-2 h-4 w-4" />
+                Discussion
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="w-full flex items-center justify-start"
+                onClick={handleShareCourse}
+              >
+                <Share2 className="mr-2 h-4 w-4" />
+                Share
               </Button>
             </div>
           </div>
