@@ -75,7 +75,7 @@ const ChatAssistant: React.FC = () => {
       // Get response (simulated for Freemium/Basic tiers)
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const responseContent = generateBasicResponse(inputValue);
+      const responseContent = generateBetterResponse(inputValue);
       
       const assistantMessage: ChatMessage = {
         id: uuidv4(),
@@ -99,44 +99,62 @@ const ChatAssistant: React.FC = () => {
     }
   };
 
-  // Simple response generator for basic/freemium tiers
-  const generateBasicResponse = (message: string): string => {
+  // Enhanced response generator for more contextual and helpful replies
+  const generateBetterResponse = (message: string): string => {
     message = message.toLowerCase();
     
-    if (message.includes('hello') || message.includes('hi ') || message.includes('hey')) {
-      return "Hello! How can I assist you today with our Digital Intelligence Marketplace?";
+    // More comprehensive message handling patterns
+    if (message.includes('hello') || message.includes('hi ') || message.includes('hey') || message.includes('greetings')) {
+      return "Hello! I'm your Digital Intelligence Assistant. I can help you discover AI tools, answer questions about our platform, or guide you through our learning resources. What would you like to know today?";
     }
     
-    if (message.includes('account') || message.includes('login') || message.includes('sign up')) {
-      return "You can manage your account settings in the Profile page. If you're having trouble logging in, please make sure your credentials are correct or use the 'Forgot Password' option.";
+    if (message.includes('account') || message.includes('login') || message.includes('sign up') || message.includes('password')) {
+      return "You can manage your account settings in the Profile section. If you need help with login issues, our authentication system supports email/password, social logins, and passwordless options. For security concerns, we recommend enabling two-factor authentication in your profile settings.";
     }
     
-    if (message.includes('course') || message.includes('learn') || message.includes('tutorial')) {
-      return "We have various AI learning courses available in our Learning Hub. You can filter them by difficulty level and category. Some advanced courses require a Basic or Pro subscription.";
+    if (message.includes('course') || message.includes('learn') || message.includes('tutorial') || message.includes('training')) {
+      return "Our Learning Hub offers a variety of AI courses ranging from beginner to advanced levels. Popular topics include prompt engineering, machine learning fundamentals, AI ethics, and practical implementations. Each course includes interactive elements, quizzes, and completion certificates. Would you like me to recommend a specific learning path based on your interests?";
     }
     
-    if (message.includes('pricing') || message.includes('subscription') || message.includes('tier')) {
-      return "We offer three tiers: Freemium (free), Basic ($10/month), and Pro ($29/month). Each tier unlocks additional features. You can see a detailed comparison on our Pricing page.";
+    if (message.includes('pricing') || message.includes('subscription') || message.includes('tier') || message.includes('payment')) {
+      return "We offer three subscription tiers designed to match different needs:\n\n• Freemium: Free access to basic tools and limited learning content\n• Basic ($10/month): Includes most tools, full course access, and standard support\n• Pro ($29/month): Unlocks all premium features, advanced AI assistant capabilities, unlimited API access, and priority support\n\nAll plans include a 14-day satisfaction guarantee. Would you like to know more about specific features in each tier?";
     }
     
-    if (message.includes('tool') || message.includes('ai tool')) {
-      return "You can explore our collection of AI tools in the AI Tools Directory. We have tools for various AI applications including NLP, computer vision, and machine learning.";
+    if (message.includes('tool') || message.includes('ai tool') || message.includes('model') || message.includes('technology')) {
+      return "Our AI Tools Directory features various categories including natural language processing, computer vision, code generation, data analysis, and creative tools. Each tool is rated for quality and performance, with usage examples and integration guides. Pro tier members get priority API access and higher usage limits. Which specific AI capability are you interested in exploring?";
     }
     
-    if (message.includes('marketplace')) {
-      return "Our Marketplace offers a wide range of AI tools, models, and services from our partners and community. You can browse all the offerings in the Marketplace section.";
+    if (message.includes('marketplace') || message.includes('buy') || message.includes('sell') || message.includes('purchase')) {
+      return "The Marketplace is our ecosystem where developers, businesses, and AI enthusiasts can discover, buy, sell, or exchange AI tools and models. You can find everything from pre-trained models to custom solutions for specific industries. All offerings are verified for quality and security. Would you like to browse popular categories or learn how to list your own AI solutions?";
     }
     
     if (message.includes('thank')) {
-      return "You're welcome! Feel free to ask if you have any other questions about the Digital Intelligence Marketplace.";
+      return "You're welcome! I'm glad I could be of assistance. If you have any other questions about our platform's features, AI tools, or learning resources, feel free to ask anytime. Is there anything else I can help with today?";
     }
     
-    if (message.includes('pro') || message.includes('advance')) {
-      return "The Pro tier unlocks advanced features like the AI Studio, custom model training, business insights, and personalized AI assistance. You'll also get priority support and access to all our premium tools. Would you like to upgrade?";
+    if (message.includes('pro') || message.includes('advance') || message.includes('upgrade') || message.includes('premium')) {
+      return "The Pro tier gives you access to our complete ecosystem of AI tools and features, including:\n\n• Advanced AI Studio for custom model training\n• Unlimited API calls to all tools\n• Priority processing for AI requests\n• Exclusive webinars and expert sessions\n• Early access to new features\n• Dedicated support with 24-hour response time\n• Full access to all courses and certifications\n\nWould you like to upgrade your account to experience the full potential of our platform?";
     }
     
-    // Default response
-    return "I'm here to help you navigate our Digital Intelligence Marketplace. You can ask me about courses, tools, account settings, or pricing plans. For more advanced assistance, consider upgrading to our Pro tier which includes a more powerful AI assistant!";
+    if (message.includes('help') || message.includes('support') || message.includes('assistance') || message.includes('contact')) {
+      return "I'm here to help! For technical support, you can contact our team at support@digitalintelligence.com or use the Help Center accessible from your dashboard. Pro members receive priority support with faster response times. You can also browse our extensive documentation and community forums for immediate answers to common questions. What specific issue can I assist you with?";
+    }
+    
+    if (message.includes('api') || message.includes('integration') || message.includes('connect') || message.includes('plugin')) {
+      return "Our platform offers comprehensive API access for integrating our AI tools into your applications. Documentation includes authentication guides, endpoint references, and code examples in popular languages. Basic tier members receive 500 API calls monthly, while Pro users get unlimited access. Would you like information on a specific API or integration scenario?";
+    }
+    
+    // Default response with more context and helpful guidance
+    return `I understand you're asking about "${message.substring(0, 30)}${message.length > 30 ? '...' : ''}". 
+
+Our Digital Intelligence Marketplace provides comprehensive AI solutions, learning resources, and community features to help you leverage artificial intelligence effectively.
+
+You might be interested in:
+• Exploring our AI Tools directory for practical applications
+• Checking out the Learning Hub for structured courses on AI topics
+• Visiting the Marketplace to discover new solutions from our community
+
+How can I better assist you with your specific interests in AI and digital intelligence?`;
   };
 
   return (

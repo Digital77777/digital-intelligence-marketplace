@@ -50,13 +50,15 @@ export const useCourseData = (courseId: string | undefined) => {
       if (!user?.id || !courseId || !course) return null;
       return await getOrInitUserProgress(user.id, parseInt(courseId, 10));
     },
-    enabled: !!user?.id && !!courseId && !!course,
-    onSuccess: (data) => {
-      if (data) {
-        setUserProgress(data.completion_percent || 0);
-      }
-    }
+    enabled: !!user?.id && !!courseId && !!course
   });
+  
+  // Update progress when data is loaded
+  useEffect(() => {
+    if (progress) {
+      setUserProgress(progress.completion_percent || 0);
+    }
+  }, [progress]);
   
   // Update progress mutation
   const { mutate: updateProgress, isPending: isUpdating } = useMutation({
