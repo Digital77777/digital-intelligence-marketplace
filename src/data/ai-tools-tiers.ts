@@ -14,6 +14,7 @@ export interface AIToolItem {
   integrations?: string[];
   demoAvailable?: boolean;
   popularTool?: boolean;
+  relatedCourses?: string[];
 }
 
 export const getTierLabel = (tier: AIToolTier | 'all'): string => {
@@ -89,7 +90,8 @@ export const aiTools: AIToolItem[] = [
     uniqueSellingPoint: 'Highest quality image generation with minimal prompt engineering required',
     integrations: ['Photoshop', 'Figma', 'Canva'],
     demoAvailable: true,
-    popularTool: true
+    popularTool: true,
+    relatedCourses: ['Introduction to AI Art', 'Prompt Engineering for Images']
   },
   {
     id: '2',
@@ -107,7 +109,8 @@ export const aiTools: AIToolItem[] = [
     usageLimit: '10 documents per day',
     uniqueSellingPoint: 'Contextual awareness preserves meaning while reducing length by up to 90%',
     integrations: ['Google Docs', 'Microsoft Word', 'Notion'],
-    demoAvailable: true
+    demoAvailable: true,
+    relatedCourses: ['Text Analysis Fundamentals', 'Content Summarization Techniques']
   },
   {
     id: '3',
