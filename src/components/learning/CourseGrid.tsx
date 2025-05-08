@@ -13,11 +13,15 @@ interface CourseGridProps {
     duration: number;
     image_url?: string | null;
     required_tier?: string;
+    certification_available?: boolean;
+    instructor?: string;
+    lesson_count?: number;
   }>;
   userProgress?: Record<string | number, number>;
   completedCourses?: Set<string | number>;
   isLoading?: boolean;
   onMarkComplete?: (id: string | number) => void;
+  emptyMessage?: string;
 }
 
 const CourseGrid: React.FC<CourseGridProps> = ({
@@ -25,7 +29,8 @@ const CourseGrid: React.FC<CourseGridProps> = ({
   userProgress = {},
   completedCourses = new Set(),
   isLoading = false,
-  onMarkComplete
+  onMarkComplete,
+  emptyMessage = "We couldn't find any courses matching your criteria."
 }) => {
   if (isLoading) {
     return (
@@ -43,7 +48,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
         <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
         <h3 className="text-xl font-medium mb-2">No courses found</h3>
         <p className="text-muted-foreground max-w-md mx-auto">
-          We couldn't find any courses matching your criteria.
+          {emptyMessage}
         </p>
       </div>
     );

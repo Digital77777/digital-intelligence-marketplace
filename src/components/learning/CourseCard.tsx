@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Clock, Lock } from 'lucide-react';
+import { BookOpen, Clock, Lock, Award, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import CourseProgress from './CourseProgress';
 import { useTier } from '@/context/TierContext';
@@ -18,6 +18,9 @@ interface CourseCardProps {
     duration: number;
     image_url?: string | null;
     required_tier?: string;
+    certification_available?: boolean;
+    instructor?: string;
+    lesson_count?: number;
   };
   progress?: number;
   isCompleted?: boolean;
@@ -41,6 +44,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
   };
   
   const locked = isCourseLocked();
+  const hasCertification = course.certification_available || false;
   
   return (
     <Card className="overflow-hidden flex flex-col h-full">
@@ -61,6 +65,24 @@ const CourseCard: React.FC<CourseCardProps> = ({
             <Lock className="h-6 w-6 text-white opacity-70" />
           </div>
         )}
+        
+        {!locked && hasCertification && (
+          <div className="absolute top-2 right-2">
+            <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+              <Award className="h-3 w-3 mr-1" />
+              Certification
+            </Badge>
+          </div>
+        )}
+        
+        {!locked && isCompleted && (
+          <div className="absolute top-2 left-2">
+            <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+              <CheckCircle className="h-3 w-3 mr-1" />
+              Completed
+            </Badge>
+          </div>
+        )}
       </div>
       
       <CardContent className="flex-grow p-4">
@@ -68,11 +90,22 @@ const CourseCard: React.FC<CourseCardProps> = ({
         <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
           {course.description}
         </p>
+        
+        <div className="flex items-center text-sm text-muted-foreground mb-3">
+          {course.instructor && (
+            <span className="mr-3">By: {course.instructor}</span>
+          )}
+          {course.lesson_count && (
+            <span>{course.lesson_count} lessons</span>
+          )}
+        </div>
+        
         {progress > 0 && (
           <CourseProgress 
             progress={progress} 
             completed={isCompleted}
             estimatedTimeMinutes={course.duration}
+            showAward={hasCertification}
           />
         )}
       </CardContent>
