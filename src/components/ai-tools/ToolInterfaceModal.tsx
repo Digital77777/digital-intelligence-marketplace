@@ -134,10 +134,16 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
                 connectionDetails={connectionDetails}
               />
             ) : (
-              // Auto-initialize the tool to skip the welcome screen
+              // Auto-initialize the tool instead of directly calling the function in JSX
               <div className="text-center py-4">
                 <p>Initializing tool...</p>
-                {handleQuickStart()}
+                <Button 
+                  variant="default" 
+                  className="mt-2"
+                  onClick={handleQuickStart}
+                >
+                  Quick Start
+                </Button>
               </div>
             )
           )}
