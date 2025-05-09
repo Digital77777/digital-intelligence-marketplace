@@ -97,6 +97,13 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
     setShowConnectionForm(true);
   };
   
+  // Auto-initialize on component mount if no connection details
+  useEffect(() => {
+    if (open && tool && !connectionDetails) {
+      handleQuickStart();
+    }
+  }, [open, tool, connectionDetails]);
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[900px] max-h-[90vh] flex flex-col p-0">
@@ -134,7 +141,6 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
                 connectionDetails={connectionDetails}
               />
             ) : (
-              // Auto-initialize the tool instead of directly calling the function in JSX
               <div className="text-center py-4">
                 <p>Initializing tool...</p>
                 <Button 
