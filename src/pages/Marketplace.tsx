@@ -39,12 +39,20 @@ import {
   Headphones,
   Users,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  Plus,
+  Briefcase,
+  Settings,
+  DollarSign
 } from 'lucide-react';
 import { marketplaceTools } from '@/data/marketplace-tools';
+import ProjectsTab from '@/components/marketplace/ProjectsTab';
+import FreelancersTab from '@/components/marketplace/FreelancersTab';
+import ToolsTab from '@/components/marketplace/ToolsTab';
+import ServicesTab from '@/components/marketplace/ServicesTab';
 
 const Marketplace = () => {
-  useScrollToTop(); // Add scroll to top on navigation
+  useScrollToTop();
   
   const { currentTier } = useTier();
   const [searchQuery, setSearchQuery] = useState('');
@@ -102,17 +110,12 @@ const Marketplace = () => {
     navigate(`/tool/${toolId}`);
   };
 
-  const handleSubmitToolClick = () => {
-    if (currentTier === 'pro') {
-      navigate('/submit-tool');
-    } else {
-      toast({
-        title: "Pro tier required",
-        description: "Tool submission is only available for Pro tier users",
-        variant: "destructive"
-      });
-      navigate('/pricing');
-    }
+  const handlePostProject = () => {
+    navigate('/marketplace/post-project');
+  };
+
+  const handleCreateFreelancerProfile = () => {
+    navigate('/marketplace/create-profile');
   };
 
   const categories = [
@@ -148,21 +151,23 @@ const Marketplace = () => {
             <div className="bg-gradient-to-r from-blue-600 to-purple-600 h-64 md:h-80 flex items-center">
               <div className="container mx-auto px-6 relative z-10">
                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 animate-fade-in">
-                  AI Tools Marketplace
+                  AI Marketplace
                 </h1>
                 <p className="text-white/90 text-lg md:text-xl max-w-2xl mb-6 animate-slide-up">
-                  Discover 50+ cutting-edge AI tools to enhance your productivity and innovation.
+                  Hire AI experts, discover tools, and sell your services in the world's premier AI marketplace.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 animate-slide-up" style={{ animationDelay: "0.2s" }}>
-                  <Button className="bg-white text-blue-600 hover:bg-blue-50">
-                    Explore Tools
+                  <Button className="bg-white text-blue-600 hover:bg-blue-50" onClick={handlePostProject}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Post a Project
                   </Button>
                   <Button 
                     variant="outline" 
                     className="border-white text-white hover:bg-white/10"
-                    onClick={handleSubmitToolClick}
+                    onClick={handleCreateFreelancerProfile}
                   >
-                    Submit Your Tool
+                    <Briefcase className="w-4 h-4 mr-2" />
+                    Start Freelancing
                   </Button>
                 </div>
               </div>
@@ -178,7 +183,7 @@ const Marketplace = () => {
               <div className="relative flex-grow">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
                 <Input
-                  placeholder="Search for AI tools and services..."
+                  placeholder="Search projects, freelancers, tools..."
                   className="pl-10 w-full"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -193,7 +198,7 @@ const Marketplace = () => {
                   </SheetTrigger>
                   <SheetContent side="right" className="w-[350px] sm:w-[450px]">
                     <SheetHeader>
-                      <SheetTitle>Filter Tools</SheetTitle>
+                      <SheetTitle>Filter Results</SheetTitle>
                       <SheetDescription>
                         Refine your search with these filters
                       </SheetDescription>
@@ -236,18 +241,6 @@ const Marketplace = () => {
                       </div>
                       
                       <div>
-                        <h3 className="text-lg font-medium mb-3">Tool Type</h3>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="premium-only" 
-                            checked={isPremiumFilter}
-                            onCheckedChange={(checked) => setIsPremiumFilter(checked === true)}
-                          />
-                          <Label htmlFor="premium-only">Premium Tools Only</Label>
-                        </div>
-                      </div>
-                      
-                      <div>
                         <h3 className="text-lg font-medium mb-3">Categories</h3>
                         <div className="space-y-2 max-h-[200px] overflow-y-auto">
                           {categories.map((category) => (
@@ -285,142 +278,48 @@ const Marketplace = () => {
                     </SheetFooter>
                   </SheetContent>
                 </Sheet>
-                
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button variant="outline" size="sm" className="flex items-center gap-1">
-                      <Tag size={16} /> Categories
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="right" className="w-[350px] sm:w-[450px]">
-                    <SheetHeader>
-                      <SheetTitle>Tool Categories</SheetTitle>
-                      <SheetDescription>
-                        Browse tools by category
-                      </SheetDescription>
-                    </SheetHeader>
-                    <div className="py-6">
-                      <div className="space-y-4">
-                        {categories.map((category) => (
-                          <Button
-                            key={category.id}
-                            variant="outline"
-                            className="w-full justify-start text-left h-auto py-3"
-                            onClick={() => {
-                              setSelectedCategory(category.id);
-                              const closeButton = document.querySelector(".SheetClose") as HTMLElement;
-                              if (closeButton) closeButton.click();
-                            }}
-                          >
-                            <div className="flex items-center">
-                              <div className="mr-3 h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center text-primary">
-                                {category.icon}
-                              </div>
-                              <div>
-                                <h3 className="font-medium">{category.name}</h3>
-                                <p className="text-xs text-muted-foreground">
-                                  {marketplaceTools.filter(t => t.category === category.id).length} tools
-                                </p>
-                              </div>
-                              <ChevronRight className="ml-auto h-5 w-5 text-muted-foreground" />
-                            </div>
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                  </SheetContent>
-                </Sheet>
               </div>
             </div>
           </div>
 
-          {/* Category Tabs */}
+          {/* Main Marketplace Tabs */}
           <div className="mb-8">
-            <Tabs defaultValue="all" onValueChange={setSelectedCategory}>
-              <TabsList className="w-full overflow-x-auto flex flex-nowrap pb-1 justify-start">
-                <TabsTrigger value="all">All Categories</TabsTrigger>
-                {categories.map((category) => (
-                  <TabsTrigger key={category.id} value={category.id} className="whitespace-nowrap flex items-center gap-1">
-                    {category.icon}
-                    {category.name}
-                  </TabsTrigger>
-                ))}
+            <Tabs defaultValue="projects" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="projects" className="flex items-center gap-2">
+                  <Briefcase className="w-4 h-4" />
+                  Projects
+                </TabsTrigger>
+                <TabsTrigger value="freelancers" className="flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  Freelancers
+                </TabsTrigger>
+                <TabsTrigger value="tools" className="flex items-center gap-2">
+                  <Settings className="w-4 h-4" />
+                  Tools
+                </TabsTrigger>
+                <TabsTrigger value="services" className="flex items-center gap-2">
+                  <DollarSign className="w-4 h-4" />
+                  Services
+                </TabsTrigger>
               </TabsList>
+              
+              <TabsContent value="projects" className="mt-6">
+                <ProjectsTab searchQuery={searchQuery} />
+              </TabsContent>
+              
+              <TabsContent value="freelancers" className="mt-6">
+                <FreelancersTab searchQuery={searchQuery} />
+              </TabsContent>
+              
+              <TabsContent value="tools" className="mt-6">
+                <ToolsTab searchQuery={searchQuery} filteredTools={filteredTools} viewToolDetails={viewToolDetails} />
+              </TabsContent>
+              
+              <TabsContent value="services" className="mt-6">
+                <ServicesTab searchQuery={searchQuery} />
+              </TabsContent>
             </Tabs>
-          </div>
-
-          <div className="space-y-6 animate-fade-in" style={{ animationDelay: "0.4s" }}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredTools.map((tool) => (
-                <Card key={tool.id} className="overflow-hidden hover:shadow-md transition-shadow border-2 group">
-                  <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 p-6 flex justify-center items-center h-36">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white text-xl">
-                      {tool.icon}
-                    </div>
-                  </div>
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg">{tool.name}</CardTitle>
-                    </div>
-                    <Badge variant={tool.isPremium ? "secondary" : "default"} className="mt-1">
-                      {tool.isPremium ? 'Premium' : 'Open Source'}
-                    </Badge>
-                    <CardDescription className="text-sm text-muted-foreground mt-1">
-                      {tool.category}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pb-2">
-                    <p className="text-sm line-clamp-2 mb-3">
-                      {tool.description}
-                    </p>
-                    <div className="flex items-center mb-2">
-                      {[...Array(Math.floor(tool.rating))].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      ))}
-                      {tool.rating % 1 > 0 && (
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      )}
-                      <span className="ml-2 text-sm text-foreground/70">{tool.rating.toFixed(1)}</span>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-between items-center">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => viewToolDetails(tool.id)}
-                    >
-                      <ExternalLink size={16} className="mr-2" /> View Tool
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-            
-            {filteredTools.length === 0 && (
-              <div className="text-center py-16">
-                <div className="mb-4 text-foreground/50">
-                  <Search className="h-12 w-12 mx-auto" />
-                </div>
-                <h3 className="text-xl font-medium mb-2">No tools found</h3>
-                <p className="text-foreground/70 max-w-md mx-auto">
-                  We couldn't find any tools matching your current filters. Try adjusting your search criteria or clearing filters.
-                </p>
-                <Button
-                  variant="outline"
-                  className="mt-6"
-                  onClick={() => {
-                    setSearchQuery('');
-                    setSelectedCategory('all');
-                    setRatingFilter(0);
-                    setIsPremiumFilter(false);
-                    setCategoriesFilter([]);
-                  }}
-                >
-                  Clear All Filters
-                </Button>
-              </div>
-            )}
           </div>
         </div>
       </main>
