@@ -43,7 +43,11 @@ import {
   Plus,
   Briefcase,
   Settings,
-  DollarSign
+  DollarSign,
+  TrendingUp,
+  Award,
+  Target,
+  Zap
 } from 'lucide-react';
 import { marketplaceTools } from '@/data/marketplace-tools';
 import ProjectsTab from '@/components/marketplace/ProjectsTab';
@@ -141,66 +145,108 @@ const Marketplace = () => {
     });
   };
 
+  const stats = [
+    { label: 'Active Projects', value: '1,234', icon: <Briefcase className="w-5 h-5" />, color: 'text-blue-600' },
+    { label: 'AI Experts', value: '2,567', icon: <Users className="w-5 h-5" />, color: 'text-green-600' },
+    { label: 'Tools Available', value: '890', icon: <Settings className="w-5 h-5" />, color: 'text-purple-600' },
+    { label: 'Success Rate', value: '98%', icon: <Award className="w-5 h-5" />, color: 'text-orange-600' }
+  ];
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 pt-24 px-6 pb-12">
         <div className="max-w-7xl mx-auto">
-          {/* Hero section */}
-          <div className="mb-12 relative overflow-hidden rounded-2xl">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 h-64 md:h-80 flex items-center">
-              <div className="container mx-auto px-6 relative z-10">
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 animate-fade-in">
-                  AI Marketplace
-                </h1>
-                <p className="text-white/90 text-lg md:text-xl max-w-2xl mb-6 animate-slide-up">
-                  Hire AI experts, discover tools, and sell your services in the world's premier AI marketplace.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 animate-slide-up" style={{ animationDelay: "0.2s" }}>
-                  <Button className="bg-white text-blue-600 hover:bg-blue-50" onClick={handlePostProject}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Post a Project
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="border-white text-white hover:bg-white/10"
-                    onClick={handleCreateFreelancerProfile}
-                  >
-                    <Briefcase className="w-4 h-4 mr-2" />
-                    Start Freelancing
-                  </Button>
+          {/* Enhanced Hero section */}
+          <div className="mb-12 relative overflow-hidden rounded-3xl">
+            <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-800 h-96 md:h-[450px] flex items-center relative">
+              <div className="container mx-auto px-8 relative z-10">
+                <div className="max-w-4xl">
+                  <div className="mb-6">
+                    <Badge variant="secondary" className="mb-4 px-4 py-2 bg-white/20 backdrop-blur-sm border-white/30 text-white">
+                      <Zap className="w-4 h-4 mr-2" />
+                      World's Premier AI Marketplace
+                    </Badge>
+                  </div>
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 animate-fade-in leading-tight">
+                    Connect with
+                    <span className="block bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
+                      AI Experts
+                    </span>
+                    Worldwide
+                  </h1>
+                  <p className="text-white/90 text-xl md:text-2xl max-w-3xl mb-8 animate-slide-up leading-relaxed">
+                    Hire top AI talent, discover cutting-edge tools, and grow your business with the most trusted AI marketplace platform.
+                  </p>
+                  
+                  {/* Stats */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+                    {stats.map((stat, index) => (
+                      <div key={index} className="text-center">
+                        <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm mb-2 ${stat.color}`}>
+                          {stat.icon}
+                        </div>
+                        <div className="text-2xl font-bold text-white">{stat.value}</div>
+                        <div className="text-white/80 text-sm">{stat.label}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-4 animate-slide-up" style={{ animationDelay: "0.2s" }}>
+                    <Button 
+                      size="lg" 
+                      className="bg-white text-blue-600 hover:bg-blue-50 font-semibold px-8 py-4 text-lg" 
+                      onClick={handlePostProject}
+                    >
+                      <Plus className="w-5 h-5 mr-2" />
+                      Post a Project
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="lg"
+                      className="border-white text-white hover:bg-white/10 font-semibold px-8 py-4 text-lg backdrop-blur-sm"
+                      onClick={handleCreateFreelancerProfile}
+                    >
+                      <Target className="w-5 h-5 mr-2" />
+                      Start Freelancing
+                    </Button>
+                  </div>
                 </div>
               </div>
+              
+              {/* Background Elements */}
+              <div className="absolute inset-0 bg-black/20"></div>
+              <div className="absolute -right-20 -top-20 w-96 h-96 bg-purple-500/30 rounded-full filter blur-3xl"></div>
+              <div className="absolute -left-20 -bottom-20 w-96 h-96 bg-blue-500/30 rounded-full filter blur-3xl"></div>
+              <div className="absolute right-1/4 top-1/4 w-64 h-64 bg-yellow-400/20 rounded-full filter blur-2xl"></div>
             </div>
-            <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]"></div>
-            <div className="absolute -right-10 -top-10 w-64 h-64 bg-purple-500/30 rounded-full filter blur-3xl"></div>
-            <div className="absolute -left-10 -bottom-10 w-64 h-64 bg-blue-500/30 rounded-full filter blur-3xl"></div>
           </div>
 
-          {/* Search and filters */}
-          <div className="bg-card shadow-sm border rounded-xl p-4 mb-8 animate-fade-in" style={{ animationDelay: "0.3s" }}>
+          {/* Enhanced Search and filters */}
+          <div className="bg-card shadow-lg border rounded-2xl p-6 mb-8 animate-fade-in" style={{ animationDelay: "0.3s" }}>
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-grow">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
                 <Input
-                  placeholder="Search projects, freelancers, tools..."
-                  className="pl-10 w-full"
+                  placeholder="Search projects, experts, tools, or services..."
+                  className="pl-12 w-full h-12 text-lg border-2 focus:border-blue-500"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex gap-3 flex-wrap">
                 <Sheet>
                   <SheetTrigger asChild>
-                    <Button variant="outline" size="sm" className="flex items-center gap-1">
-                      <Filter size={16} /> Filters
+                    <Button variant="outline" size="lg" className="flex items-center gap-2 h-12 px-6">
+                      <Filter size={18} /> 
+                      Advanced Filters
                     </Button>
                   </SheetTrigger>
-                  <SheetContent side="right" className="w-[350px] sm:w-[450px]">
+                  <SheetContent side="right" className="w-[400px] sm:w-[500px]">
                     <SheetHeader>
-                      <SheetTitle>Filter Results</SheetTitle>
+                      <SheetTitle className="text-xl">Filter Results</SheetTitle>
                       <SheetDescription>
-                        Refine your search with these filters
+                        Refine your search with advanced filters
                       </SheetDescription>
                     </SheetHeader>
                     <div className="py-6 space-y-6">
@@ -230,10 +276,9 @@ const Marketplace = () => {
                             <Label htmlFor="r45" className="flex items-center">
                               <span>4.5+</span>
                               <div className="flex ml-2">
-                                {[...Array(4)].map((_, i) => (
+                                {[...Array(5)].map((_, i) => (
                                   <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                                 ))}
-                                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                               </div>
                             </Label>
                           </div>
@@ -242,7 +287,7 @@ const Marketplace = () => {
                       
                       <div>
                         <h3 className="text-lg font-medium mb-3">Categories</h3>
-                        <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                        <div className="space-y-2 max-h-[300px] overflow-y-auto">
                           {categories.map((category) => (
                             <div key={category.id} className="flex items-center space-x-2">
                               <Checkbox 
@@ -285,41 +330,64 @@ const Marketplace = () => {
           {/* Main Marketplace Tabs */}
           <div className="mb-8">
             <Tabs defaultValue="projects" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="projects" className="flex items-center gap-2">
+              <TabsList className="grid w-full grid-cols-4 h-14 bg-muted rounded-xl p-1">
+                <TabsTrigger value="projects" className="flex items-center gap-2 h-12 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
                   <Briefcase className="w-4 h-4" />
-                  Projects
+                  <span className="hidden sm:inline">Projects</span>
                 </TabsTrigger>
-                <TabsTrigger value="freelancers" className="flex items-center gap-2">
+                <TabsTrigger value="freelancers" className="flex items-center gap-2 h-12 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
                   <Users className="w-4 h-4" />
-                  Freelancers
+                  <span className="hidden sm:inline">Experts</span>
                 </TabsTrigger>
-                <TabsTrigger value="tools" className="flex items-center gap-2">
+                <TabsTrigger value="tools" className="flex items-center gap-2 h-12 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
                   <Settings className="w-4 h-4" />
-                  Tools
+                  <span className="hidden sm:inline">Tools</span>
                 </TabsTrigger>
-                <TabsTrigger value="services" className="flex items-center gap-2">
+                <TabsTrigger value="services" className="flex items-center gap-2 h-12 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
                   <DollarSign className="w-4 h-4" />
-                  Services
+                  <span className="hidden sm:inline">Services</span>
                 </TabsTrigger>
               </TabsList>
               
-              <TabsContent value="projects" className="mt-6">
+              <TabsContent value="projects" className="mt-8">
                 <ProjectsTab searchQuery={searchQuery} />
               </TabsContent>
               
-              <TabsContent value="freelancers" className="mt-6">
+              <TabsContent value="freelancers" className="mt-8">
                 <FreelancersTab searchQuery={searchQuery} />
               </TabsContent>
               
-              <TabsContent value="tools" className="mt-6">
+              <TabsContent value="tools" className="mt-8">
                 <ToolsTab searchQuery={searchQuery} filteredTools={filteredTools} viewToolDetails={viewToolDetails} />
               </TabsContent>
               
-              <TabsContent value="services" className="mt-6">
+              <TabsContent value="services" className="mt-8">
                 <ServicesTab searchQuery={searchQuery} />
               </TabsContent>
             </Tabs>
+          </div>
+
+          {/* Success Stories Section */}
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-8 mb-8">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold mb-4">Success Stories</h2>
+              <p className="text-muted-foreground text-lg">See how our AI marketplace transforms businesses</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { stat: "$2.5M+", label: "Total Transactions", icon: <DollarSign className="w-6 h-6" /> },
+                { stat: "15,000+", label: "Projects Completed", icon: <Briefcase className="w-6 h-6" /> },
+                { stat: "98.5%", label: "Client Satisfaction", icon: <TrendingUp className="w-6 h-6" /> }
+              ].map((item, index) => (
+                <div key={index} className="text-center p-6 bg-white rounded-xl shadow-sm">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4 text-blue-600">
+                    {item.icon}
+                  </div>
+                  <div className="text-3xl font-bold text-gray-900 mb-2">{item.stat}</div>
+                  <div className="text-gray-600">{item.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </main>

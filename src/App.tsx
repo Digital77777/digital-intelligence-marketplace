@@ -1,125 +1,112 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { ThemeProvider } from '@/components/ThemeProvider';
-import { Toaster } from '@/components/ui/toaster';
-import { TierProvider } from '@/context/TierContext';
-import { UserProvider } from '@/context/UserContext';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import { TooltipProvider } from '@/components/ui/tooltip';
-// Pages
-import Home from '@/pages/Home';
-import Pricing from '@/pages/Pricing';
-import About from '@/pages/About';
-import AITools from '@/pages/AITools';
-import AIToolsDirectory from '@/pages/AIToolsDirectory';
-import ToolDetails from '@/pages/ToolDetails';
-import LearningHub from '@/pages/LearningHub';
-import CourseDetails from '@/pages/CourseDetails';
-import Marketplace from '@/pages/Marketplace';
-import CommunityForums from '@/pages/CommunityForums';
-import TopicDetails from '@/pages/TopicDetails';
-import NewTopic from '@/pages/NewTopic';
-import NewGroup from '@/pages/NewGroup';
-import AIStreamsUpload from '@/pages/AIStreamsUpload';
-import AIStreams from '@/pages/AIStreams';
-import CollaborationHub from '@/pages/CollaborationHub';
-import AIAssistant from '@/pages/AIAssistant';
-import Auth from '@/pages/Auth';
-import LearningAcademy from '@/pages/LearningAcademy';
-import BusinessInsights from '@/pages/BusinessInsights';
-import PipelineDesigner from '@/pages/PipelineDesigner';
-import ComplianceCenter from '@/pages/ComplianceCenter';
-import WorkflowDesigner from '@/pages/WorkflowDesigner';
-import DiscoveryPage from '@/pages/DiscoveryPage';
-import AIStudio from '@/pages/AIStudio';
-import ProChatAssistant from '@/components/ProChatAssistant';
-import TeamDashboard from '@/pages/TeamDashboard';
 
-// Create a client with better error handling, retry logic, and caching
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 2,
-      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-      staleTime: 60000, // 1 minute
-      gcTime: 5 * 60 * 1000, // 5 minutes
-      refetchOnWindowFocus: false,
-      refetchOnMount: true,
-      meta: {
-        onError: (error) => {
-          console.error('Query error:', error);
-          // You could also report to an error tracking service here
-        },
-      },
-    },
-    mutations: {
-      meta: {
-        onError: (error) => {
-          console.error('Mutation error:', error);
-          // You could also report to an error tracking service here
-        }
-      },
-    },
-  },
-});
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { TierProvider } from "@/context/TierContext";
+import { UserProvider } from "@/context/UserContext";
+import { ThemeProvider } from "@/components/theme-provider";
+import Index from "./pages/Index";
+import Home from "./pages/Home";
+import About from "./pages/About";
+import AITools from "./pages/AITools";
+import AIToolsDirectory from "./pages/AIToolsDirectory";
+import ToolDetails from "./pages/ToolDetails";
+import AIStudio from "./pages/AIStudio";
+import WorkflowDesigner from "./pages/WorkflowDesigner";
+import PipelineDesigner from "./pages/PipelineDesigner";
+import LearningHub from "./pages/LearningHub";
+import LearningAcademy from "./pages/LearningAcademy";
+import CourseDetails from "./pages/CourseDetails";
+import Courses from "./pages/Courses";
+import CommunityForums from "./pages/CommunityForums";
+import ForumTopic from "./pages/ForumTopic";
+import NewForumTopic from "./pages/NewForumTopic";
+import NewGroup from "./pages/NewGroup";
+import NewTopic from "./pages/NewTopic";
+import TopicDetails from "./pages/TopicDetails";
+import Community from "./pages/Community";
+import CollaborationHub from "./pages/CollaborationHub";
+import TeamDashboard from "./pages/TeamDashboard";
+import ModelMarketplace from "./pages/ModelMarketplace";
+import Marketplace from "./pages/Marketplace";
+import PostProject from "./pages/PostProject";
+import CreateFreelancerProfile from "./pages/CreateFreelancerProfile";
+import BusinessInsights from "./pages/BusinessInsights";
+import ComplianceCenter from "./pages/ComplianceCenter";
+import AIAssistant from "./pages/AIAssistant";
+import AIStreams from "./pages/AIStreams";
+import AIStreamsUpload from "./pages/AIStreamsUpload";
+import AIStreamDetail from "./pages/AIStreamDetail";
+import Auth from "./pages/Auth";
+import Profile from "./pages/Profile";
+import Pricing from "./pages/Pricing";
+import DiscoveryPage from "./pages/DiscoveryPage";
+import SubmitTool from "./pages/SubmitTool";
+import ToolDetail from "./pages/ToolDetail";
+import NotFound from "./pages/NotFound";
 
-// App content with global chat assistant
-const AppContent = () => {
+const queryClient = new QueryClient();
+
+function App() {
   return (
-    <TooltipProvider>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/pricing" element={<Pricing />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/ai-tools" element={<AITools />} />
-        <Route path="/ai-tools-directory" element={<AIToolsDirectory />} />
-        <Route path="/tool/:id" element={<ToolDetails />} />
-        <Route path="/tool/:id/interface" element={<ToolDetails />} />
-        <Route path="/learning-hub" element={<LearningHub />} />
-        <Route path="/learning/:courseId" element={<CourseDetails />} />
-        <Route path="/marketplace" element={<Marketplace />} />
-        <Route path="/community" element={<CommunityForums />} />
-        <Route path="/forums" element={<CommunityForums />} /> 
-        <Route path="/community/topic/:topicId" element={<TopicDetails />} />
-        <Route path="/community/new-topic/:categoryId" element={<NewTopic />} />
-        <Route path="/community/new-group" element={<NewGroup />} />
-        <Route path="/ai-streams" element={<AIStreams />} />
-        <Route path="/ai-streams/upload" element={<AIStreamsUpload />} />
-        <Route path="/collaboration-hub" element={<CollaborationHub />} />
-        <Route path="/ai-assistant" element={<AIAssistant />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/learning-academy" element={<LearningAcademy />} />
-        <Route path="/team-dashboard" element={<TeamDashboard />} />
-        <Route path="/workflow-designer" element={<WorkflowDesigner />} />
-        <Route path="/ai-studio" element={<AIStudio />} />
-        <Route path="/business-insights" element={<BusinessInsights />} />
-        <Route path="/pipeline-designer" element={<PipelineDesigner />} />
-        <Route path="/compliance-center" element={<ComplianceCenter />} />
-        <Route path="/discovery" element={<DiscoveryPage />} />
-      </Routes>
-      <Toaster />
-      <ProChatAssistant />
-    </TooltipProvider>
-  );
-};
-
-export default function App() {
-  return (
-    <React.StrictMode>
-      <ErrorBoundary>
-        <ThemeProvider defaultTheme="light" storageKey="ui-theme">
-          <QueryClientProvider client={queryClient}>
-            <BrowserRouter>
-              <TierProvider>
-                <UserProvider>
-                  <AppContent />
-                </UserProvider>
-              </TierProvider>
-            </BrowserRouter>
-          </QueryClientProvider>
-        </ThemeProvider>
-      </ErrorBoundary>
-    </React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+        <TierProvider>
+          <UserProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/home" element={<Home />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/ai-tools" element={<AITools />} />
+                  <Route path="/ai-tools-directory" element={<AIToolsDirectory />} />
+                  <Route path="/tool/:id" element={<ToolDetails />} />
+                  <Route path="/ai-studio" element={<AIStudio />} />
+                  <Route path="/workflow-designer" element={<WorkflowDesigner />} />
+                  <Route path="/pipeline-designer" element={<PipelineDesigner />} />
+                  <Route path="/learning-hub" element={<LearningHub />} />
+                  <Route path="/learning-academy" element={<LearningAcademy />} />
+                  <Route path="/course/:id" element={<CourseDetails />} />
+                  <Route path="/courses" element={<Courses />} />
+                  <Route path="/community-forums" element={<CommunityForums />} />
+                  <Route path="/forum/:topicId" element={<ForumTopic />} />
+                  <Route path="/new-forum-topic" element={<NewForumTopic />} />
+                  <Route path="/new-group" element={<NewGroup />} />
+                  <Route path="/new-topic" element={<NewTopic />} />
+                  <Route path="/topic/:id" element={<TopicDetails />} />
+                  <Route path="/community" element={<Community />} />
+                  <Route path="/collaboration-hub" element={<CollaborationHub />} />
+                  <Route path="/team-dashboard" element={<TeamDashboard />} />
+                  <Route path="/model-marketplace" element={<ModelMarketplace />} />
+                  <Route path="/marketplace" element={<Marketplace />} />
+                  <Route path="/marketplace/post-project" element={<PostProject />} />
+                  <Route path="/marketplace/create-profile" element={<CreateFreelancerProfile />} />
+                  <Route path="/business-insights" element={<BusinessInsights />} />
+                  <Route path="/compliance-center" element={<ComplianceCenter />} />
+                  <Route path="/ai-assistant" element={<AIAssistant />} />
+                  <Route path="/ai-streams" element={<AIStreams />} />
+                  <Route path="/ai-streams/upload" element={<AIStreamsUpload />} />
+                  <Route path="/ai-streams/:id" element={<AIStreamDetail />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/pricing" element={<Pricing />} />
+                  <Route path="/discovery" element={<DiscoveryPage />} />
+                  <Route path="/submit-tool" element={<SubmitTool />} />
+                  <Route path="/tools/:id" element={<ToolDetail />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </TooltipProvider>
+          </UserProvider>
+        </TierProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
+
+export default App;

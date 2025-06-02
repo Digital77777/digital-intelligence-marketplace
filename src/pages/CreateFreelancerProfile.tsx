@@ -12,15 +12,17 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/context/UserContext';
+import { Label } from "@/components/ui/label";
 import { 
   Plus, 
   X, 
   User, 
   DollarSign, 
   Award,
-  Github,
-  Globe,
-  Briefcase
+  ExternalLink,
+  Star,
+  Code,
+  Brain
 } from 'lucide-react';
 
 const CreateFreelancerProfile = () => {
@@ -38,7 +40,8 @@ const CreateFreelancerProfile = () => {
     skills: [],
     portfolio_url: '',
     github_url: '',
-    kaggle_url: ''
+    kaggle_url: '',
+    badge: 'bronze'
   });
 
   useEffect(() => {
@@ -64,11 +67,13 @@ const CreateFreelancerProfile = () => {
           skills: data.skills || [],
           portfolio_url: data.portfolio_url || '',
           github_url: data.github_url || '',
-          kaggle_url: data.kaggle_url || ''
+          kaggle_url: data.kaggle_url || '',
+          badge: data.badge || 'bronze'
         });
       }
     } catch (error) {
       // Profile doesn't exist yet, which is fine
+      console.log('No existing profile found');
     }
   };
 
@@ -122,16 +127,19 @@ const CreateFreelancerProfile = () => {
       const profileData = {
         user_id: user.id,
         bio: formData.bio,
-        hourly_rate: parseFloat(formData.hourly_rate),
-        years_experience: parseInt(formData.years_experience),
+        hourly_rate: formData.hourly_rate ? parseFloat(formData.hourly_rate) : null,
+        years_experience: formData.years_experience ? parseInt(formData.years_experience) : 0,
         skills: formData.skills,
         portfolio_url: formData.portfolio_url || null,
         github_url: formData.github_url || null,
-        kaggle_url: formData.kaggle_url || null
+        kaggle_url: formData.kaggle_url || null,
+        badge: formData.badge,
+        updated_at: new Date().toISOString()
       };
 
       let result;
       if (existingProfile) {
+        // Update existing profile
         result = await supabase
           .from('freelancer_profiles')
           .update(profileData)
@@ -139,6 +147,7 @@ const CreateFreelancerProfile = () => {
           .select()
           .single();
       } else {
+        // Create new profile
         result = await supabase
           .from('freelancer_profiles')
           .insert([profileData])
@@ -146,8 +155,7 @@ const CreateFreelancerProfile = () => {
           .single();
       }
 
-      const { data, error } = result;
-      if (error) throw error;
+      if (result.error) throw result.error;
 
       toast({
         title: existingProfile ? "Profile Updated" : "Profile Created",
@@ -156,7 +164,7 @@ const CreateFreelancerProfile = () => {
           : "Your freelancer profile has been created successfully.",
       });
 
-      navigate(`/marketplace/freelancer/${data.id}`);
+      navigate('/marketplace');
     } catch (error) {
       console.error('Error saving freelancer profile:', error);
       toast({
@@ -173,7 +181,7 @@ const CreateFreelancerProfile = () => {
     'Machine Learning', 'Deep Learning', 'Natural Language Processing', 'Computer Vision',
     'Data Science', 'Python', 'TensorFlow', 'PyTorch', 'React', 'Node.js',
     'Data Analysis', 'Statistical Modeling', 'AI/ML', 'API Development',
-    'Data Visualization', 'Business Intelligence', 'Cloud Computing', 'MLOps'
+    'Neural Networks', 'Reinforcement Learning', 'MLOps', 'Cloud Computing'
   ];
 
   return (
@@ -183,33 +191,34 @@ const CreateFreelancerProfile = () => {
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">
-              {existingProfile ? 'Update Your Profile' : 'Create Your Freelancer Profile'}
+              {existingProfile ? 'Update Your Profile' : 'Create Freelancer Profile'}
             </h1>
             <p className="text-muted-foreground">
               {existingProfile 
-                ? 'Update your information to attract more clients.'
-                : 'Tell clients about your skills and experience to start getting hired.'
+                ? 'Update your profile to attract more clients'
+                : 'Set up your professional profile to start receiving project opportunities'
               }
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Personal Information */}
+            {/* Profile Basics */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <User className="w-5 h-5" />
-                  Personal Information
+                  Professional Information
                 </CardTitle>
                 <CardDescription>
-                  Tell clients about yourself and your expertise
+                  Tell clients about your expertise and experience
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Professional Bio</label>
+                  <Label htmlFor="bio">Professional Bio</Label>
                   <Textarea
-                    placeholder="Describe your experience, specializations, and what makes you unique..."
+                    id="bio"
+                    placeholder="Describe your expertise, experience, and what makes you unique..."
                     rows={6}
                     value={formData.bio}
                     onChange={(e) => handleInputChange('bio', e.target.value)}
@@ -219,30 +228,24 @@ const CreateFreelancerProfile = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Years of Experience</label>
-                    <Select value={formData.years_experience} onValueChange={(value) => handleInputChange('years_experience', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select experience" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0">Less than 1 year</SelectItem>
-                        <SelectItem value="1">1 year</SelectItem>
-                        <SelectItem value="2">2 years</SelectItem>
-                        <SelectItem value="3">3 years</SelectItem>
-                        <SelectItem value="4">4 years</SelectItem>
-                        <SelectItem value="5">5 years</SelectItem>
-                        <SelectItem value="7">7 years</SelectItem>
-                        <SelectItem value="10">10+ years</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Hourly Rate ($)</label>
+                    <Label htmlFor="hourly_rate">Hourly Rate ($)</Label>
                     <Input
+                      id="hourly_rate"
                       type="number"
-                      placeholder="50"
+                      placeholder="75"
                       value={formData.hourly_rate}
                       onChange={(e) => handleInputChange('hourly_rate', e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="years_experience">Years of Experience</Label>
+                    <Input
+                      id="years_experience"
+                      type="number"
+                      placeholder="5"
+                      value={formData.years_experience}
+                      onChange={(e) => handleInputChange('years_experience', e.target.value)}
                       required
                     />
                   </div>
@@ -254,7 +257,7 @@ const CreateFreelancerProfile = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Award className="w-5 h-5" />
+                  <Brain className="w-5 h-5" />
                   Skills & Expertise
                 </CardTitle>
                 <CardDescription>
@@ -263,9 +266,10 @@ const CreateFreelancerProfile = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Skills</label>
+                  <Label htmlFor="skills">Skills</Label>
                   <div className="flex gap-2 mb-2">
                     <Input
+                      id="skills"
                       placeholder="Add a skill (e.g., Machine Learning)"
                       value={skillInput}
                       onChange={(e) => setSkillInput(e.target.value)}
@@ -296,7 +300,7 @@ const CreateFreelancerProfile = () => {
                   <div className="text-sm text-muted-foreground">
                     <p className="mb-1">Suggested skills:</p>
                     <div className="flex flex-wrap gap-1">
-                      {skillSuggestions.filter(skill => !formData.skills.includes(skill)).slice(0, 10).map((skill) => (
+                      {skillSuggestions.filter(skill => !formData.skills.includes(skill)).slice(0, 8).map((skill) => (
                         <button
                           key={skill}
                           type="button"
@@ -321,20 +325,18 @@ const CreateFreelancerProfile = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Briefcase className="w-5 h-5" />
+                  <ExternalLink className="w-5 h-5" />
                   Portfolio & Links
                 </CardTitle>
                 <CardDescription>
-                  Add links to showcase your work and expertise
+                  Showcase your work and professional profiles
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">
-                    <Globe className="w-4 h-4 inline mr-2" />
-                    Portfolio Website
-                  </label>
+                  <Label htmlFor="portfolio_url">Portfolio Website</Label>
                   <Input
+                    id="portfolio_url"
                     type="url"
                     placeholder="https://yourportfolio.com"
                     value={formData.portfolio_url}
@@ -342,30 +344,27 @@ const CreateFreelancerProfile = () => {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    <Github className="w-4 h-4 inline mr-2" />
-                    GitHub Profile
-                  </label>
-                  <Input
-                    type="url"
-                    placeholder="https://github.com/yourusername"
-                    value={formData.github_url}
-                    onChange={(e) => handleInputChange('github_url', e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    <Award className="w-4 h-4 inline mr-2" />
-                    Kaggle Profile
-                  </label>
-                  <Input
-                    type="url"
-                    placeholder="https://kaggle.com/yourusername"
-                    value={formData.kaggle_url}
-                    onChange={(e) => handleInputChange('kaggle_url', e.target.value)}
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="github_url">GitHub Profile</Label>
+                    <Input
+                      id="github_url"
+                      type="url"
+                      placeholder="https://github.com/username"
+                      value={formData.github_url}
+                      onChange={(e) => handleInputChange('github_url', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="kaggle_url">Kaggle Profile</Label>
+                    <Input
+                      id="kaggle_url"
+                      type="url"
+                      placeholder="https://kaggle.com/username"
+                      value={formData.kaggle_url}
+                      onChange={(e) => handleInputChange('kaggle_url', e.target.value)}
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -376,7 +375,7 @@ const CreateFreelancerProfile = () => {
                 Cancel
               </Button>
               <Button type="submit" disabled={loading} className="flex-1">
-                {loading ? 'Saving...' : existingProfile ? 'Update Profile' : 'Create Profile'}
+                {loading ? 'Saving...' : (existingProfile ? 'Update Profile' : 'Create Profile')}
               </Button>
             </div>
           </form>
