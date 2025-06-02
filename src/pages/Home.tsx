@@ -2,6 +2,7 @@
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import MobileStickyFooter from '@/components/MobileStickyFooter';
 import HeroSection from '@/components/HeroSection';
 import TrendingToolsCarousel from '@/components/TrendingToolsCarousel';
 import AvailableTools from '@/components/AvailableTools';
@@ -30,7 +31,7 @@ const Home = () => {
   return (
     <>
       <Navbar />
-      <main>
+      <main className="pb-16 md:pb-0">
         <HeroSection />
         <TrendingToolsCarousel />
         <AvailableTools />
@@ -72,6 +73,7 @@ const Home = () => {
         <FeaturedResources />
       </main>
       <Footer />
+      <MobileStickyFooter />
     </>
   );
 };

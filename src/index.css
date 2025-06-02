@@ -172,6 +172,11 @@ main {
   main {
     margin-top: 13rem; /* Adjusted for mobile */
   }
+  
+  /* Add bottom padding for mobile sticky footer */
+  .pb-mobile-footer {
+    padding-bottom: 4rem;
+  }
 }
 
 #root {

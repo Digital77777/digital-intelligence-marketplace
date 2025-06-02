@@ -2,6 +2,7 @@
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import MobileStickyFooter from '@/components/MobileStickyFooter';
 import { useNavigate } from 'react-router-dom';
 import { useTier } from '@/context/TierContext';
 import { Badge } from "@/components/ui/badge";
@@ -42,7 +43,7 @@ const ProTierLayout: React.FC<ProTierLayoutProps> = ({
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-950 to-indigo-950/60">
       <Navbar />
-      <main className="flex-1 pt-24 px-6 pb-12">
+      <main className="flex-1 pt-24 px-6 pb-12 md:pb-12 pb-20">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-3">
@@ -60,6 +61,7 @@ const ProTierLayout: React.FC<ProTierLayoutProps> = ({
         </div>
       </main>
       <Footer />
+      <MobileStickyFooter />
     </div>
   );
 };
