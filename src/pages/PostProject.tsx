@@ -25,6 +25,22 @@ import {
   Target
 } from 'lucide-react';
 
+interface ProjectData {
+  client_id: string;
+  title: string;
+  description: string;
+  project_type: string;
+  is_hourly: boolean;
+  required_skills: string[];
+  experience_level: string;
+  urgency_level: number;
+  budget_min?: number;
+  budget_max?: number;
+  fixed_price?: number;
+  estimated_hours?: number;
+  deadline?: string;
+}
+
 const PostProject = () => {
   const navigate = useNavigate();
   const { user } = useUser();
@@ -94,7 +110,7 @@ const PostProject = () => {
     setLoading(true);
 
     try {
-      const projectData = {
+      const projectData: ProjectData = {
         client_id: user.id,
         title: formData.title,
         description: formData.description,
