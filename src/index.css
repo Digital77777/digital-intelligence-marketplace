@@ -173,9 +173,14 @@ main {
     margin-top: 13rem; /* Adjusted for mobile */
   }
   
-  /* Add bottom padding for mobile sticky footer */
-  .pb-mobile-footer {
-    padding-bottom: 4rem;
+  /* Ensure main content has bottom padding for mobile sticky footer */
+  main {
+    padding-bottom: 4rem !important;
+  }
+  
+  /* Additional mobile-specific adjustments */
+  .mobile-footer-spacing {
+    margin-bottom: 4rem;
   }
 }
 

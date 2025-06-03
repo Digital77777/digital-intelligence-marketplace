@@ -1,7 +1,9 @@
+
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import HeroSection from '@/components/HeroSection';
 import Footer from '@/components/Footer';
+import MobileStickyFooter from '@/components/MobileStickyFooter';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Cpu, Database, BarChart3 } from 'lucide-react';
@@ -21,7 +23,7 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#1A1A1A] text-white font-inter">
       <Navbar />
-      <main className="flex-grow">
+      <main className="flex-grow pb-16 md:pb-0">
         <HeroSection />
         
         <FeaturedResources />
@@ -109,6 +111,7 @@ const Index = () => {
         </section>
       </main>
       <Footer />
+      <MobileStickyFooter />
       
       {/* Add custom styles for the gradient animation and fonts */}
       <style>
