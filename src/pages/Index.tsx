@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import HeroSection from '@/components/HeroSection';
@@ -23,7 +22,7 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#1A1A1A] text-white font-inter">
       <Navbar />
-      <main className="flex-grow pb-16 md:pb-0">
+      <main className="flex-grow pb-20 md:pb-0">
         <HeroSection />
         
         <FeaturedResources />
@@ -34,7 +33,7 @@ const Index = () => {
         <TierSpecificContent />
         
         {/* Community Section - Keeping existing one but with updated styles */}
-        <section className="py-20 px-6 bg-gradient-to-b from-transparent to-blue-900/10 dark:to-blue-900/10">
+        <section className="py-20 px-6 bg-gradient-to-b from-transparent to-blue-900/10 dark:to-blue-900/10 mb-safe">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-12">
               <Badge variant="outline" className="mb-4 px-3 py-1 bg-white/20 backdrop-blur-sm border-blue-200/30">
@@ -136,6 +135,10 @@ const Index = () => {
         
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
+        }
+
+        .mb-safe {
+          margin-bottom: env(safe-area-inset-bottom, 0);
         }
         `}
       </style>

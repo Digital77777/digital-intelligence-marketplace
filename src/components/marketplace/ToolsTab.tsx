@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useDatabaseErrorHandler } from '@/utils/databaseErrorHandler';
 import { 
   Star, 
   Download, 
@@ -17,7 +17,8 @@ import {
   Settings,
   Filter,
   Repeat,
-  Calendar
+  Calendar,
+  AlertCircle
 } from 'lucide-react';
 
 interface ToolsTabProps {
@@ -31,7 +32,8 @@ const ToolsTab: React.FC<ToolsTabProps> = ({ searchQuery, filteredTools, viewToo
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState('newest');
   const [filterBy, setFilterBy] = useState('all');
-  const { toast } = useToast();
+  const [error, setError] = useState<string | null>(null);
+  const { handleError } = useDatabaseErrorHandler();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,7 +42,8 @@ const ToolsTab: React.FC<ToolsTabProps> = ({ searchQuery, filteredTools, viewToo
 
   const fetchMarketplaceTools = async () => {
     try {
-      const { data, error } = await supabase
+      setError(null);
+      const { data, error: fetchError } = await supabase
         .from('marketplace_tools')
         .select(`
           *,
@@ -48,15 +51,19 @@ const ToolsTab: React.FC<ToolsTabProps> = ({ searchQuery, filteredTools, viewToo
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (fetchError) {
+        throw fetchError;
+      }
+      
       setMarketplaceTools(data || []);
-    } catch (error) {
-      console.error('Error fetching marketplace tools:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load marketplace tools",
-        variant: "destructive"
-      });
+    } catch (error: any) {
+      const errorInfo = handleError(error, 'marketplace tools', false);
+      setError(errorInfo.description);
+      
+      // Use fallback data when database is not available
+      if (errorInfo.fallbackData) {
+        setMarketplaceTools([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -81,7 +88,6 @@ const ToolsTab: React.FC<ToolsTabProps> = ({ searchQuery, filteredTools, viewToo
       if (filterBy === 'featured') return tool.is_featured;
       if (filterBy === 'premium') return tool.isPremium;
       if (filterBy === 'free') return !tool.isPremium;
-      // Filter by category
       return tool.category === filterBy;
     })
     .sort((a, b) => {
@@ -110,7 +116,6 @@ const ToolsTab: React.FC<ToolsTabProps> = ({ searchQuery, filteredTools, viewToo
       seller: { username: 'DIM Platform', avatar_url: null }
     }))
   ].filter(tool => {
-    // Apply the same filters to combined tools
     if (searchQuery) {
       return tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
              tool.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -163,6 +168,17 @@ const ToolsTab: React.FC<ToolsTabProps> = ({ searchQuery, filteredTools, viewToo
 
   return (
     <div className="space-y-6">
+      {/* Error Banner */}
+      {error && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+          <div>
+            <h4 className="font-medium text-yellow-800">Service Notice</h4>
+            <p className="text-sm text-yellow-700">{error}</p>
+          </div>
+        </div>
+      )}
+
       {/* Filter and Sort Controls */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div className="flex gap-4 flex-wrap">

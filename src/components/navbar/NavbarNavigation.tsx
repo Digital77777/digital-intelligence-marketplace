@@ -27,7 +27,7 @@ const NavbarNavigation: React.FC<NavbarNavigationProps> = ({ navItems }) => {
     '/community'
   ];
 
-  // Filter out footer items on mobile
+  // Filter out footer items on mobile to prevent duplication
   const filteredNavItems = isMobile 
     ? navItems.filter(item => !footerItemPaths.includes(item.path))
     : navItems;

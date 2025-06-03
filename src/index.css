@@ -162,6 +162,10 @@
   .booking-btn-secondary {
     @apply bg-[#f5a623] hover:bg-[#e09612] text-white font-medium py-2 px-4 rounded-sm transition-colors duration-200;
   }
+
+  .safe-area-padding-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }
 
 main {
@@ -171,26 +175,36 @@ main {
 @media (max-width: 767px) {
   main {
     margin-top: 13rem; /* Adjusted for mobile */
-    padding-bottom: 5rem !important; /* Increased padding for sticky footer */
-    min-height: calc(100vh - 13rem - 5rem); /* Ensure proper height calculation */
+    padding-bottom: 6rem !important; /* Increased padding for sticky footer */
+    min-height: calc(100vh - 13rem - 6rem); /* Ensure proper height calculation */
   }
   
   /* Ensure body has proper padding for mobile sticky footer */
   body {
-    padding-bottom: 5rem;
+    padding-bottom: 6rem;
   }
   
   /* Additional mobile-specific adjustments */
   .mobile-footer-spacing {
-    margin-bottom: 5rem;
+    margin-bottom: 6rem;
   }
   
-  /* Ensure sticky footer is always visible */
+  /* Ensure sticky footer is always visible with higher z-index */
   .mobile-sticky-footer {
     position: fixed !important;
     bottom: 0 !important;
-    z-index: 9999 !important;
+    z-index: 99999 !important;
     display: block !important;
+  }
+
+  /* Hide scrollbars but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
 
