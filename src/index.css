@@ -171,16 +171,26 @@ main {
 @media (max-width: 767px) {
   main {
     margin-top: 13rem; /* Adjusted for mobile */
+    padding-bottom: 5rem !important; /* Increased padding for sticky footer */
+    min-height: calc(100vh - 13rem - 5rem); /* Ensure proper height calculation */
   }
   
-  /* Ensure main content has bottom padding for mobile sticky footer */
-  main {
-    padding-bottom: 4rem !important;
+  /* Ensure body has proper padding for mobile sticky footer */
+  body {
+    padding-bottom: 5rem;
   }
   
   /* Additional mobile-specific adjustments */
   .mobile-footer-spacing {
-    margin-bottom: 4rem;
+    margin-bottom: 5rem;
+  }
+  
+  /* Ensure sticky footer is always visible */
+  .mobile-sticky-footer {
+    position: fixed !important;
+    bottom: 0 !important;
+    z-index: 9999 !important;
+    display: block !important;
   }
 }
 

@@ -24,6 +24,7 @@ const MobileStickyFooter = () => {
     return () => window.removeEventListener('resize', checkIsMobile);
   }, []);
 
+  // Always show on mobile, never hide
   if (!isMobile) return null;
 
   const footerItems = [
