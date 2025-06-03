@@ -79,7 +79,10 @@ const ToolsTab: React.FC<ToolsTabProps> = ({ searchQuery, filteredTools, viewToo
       if (filterBy === 'subscription') return tool.is_subscription;
       if (filterBy === 'one-time') return !tool.is_subscription;
       if (filterBy === 'featured') return tool.is_featured;
-      return true;
+      if (filterBy === 'premium') return tool.isPremium;
+      if (filterBy === 'free') return !tool.isPremium;
+      // Filter by category
+      return tool.category === filterBy;
     })
     .sort((a, b) => {
       switch (sortBy) {
@@ -106,6 +109,37 @@ const ToolsTab: React.FC<ToolsTabProps> = ({ searchQuery, filteredTools, viewToo
       isLegacy: true,
       seller: { username: 'DIM Platform', avatar_url: null }
     }))
+  ].filter(tool => {
+    // Apply the same filters to combined tools
+    if (searchQuery) {
+      return tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+             tool.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+             tool.category.toLowerCase().includes(searchQuery.toLowerCase());
+    }
+    return true;
+  }).filter(tool => {
+    if (filterBy === 'all') return true;
+    if (filterBy === 'premium') return tool.isPremium;
+    if (filterBy === 'free') return !tool.isPremium;
+    return tool.category === filterBy;
+  });
+
+  const categories = [
+    { value: 'all', label: 'All Categories' },
+    { value: 'content-creation', label: 'Content Creation' },
+    { value: 'productivity', label: 'Productivity' },
+    { value: 'nlp', label: 'Natural Language Processing' },
+    { value: 'marketing', label: 'Marketing & Sales' },
+    { value: 'computer-vision', label: 'Computer Vision' },
+    { value: 'video-audio', label: 'Video & Audio' },
+    { value: 'graphic-design', label: 'Graphic Design' },
+    { value: 'ml-frameworks', label: 'Machine Learning' },
+    { value: 'data-analysis', label: 'Data Analysis' },
+    { value: 'automation', label: 'Automation' },
+    { value: 'code-assistance', label: 'Code Assistance' },
+    { value: 'business-intelligence', label: 'Business Intelligence' },
+    { value: 'audio-speech', label: 'Audio & Speech' },
+    { value: 'collaboration', label: 'Collaboration' }
   ];
 
   if (loading) {
@@ -131,16 +165,20 @@ const ToolsTab: React.FC<ToolsTabProps> = ({ searchQuery, filteredTools, viewToo
     <div className="space-y-6">
       {/* Filter and Sort Controls */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex gap-4">
+        <div className="flex gap-4 flex-wrap">
           <Select value={filterBy} onValueChange={setFilterBy}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[200px]">
               <Filter className="w-4 h-4 mr-2" />
               <SelectValue placeholder="Filter tools" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Tools</SelectItem>
-              <SelectItem value="subscription">Subscription</SelectItem>
-              <SelectItem value="one-time">One-time Purchase</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category.value} value={category.value}>
+                  {category.label}
+                </SelectItem>
+              ))}
+              <SelectItem value="premium">Premium Only</SelectItem>
+              <SelectItem value="free">Free Only</SelectItem>
               <SelectItem value="featured">Featured</SelectItem>
             </SelectContent>
           </Select>
@@ -170,70 +208,47 @@ const ToolsTab: React.FC<ToolsTabProps> = ({ searchQuery, filteredTools, viewToo
           <Card key={tool.id} className="overflow-hidden hover:shadow-md transition-shadow border-2 group">
             <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 p-6 flex justify-center items-center h-36">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white text-xl">
-                {tool.isLegacy ? tool.icon : <Settings className="w-8 h-8" />}
+                {tool.isLegacy ? tool.icon : tool.icon || <Settings className="w-8 h-8" />}
               </div>
             </div>
             
             <CardHeader className="pb-2">
               <div className="flex justify-between items-start">
-                <CardTitle className="text-lg">{tool.name}</CardTitle>
-                {tool.is_featured && (
-                  <Badge variant="default" className="text-xs">Featured</Badge>
+                <CardTitle className="text-lg line-clamp-2">{tool.name}</CardTitle>
+                {(tool.is_featured || tool.isPremium) && (
+                  <Badge variant={tool.isPremium ? "default" : "secondary"} className="text-xs ml-2">
+                    {tool.isPremium ? "Premium" : "Featured"}
+                  </Badge>
                 )}
               </div>
               
-              <div className="flex items-center gap-2">
-                {tool.isLegacy ? (
-                  <Badge variant="secondary">Platform Tool</Badge>
+              <div className="flex items-center gap-2 flex-wrap">
+                {tool.price > 0 ? (
+                  <Badge variant="outline">
+                    <DollarSign className="w-3 h-3 mr-1" />
+                    ${tool.price}{tool.subscription_period && `/${tool.subscription_period}`}
+                  </Badge>
                 ) : (
-                  <>
-                    <Badge variant={tool.is_subscription ? "default" : "outline"}>
-                      {tool.is_subscription ? (
-                        <div className="flex items-center gap-1">
-                          <Repeat className="w-3 h-3" />
-                          ${tool.price}/{tool.subscription_period}
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1">
-                          <DollarSign className="w-3 h-3" />
-                          ${tool.price}
-                        </div>
-                      )}
-                    </Badge>
-                    {tool.rating > 0 && (
-                      <div className="flex items-center gap-1 text-sm">
-                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                        <span>{tool.rating.toFixed(1)}</span>
-                      </div>
-                    )}
-                  </>
+                  <Badge variant="secondary">Free</Badge>
+                )}
+                
+                {tool.rating > 0 && (
+                  <div className="flex items-center gap-1 text-sm">
+                    <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                    <span>{tool.rating.toFixed(1)}</span>
+                  </div>
                 )}
               </div>
               
-              <CardDescription className="text-sm text-muted-foreground">
-                {tool.category}
+              <CardDescription className="text-sm text-muted-foreground capitalize">
+                {tool.category.replace('-', ' ')}
               </CardDescription>
             </CardHeader>
 
             <CardContent className="pb-2">
-              <p className="text-sm line-clamp-2 mb-3">
+              <p className="text-sm line-clamp-3 mb-3">
                 {tool.description}
               </p>
-
-              {!tool.isLegacy && tool.tags && tool.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1 mb-3">
-                  {tool.tags.slice(0, 3).map((tag, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
-                  {tool.tags.length > 3 && (
-                    <Badge variant="secondary" className="text-xs">
-                      +{tool.tags.length - 3}
-                    </Badge>
-                  )}
-                </div>
-              )}
 
               <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
@@ -243,21 +258,13 @@ const ToolsTab: React.FC<ToolsTabProps> = ({ searchQuery, filteredTools, viewToo
                       {tool.seller?.username?.[0]?.toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <span>{tool.seller?.username}</span>
+                  <span className="truncate">{tool.seller?.username}</span>
                 </div>
                 
-                {!tool.isLegacy && (
-                  <div className="flex items-center gap-3">
-                    {tool.downloads_count > 0 && (
-                      <div className="flex items-center gap-1">
-                        <Download className="w-3 h-3" />
-                        <span>{tool.downloads_count}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      <span>{new Date(tool.created_at).toLocaleDateString()}</span>
-                    </div>
+                {!tool.isLegacy && tool.downloads_count > 0 && (
+                  <div className="flex items-center gap-1">
+                    <Download className="w-3 h-3" />
+                    <span>{tool.downloads_count}</span>
                   </div>
                 )}
               </div>
