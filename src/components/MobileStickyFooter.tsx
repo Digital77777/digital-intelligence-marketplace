@@ -8,21 +8,12 @@ import {
   ShoppingBag, 
   MessageSquare 
 } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const MobileStickyFooter = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isMobile, setIsMobile] = React.useState(false);
-
-  React.useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
-    return () => window.removeEventListener('resize', checkIsMobile);
-  }, []);
+  const isMobile = useIsMobile();
 
   // Always show on mobile, never hide
   if (!isMobile) return null;
@@ -40,7 +31,7 @@ const MobileStickyFooter = () => {
       label: 'Learning',
       icon: GraduationCap,
       path: '/learning-hub',
-      isActive: location.pathname === '/learning-hub' || location.pathname === '/learning-academy'
+      isActive: location.pathname === '/learning-hub' || location.pathname === '/learning-academy' || location.pathname === '/courses'
     },
     {
       id: 'streams',

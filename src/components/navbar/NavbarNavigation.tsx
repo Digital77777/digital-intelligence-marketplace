@@ -3,6 +3,7 @@ import React from 'react';
 import { NavItem } from './NavbarTypes';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface NavbarNavigationProps {
   navItems: NavItem[];
@@ -11,17 +12,7 @@ interface NavbarNavigationProps {
 const NavbarNavigation: React.FC<NavbarNavigationProps> = ({ navItems }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isMobile, setIsMobile] = React.useState(false);
-
-  React.useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
-    return () => window.removeEventListener('resize', checkIsMobile);
-  }, []);
+  const isMobile = useIsMobile();
 
   // Footer items that should be hidden from navbar on mobile
   const footerItemPaths = [
@@ -29,6 +20,7 @@ const NavbarNavigation: React.FC<NavbarNavigationProps> = ({ navItems }) => {
     '/ai-tools',
     '/learning-hub', 
     '/learning-academy',
+    '/courses',
     '/ai-streams',
     '/marketplace',
     '/community-forums',
@@ -37,9 +29,7 @@ const NavbarNavigation: React.FC<NavbarNavigationProps> = ({ navItems }) => {
 
   // Filter out footer items on mobile
   const filteredNavItems = isMobile 
-    ? navItems.filter(item => !footerItemPaths.some(path => 
-        item.path === path || item.path.startsWith(path)
-      ))
+    ? navItems.filter(item => !footerItemPaths.includes(item.path))
     : navItems;
 
   const handleNavigation = (path: string) => {
