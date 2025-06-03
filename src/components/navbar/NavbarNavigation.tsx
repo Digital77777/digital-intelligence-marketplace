@@ -1,11 +1,11 @@
 
 import React from 'react';
-import { NavItemType } from './NavbarTypes';
+import { NavItem } from './NavbarTypes';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 interface NavbarNavigationProps {
-  navItems: NavItemType[];
+  navItems: NavItem[];
 }
 
 const NavbarNavigation: React.FC<NavbarNavigationProps> = ({ navItems }) => {
@@ -38,16 +38,16 @@ const NavbarNavigation: React.FC<NavbarNavigationProps> = ({ navItems }) => {
   // Filter out footer items on mobile
   const filteredNavItems = isMobile 
     ? navItems.filter(item => !footerItemPaths.some(path => 
-        item.href === path || item.href.startsWith(path)
+        item.path === path || item.path.startsWith(path)
       ))
     : navItems;
 
-  const handleNavigation = (href: string) => {
-    navigate(href);
+  const handleNavigation = (path: string) => {
+    navigate(path);
   };
 
-  const isActive = (href: string) => {
-    return location.pathname === href || location.pathname.startsWith(href + '/');
+  const isActive = (path: string) => {
+    return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
   return (
@@ -57,18 +57,18 @@ const NavbarNavigation: React.FC<NavbarNavigationProps> = ({ navItems }) => {
           <div className="flex items-center space-x-1 min-w-max">
             {filteredNavItems.map((item) => (
               <Button
-                key={item.id}
-                variant={isActive(item.href) ? "default" : "ghost"}
+                key={item.path}
+                variant={isActive(item.path) ? "default" : "ghost"}
                 size="sm"
-                onClick={() => handleNavigation(item.href)}
+                onClick={() => handleNavigation(item.path)}
                 className={`whitespace-nowrap text-sm font-medium transition-colors ${
-                  isActive(item.href)
+                  isActive(item.path)
                     ? 'bg-[#0071c2] text-white hover:bg-[#00487a]'
                     : 'text-gray-700 hover:text-[#0071c2] hover:bg-blue-50'
                 }`}
               >
                 {item.icon && <item.icon className="h-4 w-4 mr-2" />}
-                {item.label}
+                {item.title}
               </Button>
             ))}
           </div>
