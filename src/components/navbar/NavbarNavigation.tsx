@@ -67,7 +67,11 @@ const NavbarNavigation: React.FC<NavbarNavigationProps> = ({ navItems }) => {
                     : 'text-gray-700 hover:text-[#0071c2] hover:bg-blue-50'
                 }`}
               >
-                {item.icon && <item.icon className="h-4 w-4 mr-2" />}
+                {item.icon && (
+                  <span className="mr-2 flex items-center">
+                    {item.icon}
+                  </span>
+                )}
                 {item.title}
               </Button>
             ))}
