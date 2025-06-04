@@ -5,7 +5,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
+    --background: 0 0% 100%;
     --foreground: 220 14% 10%;
 
     --card: 0 0% 100%;
@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 14% 10%;
 
-    --primary: 210 100% 50%;  /* electric blue */
+    --primary: 210 100% 50%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -44,49 +44,14 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
     
-    /* electric blue colors */
-    --electric-blue: #0088ff;
-    --electric-blue-dark: #0066cc;
-    --electric-blue-light: #66bbff;
-    
-    /* booking.com colors - updated to match electric blue theme */
-    --booking-blue: #0088ff;
-    --booking-dark-blue: #0066cc;
-    --booking-yellow: #f5a623;
-    
-    /* Pro Tier Accent Colors - updated to electric blue theme */
-    --pro-accent: 195 100% 60%; /* #00AAFF */
-    --pro-accent-foreground: 240 5.9% 10%;
-  }
-
-  .dark {
-    --background: 220 14% 10%;
-    --foreground: 210 40% 98%;
-
-    --card: 220 14% 10%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 220 14% 10%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 100% 38%;  /* booking.com blue */
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 240 10% 3.9%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    /* Professional blue color scheme */
+    --ai-primary: #0071c2;
+    --ai-primary-dark: #005ea8;
+    --ai-secondary: #f5f8fa;
+    --ai-accent: #00a8ff;
+    --ai-success: #28a745;
+    --ai-warning: #ffc107;
+    --ai-danger: #dc3545;
   }
 }
 
@@ -98,6 +63,7 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   }
 
   html {
@@ -107,11 +73,7 @@
 
 @layer utilities {
   .glass {
-    @apply bg-white/70 backdrop-blur-lg border border-white/20 shadow-lg;
-  }
-
-  .glass-dark {
-    @apply bg-black/20 backdrop-blur-lg border border-white/10 shadow-lg;
+    @apply bg-white/90 backdrop-blur-lg border border-gray-200/50 shadow-xl;
   }
 
   .text-balance {
@@ -127,44 +89,48 @@
     display: none;
   }
   
-  .pro-gradient {
-    @apply bg-gradient-to-br from-[#00AAFF] to-purple-600;
+  .ai-gradient {
+    @apply bg-gradient-to-br from-[#0071c2] to-[#00a8ff];
   }
   
-  .pro-text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-[#00AAFF] to-purple-600;
+  .ai-text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[#0071c2] to-[#00a8ff];
   }
   
-  .pro-border {
-    @apply border border-[#00AAFF]/30;
+  .ai-border {
+    @apply border border-[#0071c2]/20;
   }
   
-  .pro-shadow {
-    @apply shadow-lg shadow-[#00AAFF]/5;
+  .ai-shadow {
+    @apply shadow-lg shadow-[#0071c2]/10;
   }
 
-  .booking-blue-gradient {
-    @apply bg-gradient-to-r from-[#0071c2] to-[#00487a];
+  .ai-card {
+    @apply bg-white border border-gray-200/80 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300;
   }
   
-  .booking-card {
-    @apply bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md transition-shadow duration-200;
+  .ai-input {
+    @apply border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#0071c2] focus:border-[#0071c2] outline-none transition-all duration-200;
   }
   
-  .booking-input {
-    @apply border border-gray-300 rounded-md px-4 py-2 focus:ring-[#0071c2] focus:border-[#0071c2] outline-none;
+  .ai-btn {
+    @apply bg-[#0071c2] hover:bg-[#005ea8] text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md;
   }
   
-  .booking-btn {
-    @apply bg-[#0071c2] hover:bg-[#00487a] text-white font-medium py-2 px-4 rounded-sm transition-colors duration-200;
-  }
-  
-  .booking-btn-secondary {
-    @apply bg-[#f5a623] hover:bg-[#e09612] text-white font-medium py-2 px-4 rounded-sm transition-colors duration-200;
+  .ai-btn-secondary {
+    @apply bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 px-6 rounded-lg transition-all duration-200;
   }
 
   .safe-area-padding-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0.5rem);
+  }
+
+  .hero-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  .feature-gradient {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   }
 }
 
@@ -188,24 +154,22 @@ header {
 
 /* Main content margin adjustment */
 main {
-  margin-top: 11.25rem !important; /* Adjusted for the three-level navbar */
+  margin-top: 11.25rem !important;
 }
 
 @media (max-width: 767px) {
   main {
-    margin-top: 13rem !important; /* Adjusted for mobile */
-    padding-bottom: 7rem !important; /* Increased padding for sticky footer */
+    margin-top: 13rem !important;
+    padding-bottom: 7rem !important;
     min-height: calc(100vh - 13rem - 7rem) !important;
   }
   
-  /* Ensure body has proper padding for mobile sticky footer */
   body {
     padding-bottom: 7rem !important;
   }
   
   /* Mobile sticky footer - ALWAYS VISIBLE */
-  .mobile-sticky-footer,
-  div[class*="fixed bottom-0"] {
+  .mobile-sticky-footer {
     position: fixed !important;
     bottom: 0 !important;
     left: 0 !important;
@@ -218,13 +182,12 @@ main {
     transition: none !important;
   }
 
-  /* Hide scrollbars but keep functionality */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
   
-  .scrollbar-hide::-webkit-scrollbar {
+  .scrollbar-hide: :-webkit-scrollbar {
     display: none;
   }
 }
@@ -232,4 +195,58 @@ main {
 #root {
   margin: 0 auto;
   width: 100%;
+}
+
+/* AI Tools Directory specific styles */
+.ai-tools-hero {
+  background: linear-gradient(135deg, #0071c2 0%, #00a8ff 100%);
+  height: 500px;
+  display: flex;
+  align-items: center;
+  color: white;
+}
+
+.ai-tools-card {
+  transition: all 0.3s ease;
+}
+
+.ai-tools-card:hover {
+  transform: translateY(-5px);
+}
+
+.ai-tools-featured {
+  position: relative;
+  overflow: hidden;
+}
+
+.ai-tools-featured::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(to right, #0071c2, #00a8ff);
+}
+
+.ai-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.section-heading {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 1.5rem;
+}
+
+.section-heading::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(to right, #0071c2, #00a8ff);
 }

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AIToolItem, getTierBadgeColor, getTierIcon, getTierLabel } from '@/data/ai-tools-tiers';
-import { Check, Info, Key, Lock, Server } from 'lucide-react';
+import { Check, Info, Key, Lock, Server, ExternalLink, ArrowUpRight } from 'lucide-react';
 import { useTier } from '@/context/TierContext';
 import {
   Tooltip,
@@ -46,10 +46,10 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
 
   if (compact) {
     return (
-      <Card className={`overflow-hidden transition-all ${!hasAccess ? 'opacity-80' : 'hover:shadow-md'}`}>
+      <Card className={`overflow-hidden transition-all border ${hasAccess ? 'hover:shadow-md hover:border-blue-200' : 'opacity-80'}`}>
         <div className="p-4 flex justify-between items-start">
           <div className="flex items-center gap-3">
-            <div className="bg-primary/10 p-2 rounded-full">{tool.icon}</div>
+            <div className="bg-blue-50 p-2 rounded-full">{tool.icon}</div>
             <div>
               <h3 className="font-medium text-sm">{tool.name}</h3>
               <p className="text-xs text-muted-foreground">{tool.category}</p>
@@ -78,11 +78,11 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
         {isApiConnected && (
           <div className="px-4 pb-2 flex items-center gap-1 text-xs">
             {isUsingOpenSource ? (
-              <span className="text-green-600 dark:text-green-400 flex items-center gap-1">
+              <span className="text-green-600 flex items-center gap-1">
                 <Server className="h-3 w-3" /> Open Source
               </span>
             ) : (
-              <span className="text-blue-600 dark:text-blue-400 flex items-center gap-1">
+              <span className="text-blue-600 flex items-center gap-1">
                 <Key className="h-3 w-3" /> API Connected
               </span>
             )}
@@ -93,14 +93,14 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
   }
 
   return (
-    <Card className={`overflow-hidden h-full flex flex-col transition-all ${!hasAccess ? 'opacity-80' : 'hover:shadow-md'}`}>
-      <CardHeader className="pb-3">
+    <Card className={`overflow-hidden h-full flex flex-col transition-all border ${hasAccess ? 'hover:shadow-md hover:border-blue-200' : 'opacity-80'}`}>
+      <CardHeader className="pb-3 bg-gradient-to-r from-blue-50/50 to-transparent">
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-3">
-            <div className="bg-primary/10 p-2.5 rounded-full">{tool.icon}</div>
+            <div className="bg-blue-100/80 p-2.5 rounded-full shadow-sm">{tool.icon}</div>
             <div>
               <CardTitle className="text-lg">{tool.name}</CardTitle>
-              <CardDescription>{tool.category}</CardDescription>
+              <CardDescription className="capitalize">{tool.category.replace('-', ' ')}</CardDescription>
             </div>
           </div>
           <Badge variant="outline" className={`${getTierBadgeColor(tool.tier)} px-2.5 py-1 text-xs flex items-center gap-1.5`}>
@@ -109,27 +109,27 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="flex-grow">
-        <p className="text-sm text-foreground/80 mb-4">{tool.description}</p>
+      <CardContent className="flex-grow pt-4">
+        <p className="text-sm text-gray-700 mb-4">{tool.description}</p>
         
         {tool.usageLimit && (
-          <div className="flex items-start gap-2 mb-3">
-            <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-            <p className="text-xs text-muted-foreground">{tool.usageLimit}</p>
+          <div className="flex items-start gap-2 mb-3 bg-blue-50/50 p-2 rounded-md">
+            <Info className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
+            <p className="text-xs text-blue-700">{tool.usageLimit}</p>
           </div>
         )}
         
-        <div className="bg-muted/50 rounded-lg p-3 mb-3">
+        <div className="bg-gray-50 rounded-lg p-3 mb-3 border border-gray-100">
           <h4 className="font-medium text-sm mb-1">Unique Selling Point</h4>
-          <p className="text-xs text-foreground/80">{tool.uniqueSellingPoint}</p>
+          <p className="text-xs text-gray-700">{tool.uniqueSellingPoint}</p>
         </div>
         
         {hasOpenSourceOption && (
-          <div className="bg-green-50/50 dark:bg-green-900/20 rounded-lg p-3 mb-3 border border-green-100 dark:border-green-900">
-            <h4 className="font-medium text-sm mb-1 flex items-center gap-1.5 text-green-800 dark:text-green-300">
+          <div className="bg-green-50 rounded-lg p-3 mb-3 border border-green-100">
+            <h4 className="font-medium text-sm mb-1 flex items-center gap-1.5 text-green-800">
               <Server className="h-4 w-4" /> Open Source Available
             </h4>
-            <p className="text-xs text-green-700 dark:text-green-400">
+            <p className="text-xs text-green-700">
               This tool can run using open source models in your browser
             </p>
           </div>
@@ -137,10 +137,10 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
         
         {tool.integrations && tool.integrations.length > 0 && (
           <div>
-            <h4 className="font-medium text-xs mb-1 text-muted-foreground">Integrations</h4>
+            <h4 className="font-medium text-xs mb-1 text-gray-500">Integrations</h4>
             <div className="flex flex-wrap gap-1.5">
               {tool.integrations.map((integration, idx) => (
-                <Badge key={idx} variant="outline" className="text-xs py-0 px-2">
+                <Badge key={idx} variant="outline" className="text-xs py-0 px-2 bg-gray-50">
                   {integration}
                 </Badge>
               ))}
@@ -151,28 +151,28 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
         {isApiConnected && (
           <div className="mt-3 flex items-center gap-2 text-sm">
             {isUsingOpenSource ? (
-              <div className="text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-md flex items-center gap-2 w-full">
+              <div className="text-green-700 bg-green-50 px-3 py-1.5 rounded-md flex items-center gap-2 w-full border border-green-100">
                 <Server className="h-4 w-4" />
-                <span>Using Open Source Models</span>
+                <span className="font-medium">Using Open Source Models</span>
               </div>
             ) : (
-              <div className="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-md flex items-center gap-2 w-full">
+              <div className="text-blue-700 bg-blue-50 px-3 py-1.5 rounded-md flex items-center gap-2 w-full border border-blue-100">
                 <Key className="h-4 w-4" />
-                <span>API Connected</span>
+                <span className="font-medium">API Connected</span>
               </div>
             )}
           </div>
         )}
       </CardContent>
       
-      <CardFooter className="pt-2 border-t mt-auto">
+      <CardFooter className="pt-2 border-t mt-auto bg-gray-50/50">
         <div className="w-full flex justify-between items-center">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center gap-1.5">
                   <div className={`h-2.5 w-2.5 rounded-full ${hasAccess ? 'bg-green-500' : 'bg-amber-500'}`}></div>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-gray-600">
                     {hasAccess ? (isApiConnected ? "Ready to use" : "Available") : "Requires upgrade"}
                   </span>
                 </div>
@@ -193,13 +193,26 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
               action="view"
               size="sm"
               variant="outline"
-            />
+              className="flex items-center gap-1"
+            >
+              <ArrowUpRight className="h-3.5 w-3.5" />
+              Details
+            </ToolActionButton>
             <ToolActionButton 
               tool={tool}
               action={isApiConnected ? "launch" : "connect-api"}
               size="sm"
               onSelect={onSelect}
-            />
+            >
+              {isApiConnected ? (
+                <>
+                  <ExternalLink className="h-3.5 w-3.5 mr-1" />
+                  Launch
+                </>
+              ) : (
+                'Connect'
+              )}
+            </ToolActionButton>
           </div>
         </div>
       </CardFooter>

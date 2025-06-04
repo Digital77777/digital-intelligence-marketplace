@@ -2,12 +2,13 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import MobileStickyFooter from '@/components/MobileStickyFooter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AIToolItem, AIToolTier, aiTools, toolCategories } from '@/data/ai-tools-tiers';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useQuery } from '@tanstack/react-query';
-import { Info } from 'lucide-react';
+import { Info, ChevronLeft, LayoutGrid, ListFilter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AllToolsTab from '@/components/ai-tools/AllToolsTab';
 import ToolsTabContent from '@/components/ai-tools/ToolsTabContent';
@@ -15,6 +16,7 @@ import ToolTierComparison from '@/components/ai-tools/ToolTierComparison';
 import TierToolsSection from '@/components/ai-tools/TierToolsSection';
 import ToolInterfaceModal from '@/components/ai-tools/ToolInterfaceModal';
 import useScrollToTop from '@/hooks/useScrollToTop';
+import { Badge } from '@/components/ui/badge';
 
 const AIToolsDirectory = () => {
   useScrollToTop(); // Add scroll to top on navigation
@@ -118,16 +120,30 @@ const AIToolsDirectory = () => {
   };
   
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-white">
       <Navbar />
-      <main className="flex-1 pt-24 px-4 md:px-6 pb-12 bg-gradient-to-b from-indigo-50/30 to-white dark:from-indigo-950/20 dark:to-gray-950">
+      <main className="flex-1 pt-24 px-4 md:px-6 pb-12 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
+          {/* Back button and header */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-3">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold mb-1">AI Tools Directory</h1>
-              <p className="text-muted-foreground">
-                Discover and utilize powerful AI tools organized by category and subscription tier
-              </p>
+              <Button 
+                variant="ghost" 
+                className="mb-2 -ml-3 text-gray-600" 
+                onClick={() => navigate('/ai-tools')}
+              >
+                <ChevronLeft className="mr-1 h-4 w-4" />
+                Back to Tools Home
+              </Button>
+              <h1 className="text-2xl md:text-3xl font-bold mb-2">AI Tools Directory</h1>
+              <div className="flex items-center gap-3 flex-wrap">
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                  {aiTools.length} Total Tools
+                </Badge>
+                <p className="text-gray-600">
+                  Browse, filter, and compare AI tools by category and tier
+                </p>
+              </div>
             </div>
             
             <div className="flex gap-2">
@@ -143,23 +159,23 @@ const AIToolsDirectory = () => {
           </div>
           
           <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="mb-8">
-            <TabsList className="flex flex-wrap mb-6 h-auto">
-              <TabsTrigger value="all" className="px-4 py-2 h-auto">
+            <TabsList className="flex flex-wrap mb-8 p-1 bg-blue-50/50 border border-blue-100 rounded-lg h-auto">
+              <TabsTrigger value="all" className="px-4 py-2.5 h-auto data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm">
                 All Tools
               </TabsTrigger>
-              <TabsTrigger value="popular" className="px-4 py-2 h-auto">
+              <TabsTrigger value="popular" className="px-4 py-2.5 h-auto data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm">
                 Popular
               </TabsTrigger>
-              <TabsTrigger value="freemium" className="px-4 py-2 h-auto">
+              <TabsTrigger value="freemium" className="px-4 py-2.5 h-auto data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm">
                 Freemium
               </TabsTrigger>
-              <TabsTrigger value="basic" className="px-4 py-2 h-auto">
+              <TabsTrigger value="basic" className="px-4 py-2.5 h-auto data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm">
                 Basic
               </TabsTrigger>
-              <TabsTrigger value="pro" className="px-4 py-2 h-auto">
+              <TabsTrigger value="pro" className="px-4 py-2.5 h-auto data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm">
                 Pro
               </TabsTrigger>
-              <TabsTrigger value="compare" className="px-4 py-2 h-auto">
+              <TabsTrigger value="compare" className="px-4 py-2.5 h-auto data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm">
                 Compare Tiers
               </TabsTrigger>
             </TabsList>
@@ -190,6 +206,27 @@ const AIToolsDirectory = () => {
                 title="Popular Tools"
                 description="These are the most widely used tools across all subscription tiers"
                 onToolSelect={handleToolSelect}
+                viewControls={
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant={viewType === 'grid' ? 'default' : 'outline'} 
+                      size="icon"
+                      onClick={() => setViewType('grid')}
+                      className="h-8 w-8"
+                    >
+                      <LayoutGrid className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant={viewType === 'list' ? 'default' : 'outline'}
+                      size="icon"
+                      onClick={() => setViewType('list')}
+                      className="h-8 w-8"
+                    >
+                      <ListFilter className="h-4 w-4" />
+                    </Button>
+                  </div>
+                }
+                viewType={viewType}
               />
             </TabsContent>
             
@@ -200,8 +237,29 @@ const AIToolsDirectory = () => {
                 filteredTools={filteredTools}
                 title="Freemium Tools"
                 description="These tools are available to all users with a free account, designed to help you get started with AI"
-                alertColor="bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800"
+                alertColor="bg-amber-50 border-amber-200 text-amber-800"
                 onToolSelect={handleToolSelect}
+                viewControls={
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant={viewType === 'grid' ? 'default' : 'outline'} 
+                      size="icon"
+                      onClick={() => setViewType('grid')}
+                      className="h-8 w-8"
+                    >
+                      <LayoutGrid className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant={viewType === 'list' ? 'default' : 'outline'}
+                      size="icon"
+                      onClick={() => setViewType('list')}
+                      className="h-8 w-8"
+                    >
+                      <ListFilter className="h-4 w-4" />
+                    </Button>
+                  </div>
+                }
+                viewType={viewType}
               />
             </TabsContent>
             
@@ -212,8 +270,29 @@ const AIToolsDirectory = () => {
                 filteredTools={filteredTools}
                 title="Basic Tier Tools"
                 description="Professional tools for individuals and small teams with expanded functionality"
-                alertColor="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800"
+                alertColor="bg-blue-50 border-blue-200 text-blue-800"
                 onToolSelect={handleToolSelect}
+                viewControls={
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant={viewType === 'grid' ? 'default' : 'outline'} 
+                      size="icon"
+                      onClick={() => setViewType('grid')}
+                      className="h-8 w-8"
+                    >
+                      <LayoutGrid className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant={viewType === 'list' ? 'default' : 'outline'}
+                      size="icon"
+                      onClick={() => setViewType('list')}
+                      className="h-8 w-8"
+                    >
+                      <ListFilter className="h-4 w-4" />
+                    </Button>
+                  </div>
+                }
+                viewType={viewType}
               />
             </TabsContent>
             
@@ -224,16 +303,37 @@ const AIToolsDirectory = () => {
                 filteredTools={filteredTools}
                 title="Pro Tier Tools"
                 description="Enterprise-grade tools with advanced features, integrations, and scalability"
-                alertColor="bg-purple-50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-800"
+                alertColor="bg-purple-50 border-purple-200 text-purple-800"
                 onToolSelect={handleToolSelect}
+                viewControls={
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant={viewType === 'grid' ? 'default' : 'outline'} 
+                      size="icon"
+                      onClick={() => setViewType('grid')}
+                      className="h-8 w-8"
+                    >
+                      <LayoutGrid className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant={viewType === 'list' ? 'default' : 'outline'}
+                      size="icon"
+                      onClick={() => setViewType('list')}
+                      className="h-8 w-8"
+                    >
+                      <ListFilter className="h-4 w-4" />
+                    </Button>
+                  </div>
+                }
+                viewType={viewType}
               />
             </TabsContent>
             
             {/* Compare Tab */}
             <TabsContent value="compare" className="mt-0">
-              <div className="mb-6 p-5 bg-[#00FFFF]/5 border border-[#00FFFF]/20 rounded-md">
-                <h2 className="text-xl font-semibold mb-2">Tier Comparison</h2>
-                <p>Compare features across different subscription tiers</p>
+              <div className="mb-6 p-5 bg-[#f5f8fa] border border-blue-100 rounded-lg">
+                <h2 className="text-xl font-semibold mb-2">AI Tool Tier Comparison</h2>
+                <p className="text-gray-600">Compare features and capabilities across different subscription tiers</p>
               </div>
               
               <ToolTierComparison />
@@ -262,6 +362,7 @@ const AIToolsDirectory = () => {
       />
       
       <Footer />
+      <MobileStickyFooter />
     </div>
   );
 };

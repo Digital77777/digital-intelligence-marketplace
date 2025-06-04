@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { AIToolItem, AIToolTier } from '@/data/ai-tools-tiers';
+import { AIToolItem } from '@/data/ai-tools-tiers';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import AIToolCard from '@/components/ai-tools/AIToolCard';
 import { Spinner } from '@/components/ui/spinner';
@@ -12,6 +12,8 @@ interface ToolsTabContentProps {
   description: string;
   alertColor?: string;
   onToolSelect: (tool: AIToolItem) => void;
+  viewControls?: React.ReactNode;
+  viewType?: 'grid' | 'list';
 }
 
 const ToolsTabContent: React.FC<ToolsTabContentProps> = ({
@@ -20,36 +22,69 @@ const ToolsTabContent: React.FC<ToolsTabContentProps> = ({
   title,
   description,
   alertColor,
-  onToolSelect
+  onToolSelect,
+  viewControls,
+  viewType = 'grid'
 }) => {
   return (
     <>
-      <Alert className={`mb-6 ${alertColor || "bg-[#00FFFF]/5 dark:border-[#00FFFF]/30"}`}>
-        <AlertTitle>{title}</AlertTitle>
-        <AlertDescription>
-          {description}
-        </AlertDescription>
-      </Alert>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {isLoading ? (
-          Array(6).fill(0).map((_, i) => (
-            <div key={i} className="h-[300px] rounded-lg bg-muted animate-pulse"></div>
-          ))
-        ) : filteredTools && filteredTools.length > 0 ? (
-          filteredTools.map(tool => (
-            <AIToolCard 
-              key={tool.id} 
-              tool={tool} 
-              onSelect={() => onToolSelect(tool)}
-            />
-          ))
-        ) : (
-          <div className="col-span-3 py-12 text-center">
-            <p>No {title.toLowerCase()} tools found with the current filters.</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <Alert className={`mb-0 p-4 flex-grow ${alertColor || "bg-blue-50 border-blue-200 text-blue-800"}`}>
+          <AlertTitle>{title}</AlertTitle>
+          <AlertDescription className="text-inherit opacity-80">
+            {description}
+          </AlertDescription>
+        </Alert>
+        
+        {viewControls && (
+          <div className="ml-auto">
+            {viewControls}
           </div>
         )}
       </div>
+      
+      {viewType === 'grid' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {isLoading ? (
+            Array(6).fill(0).map((_, i) => (
+              <div key={i} className="h-[300px] rounded-lg bg-gray-100 animate-pulse"></div>
+            ))
+          ) : filteredTools && filteredTools.length > 0 ? (
+            filteredTools.map(tool => (
+              <AIToolCard 
+                key={tool.id} 
+                tool={tool} 
+                onSelect={() => onToolSelect(tool)}
+              />
+            ))
+          ) : (
+            <div className="col-span-3 py-12 text-center">
+              <p>No {title.toLowerCase()} tools found with the current filters.</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {isLoading ? (
+            Array(6).fill(0).map((_, i) => (
+              <div key={i} className="h-24 rounded-lg bg-gray-100 animate-pulse"></div>
+            ))
+          ) : filteredTools && filteredTools.length > 0 ? (
+            filteredTools.map(tool => (
+              <AIToolCard 
+                key={tool.id} 
+                tool={tool} 
+                compact={true}
+                onSelect={() => onToolSelect(tool)}
+              />
+            ))
+          ) : (
+            <div className="py-12 text-center">
+              <p>No {title.toLowerCase()} tools found with the current filters.</p>
+            </div>
+          )}
+        </div>
+      )}
     </>
   );
 };
