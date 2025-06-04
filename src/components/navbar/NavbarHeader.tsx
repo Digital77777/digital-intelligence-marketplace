@@ -1,4 +1,3 @@
-
 import React from 'react';
 import NavbarBrand from './NavbarBrand';
 import NavbarActions from './NavbarActions';
@@ -16,15 +15,7 @@ const NavbarHeader: React.FC<NavbarHeaderProps> = ({
   isScrolled
 }) => {
   return (
-    <div 
-      className="bg-gradient-to-r from-[#005ea8] to-[#0071c2] text-white shadow-lg"
-      style={{
-        position: 'sticky',
-        top: '0',
-        zIndex: '50',
-        willChange: 'auto'
-      }}
-    >
+    <div className="navbar-header-content bg-gradient-to-r from-[#005ea8] to-[#0071c2] text-white shadow-lg">
       <div className="container px-4 py-3">
         <div className="flex items-center justify-between">
           <NavbarBrand />

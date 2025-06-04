@@ -62,11 +62,8 @@ const MobileStickyFooter = () => {
 
   return (
     <div 
-      className="fixed bottom-0 left-0 right-0 z-[100000] bg-white/98 backdrop-blur-lg border-t-2 border-gray-200 shadow-2xl md:hidden"
+      className="mobile-sticky-footer fixed bottom-0 left-0 right-0 z-[100000] bg-white/98 backdrop-blur-lg border-t-2 border-gray-200 shadow-2xl md:hidden"
       style={{
-        position: 'fixed !important',
-        display: 'block !important',
-        visibility: 'visible !important',
         paddingBottom: 'env(safe-area-inset-bottom, 0.5rem)'
       }}
     >

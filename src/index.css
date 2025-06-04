@@ -169,6 +169,7 @@
 }
 
 /* Fixed navbar positioning */
+.navbar-header,
 header {
   position: fixed !important;
   top: 0 !important;
@@ -176,6 +177,13 @@ header {
   right: 0 !important;
   z-index: 50 !important;
   transform: none !important;
+}
+
+.navbar-header-content {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 50 !important;
+  will-change: auto !important;
 }
 
 /* Main content margin adjustment */

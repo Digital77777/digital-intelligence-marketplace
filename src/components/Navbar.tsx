@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import useScrollToTop from '@/hooks/useScrollToTop';
 import NavbarHeader from './navbar/NavbarHeader';
@@ -28,18 +27,7 @@ const Navbar = () => {
   }, []);
 
   return (
-    <header 
-      className="fixed top-0 left-0 right-0 z-50"
-      style={{
-        position: 'fixed !important',
-        top: '0 !important',
-        left: '0 !important',
-        right: '0 !important',
-        zIndex: '50 !important',
-        transform: 'none !important',
-        willChange: 'auto'
-      }}
-    >
+    <header className="navbar-header fixed top-0 left-0 right-0 z-50">
       {/* Top bar with brand and actions */}
       <NavbarHeader 
         secondaryNavItems={secondaryNavItems} 
