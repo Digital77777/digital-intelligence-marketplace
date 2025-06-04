@@ -9,9 +9,9 @@ import { initializePerformanceMonitoring } from './utils/performanceMonitoring.t
 initializePerformanceMonitoring();
 
 // Enhanced error tracking function
-const trackError = (error: Error, info: { componentStack: string }) => {
+const trackError = (error: Error, info: { componentStack?: string }) => {
   console.error('Application error:', error);
-  console.error('Component stack:', info.componentStack);
+  console.error('Component stack:', info.componentStack || 'No component stack available');
   
   // In production, you would send this to your error tracking service
   // Example: sendToErrorTrackingService(error, info);
