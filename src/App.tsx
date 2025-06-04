@@ -2,9 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'sonner';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@/components/theme-provider';
 import { TierProvider } from '@/context/TierContext';
 import { UserProvider } from '@/context/UserContext';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import Index from '@/pages/Index';
 import Home from '@/pages/Home';
 import About from '@/pages/About';
@@ -26,6 +28,16 @@ import CommunityForums from '@/pages/CommunityForums';
 import Community from '@/pages/Community';
 import Marketplace from '@/pages/Marketplace';
 import AIToolsLanding from '@/pages/AIToolsLanding';
+
+// Create a query client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 function AppRoutes() {
   const location = useLocation();
@@ -79,16 +91,20 @@ function AppRoutes() {
 
 function App() {
   return (
-    <Router>
-      <ThemeProvider>
-        <UserProvider>
-          <TierProvider>
-            <AppRoutes />
-            <Toaster />
-          </TierProvider>
-        </UserProvider>
-      </ThemeProvider>
-    </Router>
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <ThemeProvider>
+          <TooltipProvider>
+            <UserProvider>
+              <TierProvider>
+                <AppRoutes />
+                <Toaster />
+              </TierProvider>
+            </UserProvider>
+          </TooltipProvider>
+        </ThemeProvider>
+      </Router>
+    </QueryClientProvider>
   );
 }
 
