@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -45,6 +44,7 @@ import {
 import { useUser } from '@/context/UserContext';
 import { useTier } from '@/context/TierContext';
 import { useLearningResources } from '@/hooks/useLearningResources';
+import YouTubeCourses from '@/components/learning/YouTubeCourses';
 
 const LearningHub = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -246,10 +246,14 @@ const LearningHub = () => {
 
           {/* Main content tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="courses" className="flex items-center gap-2">
                 <BookOpen className="h-4 w-4" />
                 Courses
+              </TabsTrigger>
+              <TabsTrigger value="youtube" className="flex items-center gap-2">
+                <Video className="h-4 w-4" />
+                YouTube
               </TabsTrigger>
               <TabsTrigger value="events" className="flex items-center gap-2">
                 <Video className="h-4 w-4" />
@@ -359,6 +363,20 @@ const LearningHub = () => {
                   ))}
                 </div>
               )}
+            </TabsContent>
+
+            {/* YouTube Courses Tab */}
+            <TabsContent value="youtube" className="mt-6">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-2">YouTube Learning Videos</h2>
+                <p className="text-muted-foreground">Access educational content from top YouTube creators and channels</p>
+              </div>
+              
+              <YouTubeCourses 
+                searchQuery={searchQuery}
+                category={categoryFilter}
+                difficulty={difficultyFilter}
+              />
             </TabsContent>
 
             {/* Live Events Tab */}
