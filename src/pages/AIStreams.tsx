@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import MobileStickyFooter from '@/components/MobileStickyFooter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useTier } from '@/context/TierContext';
@@ -187,6 +188,7 @@ const AIStreams = () => {
         </div>
       </main>
       <Footer />
+      <MobileStickyFooter />
     </div>
   );
 };

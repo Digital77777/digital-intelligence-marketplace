@@ -157,15 +157,25 @@ main {
   margin-top: 11.25rem !important;
 }
 
+/* Ensure footer is always visible */
+footer {
+  position: relative !important;
+  z-index: 10 !important;
+  margin-top: auto !important;
+}
+
 @media (max-width: 767px) {
   main {
     margin-top: 13rem !important;
-    padding-bottom: 7rem !important;
+    padding-bottom: 1rem !important;
     min-height: calc(100vh - 13rem - 7rem) !important;
   }
   
-  body {
-    padding-bottom: 7rem !important;
+  /* Ensure footer has proper spacing from mobile sticky footer */
+  footer {
+    margin-bottom: 7rem !important;
+    position: relative !important;
+    z-index: 10 !important;
   }
   
   /* Mobile sticky footer - ALWAYS VISIBLE */
@@ -195,6 +205,9 @@ main {
 #root {
   margin: 0 auto;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 /* AI Tools Directory specific styles */
