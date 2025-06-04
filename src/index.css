@@ -164,37 +164,50 @@
   }
 
   .safe-area-padding-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-bottom: env(safe-area-inset-bottom, 0.5rem);
   }
 }
 
+/* Fixed navbar positioning */
+header {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 50 !important;
+  transform: none !important;
+}
+
+/* Main content margin adjustment */
 main {
-  margin-top: 11.25rem; /* Adjusted for the new three-level navbar */
+  margin-top: 11.25rem !important; /* Adjusted for the three-level navbar */
 }
 
 @media (max-width: 767px) {
   main {
-    margin-top: 13rem; /* Adjusted for mobile */
-    padding-bottom: 6rem !important; /* Increased padding for sticky footer */
-    min-height: calc(100vh - 13rem - 6rem); /* Ensure proper height calculation */
+    margin-top: 13rem !important; /* Adjusted for mobile */
+    padding-bottom: 7rem !important; /* Increased padding for sticky footer */
+    min-height: calc(100vh - 13rem - 7rem) !important;
   }
   
   /* Ensure body has proper padding for mobile sticky footer */
   body {
-    padding-bottom: 6rem;
+    padding-bottom: 7rem !important;
   }
   
-  /* Additional mobile-specific adjustments */
-  .mobile-footer-spacing {
-    margin-bottom: 6rem;
-  }
-  
-  /* Ensure sticky footer is always visible with higher z-index */
-  .mobile-sticky-footer {
+  /* Mobile sticky footer - ALWAYS VISIBLE */
+  .mobile-sticky-footer,
+  div[class*="fixed bottom-0"] {
     position: fixed !important;
     bottom: 0 !important;
-    z-index: 99999 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 100000 !important;
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
 
   /* Hide scrollbars but keep functionality */

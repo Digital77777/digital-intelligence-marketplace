@@ -15,7 +15,7 @@ const MobileStickyFooter = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
 
-  // Only show on mobile devices
+  // Always show on mobile devices - never hide
   if (!isMobile) return null;
 
   const footerItems = [
@@ -61,28 +61,37 @@ const MobileStickyFooter = () => {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[99999] bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-2xl md:hidden">
-      <div className="flex items-center justify-around py-3 px-2 safe-area-padding-bottom">
+    <div 
+      className="fixed bottom-0 left-0 right-0 z-[100000] bg-white/98 backdrop-blur-lg border-t-2 border-gray-200 shadow-2xl md:hidden"
+      style={{
+        position: 'fixed !important',
+        display: 'block !important',
+        visibility: 'visible !important',
+        paddingBottom: 'env(safe-area-inset-bottom, 0.5rem)'
+      }}
+    >
+      <div className="flex items-center justify-around py-3 px-2">
         {footerItems.map((item) => {
           const IconComponent = item.icon;
           return (
             <button
               key={item.id}
               onClick={() => handleNavigation(item.path)}
-              className={`flex flex-col items-center justify-center py-2 px-3 min-w-0 flex-1 transition-all duration-200 rounded-lg ${
+              className={`flex flex-col items-center justify-center py-2 px-3 min-w-0 flex-1 transition-all duration-200 rounded-lg touch-manipulation ${
                 item.isActive 
-                  ? 'text-[#0071c2] bg-blue-50' 
-                  : 'text-gray-600 hover:text-[#0071c2] hover:bg-gray-50'
+                  ? 'text-[#0071c2] bg-blue-50 scale-105' 
+                  : 'text-gray-600 hover:text-[#0071c2] hover:bg-gray-50 active:scale-95'
               }`}
+              style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               <div className={`relative mb-1 ${item.isActive ? 'text-[#0071c2]' : ''}`}>
-                <IconComponent size={20} />
+                <IconComponent size={20} strokeWidth={2} />
                 {item.id === 'streams' && (
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 )}
               </div>
               <span className={`text-xs font-medium truncate leading-none ${
-                item.isActive ? 'text-[#0071c2]' : 'text-gray-600'
+                item.isActive ? 'text-[#0071c2] font-semibold' : 'text-gray-600'
               }`}>
                 {item.label}
               </span>

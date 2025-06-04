@@ -28,7 +28,18 @@ const Navbar = () => {
   }, []);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 transition-all duration-300">
+    <header 
+      className="fixed top-0 left-0 right-0 z-50"
+      style={{
+        position: 'fixed !important',
+        top: '0 !important',
+        left: '0 !important',
+        right: '0 !important',
+        zIndex: '50 !important',
+        transform: 'none !important',
+        willChange: 'auto'
+      }}
+    >
       {/* Top bar with brand and actions */}
       <NavbarHeader 
         secondaryNavItems={secondaryNavItems} 
