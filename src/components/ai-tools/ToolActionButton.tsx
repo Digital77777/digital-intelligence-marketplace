@@ -16,6 +16,7 @@ interface ToolActionButtonProps {
   className?: string;
   size?: "default" | "sm" | "lg" | "icon" | null | undefined;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | null | undefined;
+  children?: React.ReactNode;
 }
 
 export const ToolActionButton: React.FC<ToolActionButtonProps> = ({ 
@@ -26,6 +27,7 @@ export const ToolActionButton: React.FC<ToolActionButtonProps> = ({
   className,
   size,
   variant,
+  children,
 }) => {
   const navigate = useNavigate();
   const { currentTier, upgradePrompt } = useTier();
@@ -80,30 +82,24 @@ export const ToolActionButton: React.FC<ToolActionButtonProps> = ({
     }
   }
 
-  const getLabelText = () => {
-    if (isViewButton) return "View Tool";
-    if (isConnectApiButton) return isApiConnected ? "Update API" : "Connect API";
-    return hasAccess ? "Launch Tool" : `Upgrade to ${tool.tier.charAt(0).toUpperCase() + tool.tier.slice(1)}`;
+  const getDefaultContent = () => {
+    if (isViewButton) return <>View Tool <ExternalLink className="h-3.5 w-3.5 ml-1.5" /></>;
+    if (isConnectApiButton) return <><Key className="h-3.5 w-3.5 mr-1.5" /> {isApiConnected ? "Update API" : "Connect API"}</>;
+    return hasAccess ? (
+      <>Launch Tool <ExternalLink className="h-3.5 w-3.5 ml-1.5" /></>
+    ) : (
+      <>Upgrade <Lock className="h-3.5 w-3.5 ml-1.5" /></>
+    );
   };
 
   return (
     <Button
       variant={buttonVariant}
       size={compact ? "sm" : size || "default"}
-      className={`${className || ''} ${compact ? 'w-full' : ''} ${isConnectApiButton ? 'bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40 dark:hover:text-blue-300' : ''}`}
+      className={`${className || ''} ${compact ? 'w-full' : ''} ${isConnectApiButton ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' : ''}`}
       onClick={handleAction}
     >
-      {isViewButton ? (
-        <>View Tool <ExternalLink className="h-3.5 w-3.5 ml-1.5" /></>
-      ) : isConnectApiButton ? (
-        <><Key className="h-3.5 w-3.5 mr-1.5" /> {isApiConnected ? "Update API" : "Connect API"}</>
-      ) : (
-        hasAccess ? (
-          <>Launch Tool <ExternalLink className="h-3.5 w-3.5 ml-1.5" /></>
-        ) : (
-          <>Upgrade <Lock className="h-3.5 w-3.5 ml-1.5" /></>
-        )
-      )}
+      {children || getDefaultContent()}
     </Button>
   );
 };

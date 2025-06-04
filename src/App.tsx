@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'sonner';
@@ -22,8 +23,6 @@ import AIStreamsUpload from '@/pages/AIStreamsUpload';
 import CommunityForums from '@/pages/CommunityForums';
 import Community from '@/pages/Community';
 import Marketplace from '@/pages/Marketplace';
-import ToolView from '@/pages/ToolView';
-import SellTool from '@/pages/SellTool';
 import AIToolsLanding from '@/pages/AIToolsLanding';
 
 function App() {
@@ -71,8 +70,6 @@ function App() {
         
         {/* Marketplace Section */}
         <Route path="/marketplace" element={<Marketplace />} />
-        <Route path="/marketplace/tool/:id" element={<ToolView />} />
-        <Route path="/marketplace/sell-tool" element={<SellTool />} />
         
         <Route path="*" element={<NotFound />} />
       </Routes>
