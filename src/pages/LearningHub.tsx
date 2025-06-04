@@ -293,7 +293,7 @@ const LearningHub = () => {
                         <div className="flex items-center justify-center h-full w-full">
                           <BookOpen className="h-12 w-12 text-white opacity-70" />
                         </div>
-                        {isContentLocked(course.required_tier) && (
+                        {isContentLocked(course.requiredTier) && (
                           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                             <Lock className="h-6 w-6 text-white opacity-70" />
                           </div>
@@ -319,18 +319,18 @@ const LearningHub = () => {
                             <Clock className="h-3 w-3 mr-1" />
                             {course.duration} min
                           </div>
-                          {course.required_tier !== 'freemium' && (
+                          {course.requiredTier !== 'freemium' && (
                             <Badge variant="outline" className="text-xs">
-                              {course.required_tier}
+                              {course.requiredTier}
                             </Badge>
                           )}
                         </div>
                       </CardContent>
                       <CardFooter className="pt-0">
-                        {isContentLocked(course.required_tier) ? (
+                        {isContentLocked(course.requiredTier) ? (
                           <Button 
                             className="w-full" 
-                            onClick={() => upgradePrompt(course.required_tier === 'basic' ? 'basic' : 'pro')}
+                            onClick={() => upgradePrompt(course.requiredTier === 'basic' ? 'basic' : 'pro')}
                           >
                             <Lock className="mr-2 h-4 w-4" />
                             Upgrade to Access
