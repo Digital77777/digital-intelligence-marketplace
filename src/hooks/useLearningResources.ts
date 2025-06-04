@@ -3,8 +3,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
 import { useTier } from '@/context/TierContext';
-import { supabase } from '@/integrations/supabase/client';
-import { LearningContent, UserProgress } from '@/types/learning';
+import { learningContentService, Course, LiveEvent, Certification } from '@/utils/learningApiService';
 
 interface UseLearningResourcesProps {
   categoryFilter?: string;
@@ -14,7 +13,9 @@ interface UseLearningResourcesProps {
 }
 
 interface UseLearningResourcesResult {
-  resources: LearningContent[];
+  resources: Course[];
+  liveEvents: LiveEvent[];
+  certifications: Certification[];
   isLoading: boolean;
   error: Error | null;
   userProgress: Record<string, number>;
@@ -31,7 +32,9 @@ export const useLearningResources = ({
   searchQuery = '',
   limit = 12
 }: UseLearningResourcesProps = {}): UseLearningResourcesResult => {
-  const [resources, setResources] = useState<LearningContent[]>([]);
+  const [resources, setResources] = useState<Course[]>([]);
+  const [liveEvents, setLiveEvents] = useState<LiveEvent[]>([]);
+  const [certifications, setCertifications] = useState<Certification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [userProgress, setUserProgress] = useState<Record<string, number>>({});
@@ -43,48 +46,65 @@ export const useLearningResources = ({
   const { user } = useUser();
   const { currentTier } = useTier();
   
-  // Fetch resources based on filters
+  // Fetch all learning content
   useEffect(() => {
-    const fetchResources = async () => {
+    const fetchLearningContent = async () => {
       setIsLoading(true);
-      setOffset(0);
+      setError(null);
       
       try {
-        // Build the query
-        let query = supabase
-          .from('learning_content')
-          .select('*', { count: 'exact' });
+        // Fetch courses, events, and certifications concurrently
+        const [coursesData, eventsData, certificationsData] = await Promise.all([
+          learningContentService.fetchOpenSourceCourses(),
+          learningContentService.fetchLiveEvents(),
+          learningContentService.fetchCertifications()
+        ]);
         
-        // Apply filters if available
+        // Apply filters
+        let filteredCourses = coursesData;
+        
+        // Category filter
         if (categoryFilter) {
-          query = query.eq('category', categoryFilter);
+          filteredCourses = filteredCourses.filter(course => 
+            course.category.toLowerCase().includes(categoryFilter.toLowerCase())
+          );
         }
         
+        // Difficulty filter
         if (difficultyFilter) {
-          query = query.eq('difficulty', difficultyFilter);
+          filteredCourses = filteredCourses.filter(course => 
+            course.difficulty === difficultyFilter
+          );
         }
         
+        // Search query filter
         if (searchQuery) {
-          query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
+          const query = searchQuery.toLowerCase();
+          filteredCourses = filteredCourses.filter(course => 
+            course.title.toLowerCase().includes(query) ||
+            course.description.toLowerCase().includes(query) ||
+            course.category.toLowerCase().includes(query) ||
+            course.instructor.toLowerCase().includes(query)
+          );
         }
         
         // Tier filtering - only show resources available to the current tier
         if (currentTier === 'freemium') {
-          query = query.eq('required_tier', 'freemium');
+          filteredCourses = filteredCourses.filter(course => course.requiredTier === 'freemium');
         } else if (currentTier === 'basic') {
-          query = query.in('required_tier', ['freemium', 'basic']);
+          filteredCourses = filteredCourses.filter(course => 
+            course.requiredTier === 'freemium' || course.requiredTier === 'basic'
+          );
         }
         
-        // Pagination
-        const { data, error, count } = await query
-          .order('created_at', { ascending: false })
-          .range(0, limit - 1);
+        setResources(filteredCourses);
+        setLiveEvents(eventsData);
+        setCertifications(certificationsData);
+        setTotalCount(filteredCourses.length);
+        setHasMore(false); // All data is loaded at once for simplicity
         
-        if (error) throw error;
-        
-        setResources(data as unknown as LearningContent[]);
-        setTotalCount(count || 0);
-        setHasMore((count || 0) > limit);
+        // Load user progress from localStorage (simulating database)
+        loadUserProgress();
         
       } catch (err: any) {
         console.error("Error fetching learning resources:", err);
@@ -95,39 +115,26 @@ export const useLearningResources = ({
       }
     };
     
-    fetchResources();
-    fetchUserProgress();
-    
-  }, [categoryFilter, difficultyFilter, searchQuery, currentTier, limit]);
+    fetchLearningContent();
+  }, [categoryFilter, difficultyFilter, searchQuery, currentTier]);
   
-  // Fetch user progress
-  const fetchUserProgress = async () => {
+  // Load user progress from localStorage
+  const loadUserProgress = () => {
     if (!user) return;
     
     try {
-      const { data, error } = await supabase
-        .from('learning_progress')
-        .select('*')
-        .eq('user_id', user.id);
+      const storedProgress = localStorage.getItem(`learning_progress_${user.id}`);
+      const storedCompleted = localStorage.getItem(`completed_resources_${user.id}`);
       
-      if (error) throw error;
+      if (storedProgress) {
+        setUserProgress(JSON.parse(storedProgress));
+      }
       
-      const progressMap: Record<string, number> = {};
-      const completedSet = new Set<string>();
-      
-      (data || []).forEach((item: any) => {
-        progressMap[item.content_id] = item.progress_percent || 0;
-        
-        if (item.progress_percent === 100) {
-          completedSet.add(item.content_id);
-        }
-      });
-      
-      setUserProgress(progressMap);
-      setCompletedResources(completedSet);
-      
-    } catch (err) {
-      console.error("Error fetching user progress:", err);
+      if (storedCompleted) {
+        setCompletedResources(new Set(JSON.parse(storedCompleted)));
+      }
+    } catch (error) {
+      console.error("Error loading user progress:", error);
     }
   };
   
@@ -139,87 +146,38 @@ export const useLearningResources = ({
     }
     
     try {
-      const { error } = await supabase
-        .from('learning_progress')
-        .upsert({
-          user_id: user.id,
-          content_id: resourceId,
-          progress_percent: 100,
-          last_accessed: new Date().toISOString()
-        });
-      
-      if (error) throw error;
+      // Update progress via API
+      await learningContentService.updateProgress(user.id, resourceId, 100);
       
       // Update local state
-      setUserProgress(prev => ({
-        ...prev,
-        [resourceId]: 100
-      }));
+      const newProgress = { ...userProgress, [resourceId]: 100 };
+      const newCompleted = new Set(completedResources).add(resourceId);
       
-      setCompletedResources(prev => new Set(prev).add(resourceId));
+      setUserProgress(newProgress);
+      setCompletedResources(newCompleted);
       
-      toast.success("Progress updated");
+      // Persist to localStorage
+      localStorage.setItem(`learning_progress_${user.id}`, JSON.stringify(newProgress));
+      localStorage.setItem(`completed_resources_${user.id}`, JSON.stringify(Array.from(newCompleted)));
+      
+      toast.success("Course marked as completed!");
       
     } catch (err) {
-      console.error("Error updating progress:", err);
+      console.error("Error marking resource complete:", err);
       toast.error("Failed to update progress");
     }
   };
   
-  // Fetch more resources
+  // Fetch more resources (placeholder for pagination)
   const fetchMore = async () => {
-    if (!hasMore || isLoading) return;
-    
-    const newOffset = offset + limit;
-    setIsLoading(true);
-    
-    try {
-      // Build the query
-      let query = supabase
-        .from('learning_content')
-        .select('*');
-      
-      // Apply filters if available
-      if (categoryFilter) {
-        query = query.eq('category', categoryFilter);
-      }
-      
-      if (difficultyFilter) {
-        query = query.eq('difficulty', difficultyFilter);
-      }
-      
-      if (searchQuery) {
-        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
-      }
-      
-      // Tier filtering - only show resources available to the current tier
-      if (currentTier === 'freemium') {
-        query = query.eq('required_tier', 'freemium');
-      } else if (currentTier === 'basic') {
-        query = query.in('required_tier', ['freemium', 'basic']);
-      }
-      
-      // Pagination
-      const { data, error } = await query
-        .order('created_at', { ascending: false })
-        .range(newOffset, newOffset + limit - 1);
-      
-      if (error) throw error;
-      
-      setResources(prev => [...prev, ...(data as unknown as LearningContent[])]);
-      setOffset(newOffset);
-      setHasMore(data.length === limit);
-      
-    } catch (err: any) {
-      console.error("Error fetching more learning resources:", err);
-      toast.error("Failed to load more resources");
-    } finally {
-      setIsLoading(false);
-    }
+    // In a real implementation, this would load more data
+    console.log('Fetching more resources...');
   };
   
   return {
     resources,
+    liveEvents,
+    certifications,
     isLoading,
     error,
     userProgress,
