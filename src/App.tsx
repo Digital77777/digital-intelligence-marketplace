@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 import { TierProvider } from '@/context/TierContext';
+import { UserProvider } from '@/context/UserContext';
 import Index from '@/pages/Index';
 import Home from '@/pages/Home';
 import About from '@/pages/About';
@@ -80,10 +81,12 @@ function App() {
   return (
     <Router>
       <ThemeProvider>
-        <TierProvider>
-          <AppRoutes />
-          <Toaster />
-        </TierProvider>
+        <UserProvider>
+          <TierProvider>
+            <AppRoutes />
+            <Toaster />
+          </TierProvider>
+        </UserProvider>
       </ThemeProvider>
     </Router>
   );
