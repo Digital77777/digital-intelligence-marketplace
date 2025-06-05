@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { AIToolItem } from '@/data/ai-tools-tiers';
 import { Button } from '@/components/ui/button';
@@ -9,13 +8,15 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import CropMindInterface from './interfaces/CropMindInterface';
 
 interface ToolInterfaceProps {
   tool: AIToolItem;
   onBack: () => void;
+  connectionDetails: any;
 }
 
-const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack }) => {
+const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack, connectionDetails }) => {
   const [activeTab, setActiveTab] = useState<string>('main');
   const { toast } = useToast();
   
@@ -29,6 +30,11 @@ const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack }) => {
   
   // Render different interfaces based on tool category
   const renderToolInterface = () => {
+    // Handle new CropMind AI tool
+    if (tool.id === 'cropmind-ai') {
+      return <CropMindInterface />;
+    }
+
     switch (tool.category) {
       case 'analytics':
         return <AnalyticsToolInterface tool={tool} handleAction={handleAction} />;

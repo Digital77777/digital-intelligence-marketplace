@@ -47,7 +47,7 @@ export const getTierBadgeColor = (tier: AIToolTier | 'all'): string => {
   }
 };
 
-export const toolCategories = [
+export const toolCategories: ToolCategoryInfo[] = [
   { id: 'image-generation', name: 'Image Generation', icon: '🖼️' },
   { id: 'text-tools', name: 'Text Tools', icon: '📝' },
   { id: 'development', name: 'Development', icon: '💻' },
@@ -62,7 +62,14 @@ export const toolCategories = [
   { id: 'machine-learning', name: 'Machine Learning', icon: '🧠' },
   { id: 'seo', name: 'SEO', icon: '🔍' },
   { id: 'ethics', name: 'AI Ethics', icon: '🛡️' },
-  { id: 'cloud', name: 'Cloud Integration', icon: '☁️' }
+  { id: 'cloud', name: 'Cloud Integration', icon: '☁️' },
+  {
+    id: 'agriculture',
+    name: 'Agriculture',
+    description: 'AI tools for farming, crop monitoring, and agricultural optimization',
+    icon: React.createElement(Sprout, { className: "w-6 h-6" }),
+    count: aiTools.filter(tool => tool.category === 'agriculture').length
+  }
 ];
 
 export interface ToolCategoryInfo {
