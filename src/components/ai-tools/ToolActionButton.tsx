@@ -1,106 +1,153 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { AIToolItem } from '@/data/ai-tools-tiers';
-import { ExternalLink, Key, Lock } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { useTier } from '@/context/TierContext';
-import apiConnectionManager from '@/utils/apiConnectionManager';
+import { useToast } from '@/hooks/use-toast';
+import { Lock, ExternalLink, Eye, Settings } from 'lucide-react';
+import ToolDetailView from './ToolDetailView';
+import ToolInterfaceModal from './ToolInterfaceModal';
 
-// Define our own props interface without extending ButtonProps
 interface ToolActionButtonProps {
   tool: AIToolItem;
-  compact?: boolean;
-  action: 'view' | 'launch' | 'connect-api';
-  onSelect?: (tool: AIToolItem) => void;
+  action: 'view' | 'launch' | 'connect-api' | 'configure';
+  size?: 'sm' | 'md' | 'lg';
+  variant?: 'default' | 'outline' | 'secondary';
   className?: string;
-  size?: "default" | "sm" | "lg" | "icon" | null | undefined;
-  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | null | undefined;
+  compact?: boolean;
   children?: React.ReactNode;
+  onSelect?: (tool: AIToolItem) => void;
 }
 
-export const ToolActionButton: React.FC<ToolActionButtonProps> = ({ 
-  tool, 
-  compact = false, 
+const ToolActionButton: React.FC<ToolActionButtonProps> = ({
+  tool,
   action,
-  onSelect,
-  className,
-  size,
-  variant,
+  size = 'md',
+  variant = 'default',
+  className = '',
+  compact = false,
   children,
+  onSelect
 }) => {
-  const navigate = useNavigate();
   const { currentTier, upgradePrompt } = useTier();
-  
-  // Access logic to ensure proper tier access
+  const { toast } = useToast();
+  const [showDetailView, setShowDetailView] = useState(false);
+  const [showToolInterface, setShowToolInterface] = useState(false);
+
   const hasAccess = (
     (tool.tier === 'freemium') || 
     (tool.tier === 'basic' && (currentTier === 'basic' || currentTier === 'pro')) ||
     (tool.tier === 'pro' && currentTier === 'pro')
   );
 
-  // Check API connection status
-  const isApiConnected = apiConnectionManager.hasConnection(tool.id);
-  
   const handleAction = () => {
-    // Always scroll to top before any action
-    window.scrollTo(0, 0);
-    
-    if (action === 'view') {
-      // Always navigate to tool details regardless of access
-      navigate(`/tool/${tool.id}`);
-    } else if (action === 'launch') {
-      if (hasAccess) {
-        if (onSelect) {
-          onSelect(tool);
+    switch (action) {
+      case 'view':
+        setShowDetailView(true);
+        break;
+        
+      case 'launch':
+        if (hasAccess) {
+          setShowToolInterface(true);
+          if (onSelect) onSelect(tool);
         } else {
-          navigate(`/tool/${tool.id}/interface`);
+          upgradePrompt(tool.tier);
         }
-      } else {
-        upgradePrompt(tool.tier);
-      }
-    } else if (action === 'connect-api') {
-      if (onSelect) {
-        onSelect(tool);
-      }
+        break;
+        
+      case 'connect-api':
+        if (hasAccess) {
+          toast({
+            title: "API Connection",
+            description: `Setting up API connection for ${tool.name}...`,
+          });
+          // In real implementation, this would open API connection flow
+        } else {
+          upgradePrompt(tool.tier);
+        }
+        break;
+        
+      case 'configure':
+        if (hasAccess) {
+          toast({
+            title: "Configuration",
+            description: `Opening configuration for ${tool.name}...`,
+          });
+        } else {
+          upgradePrompt(tool.tier);
+        }
+        break;
     }
   };
 
-  // View button should always be accessible
-  const isViewButton = action === 'view';
-  const isConnectApiButton = action === 'connect-api';
-  
-  let buttonVariant = variant;
-  
-  if (!buttonVariant) {
-    if (isViewButton) {
-      buttonVariant = "outline";
-    } else if (isConnectApiButton) {
-      buttonVariant = "outline";
-    } else {
-      buttonVariant = hasAccess ? "default" : "outline";
+  const getButtonContent = () => {
+    if (children) return children;
+    
+    switch (action) {
+      case 'view':
+        return (
+          <>
+            <Eye className="h-4 w-4 mr-1" />
+            View Details
+          </>
+        );
+      case 'launch':
+        return hasAccess ? (
+          <>
+            <ExternalLink className="h-4 w-4 mr-1" />
+            Launch
+          </>
+        ) : (
+          <>
+            <Lock className="h-4 w-4 mr-1" />
+            Upgrade Required
+          </>
+        );
+      case 'connect-api':
+        return 'Connect API';
+      case 'configure':
+        return (
+          <>
+            <Settings className="h-4 w-4 mr-1" />
+            Configure
+          </>
+        );
+      default:
+        return 'Action';
     }
-  }
-
-  const getDefaultContent = () => {
-    if (isViewButton) return <>View Tool <ExternalLink className="h-3.5 w-3.5 ml-1.5" /></>;
-    if (isConnectApiButton) return <><Key className="h-3.5 w-3.5 mr-1.5" /> {isApiConnected ? "Update API" : "Connect API"}</>;
-    return hasAccess ? (
-      <>Launch Tool <ExternalLink className="h-3.5 w-3.5 ml-1.5" /></>
-    ) : (
-      <>Upgrade <Lock className="h-3.5 w-3.5 ml-1.5" /></>
-    );
   };
 
   return (
-    <Button
-      variant={buttonVariant}
-      size={compact ? "sm" : size || "default"}
-      className={`${className || ''} ${compact ? 'w-full' : ''} ${isConnectApiButton ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' : ''}`}
-      onClick={handleAction}
-    >
-      {children || getDefaultContent()}
-    </Button>
+    <>
+      <Button
+        size={size}
+        variant={variant}
+        className={className}
+        onClick={handleAction}
+        disabled={!hasAccess && action !== 'view'}
+      >
+        {getButtonContent()}
+      </Button>
+
+      {showDetailView && (
+        <div className="fixed inset-0 z-50 bg-white">
+          <ToolDetailView
+            tool={tool}
+            onBack={() => setShowDetailView(false)}
+            onLaunch={() => {
+              setShowDetailView(false);
+              setShowToolInterface(true);
+            }}
+          />
+        </div>
+      )}
+
+      <ToolInterfaceModal
+        open={showToolInterface}
+        onOpenChange={setShowToolInterface}
+        tool={tool}
+      />
+    </>
   );
 };
 

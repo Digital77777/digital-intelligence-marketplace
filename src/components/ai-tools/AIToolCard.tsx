@@ -66,6 +66,7 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
             compact={true}
             action="view"
             className="flex-1"
+            onSelect={onSelect}
           />
           <ToolActionButton
             tool={tool}
@@ -194,6 +195,7 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
               size="sm"
               variant="outline"
               className="flex items-center gap-1"
+              onSelect={onSelect}
             >
               <ArrowUpRight className="h-3.5 w-3.5" />
               Details

@@ -1,86 +1,140 @@
+import React from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { aiTools, categories } from '@/data/ai-tools-tiers';
+import { Course } from '@/data/courses';
+import { forumData } from '@/data/forum';
+import { AITool } from '@/types/tools';
 
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useSearch, SearchResultType } from '@/hooks/useSearch';
-import { getIconForType } from './searchIcons';
-import { SearchableItem } from './CommandItem';
+interface SearchItem {
+  id: string;
+  title: string;
+  description: string;
+  type: 'tool' | 'course' | 'forum' | 'category';
+  category?: string;
+  url: string;
+  icon?: React.ReactNode;
+}
 
-export function useSearchCommands() {
-  const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState('');
+export const useSearchCommands = () => {
+  const [open, setOpen] = React.useState(false);
+  const [query, setQuery] = React.useState('');
   const navigate = useNavigate();
-  const { performSearch, results, isSearching } = useSearch();
-  
-  // Create searchable items from search results
-  const searchItems = results.map(result => ({
-    id: result.id,
-    type: result.type,
-    title: result.title,
-    description: result.description,
-    route: result.url,
-    icon: getIconForType(result.type),
-  }));
+  const [searchParams] = useSearchParams();
 
-  // Filter items based on search query
-  const filteredItems = searchItems.filter(item => {
-    if (!query) return true;
-    const searchTerms = query.toLowerCase();
-    return (
-      item.title.toLowerCase().includes(searchTerms) ||
-      (item.description && item.description.toLowerCase().includes(searchTerms))
-    );
-  });
-
-  // Group items by type
-  const groupedItems = filteredItems.reduce((acc, item) => {
-    const type = item.type as SearchResultType;
-    if (!acc[type]) {
-      acc[type] = [];
-    }
-    acc[type].push(item);
-    return acc;
-  }, {} as Record<SearchResultType, SearchableItem[]>);
-
-  // Map search result type to human readable category
-  const typeLabels: Record<SearchResultType, string> = {
-    'all': 'All Results',
-    'tools': 'AI Tools',
-    'learning': 'Courses',
-    'community': 'Community',
-    'streams': 'Streams',
-  };
-
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if ((e.key === 'k' && (e.metaKey || e.ctrlKey)) || e.key === '/') {
-        e.preventDefault();
-        setOpen((open) => !open);
+  const searchItems = React.useMemo(() => {
+    if (!query) return [];
+    
+    const lowerQuery = query.toLowerCase();
+    const results: SearchItem[] = [];
+    
+    // Search AI Tools
+    aiTools.forEach(tool => {
+      if (
+        tool.name.toLowerCase().includes(lowerQuery) ||
+        tool.description.toLowerCase().includes(lowerQuery) ||
+        tool.category.toLowerCase().includes(lowerQuery) ||
+        tool.use_cases?.some(useCase => useCase.toLowerCase().includes(lowerQuery))
+      ) {
+        results.push({
+          id: tool.id,
+          title: tool.name,
+          description: tool.description,
+          type: 'tool',
+          category: tool.category,
+          url: `/tool/${tool.id}`,
+          icon: tool.icon
+        });
       }
-    };
+    });
+    
+    // Search Categories (including agriculture)
+    categories.forEach(category => {
+      if (
+        category.name.toLowerCase().includes(lowerQuery) ||
+        category.description.toLowerCase().includes(lowerQuery)
+      ) {
+        results.push({
+          id: category.id,
+          title: category.name,
+          description: category.description,
+          type: 'category',
+          url: `/ai-tools-directory?category=${category.id}`,
+          icon: category.icon
+        });
+      }
+    });
+    
+    // Search Courses
+    Course.forEach(course => {
+      if (
+        course.title.toLowerCase().includes(lowerQuery) ||
+        course.description.toLowerCase().includes(lowerQuery) ||
+        course.tags?.some(tag => tag.toLowerCase().includes(lowerQuery))
+      ) {
+        results.push({
+          id: course.id,
+          title: course.title,
+          description: course.description,
+          type: 'course',
+          url: `/courses/${course.id}`,
+        });
+      }
+    });
+    
+    // Search Forum Data
+    forumData.forEach(forum => {
+      if (
+        forum.title.toLowerCase().includes(lowerQuery) ||
+        forum.content.toLowerCase().includes(lowerQuery) ||
+        forum.tags?.some(tag => tag.toLowerCase().includes(lowerQuery))
+      ) {
+        results.push({
+          id: forum.id,
+          title: forum.title,
+          description: forum.content,
+          type: 'forum',
+          url: `/forums/${forum.id}`,
+        });
+      }
+    });
+    
+    return results.slice(0, 20);
+  }, [query]);
 
-    document.addEventListener('keydown', down);
-    return () => document.removeEventListener('keydown', down);
-  }, []);
+  const groupedItems = React.useMemo(() => {
+    const grouped: { [key: string]: SearchItem[] } = {};
+    searchItems.forEach(item => {
+      if (!grouped[item.type]) {
+        grouped[item.type] = [];
+      }
+      grouped[item.type].push(item);
+    });
+    return grouped;
+  }, [searchItems]);
 
-  useEffect(() => {
-    if (query && query.length > 1) {
-      performSearch(query);
-    }
-  }, [query, performSearch]);
-
-  const handleSelect = (item: SearchableItem) => {
-    setOpen(false);
-    navigate(item.route);
+  const typeLabels: { [key: string]: string } = {
+    tool: 'AI Tools',
+    course: 'Courses',
+    forum: 'Forums',
+    category: 'Categories'
   };
 
-  // For immediate navigation to advanced search
+  const handleSelect = (url: string) => {
+    setOpen(false);
+    setQuery('');
+    navigate(url);
+  };
+
   const handleShowAll = () => {
     setOpen(false);
-    // If we have a query, bring it to discovery page
+    setQuery('');
+    
+    // If the query is not empty, navigate to the AI tools directory with the query as a search parameter
     if (query) {
-      navigate(`/discovery?search=${encodeURIComponent(query)}`);
+      navigate(`/ai-tools-directory?search=${query}`);
     } else {
-      navigate('/discovery');
+      // If the query is empty, navigate to the AI tools directory without any search parameters
+      navigate('/ai-tools-directory');
     }
   };
 
@@ -91,8 +145,7 @@ export function useSearchCommands() {
     setQuery,
     groupedItems,
     typeLabels,
-    isSearching,
     handleSelect,
     handleShowAll
   };
-}
+};

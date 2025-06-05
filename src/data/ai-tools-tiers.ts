@@ -1,578 +1,395 @@
 import React from 'react';
-import { Sprout } from 'lucide-react';
-
-export type AIToolTier = 'freemium' | 'basic' | 'pro';
+import { 
+  LineChart, 
+  BarChart3, 
+  Code, 
+  HelpCircle, 
+  Settings, 
+  MessageSquare, 
+  Mic, 
+  Send, 
+  Satellite, 
+  CloudRain, 
+  Sprout,
+  ArrowLeft,
+  Bell,
+  User,
+  Check,
+  Info,
+  Key,
+  Lock,
+  Server,
+  ExternalLink,
+  ArrowUpRight,
+  Rocket,
+  Star,
+  Users,
+  Zap,
+  Shield,
+  Globe,
+  Play,
+  BookOpen
+} from 'lucide-react';
 
 export interface AIToolItem {
   id: string;
   name: string;
   description: string;
   category: string;
-  tier: AIToolTier;
-  icon: string;
-  use_cases?: string[];
-  rationale?: string;
+  tier: string;
+  icon: React.ReactNode;
+  uniqueSellingPoint: string;
+  use_cases: string[];
+  rationale: string;
   usageLimit?: string;
-  uniqueSellingPoint?: string;
   integrations?: string[];
-  demoAvailable?: boolean;
-  popularTool?: boolean;
-  relatedCourses?: string[];
+  image_url?: string;
 }
 
-export const getTierLabel = (tier: AIToolTier | 'all'): string => {
-  switch (tier) {
-    case 'freemium': return 'Free';
-    case 'basic': return 'Basic';
-    case 'pro': return 'Pro';
-    case 'all': return 'All Tiers';
-    default: return tier;
-  }
-};
-
-export const getTierIcon = (tier: AIToolTier | 'all'): string => {
-  switch (tier) {
-    case 'freemium': return '🆓';
-    case 'basic': return '🔹';
-    case 'pro': return '⭐';
-    case 'all': return '🔍';
-    default: return '•';
-  }
-};
-
-export const getTierBadgeColor = (tier: AIToolTier | 'all'): string => {
-  switch (tier) {
-    case 'freemium': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
-    case 'basic': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
-    case 'pro': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400';
-    case 'all': return 'bg-gray-100 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300';
-    default: return 'bg-gray-100 text-gray-800';
-  }
-};
+export interface ToolCategory {
+  id: string;
+  name: string;
+  count: number;
+}
 
 export interface ToolCategoryInfo {
   id: string;
   name: string;
+  description: string;
   icon: React.ReactNode;
-  description?: string;
+  count: number;
 }
 
+export const getTierBadgeColor = (tier: string) => {
+  switch (tier) {
+    case 'freemium':
+      return 'bg-amber-50 text-amber-800 hover:bg-amber-100 dark:bg-amber-950/20';
+    case 'basic':
+      return 'bg-blue-50 text-blue-800 hover:bg-blue-100 dark:bg-blue-950/20';
+    case 'pro':
+      return 'bg-purple-50 text-purple-800 hover:bg-purple-100 dark:bg-purple-950/20';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
+
+export const getTierIcon = (tier: string) => {
+  switch (tier) {
+    case 'freemium':
+      return React.createElement(Lock, { className: 'w-3 h-3' });
+    case 'basic':
+      return React.createElement(Key, { className: 'w-3 h-3' });
+    case 'pro':
+      return React.createElement(Rocket, { className: 'w-3 h-3' });
+    default:
+      return null;
+  }
+};
+
+export const getTierLabel = (tier: string) => {
+  return tier.charAt(0).toUpperCase() + tier.slice(1);
+};
+
+// AI Tools Data with CropMind AI added
 export const aiTools: AIToolItem[] = [
   {
-    id: '1',
-    name: 'AI Image Generator',
-    description: 'Generate stunning images from text prompts using AI.',
-    category: 'Image Generation',
-    tier: 'freemium',
-    icon: '🖼️',
-    use_cases: [
-      'Create unique artwork',
-      'Generate marketing visuals',
-      'Design website graphics',
-    ],
-    rationale: 'Quickly create visuals without needing design skills.',
-    usageLimit: '25 generations per day',
-    uniqueSellingPoint: 'Highest quality image generation with minimal prompt engineering required',
-    integrations: ['Photoshop', 'Figma', 'Canva'],
-    demoAvailable: true,
-    popularTool: true,
-    relatedCourses: ['Introduction to AI Art', 'Prompt Engineering for Images']
-  },
-  {
-    id: '2',
-    name: 'AI Text Summarizer',
-    description: 'Summarize long articles and documents into concise summaries.',
-    category: 'Text Tools',
-    tier: 'freemium',
-    icon: '📝',
-    use_cases: [
-      'Summarize research papers',
-      'Get quick insights from articles',
-      'Condense meeting notes',
-    ],
-    rationale: 'Save time by quickly understanding key information.',
-    usageLimit: '10 documents per day',
-    uniqueSellingPoint: 'Contextual awareness preserves meaning while reducing length by up to 90%',
-    integrations: ['Google Docs', 'Microsoft Word', 'Notion'],
-    demoAvailable: true,
-    relatedCourses: ['Text Analysis Fundamentals', 'Content Summarization Techniques']
-  },
-  {
-    id: '3',
-    name: 'AI Code Assistant',
-    description: 'Get real-time coding suggestions and error detection.',
-    category: 'Development',
-    tier: 'basic',
-    icon: '💻',
-    use_cases: [
-      'Write code faster',
-      'Reduce coding errors',
-      'Learn new programming languages',
-    ],
-    rationale: 'Improve coding efficiency and accuracy.',
-    usageLimit: 'Unlimited',
-    uniqueSellingPoint: 'AI-powered code completion and debugging',
-    integrations: ['VS Code', 'IntelliJ IDEA', 'PyCharm'],
-    demoAvailable: false
-  },
-  {
-    id: '4',
-    name: 'AI Email Writer',
-    description: 'Generate professional emails quickly and easily.',
-    category: 'Productivity',
-    tier: 'basic',
-    icon: '📧',
-    use_cases: [
-      'Write marketing emails',
-      'Create customer support responses',
-      'Generate sales pitches',
-    ],
-    rationale: 'Streamline email communication and save time.',
-    usageLimit: 'Unlimited',
-    uniqueSellingPoint: 'AI-powered email drafting and personalization',
-    integrations: ['Gmail', 'Outlook', 'Zoho Mail'],
-    demoAvailable: false
-  },
-  {
-    id: '5',
-    name: 'AI Social Media Manager',
-    description: 'Automate social media posting and engagement.',
-    category: 'Marketing',
-    tier: 'pro',
-    icon: '📱',
-    use_cases: [
-      'Schedule social media posts',
-      'Analyze social media engagement',
-      'Generate social media content',
-    ],
-    rationale: 'Enhance social media presence and engagement.',
-    usageLimit: 'Unlimited',
-    uniqueSellingPoint: 'AI-powered social media scheduling and analytics',
-    integrations: ['Facebook', 'Instagram', 'Twitter'],
-    demoAvailable: true
-  },
-  {
-    id: '6',
-    name: 'AI Video Editor',
-    description: 'Edit videos automatically with AI-powered tools.',
-    category: 'Video Editing',
-    tier: 'pro',
-    icon: '🎬',
-    use_cases: [
-      'Create professional videos',
-      'Automate video editing tasks',
-      'Generate video content',
-    ],
-    rationale: 'Simplify video editing and create high-quality videos.',
-    usageLimit: 'Unlimited',
-    uniqueSellingPoint: 'AI-powered video editing and rendering',
-    integrations: ['Adobe Premiere Pro', 'Final Cut Pro', 'DaVinci Resolve'],
-    demoAvailable: true
-  },
-  {
-    id: '7',
-    name: 'AI Presentation Maker',
-    description: 'Create stunning presentations with AI-generated slides.',
-    category: 'Productivity',
-    tier: 'freemium',
-    icon: '📊',
-    use_cases: [
-      'Generate presentation slides',
-      'Design presentation templates',
-      'Create engaging presentations',
-    ],
-    rationale: 'Design professional presentations quickly and easily.',
-    usageLimit: 'Unlimited',
-    uniqueSellingPoint: 'AI-powered presentation design and customization',
-    integrations: ['Microsoft PowerPoint', 'Google Slides', 'Canva'],
-    demoAvailable: true
-  },
-  {
-    id: '8',
-    name: 'AI Music Composer',
-    description: 'Compose original music with AI-powered tools.',
-    category: 'Music',
-    tier: 'basic',
-    icon: '🎵',
-    use_cases: [
-      'Create original music tracks',
-      'Generate background music',
-      'Design custom music for videos',
-    ],
-    rationale: 'Create unique music tracks without needing musical skills.',
-    usageLimit: 'Unlimited',
-    uniqueSellingPoint: 'AI-powered music composition and arrangement',
-    integrations: ['Ableton Live', 'Logic Pro', 'FL Studio'],
-    demoAvailable: false
-  },
-  {
-    id: '9',
-    name: 'AI Language Translator',
-    description: 'Translate text between multiple languages with AI.',
-    category: 'Text Tools',
-    tier: 'freemium',
-    icon: '🌐',
-    use_cases: [
-      'Translate documents',
-      'Communicate with international clients',
-      'Learn new languages',
-    ],
-    rationale: 'Communicate effectively across different languages.',
-    usageLimit: 'Unlimited',
-    uniqueSellingPoint: 'AI-powered language translation and interpretation',
-    integrations: ['Google Translate', 'Microsoft Translator', 'DeepL'],
-    demoAvailable: true
-  },
-  {
-    id: '10',
-    name: 'AI Voice Generator',
-    description: 'Generate realistic voiceovers with AI.',
-    category: 'Voice',
-    tier: 'pro',
-    icon: '🎤',
-    use_cases: [
-      'Create voiceovers for videos',
-      'Generate audio content',
-      'Design custom voice assistants',
-    ],
-    rationale: 'Create professional voiceovers without hiring voice actors.',
-    usageLimit: 'Unlimited',
-    uniqueSellingPoint: 'AI-powered voice generation and synthesis',
-    integrations: ['Vocaloid', 'Synthesia', 'Deep Voice'],
-    demoAvailable: true
-  },
-  {
-    id: '11',
-    name: 'InsightLite',
-    description: 'Basic data visualization and insights tool for small datasets.',
-    category: 'Data Analysis',
-    tier: 'freemium',
-    icon: '📊',
-    use_cases: [
-      'Visualize simple data trends',
-      'Create basic reports',
-      'Analyze small datasets'
-    ],
-    rationale: 'Makes data analysis accessible to everyone without technical skills.',
-    usageLimit: '5MB data limit',
-    uniqueSellingPoint: 'One-click insights from CSV and Excel files',
-    integrations: ['Excel', 'Google Sheets', 'CSV'],
-    demoAvailable: true
-  },
-  {
-    id: '12',
-    name: 'TaskBot Mini',
-    description: 'Simple task automation assistant for repetitive work.',
-    category: 'Automation',
-    tier: 'freemium',
-    icon: '🤖',
-    use_cases: [
-      'Automate data entry',
-      'Schedule reminders',
-      'Simple workflow automation'
-    ],
-    rationale: 'Save time on repetitive tasks without coding skills.',
-    usageLimit: '50 automated tasks per month',
-    uniqueSellingPoint: 'No-code automation for everyday tasks',
-    integrations: ['Gmail', 'Google Calendar', 'Trello'],
-    demoAvailable: true
-  },
-  {
-    id: '13',
-    name: 'CopyCraft Free',
-    description: 'Generate basic marketing copy and content ideas.',
-    category: 'Text Tools',
-    tier: 'freemium',
-    icon: '✍️',
-    use_cases: [
-      'Create social media captions',
-      'Write email subject lines',
-      'Generate blog ideas'
-    ],
-    rationale: 'Help small businesses create engaging content quickly.',
-    usageLimit: '500 words per day',
-    uniqueSellingPoint: 'AI-powered content inspiration for beginners',
-    integrations: ['WordPress', 'Buffer', 'Mailchimp'],
-    demoAvailable: true
-  },
-  {
-    id: '14',
-    name: 'AI Basic Simulator',
-    description: 'Simple AI concept simulator to understand machine learning basics.',
-    category: 'Machine Learning',
-    tier: 'freemium',
-    icon: '🧩',
-    use_cases: [
-      'Learn AI concepts',
-      'Visualize simple algorithms',
-      'Educational demonstrations'
-    ],
-    rationale: 'Makes AI concepts accessible to beginners and students.',
-    usageLimit: '10 simulations per day',
-    uniqueSellingPoint: 'Visual learning tool for AI fundamentals',
-    integrations: ['Educational platforms', 'Learning management systems'],
-    demoAvailable: true
-  },
-  {
-    id: '15',
-    name: 'Forum Assistant',
-    description: 'AI-powered forum moderation and response suggestion tool.',
-    category: 'Collaboration',
-    tier: 'freemium',
-    icon: '💬',
-    use_cases: [
-      'Auto-moderate comments',
-      'Suggest responses to questions',
-      'Summarize forum discussions'
-    ],
-    rationale: 'Helps community managers maintain healthy online discussions.',
-    usageLimit: '100 suggestions per day',
-    uniqueSellingPoint: 'Smart content moderation for small communities',
-    integrations: ['Discourse', 'Reddit', 'WordPress forums'],
-    demoAvailable: true
-  },
-  {
-    id: '16',
-    name: 'DataFlow Pro',
-    description: 'Advanced data processing and visualization platform.',
-    category: 'Data Analysis',
-    tier: 'basic',
-    icon: '📈',
-    use_cases: [
-      'Create interactive dashboards',
-      'Process large datasets',
-      'Generate business reports'
-    ],
-    rationale: 'Transform complex data into actionable insights.',
-    usageLimit: '50MB data processing',
-    uniqueSellingPoint: 'Drag-and-drop interface for complex data analysis',
-    integrations: ['SQL databases', 'CSV', 'Excel', 'Tableau'],
-    demoAvailable: true
-  },
-  {
-    id: '17',
-    name: 'AutoPilot Studio',
-    description: 'Comprehensive workflow automation suite for businesses.',
-    category: 'Automation',
-    tier: 'basic',
-    icon: '⚙️',
-    use_cases: [
-      'Create complex automations',
-      'Integrate multiple systems',
-      'Build custom workflows'
-    ],
-    rationale: 'Increase productivity through intelligent process automation.',
-    usageLimit: '1,000 automations per month',
-    uniqueSellingPoint: 'Visual workflow builder with conditional logic',
-    integrations: ['Salesforce', 'HubSpot', 'Zapier', 'Slack'],
-    demoAvailable: true
-  },
-  {
-    id: '18',
-    name: 'ModelMaker Lite',
-    description: 'User-friendly platform for creating and deploying AI models.',
-    category: 'Machine Learning',
-    tier: 'basic',
-    icon: '🧠',
-    use_cases: [
-      'Build custom classifiers',
-      'Train prediction models',
-      'Deploy ML solutions'
-    ],
-    rationale: 'Makes machine learning accessible to non-technical users.',
-    usageLimit: '5 active models',
-    uniqueSellingPoint: 'No-code ML model creation and deployment',
-    integrations: ['AWS', 'Google Cloud', 'Azure'],
-    demoAvailable: true
-  },
-  {
-    id: '19',
-    name: 'SEO Boost AI',
-    description: 'AI-powered SEO optimization and content enhancement.',
-    category: 'SEO',
-    tier: 'basic',
-    icon: '🔍',
-    use_cases: [
-      'Optimize website content',
-      'Analyze competitors',
-      'Generate SEO recommendations'
-    ],
-    rationale: 'Improve search rankings with AI-assisted optimization.',
-    usageLimit: '25 pages analyzed per day',
-    uniqueSellingPoint: 'Real-time content optimization suggestions',
-    integrations: ['WordPress', 'Shopify', 'Google Analytics'],
-    demoAvailable: false
-  },
-  {
-    id: '20',
-    name: 'TeamSync AI',
-    description: 'AI-enhanced team collaboration and project management.',
-    category: 'Collaboration',
-    tier: 'basic',
-    icon: '👥',
-    use_cases: [
-      'Automate meeting notes',
-      'Track project progress',
-      'Enhance team communication'
-    ],
-    rationale: 'Streamline team workflows and boost productivity.',
-    usageLimit: '10 team members',
-    uniqueSellingPoint: 'AI assistant for team coordination and task management',
-    integrations: ['Microsoft Teams', 'Slack', 'Asana', 'Trello'],
-    demoAvailable: true
-  },
-  {
-    id: '21',
-    name: 'Predictirix Enterprise',
-    description: 'Advanced predictive analytics and forecasting platform.',
-    category: 'Data Analysis',
-    tier: 'pro',
-    icon: '📉',
-    use_cases: [
-      'Forecast business trends',
-      'Predict customer behavior',
-      'Perform risk analysis'
-    ],
-    rationale: 'Make data-driven decisions with predictive intelligence.',
-    usageLimit: 'Unlimited data processing',
-    uniqueSellingPoint: 'Enterprise-grade predictive modeling with 99% accuracy',
-    integrations: ['SAP', 'Oracle', 'Salesforce', 'Tableau'],
-    demoAvailable: true
-  },
-  {
-    id: '22',
-    name: 'NeuroForge Pro',
-    description: 'Enterprise neural network design and deployment platform.',
-    category: 'Machine Learning',
-    tier: 'pro',
-    icon: '🧠',
-    use_cases: [
-      'Design custom neural networks',
-      'Train models on proprietary data',
-      'Deploy AI at scale'
-    ],
-    rationale: 'Build advanced AI systems without deep ML expertise.',
-    usageLimit: 'Unlimited models',
-    uniqueSellingPoint: 'Visual neural network architecture designer with performance optimization',
-    integrations: ['TensorFlow', 'PyTorch', 'CUDA', 'Cloud GPUs'],
-    demoAvailable: true
-  },
-  {
-    id: '23',
-    name: 'OmniFlow AI',
-    description: 'Enterprise-grade automation platform for complex workflows.',
-    category: 'Automation',
-    tier: 'pro',
-    icon: '⚙️',
-    use_cases: [
-      'Automate enterprise processes',
-      'Create complex decision systems',
-      'Build intelligent business operations'
-    ],
-    rationale: 'Transform business operations with intelligent automation.',
-    usageLimit: 'Unlimited automations',
-    uniqueSellingPoint: 'Advanced process mining and optimization with predictive capabilities',
-    integrations: ['SAP', 'Oracle', 'ServiceNow', 'Workday'],
-    demoAvailable: true
-  },
-  {
-    id: '24',
-    name: 'AI Marketplace Publisher',
-    description: 'Create and monetize your own AI models and applications.',
-    category: 'Development',
-    tier: 'pro',
-    icon: '🏪',
-    use_cases: [
-      'Publish custom AI solutions',
-      'Monetize AI models',
-      'Build AI application marketplace'
-    ],
-    rationale: 'Turn AI expertise into revenue streams.',
-    usageLimit: 'Unlimited publishing',
-    uniqueSellingPoint: 'End-to-end platform for AI model monetization and distribution',
-    integrations: ['Stripe', 'PayPal', 'AWS Marketplace', 'Docker'],
-    demoAvailable: false
-  },
-  {
-    id: '25',
-    name: 'EthicsGuard AI',
-    description: 'Enterprise AI governance and ethical compliance platform.',
-    category: 'Ethics',
-    tier: 'pro',
-    icon: '🛡️',
-    use_cases: [
-      'Monitor AI bias',
-      'Ensure ethical AI deployment',
-      'Generate compliance reports'
-    ],
-    rationale: 'Maintain ethical standards and regulatory compliance in AI systems.',
-    usageLimit: 'Unlimited monitoring',
-    uniqueSellingPoint: 'Comprehensive AI governance with regulatory compliance frameworks',
-    integrations: ['Custom AI systems', 'Cloud AI services', 'Enterprise data environments'],
-    demoAvailable: true
-  },
-  {
-    id: '26',
-    name: 'CloudBridge AI',
-    description: 'Enterprise AI integration platform for multi-cloud environments.',
-    category: 'Cloud',
-    tier: 'pro',
-    icon: '☁️',
-    use_cases: [
-      'Unify multi-cloud AI services',
-      'Orchestrate distributed AI workloads',
-      'Manage enterprise AI infrastructure'
-    ],
-    rationale: 'Simplify complex cloud AI deployments across providers.',
-    usageLimit: 'Unlimited connections',
-    uniqueSellingPoint: 'Seamless integration of AI services across AWS, Azure, and Google Cloud',
-    integrations: ['AWS', 'Azure', 'Google Cloud', 'IBM Cloud', 'Oracle Cloud'],
-    demoAvailable: false
-  },
-  {
-    id: 'cropMind-001',
+    id: 'cropmind-ai',
     name: 'CropMind AI',
-    description: 'Generative AI agronomist providing hyperlocal crop recommendations and alerts for smallholder farmers using satellite, soil, and weather data.',
-    category: 'Agriculture',
+    description: 'Smart farming assistant providing personalized crop advice via chat, voice, and WhatsApp integration',
+    category: 'agriculture',
     tier: 'basic',
-    icon: '🌾',
+    icon: React.createElement(Sprout),
+    uniqueSellingPoint: 'First AI assistant designed specifically for smallholder farmers with offline capabilities and local language support',
     use_cases: [
-      'Daily crop health monitoring',
-      'Satellite-based growth stage detection',
-      'Personalized farming recommendations',
-      'Weather-based irrigation alerts',
-      'Multilingual voice assistance'
+      'Get personalized crop advice based on satellite data',
+      'Receive weather-based farming recommendations',
+      'Monitor crop health through NDVI analysis',
+      'Connect with local agricultural experts',
+      'Access farming tips in local languages'
     ],
-    rationale: 'Empowers smallholder farmers with AI-driven insights to improve crop yield and reduce farming risks using multimodal data sources.',
-    usageLimit: '3 farm profiles, 50 recommendations per month',
-    uniqueSellingPoint: 'Combines satellite imagery, soil data, and local weather for hyperlocal agricultural insights in farmers\' native languages',
-    integrations: ['WhatsApp', 'Sentinel-2 Satellite', 'OpenWeatherMap', 'SoilGrids API'],
-    demoAvailable: true,
-    popularTool: true,
-    relatedCourses: ['Precision Agriculture', 'Satellite Data Analysis', 'AI for Agriculture']
-  }
+    rationale: 'Empowers farmers with AI-driven insights to increase crop yields and reduce losses through timely, data-driven recommendations',
+    usageLimit: 'Basic: 50 queries/month, Pro: Unlimited queries + WhatsApp integration',
+    integrations: ['WhatsApp', 'Satellite APIs', 'Weather APIs', 'Soil Analysis'],
+    image_url: '/placeholder.svg'
+  },
+  {
+    id: 'data-insights-analyzer',
+    name: 'Data Insights Analyzer',
+    description: 'Uncover hidden patterns in your data with AI-driven analytics and visualization tools',
+    category: 'analytics',
+    tier: 'pro',
+    icon: React.createElement(LineChart),
+    uniqueSellingPoint: 'Automatically identifies key trends and anomalies, saving hours of manual analysis',
+    use_cases: [
+      'Analyze sales data to identify top-performing products',
+      'Detect fraudulent transactions in real-time',
+      'Predict customer churn based on behavior patterns',
+      'Optimize marketing campaigns for maximum ROI',
+      'Improve supply chain efficiency through demand forecasting'
+    ],
+    rationale: 'Transforms raw data into actionable insights, empowering businesses to make smarter decisions and gain a competitive edge',
+    usageLimit: 'Pro: Unlimited data sources, advanced algorithms, and priority support',
+    integrations: ['Salesforce', 'Google Analytics', 'Tableau', 'Excel'],
+    image_url: '/placeholder.svg'
+  },
+  {
+    id: 'workflow-automator',
+    name: 'Workflow Automator',
+    description: 'Streamline your business processes with intelligent automation and robotic process automation (RPA)',
+    category: 'automation',
+    tier: 'basic',
+    icon: React.createElement(Code),
+    uniqueSellingPoint: 'Automates repetitive tasks across multiple systems, freeing up employees to focus on higher-value work',
+    use_cases: [
+      'Automate invoice processing and payment approvals',
+      'Generate personalized email campaigns based on customer data',
+      'Schedule social media posts and monitor engagement',
+      'Onboard new employees with automated task assignments',
+      'Manage inventory levels and trigger reorders'
+    ],
+    rationale: 'Reduces operational costs, improves accuracy, and accelerates business growth by automating routine tasks and workflows',
+    usageLimit: 'Basic: 10 automated workflows, 1000 tasks/month',
+    integrations: ['Slack', 'Trello', 'Asana', 'Zapier'],
+    image_url: '/placeholder.svg'
+  },
+  {
+    id: 'content-generator-pro',
+    name: 'Content Generator Pro',
+    description: 'Create high-quality content in minutes with AI-powered writing assistance and content optimization tools',
+    category: 'content',
+    tier: 'pro',
+    icon: React.createElement(HelpCircle),
+    uniqueSellingPoint: 'Generates original, engaging content tailored to your brand voice and target audience',
+    use_cases: [
+      'Write blog posts, articles, and website copy',
+      'Create social media posts and ad copy',
+      'Generate email newsletters and marketing materials',
+      'Optimize content for search engines (SEO)',
+      'Translate content into multiple languages'
+    ],
+    rationale: 'Saves time and resources on content creation, enabling businesses to scale their content marketing efforts and drive more traffic and leads',
+    usageLimit: 'Pro: Unlimited content generation, advanced SEO tools, and plagiarism checker',
+    integrations: ['WordPress', 'Google Docs', 'HubSpot', 'SEMrush'],
+    image_url: '/placeholder.svg'
+  },
+  {
+    id: 'ai-code-assistant',
+    name: 'AI Code Assistant',
+    description: 'Write code faster and more efficiently with AI-powered code completion, debugging, and code generation tools',
+    category: 'development',
+    tier: 'basic',
+    icon: React.createElement(Code),
+    uniqueSellingPoint: 'Suggests code snippets, identifies bugs, and generates code from natural language descriptions',
+    use_cases: [
+      'Write code in multiple programming languages',
+      'Debug code and identify errors',
+      'Generate code from natural language descriptions',
+      'Refactor code and improve code quality',
+      'Automate repetitive coding tasks'
+    ],
+    rationale: 'Accelerates software development, reduces errors, and improves code quality, enabling developers to build better software faster',
+    usageLimit: 'Basic: 500 code suggestions/month, limited language support',
+    integrations: ['VS Code', 'GitHub', 'GitLab', 'Stack Overflow'],
+    image_url: '/placeholder.svg'
+  },
+  {
+    id: 'ai-tutor',
+    name: 'AI Tutor',
+    description: 'Personalized learning platform powered by AI',
+    category: 'learning',
+    tier: 'freemium',
+    icon: React.createElement(BookOpen),
+    uniqueSellingPoint: 'Adaptive learning paths tailored to individual student needs',
+    use_cases: [
+      'Personalized learning',
+      'Adaptive assessments',
+      'Automated feedback',
+      'Content recommendations',
+      'Progress tracking'
+    ],
+    rationale: 'Democratizes education, making personalized learning accessible to all',
+    usageLimit: 'Freemium: Limited content, basic features',
+    integrations: ['Google Classroom', 'Zoom', 'Slack'],
+    image_url: '/placeholder.svg'
+  },
+  {
+    id: 'team-collab-ai',
+    name: 'Team Collab AI',
+    description: 'AI-enhanced collaboration platform',
+    category: 'collaboration',
+    tier: 'basic',
+    icon: React.createElement(Users),
+    uniqueSellingPoint: 'AI-driven task assignments and progress tracking',
+    use_cases: [
+      'Smart task assignments',
+      'Automated progress tracking',
+      'Meeting summaries',
+      'Sentiment analysis',
+      'Conflict resolution'
+    ],
+    rationale: 'Enhances team productivity and collaboration through AI-driven insights',
+    usageLimit: 'Basic: Limited users, basic features',
+    integrations: ['Slack', 'Microsoft Teams', 'Asana'],
+    image_url: '/placeholder.svg'
+  },
+  {
+    id: 'community-builder-ai',
+    name: 'Community Builder AI',
+    description: 'AI-powered community management tool',
+    category: 'community',
+    tier: 'pro',
+    icon: React.createElement(MessageSquare),
+    uniqueSellingPoint: 'Automated moderation and engagement analysis',
+    use_cases: [
+      'Automated moderation',
+      'Sentiment analysis',
+      'Engagement analysis',
+      'Content recommendations',
+      'Spam detection'
+    ],
+    rationale: 'Fosters healthy online communities with AI-driven moderation and engagement tools',
+    usageLimit: 'Pro: Unlimited members, advanced features',
+    integrations: ['Discord', 'Reddit', 'Facebook Groups'],
+    image_url: '/placeholder.svg'
+  },
+  {
+    id: 'monetize-ai',
+    name: 'Monetize AI',
+    description: 'AI-driven monetization platform',
+    category: 'monetization',
+    tier: 'pro',
+    icon: React.createElement(Star),
+    uniqueSellingPoint: 'AI-powered pricing and revenue optimization',
+    use_cases: [
+      'Dynamic pricing',
+      'Revenue optimization',
+      'Churn prediction',
+      'Personalized offers',
+      'Automated A/B testing'
+    ],
+    rationale: 'Maximizes revenue and profitability with AI-driven pricing and monetization strategies',
+    usageLimit: 'Pro: Unlimited products, advanced features',
+    integrations: ['Stripe', 'PayPal', 'Shopify'],
+    image_url: '/placeholder.svg'
+  },
+  {
+    id: 'security-guard-ai',
+    name: 'Security Guard AI',
+    description: 'AI-powered security solution',
+    category: 'security',
+    tier: 'basic',
+    icon: React.createElement(Lock),
+    uniqueSellingPoint: 'Real-time threat detection and prevention',
+    use_cases: [
+      'Real-time threat detection',
+      'Anomaly detection',
+      'Fraud prevention',
+      'Automated incident response',
+      'Vulnerability scanning'
+    ],
+    rationale: 'Protects businesses from cyber threats with AI-driven security solutions',
+    usageLimit: 'Basic: Limited devices, basic features',
+    integrations: ['AWS', 'Azure', 'Google Cloud'],
+    image_url: '/placeholder.svg'
+  },
+  {
+    id: 'integration-hub-ai',
+    name: 'Integration Hub AI',
+    description: 'AI-powered integration platform',
+    category: 'integration',
+    tier: 'pro',
+    icon: React.createElement(Zap),
+    uniqueSellingPoint: 'Automated integration and data mapping',
+    use_cases: [
+      'Automated integration',
+      'Data mapping',
+      'Workflow automation',
+      'API management',
+      'Real-time monitoring'
+    ],
+    rationale: 'Simplifies integration and data management with AI-driven automation',
+    usageLimit: 'Pro: Unlimited integrations, advanced features',
+    integrations: ['Salesforce', 'SAP', 'Oracle'],
+    image_url: '/placeholder.svg'
+  },
 ];
 
-export const toolCategories: ToolCategoryInfo[] = [
-  { id: 'image-generation', name: 'Image Generation', icon: '🖼️' },
-  { id: 'text-tools', name: 'Text Tools', icon: '📝' },
-  { id: 'development', name: 'Development', icon: '💻' },
-  { id: 'productivity', name: 'Productivity', icon: '⚡' },
-  { id: 'marketing', name: 'Marketing', icon: '📊' },
-  { id: 'video-editing', name: 'Video Editing', icon: '🎬' },
-  { id: 'music', name: 'Music', icon: '🎵' },
-  { id: 'voice', name: 'Voice', icon: '🎤' },
-  { id: 'data-analysis', name: 'Data Analysis', icon: '📊' },
-  { id: 'automation', name: 'Automation', icon: '⚙️' },
-  { id: 'collaboration', name: 'Collaboration', icon: '👥' },
-  { id: 'machine-learning', name: 'Machine Learning', icon: '🧠' },
-  { id: 'seo', name: 'SEO', icon: '🔍' },
-  { id: 'ethics', name: 'AI Ethics', icon: '🛡️' },
-  { id: 'cloud', name: 'Cloud Integration', icon: '☁️' },
+export const categories: ToolCategoryInfo[] = [
   {
     id: 'agriculture',
-    name: 'Agriculture',
-    description: 'AI tools for farming, crop monitoring, and agricultural optimization',
-    icon: React.createElement(Sprout, { className: "w-6 h-6" })
-  }
+    name: 'Agriculture & Farming',
+    description: 'AI tools for modern farming, crop management, and agricultural optimization',
+    icon: React.createElement(Sprout),
+    count: aiTools.filter(tool => tool.category === 'agriculture').length
+  },
+  {
+    id: 'analytics',
+    name: 'Analytics & BI',
+    description: 'AI tools for data analysis, visualization, and business intelligence',
+    icon: React.createElement(LineChart),
+    count: aiTools.filter(tool => tool.category === 'analytics').length
+  },
+  {
+    id: 'automation',
+    name: 'Automation',
+    description: 'AI tools for automating tasks, workflows, and processes',
+    icon: React.createElement(Code),
+    count: aiTools.filter(tool => tool.category === 'automation').length
+  },
+  {
+    id: 'content',
+    name: 'Content Creation',
+    description: 'AI tools for generating text, images, and other types of content',
+    icon: React.createElement(HelpCircle),
+    count: aiTools.filter(tool => tool.category === 'content').length
+  },
+  {
+    id: 'development',
+    name: 'Development',
+    description: 'AI tools for software development, testing, and deployment',
+    icon: React.createElement(Code),
+    count: aiTools.filter(tool => tool.category === 'development').length
+  },
+  {
+    id: 'learning',
+    name: 'Education & Learning',
+    description: 'AI tools for personalized learning and education',
+    icon: React.createElement(BookOpen),
+    count: aiTools.filter(tool => tool.category === 'learning').length
+  },
+  {
+    id: 'collaboration',
+    name: 'Collaboration',
+    description: 'AI tools for team collaboration and communication',
+    icon: React.createElement(Users),
+    count: aiTools.filter(tool => tool.category === 'collaboration').length
+  },
+  {
+    id: 'community',
+    name: 'Community',
+    description: 'AI tools for community management and engagement',
+    icon: React.createElement(MessageSquare),
+    count: aiTools.filter(tool => tool.category === 'community').length
+  },
+  {
+    id: 'monetization',
+    name: 'Monetization',
+    description: 'AI tools for revenue optimization and monetization',
+    icon: React.createElement(Star),
+    count: aiTools.filter(tool => tool.category === 'monetization').length
+  },
+  {
+    id: 'security',
+    name: 'Security',
+    description: 'AI tools for cybersecurity and threat detection',
+    icon: React.createElement(Lock),
+    count: aiTools.filter(tool => tool.category === 'security').length
+  },
+  {
+    id: 'integration',
+    name: 'Integration',
+    description: 'AI tools for system integration and data management',
+    icon: React.createElement(Zap),
+    count: aiTools.filter(tool => tool.category === 'integration').length
+  },
 ];
