@@ -1,3 +1,6 @@
+import React from 'react';
+import { Sprout } from 'lucide-react';
+
 export type AIToolTier = 'freemium' | 'basic' | 'pro';
 
 export interface AIToolItem {
@@ -46,31 +49,6 @@ export const getTierBadgeColor = (tier: AIToolTier | 'all'): string => {
     default: return 'bg-gray-100 text-gray-800';
   }
 };
-
-export const toolCategories: ToolCategoryInfo[] = [
-  { id: 'image-generation', name: 'Image Generation', icon: '🖼️' },
-  { id: 'text-tools', name: 'Text Tools', icon: '📝' },
-  { id: 'development', name: 'Development', icon: '💻' },
-  { id: 'productivity', name: 'Productivity', icon: '⚡' },
-  { id: 'marketing', name: 'Marketing', icon: '📊' },
-  { id: 'video-editing', name: 'Video Editing', icon: '🎬' },
-  { id: 'music', name: 'Music', icon: '🎵' },
-  { id: 'voice', name: 'Voice', icon: '🎤' },
-  { id: 'data-analysis', name: 'Data Analysis', icon: '📊' },
-  { id: 'automation', name: 'Automation', icon: '⚙️' },
-  { id: 'collaboration', name: 'Collaboration', icon: '👥' },
-  { id: 'machine-learning', name: 'Machine Learning', icon: '🧠' },
-  { id: 'seo', name: 'SEO', icon: '🔍' },
-  { id: 'ethics', name: 'AI Ethics', icon: '🛡️' },
-  { id: 'cloud', name: 'Cloud Integration', icon: '☁️' },
-  {
-    id: 'agriculture',
-    name: 'Agriculture',
-    description: 'AI tools for farming, crop monitoring, and agricultural optimization',
-    icon: React.createElement(Sprout, { className: "w-6 h-6" }),
-    count: aiTools.filter(tool => tool.category === 'agriculture').length
-  }
-];
 
 export interface ToolCategoryInfo {
   id: string;
@@ -550,5 +528,51 @@ export const aiTools: AIToolItem[] = [
     uniqueSellingPoint: 'Seamless integration of AI services across AWS, Azure, and Google Cloud',
     integrations: ['AWS', 'Azure', 'Google Cloud', 'IBM Cloud', 'Oracle Cloud'],
     demoAvailable: false
+  },
+  {
+    id: 'cropMind-001',
+    name: 'CropMind AI',
+    description: 'Generative AI agronomist providing hyperlocal crop recommendations and alerts for smallholder farmers using satellite, soil, and weather data.',
+    category: 'Agriculture',
+    tier: 'basic',
+    icon: '🌾',
+    use_cases: [
+      'Daily crop health monitoring',
+      'Satellite-based growth stage detection',
+      'Personalized farming recommendations',
+      'Weather-based irrigation alerts',
+      'Multilingual voice assistance'
+    ],
+    rationale: 'Empowers smallholder farmers with AI-driven insights to improve crop yield and reduce farming risks using multimodal data sources.',
+    usageLimit: '3 farm profiles, 50 recommendations per month',
+    uniqueSellingPoint: 'Combines satellite imagery, soil data, and local weather for hyperlocal agricultural insights in farmers\' native languages',
+    integrations: ['WhatsApp', 'Sentinel-2 Satellite', 'OpenWeatherMap', 'SoilGrids API'],
+    demoAvailable: true,
+    popularTool: true,
+    relatedCourses: ['Precision Agriculture', 'Satellite Data Analysis', 'AI for Agriculture']
+  }
+];
+
+export const toolCategories: ToolCategoryInfo[] = [
+  { id: 'image-generation', name: 'Image Generation', icon: '🖼️' },
+  { id: 'text-tools', name: 'Text Tools', icon: '📝' },
+  { id: 'development', name: 'Development', icon: '💻' },
+  { id: 'productivity', name: 'Productivity', icon: '⚡' },
+  { id: 'marketing', name: 'Marketing', icon: '📊' },
+  { id: 'video-editing', name: 'Video Editing', icon: '🎬' },
+  { id: 'music', name: 'Music', icon: '🎵' },
+  { id: 'voice', name: 'Voice', icon: '🎤' },
+  { id: 'data-analysis', name: 'Data Analysis', icon: '📊' },
+  { id: 'automation', name: 'Automation', icon: '⚙️' },
+  { id: 'collaboration', name: 'Collaboration', icon: '👥' },
+  { id: 'machine-learning', name: 'Machine Learning', icon: '🧠' },
+  { id: 'seo', name: 'SEO', icon: '🔍' },
+  { id: 'ethics', name: 'AI Ethics', icon: '🛡️' },
+  { id: 'cloud', name: 'Cloud Integration', icon: '☁️' },
+  {
+    id: 'agriculture',
+    name: 'Agriculture',
+    description: 'AI tools for farming, crop monitoring, and agricultural optimization',
+    icon: React.createElement(Sprout, { className: "w-6 h-6" })
   }
 ];

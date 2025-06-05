@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -134,7 +133,15 @@ const ToolDetail = () => {
       <main className="flex-1 pt-24 px-4 md:px-6 pb-12">
         <div className="max-w-6xl mx-auto">
           {showToolInterface ? (
-            <ToolInterface tool={tool} onBack={handleBackToDetails} />
+            <ToolInterface 
+              tool={tool} 
+              onBack={handleBackToDetails}
+              connectionDetails={{
+                apiKey: '',
+                endpoint: '',
+                isConnected: false
+              }}
+            />
           ) : (
             <>
               <div className="mb-4">
@@ -213,7 +220,6 @@ const ToolDetail = () => {
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {/* Example features */}
                           <Card>
                             <CardHeader className="pb-2">
                               <CardTitle className="text-base">Core Functionality</CardTitle>
