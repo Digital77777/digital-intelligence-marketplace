@@ -32,7 +32,7 @@ const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack, connectionD
   const renderToolInterface = () => {
     // Handle new CropMind AI tool
     if (tool.id === 'cropmind-ai') {
-      return <CropMindInterface />;
+      return <CropMindInterface tool={tool} onBack={onBack} />;
     }
 
     switch (tool.category) {
