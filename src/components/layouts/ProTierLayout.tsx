@@ -41,21 +41,21 @@ const ProTierLayout: React.FC<ProTierLayoutProps> = ({
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-950 to-indigo-950/60">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-purple-50/50 to-indigo-50/30">
       <Navbar />
       <main className="flex-1 pt-24 px-6 pb-12 md:pb-12 pb-20">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold text-white">{pageTitle}</h1>
-              <Badge variant="outline" className="bg-purple-900/60 text-purple-200 border-purple-700 px-3 py-1 flex items-center gap-1.5">
-                <Zap className="h-3.5 w-3.5 text-[#6AC8FF]" />
+              <h1 className="text-3xl font-bold text-gray-900">{pageTitle}</h1>
+              <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200 px-3 py-1 flex items-center gap-1.5">
+                <Zap className="h-3.5 w-3.5 text-purple-600" />
                 <span>PRO</span>
               </Badge>
             </div>
           </div>
           
-          <div className="glass-dark backdrop-blur-sm rounded-xl border border-indigo-900/50 p-6 shadow-lg">
+          <div className="bg-white backdrop-blur-sm rounded-xl border border-purple-100/80 p-6 shadow-lg">
             {children}
           </div>
         </div>

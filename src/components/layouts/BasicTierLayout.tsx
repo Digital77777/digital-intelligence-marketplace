@@ -41,21 +41,21 @@ const BasicTierLayout: React.FC<BasicTierLayoutProps> = ({
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50/50 to-indigo-50/30 dark:from-blue-950/20 dark:to-indigo-950/10">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50/50 to-indigo-50/30">
       <Navbar />
       <main className="flex-1 pt-24 px-6 pb-12 md:pb-12 pb-20">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-3">
               <h1 className="text-3xl font-bold">{pageTitle}</h1>
-              <Badge variant="outline" className="bg-blue-100 dark:bg-blue-900/60 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800 px-3 py-1 flex items-center gap-1.5">
+              <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200 px-3 py-1 flex items-center gap-1.5">
                 <Shield className="h-3.5 w-3.5" />
                 <span>BASIC</span>
               </Badge>
             </div>
           </div>
           
-          <div className="bg-white/80 dark:bg-gray-900/60 backdrop-blur-sm rounded-xl border border-blue-100/80 dark:border-blue-900/50 p-6 shadow-md">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-blue-100/80 p-6 shadow-md">
             {children}
           </div>
         </div>
