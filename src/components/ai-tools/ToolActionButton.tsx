@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { AIToolItem } from '@/data/ai-tools-tiers';
+import { AIToolItem, AIToolTier } from '@/data/ai-tools-tiers';
 import { useTier } from '@/context/TierContext';
 import { useToast } from '@/hooks/use-toast';
 import { Lock, ExternalLink, Eye, Settings } from 'lucide-react';
@@ -11,7 +11,7 @@ import ToolInterfaceModal from './ToolInterfaceModal';
 interface ToolActionButtonProps {
   tool: AIToolItem;
   action: 'view' | 'launch' | 'connect-api' | 'configure';
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'lg' | 'default';
   variant?: 'default' | 'outline' | 'secondary';
   className?: string;
   compact?: boolean;
@@ -22,7 +22,7 @@ interface ToolActionButtonProps {
 const ToolActionButton: React.FC<ToolActionButtonProps> = ({
   tool,
   action,
-  size = 'md',
+  size = 'default',
   variant = 'default',
   className = '',
   compact = false,
@@ -61,7 +61,6 @@ const ToolActionButton: React.FC<ToolActionButtonProps> = ({
             title: "API Connection",
             description: `Setting up API connection for ${tool.name}...`,
           });
-          // In real implementation, this would open API connection flow
         } else {
           upgradePrompt(tool.tier);
         }

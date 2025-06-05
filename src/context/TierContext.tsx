@@ -1,203 +1,32 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { toast } from 'sonner';
 
-export type TierType = 'freemium' | 'basic' | 'pro';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { AIToolTier } from '@/data/ai-tools-tiers';
 
-export interface TierFeatures {
-  maxTeamMembers: number;
-  maxProjects: number;
-  apiCallsLimit: number;
-  toolAccess: number;
-  supportResponse: string;
-  storage: string;
-  analytics: boolean;
-  collaboration: boolean;
-  workflowAutomation: boolean;
-  advancedSecurity: boolean;
-  customModels: boolean;
-  aiStudio: boolean;
-  unlimitedTeamMembers: boolean;
-  dedicatedSupport: boolean;
-  complianceTools: boolean;
-  monetization: boolean;
-}
+export type TierType = AIToolTier;
 
 interface TierContextType {
   currentTier: TierType;
-  setTier: (tier: TierType) => void;
-  getTierFeatures: (tier: TierType) => TierFeatures;
-  canAccess: (feature: string) => boolean;
-  isFeatureAvailable: (feature: string) => boolean;
-  upgradePrompt: (targetTier: TierType) => void;
+  setCurrentTier: (tier: TierType) => void;
+  upgradePrompt: (requiredTier: TierType) => void;
 }
-
-const tierFeaturesMap: Record<TierType, TierFeatures> = {
-  freemium: {
-    maxTeamMembers: 1,
-    maxProjects: 3,
-    apiCallsLimit: 100,
-    toolAccess: 9,
-    supportResponse: "Community support",
-    storage: "500MB",
-    analytics: false,
-    collaboration: false,
-    workflowAutomation: false,
-    advancedSecurity: false,
-    customModels: false,
-    aiStudio: false,
-    unlimitedTeamMembers: false,
-    dedicatedSupport: false,
-    complianceTools: false,
-    monetization: false
-  },
-  basic: {
-    maxTeamMembers: 10,
-    maxProjects: 20,
-    apiCallsLimit: 5000,
-    toolAccess: 17,
-    supportResponse: "24-48 hours",
-    storage: "10GB",
-    analytics: true,
-    collaboration: true,
-    workflowAutomation: true,
-    advancedSecurity: true,
-    customModels: false,
-    aiStudio: false,
-    unlimitedTeamMembers: false,
-    dedicatedSupport: false,
-    complianceTools: false,
-    monetization: false
-  },
-  pro: {
-    maxTeamMembers: 50,
-    maxProjects: 100,
-    apiCallsLimit: 50000,
-    toolAccess: 26,
-    supportResponse: "4-8 hours",
-    storage: "100GB",
-    analytics: true,
-    collaboration: true,
-    workflowAutomation: true,
-    advancedSecurity: true,
-    customModels: true,
-    aiStudio: true,
-    unlimitedTeamMembers: true,
-    dedicatedSupport: true,
-    complianceTools: true,
-    monetization: true
-  }
-};
-
-const tierFeatureAccess: Record<string, TierType[]> = {
-  'ai-tools-directory': ['freemium', 'basic', 'pro'],
-  'forums': ['freemium', 'basic', 'pro'],
-  'marketplace': ['freemium', 'basic', 'pro'],
-  'profile-management': ['freemium', 'basic', 'pro'],
-  'starter-api': ['freemium', 'basic', 'pro'],
-  'learning-hub': ['freemium', 'basic', 'pro'],
-  'ai-streams': ['freemium', 'basic', 'pro'],
-  'community-discussions': ['freemium', 'basic', 'pro'],
-  'basic-analytics': ['freemium', 'basic', 'pro'],
-  'basic-automation': ['freemium', 'basic', 'pro'],
-  'content-creation': ['freemium', 'basic', 'pro'],
-  'learning-tools': ['freemium', 'basic', 'pro'],
-  
-  'team-dashboard': ['basic', 'pro'],
-  'collaboration-hub': ['basic', 'pro'],
-  'workflow-designer': ['basic', 'pro'],
-  'extended-tools': ['basic', 'pro'],
-  'usage-analytics': ['basic', 'pro'],
-  'team-settings': ['basic', 'pro'],
-  'audit-logs': ['basic', 'pro'],
-  'priority-support': ['basic', 'pro'],
-  'learning-hub-pro': ['basic', 'pro'],
-  'api-calls-5000': ['basic', 'pro'],
-  'private-discussions': ['basic', 'pro'],
-  'seo-optimization': ['basic', 'pro'],
-  'intermediate-analytics': ['basic', 'pro'],
-  'intermediate-automation': ['basic', 'pro'],
-  
-  'custom-models': ['pro'],
-  'advanced-api': ['pro'],
-  'white-labeling': ['pro'],
-  'dedicated-support': ['pro'],
-  'ai-studio': ['pro'],
-  'model-marketplace': ['pro'],
-  'pipeline-designer': ['pro'],
-  'team-workspace': ['pro'],
-  'compliance-center': ['pro'],
-  'security-dashboard': ['pro'],
-  'business-insights': ['pro'],
-  'pro-chatbot': ['pro'],
-  'learning-academy': ['pro'],
-  'api-calls-50000': ['pro'],
-  'monetization-tools': ['pro'],
-  'enterprise-integration': ['pro'],
-  'advanced-analytics': ['pro'],
-  'advanced-automation': ['pro']
-};
 
 const TierContext = createContext<TierContextType | undefined>(undefined);
 
-export const TierProvider = ({ children }: { children: ReactNode }) => {
+export const TierProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [currentTier, setCurrentTier] = useState<TierType>('freemium');
+  const { toast } = useToast();
 
-  const setTier = (tier: TierType) => {
-    if (tier !== currentTier) {
-      const tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
-      toast.success(`Switched to ${tierName} tier!`, {
-        description: tier === 'freemium' 
-          ? "You now have access to basic features and 9 core AI tools."
-          : tier === 'basic'
-          ? "You now have access to team collaboration features and 17 AI tools!"
-          : "You now have access to all premium features and all 26 AI tools!"
-      });
-    }
-    setCurrentTier(tier);
-  };
-
-  const getTierFeatures = (tier: TierType): TierFeatures => {
-    return tierFeaturesMap[tier];
-  };
-
-  const canAccess = (feature: string): boolean => {
-    return tierFeatureAccess[feature]?.includes(currentTier) || false;
-  };
-
-  const isFeatureAvailable = (feature: string): boolean => {
-    return canAccess(feature);
-  };
-
-  const upgradePrompt = (targetTier: TierType) => {
-    toast.info(`Upgrade to ${targetTier} to access this feature`, {
-      description: "Explore enhanced features with our premium tiers",
-      action: {
-        label: "View Plans",
-        onClick: () => window.location.href = '/pricing'
-      }
+  const upgradePrompt = (requiredTier: TierType) => {
+    toast({
+      title: "Upgrade Required",
+      description: `This feature requires a ${requiredTier} subscription. Please upgrade to continue.`,
+      variant: "destructive",
     });
   };
 
-  useEffect(() => {
-    const savedTier = localStorage.getItem('userTier');
-    if (savedTier && (savedTier === 'freemium' || savedTier === 'basic' || savedTier === 'pro')) {
-      setCurrentTier(savedTier as TierType);
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('userTier', currentTier);
-  }, [currentTier]);
-
   return (
-    <TierContext.Provider value={{ 
-      currentTier, 
-      setTier, 
-      getTierFeatures, 
-      canAccess, 
-      isFeatureAvailable,
-      upgradePrompt 
-    }}>
+    <TierContext.Provider value={{ currentTier, setCurrentTier, upgradePrompt }}>
       {children}
     </TierContext.Provider>
   );

@@ -1,9 +1,9 @@
+
 import React from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { aiTools, categories } from '@/data/ai-tools-tiers';
 import { Course } from '@/data/courses';
 import { forumData } from '@/data/forum';
-import { AITool } from '@/types/tools';
 
 interface SearchItem {
   id: string;
@@ -12,6 +12,7 @@ interface SearchItem {
   type: 'tool' | 'course' | 'forum' | 'category';
   category?: string;
   url: string;
+  route: string; // Added to match SearchableItem interface
   icon?: React.ReactNode;
 }
 
@@ -42,6 +43,7 @@ export const useSearchCommands = () => {
           type: 'tool',
           category: tool.category,
           url: `/tool/${tool.id}`,
+          route: `/tool/${tool.id}`,
           icon: tool.icon
         });
       }
@@ -59,6 +61,7 @@ export const useSearchCommands = () => {
           description: category.description,
           type: 'category',
           url: `/ai-tools-directory?category=${category.id}`,
+          route: `/ai-tools-directory?category=${category.id}`,
           icon: category.icon
         });
       }
@@ -77,6 +80,7 @@ export const useSearchCommands = () => {
           description: course.description,
           type: 'course',
           url: `/courses/${course.id}`,
+          route: `/courses/${course.id}`,
         });
       }
     });
@@ -94,6 +98,7 @@ export const useSearchCommands = () => {
           description: forum.content,
           type: 'forum',
           url: `/forums/${forum.id}`,
+          route: `/forums/${forum.id}`,
         });
       }
     });
@@ -119,21 +124,19 @@ export const useSearchCommands = () => {
     category: 'Categories'
   };
 
-  const handleSelect = (url: string) => {
+  const handleSelect = (item: SearchItem) => {
     setOpen(false);
     setQuery('');
-    navigate(url);
+    navigate(item.url);
   };
 
   const handleShowAll = () => {
     setOpen(false);
     setQuery('');
     
-    // If the query is not empty, navigate to the AI tools directory with the query as a search parameter
     if (query) {
       navigate(`/ai-tools-directory?search=${query}`);
     } else {
-      // If the query is empty, navigate to the AI tools directory without any search parameters
       navigate('/ai-tools-directory');
     }
   };
@@ -146,6 +149,7 @@ export const useSearchCommands = () => {
     groupedItems,
     typeLabels,
     handleSelect,
-    handleShowAll
+    handleShowAll,
+    searchItems
   };
 };

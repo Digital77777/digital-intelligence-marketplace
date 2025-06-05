@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   LineChart, 
@@ -31,12 +32,14 @@ import {
   BookOpen
 } from 'lucide-react';
 
+export type AIToolTier = 'freemium' | 'basic' | 'pro';
+
 export interface AIToolItem {
   id: string;
   name: string;
   description: string;
   category: string;
-  tier: string;
+  tier: AIToolTier;
   icon: React.ReactNode;
   uniqueSellingPoint: string;
   use_cases: string[];
@@ -44,6 +47,9 @@ export interface AIToolItem {
   usageLimit?: string;
   integrations?: string[];
   image_url?: string;
+  popularTool?: boolean;
+  demoAvailable?: boolean;
+  relatedCourses?: string[];
 }
 
 export interface ToolCategory {
@@ -60,7 +66,7 @@ export interface ToolCategoryInfo {
   count: number;
 }
 
-export const getTierBadgeColor = (tier: string) => {
+export const getTierBadgeColor = (tier: AIToolTier) => {
   switch (tier) {
     case 'freemium':
       return 'bg-amber-50 text-amber-800 hover:bg-amber-100 dark:bg-amber-950/20';
@@ -73,7 +79,7 @@ export const getTierBadgeColor = (tier: string) => {
   }
 };
 
-export const getTierIcon = (tier: string) => {
+export const getTierIcon = (tier: AIToolTier) => {
   switch (tier) {
     case 'freemium':
       return React.createElement(Lock, { className: 'w-3 h-3' });
@@ -86,11 +92,10 @@ export const getTierIcon = (tier: string) => {
   }
 };
 
-export const getTierLabel = (tier: string) => {
+export const getTierLabel = (tier: AIToolTier) => {
   return tier.charAt(0).toUpperCase() + tier.slice(1);
 };
 
-// AI Tools Data with CropMind AI added
 export const aiTools: AIToolItem[] = [
   {
     id: 'cropmind-ai',
@@ -110,7 +115,10 @@ export const aiTools: AIToolItem[] = [
     rationale: 'Empowers farmers with AI-driven insights to increase crop yields and reduce losses through timely, data-driven recommendations',
     usageLimit: 'Basic: 50 queries/month, Pro: Unlimited queries + WhatsApp integration',
     integrations: ['WhatsApp', 'Satellite APIs', 'Weather APIs', 'Soil Analysis'],
-    image_url: '/placeholder.svg'
+    image_url: '/placeholder.svg',
+    popularTool: true,
+    demoAvailable: true,
+    relatedCourses: ['sustainable-farming', 'precision-agriculture']
   },
   {
     id: 'data-insights-analyzer',
@@ -130,7 +138,10 @@ export const aiTools: AIToolItem[] = [
     rationale: 'Transforms raw data into actionable insights, empowering businesses to make smarter decisions and gain a competitive edge',
     usageLimit: 'Pro: Unlimited data sources, advanced algorithms, and priority support',
     integrations: ['Salesforce', 'Google Analytics', 'Tableau', 'Excel'],
-    image_url: '/placeholder.svg'
+    image_url: '/placeholder.svg',
+    popularTool: true,
+    demoAvailable: false,
+    relatedCourses: ['data-analytics-101']
   },
   {
     id: 'workflow-automator',
@@ -150,7 +161,9 @@ export const aiTools: AIToolItem[] = [
     rationale: 'Reduces operational costs, improves accuracy, and accelerates business growth by automating routine tasks and workflows',
     usageLimit: 'Basic: 10 automated workflows, 1000 tasks/month',
     integrations: ['Slack', 'Trello', 'Asana', 'Zapier'],
-    image_url: '/placeholder.svg'
+    image_url: '/placeholder.svg',
+    popularTool: false,
+    demoAvailable: true
   },
   {
     id: 'content-generator-pro',
@@ -170,7 +183,9 @@ export const aiTools: AIToolItem[] = [
     rationale: 'Saves time and resources on content creation, enabling businesses to scale their content marketing efforts and drive more traffic and leads',
     usageLimit: 'Pro: Unlimited content generation, advanced SEO tools, and plagiarism checker',
     integrations: ['WordPress', 'Google Docs', 'HubSpot', 'SEMrush'],
-    image_url: '/placeholder.svg'
+    image_url: '/placeholder.svg',
+    popularTool: true,
+    demoAvailable: true
   },
   {
     id: 'ai-code-assistant',
@@ -190,7 +205,9 @@ export const aiTools: AIToolItem[] = [
     rationale: 'Accelerates software development, reduces errors, and improves code quality, enabling developers to build better software faster',
     usageLimit: 'Basic: 500 code suggestions/month, limited language support',
     integrations: ['VS Code', 'GitHub', 'GitLab', 'Stack Overflow'],
-    image_url: '/placeholder.svg'
+    image_url: '/placeholder.svg',
+    popularTool: false,
+    demoAvailable: true
   },
   {
     id: 'ai-tutor',
@@ -210,7 +227,9 @@ export const aiTools: AIToolItem[] = [
     rationale: 'Democratizes education, making personalized learning accessible to all',
     usageLimit: 'Freemium: Limited content, basic features',
     integrations: ['Google Classroom', 'Zoom', 'Slack'],
-    image_url: '/placeholder.svg'
+    image_url: '/placeholder.svg',
+    popularTool: false,
+    demoAvailable: true
   },
   {
     id: 'team-collab-ai',
@@ -230,7 +249,9 @@ export const aiTools: AIToolItem[] = [
     rationale: 'Enhances team productivity and collaboration through AI-driven insights',
     usageLimit: 'Basic: Limited users, basic features',
     integrations: ['Slack', 'Microsoft Teams', 'Asana'],
-    image_url: '/placeholder.svg'
+    image_url: '/placeholder.svg',
+    popularTool: false,
+    demoAvailable: false
   },
   {
     id: 'community-builder-ai',
@@ -250,7 +271,9 @@ export const aiTools: AIToolItem[] = [
     rationale: 'Fosters healthy online communities with AI-driven moderation and engagement tools',
     usageLimit: 'Pro: Unlimited members, advanced features',
     integrations: ['Discord', 'Reddit', 'Facebook Groups'],
-    image_url: '/placeholder.svg'
+    image_url: '/placeholder.svg',
+    popularTool: false,
+    demoAvailable: false
   },
   {
     id: 'monetize-ai',
@@ -270,7 +293,9 @@ export const aiTools: AIToolItem[] = [
     rationale: 'Maximizes revenue and profitability with AI-driven pricing and monetization strategies',
     usageLimit: 'Pro: Unlimited products, advanced features',
     integrations: ['Stripe', 'PayPal', 'Shopify'],
-    image_url: '/placeholder.svg'
+    image_url: '/placeholder.svg',
+    popularTool: false,
+    demoAvailable: false
   },
   {
     id: 'security-guard-ai',
@@ -290,7 +315,9 @@ export const aiTools: AIToolItem[] = [
     rationale: 'Protects businesses from cyber threats with AI-driven security solutions',
     usageLimit: 'Basic: Limited devices, basic features',
     integrations: ['AWS', 'Azure', 'Google Cloud'],
-    image_url: '/placeholder.svg'
+    image_url: '/placeholder.svg',
+    popularTool: false,
+    demoAvailable: true
   },
   {
     id: 'integration-hub-ai',
@@ -310,7 +337,9 @@ export const aiTools: AIToolItem[] = [
     rationale: 'Simplifies integration and data management with AI-driven automation',
     usageLimit: 'Pro: Unlimited integrations, advanced features',
     integrations: ['Salesforce', 'SAP', 'Oracle'],
-    image_url: '/placeholder.svg'
+    image_url: '/placeholder.svg',
+    popularTool: false,
+    demoAvailable: false
   },
 ];
 
@@ -393,3 +422,5 @@ export const categories: ToolCategoryInfo[] = [
     count: aiTools.filter(tool => tool.category === 'integration').length
   },
 ];
+
+export const toolCategories = categories;
