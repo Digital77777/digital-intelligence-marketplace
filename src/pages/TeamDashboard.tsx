@@ -1,9 +1,14 @@
 
 import React from 'react';
-import { TeamDashboard as TeamDashboardComponent } from '@/components/team-dashboard/TeamDashboard';
+import BasicTierLayout from '@/components/layouts/BasicTierLayout';
+import TeamDashboard from '@/components/team-dashboard/TeamDashboard';
 
-const TeamDashboard = () => {
-  return <TeamDashboardComponent />;
+const TeamDashboardPage = () => {
+  return (
+    <BasicTierLayout pageTitle="Team Dashboard" requiredFeature="team-dashboard">
+      <TeamDashboard />
+    </BasicTierLayout>
+  );
 };
 
-export default TeamDashboard;
+export default TeamDashboardPage;

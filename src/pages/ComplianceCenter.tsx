@@ -1,164 +1,360 @@
 
-import React from 'react';
-import ProTierLayout from '@/components/layouts/ProTierLayout';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Check, AlertTriangle, FileDown, Shield } from 'lucide-react';
-import ComplianceChecklist from '@/components/compliance/ComplianceChecklist';
-import ComplianceReport from '@/components/compliance/ComplianceReport';
-import ComplianceSettings from '@/components/compliance/ComplianceSettings';
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Shield, AlertTriangle, CheckCircle, Clock, Eye, Download } from 'lucide-react';
+import ProTierLayout from '@/components/layouts/ProTierLayout';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
-const ComplianceCenter = () => {
+interface ActivityLog {
+  id: string;
+  action: string;
+  table_name: string;
+  timestamp: string;
+  user_id: string;
+  ip_address: string;
+  user_agent: string;
+}
+
+interface ComplianceMetric {
+  name: string;
+  status: 'compliant' | 'warning' | 'non-compliant';
+  score: number;
+  description: string;
+  lastChecked: string;
+}
+
+const ComplianceCenterPage = () => {
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchActivityLogs();
+  }, []);
+
+  const fetchActivityLogs = async () => {
+    try {
+      setLoading(true);
+      
+      const { data, error } = await supabase
+        .from('activity_logs')
+        .select('*')
+        .order('timestamp', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      setActivityLogs(data || []);
+    } catch (error) {
+      console.error('Error fetching activity logs:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load activity logs",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Sample compliance metrics for demonstration
+  const complianceMetrics: ComplianceMetric[] = [
+    {
+      name: 'GDPR Compliance',
+      status: 'compliant',
+      score: 95,
+      description: 'Data protection and privacy regulations',
+      lastChecked: '2024-01-15T10:30:00Z'
+    },
+    {
+      name: 'Data Encryption',
+      status: 'compliant',
+      score: 98,
+      description: 'All sensitive data is properly encrypted',
+      lastChecked: '2024-01-15T09:15:00Z'
+    },
+    {
+      name: 'Access Controls',
+      status: 'warning',
+      score: 78,
+      description: 'User access permissions and authentication',
+      lastChecked: '2024-01-15T08:45:00Z'
+    },
+    {
+      name: 'Audit Logging',
+      status: 'compliant',
+      score: 92,
+      description: 'System activity monitoring and logging',
+      lastChecked: '2024-01-15T10:00:00Z'
+    },
+    {
+      name: 'Data Backup',
+      status: 'non-compliant',
+      score: 65,
+      description: 'Regular data backup and recovery procedures',
+      lastChecked: '2024-01-14T23:30:00Z'
+    }
+  ];
+
+  const getStatusIcon = (status: ComplianceMetric['status']) => {
+    switch (status) {
+      case 'compliant':
+        return <CheckCircle className="h-5 w-5 text-green-600" />;
+      case 'warning':
+        return <AlertTriangle className="h-5 w-5 text-yellow-600" />;
+      case 'non-compliant':
+        return <Shield className="h-5 w-5 text-red-600" />;
+      default:
+        return <Clock className="h-5 w-5 text-gray-600" />;
+    }
+  };
+
+  const getStatusColor = (status: ComplianceMetric['status']) => {
+    switch (status) {
+      case 'compliant':
+        return 'bg-green-100 text-green-800';
+      case 'warning':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'non-compliant':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getScoreColor = (score: number) => {
+    if (score >= 90) return 'text-green-600';
+    if (score >= 70) return 'text-yellow-600';
+    return 'text-red-600';
+  };
+
+  const overallScore = Math.round(complianceMetrics.reduce((sum, metric) => sum + metric.score, 0) / complianceMetrics.length);
+
+  const logActivity = async (action: string, tableName?: string) => {
+    try {
+      await supabase
+        .from('activity_logs')
+        .insert([{
+          action,
+          table_name: tableName || null,
+          ip_address: '192.168.1.1', // This would come from the request in a real implementation
+          user_agent: navigator.userAgent
+        }]);
+
+      // Refresh logs after adding new one
+      fetchActivityLogs();
+      
+      toast({
+        title: "Activity Logged",
+        description: `Action "${action}" has been recorded`,
+      });
+    } catch (error) {
+      console.error('Error logging activity:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <ProTierLayout pageTitle="Compliance Center" requiredFeature="compliance-center">
+        <div className="flex items-center justify-center h-64">Loading compliance data...</div>
+      </ProTierLayout>
+    );
+  }
+
   return (
     <ProTierLayout pageTitle="Compliance Center" requiredFeature="compliance-center">
       <div className="space-y-6">
-        <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-          <p className="text-white/80">
-            Monitor and manage your organization's compliance with industry standards and regulations.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" className="bg-indigo-900/30 border-indigo-800 text-indigo-100 hover:bg-indigo-800/50">
-              <FileDown className="h-4 w-4 mr-1.5" /> Export Report
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold">Compliance Dashboard</h2>
+            <p className="text-gray-600">Monitor and maintain regulatory compliance</p>
+          </div>
+          <div className="flex space-x-2">
+            <Button variant="outline" onClick={() => logActivity('compliance_audit_viewed')}>
+              <Eye className="w-4 h-4 mr-2" />
+              View Audit
             </Button>
-            <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white">
-              <Shield className="h-4 w-4 mr-1.5" /> Run Compliance Scan
+            <Button onClick={() => logActivity('compliance_report_exported')}>
+              <Download className="w-4 h-4 mr-2" />
+              Export Report
             </Button>
           </div>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <ComplianceStatusCard 
-            title="GDPR" 
-            status="Compliant" 
-            score={92} 
-            lastScan="Today"
-            issues={2}
-          />
-          
-          <ComplianceStatusCard 
-            title="HIPAA" 
-            status="Action Needed" 
-            score={78} 
-            lastScan="Yesterday"
-            issues={5}
-          />
-          
-          <ComplianceStatusCard 
-            title="SOC 2" 
-            status="Compliant" 
-            score={96} 
-            lastScan="3 days ago"
-            issues={0}
-          />
-        </div>
-        
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="bg-indigo-950/60 border border-indigo-900/50 mb-4">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-indigo-900/60 data-[state=active]:text-white text-indigo-200">
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="checklist" className="data-[state=active]:bg-indigo-900/60 data-[state=active]:text-white text-indigo-200">
-              Checklist
-            </TabsTrigger>
-            <TabsTrigger value="reports" className="data-[state=active]:bg-indigo-900/60 data-[state=active]:text-white text-indigo-200">
-              Reports
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="data-[state=active]:bg-indigo-900/60 data-[state=active]:text-white text-indigo-200">
-              Settings
-            </TabsTrigger>
+
+        {/* Overall Compliance Score */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Shield className="h-5 w-5" />
+              <span>Overall Compliance Score</span>
+            </CardTitle>
+            <CardDescription>Your current compliance status across all regulations</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center space-x-4">
+              <div className="flex-1">
+                <div className="flex justify-between mb-2">
+                  <span className="text-sm font-medium">Compliance Score</span>
+                  <span className={`text-sm font-bold ${getScoreColor(overallScore)}`}>
+                    {overallScore}%
+                  </span>
+                </div>
+                <Progress value={overallScore} className="h-3" />
+              </div>
+              <div className="text-right">
+                <div className={`text-3xl font-bold ${getScoreColor(overallScore)}`}>
+                  {overallScore}%
+                </div>
+                <Badge className={getStatusColor(overallScore >= 90 ? 'compliant' : overallScore >= 70 ? 'warning' : 'non-compliant')}>
+                  {overallScore >= 90 ? 'Compliant' : overallScore >= 70 ? 'Needs Attention' : 'Non-Compliant'}
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Tabs defaultValue="overview" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="activity">Activity Logs</TabsTrigger>
+            <TabsTrigger value="policies">Policies</TabsTrigger>
           </TabsList>
-          
-          <TabsContent value="overview" className="mt-0">
-            <Card className="bg-indigo-950/40 border-indigo-900/50 text-white">
+
+          <TabsContent value="overview">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {complianceMetrics.map((metric, index) => (
+                <Card key={index}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        {getStatusIcon(metric.status)}
+                        <CardTitle className="text-lg">{metric.name}</CardTitle>
+                      </div>
+                      <Badge className={getStatusColor(metric.status)}>
+                        {metric.status.replace('-', ' ')}
+                      </Badge>
+                    </div>
+                    <CardDescription>{metric.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">Score</span>
+                        <span className={`text-lg font-bold ${getScoreColor(metric.score)}`}>
+                          {metric.score}%
+                        </span>
+                      </div>
+                      <Progress value={metric.score} className="h-2" />
+                      <div className="text-xs text-gray-500">
+                        Last checked: {new Date(metric.lastChecked).toLocaleString()}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="activity">
+            <Card>
               <CardHeader>
-                <CardTitle>Compliance Issues</CardTitle>
-                <CardDescription className="text-indigo-200">
-                  Critical issues that need immediate attention
-                </CardDescription>
+                <CardTitle>Recent Activity</CardTitle>
+                <CardDescription>System activity and audit trail</CardDescription>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-indigo-800/50 hover:bg-indigo-900/20">
-                      <TableHead className="text-indigo-200">Issue</TableHead>
-                      <TableHead className="text-indigo-200">Regulation</TableHead>
-                      <TableHead className="text-indigo-200">Risk Level</TableHead>
-                      <TableHead className="text-indigo-200">Detected</TableHead>
-                      <TableHead className="text-indigo-200">Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {[
-                      { 
-                        issue: "Missing data retention policy", 
-                        regulation: "GDPR", 
-                        riskLevel: "High", 
-                        detected: "2 days ago",
-                        status: "Open"
-                      },
-                      { 
-                        issue: "Incomplete access controls", 
-                        regulation: "HIPAA", 
-                        riskLevel: "Critical", 
-                        detected: "Yesterday",
-                        status: "In Progress"
-                      },
-                      { 
-                        issue: "Unencrypted data storage", 
-                        regulation: "HIPAA", 
-                        riskLevel: "Critical", 
-                        detected: "1 week ago",
-                        status: "Open"
-                      },
-                    ].map((issue, index) => (
-                      <TableRow key={index} className="border-indigo-800/50 hover:bg-indigo-900/20">
-                        <TableCell className="font-medium text-white">{issue.issue}</TableCell>
-                        <TableCell>
-                          <Badge className="bg-indigo-900/30 border-indigo-800/50 text-indigo-300">
-                            {issue.regulation}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={`
-                            ${issue.riskLevel === 'Critical' ? 'bg-red-900/30 text-red-400 border-red-800/50' : ''}
-                            ${issue.riskLevel === 'High' ? 'bg-amber-900/30 text-amber-400 border-amber-800/50' : ''}
-                            ${issue.riskLevel === 'Medium' ? 'bg-yellow-900/30 text-yellow-400 border-yellow-800/50' : ''}
-                            ${issue.riskLevel === 'Low' ? 'bg-green-900/30 text-green-400 border-green-800/50' : ''}
-                          `}>
-                            {issue.riskLevel}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-indigo-200">{issue.detected}</TableCell>
-                        <TableCell>
-                          <Badge className={`
-                            ${issue.status === 'Open' ? 'bg-red-900/30 text-red-400 border-red-800/50' : ''}
-                            ${issue.status === 'In Progress' ? 'bg-yellow-900/30 text-yellow-400 border-yellow-800/50' : ''}
-                            ${issue.status === 'Resolved' ? 'bg-green-900/30 text-green-400 border-green-800/50' : ''}
-                          `}>
-                            {issue.status}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <div className="space-y-4">
+                  {activityLogs.length > 0 ? (
+                    activityLogs.map((log) => (
+                      <div key={log.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                          <div>
+                            <p className="font-medium">{log.action}</p>
+                            {log.table_name && (
+                              <p className="text-sm text-gray-600">Table: {log.table_name}</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-gray-600">
+                            {new Date(log.timestamp).toLocaleString()}
+                          </p>
+                          {log.ip_address && (
+                            <p className="text-xs text-gray-500">IP: {log.ip_address}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>No activity logs found.</p>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => logActivity('test_activity_log')}
+                        className="mt-2"
+                      >
+                        Generate Test Log
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
-          
-          <TabsContent value="checklist" className="mt-0">
-            <ComplianceChecklist />
-          </TabsContent>
-          
-          <TabsContent value="reports" className="mt-0">
-            <ComplianceReport />
-          </TabsContent>
-          
-          <TabsContent value="settings" className="mt-0">
-            <ComplianceSettings />
+
+          <TabsContent value="policies">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Data Protection Policies</CardTitle>
+                  <CardDescription>GDPR and privacy compliance</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span>Data Retention Policy</span>
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Consent Management</span>
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Right to be Forgotten</span>
+                      <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Security Policies</CardTitle>
+                  <CardDescription>Access control and security measures</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span>Multi-Factor Authentication</span>
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Password Policy</span>
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Session Management</span>
+                      <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
@@ -166,61 +362,4 @@ const ComplianceCenter = () => {
   );
 };
 
-const ComplianceStatusCard = ({ title, status, score, lastScan, issues }: { 
-  title: string; 
-  status: string; 
-  score: number;
-  lastScan: string;
-  issues: number;
-}) => {
-  const isCompliant = status === 'Compliant';
-  
-  return (
-    <Card className="bg-indigo-950/40 border-indigo-900/50 text-white overflow-hidden">
-      <div className={`h-1.5 w-full ${isCompliant ? 'bg-green-500' : 'bg-amber-500'}`}></div>
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-lg">{title}</CardTitle>
-          <Badge className={`
-            ${isCompliant 
-              ? 'bg-green-900/30 text-green-400 border-green-800/50' 
-              : 'bg-amber-900/30 text-amber-400 border-amber-800/50'
-            }
-          `}>
-            {status}
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div className={`h-12 w-12 rounded-full flex items-center justify-center 
-              ${isCompliant 
-                ? 'bg-green-900/30 text-green-400 border border-green-800/50' 
-                : 'bg-amber-900/30 text-amber-400 border border-amber-800/50'
-              }
-            `}>
-              {isCompliant ? (
-                <Check className="h-6 w-6" />
-              ) : (
-                <AlertTriangle className="h-6 w-6" />
-              )}
-            </div>
-            <div className="ml-3">
-              <div className="text-2xl font-bold">{score}%</div>
-              <div className="text-xs text-indigo-300">Compliance Score</div>
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="text-sm font-medium">
-              {issues} {issues === 1 ? 'issue' : 'issues'} detected
-            </div>
-            <div className="text-xs text-indigo-300">Last scan: {lastScan}</div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-export default ComplianceCenter;
+export default ComplianceCenterPage;
