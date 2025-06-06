@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,10 +12,8 @@ import AIToolsDirectory from "./pages/AIToolsDirectory";
 import LearningHub from "./pages/LearningHub";
 import AIStreams from "./pages/AIStreams";
 import Marketplace from "./pages/Marketplace";
-import Forums from "./pages/Forums";
 import Pricing from "./pages/Pricing";
 import Profile from "./pages/Profile";
-import ForumCategory from "./pages/ForumCategory";
 import BusinessInsights from "./pages/BusinessInsights";
 import ComplianceCenter from "./pages/ComplianceCenter";
 import TeamDashboard from "./pages/TeamDashboard";
@@ -38,10 +37,8 @@ const App = () => (
                 <Route path="/learning-hub" element={<LearningHub />} />
                 <Route path="/ai-streams" element={<AIStreams />} />
                 <Route path="/marketplace" element={<Marketplace />} />
-                <Route path="/forums" element={<Forums />} />
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/forum-category/:slug" element={<ForumCategory />} />
                 
                 {/* New Feature Routes */}
                 <Route path="/team-dashboard" element={<TeamDashboard />} />
