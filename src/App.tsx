@@ -23,6 +23,9 @@ import AIStudio from "./pages/AIStudio";
 import LearningAcademy from "./pages/LearningAcademy";
 import AIAssistant from "./pages/AIAssistant";
 import DiscoveryPage from "./pages/DiscoveryPage";
+import CommunityForums from "./pages/CommunityForums";
+import CollaborationHub from "./pages/CollaborationHub";
+import NewGroup from "./pages/NewGroup";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +46,13 @@ const App = () => (
                 <Route path="/marketplace" element={<Marketplace />} />
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/profile" element={<Profile />} />
+                
+                {/* Community Routes */}
+                <Route path="/community" element={<CommunityForums />} />
+                <Route path="/community/new-group" element={<NewGroup />} />
+                
+                {/* Collaboration Routes */}
+                <Route path="/collaboration-hub" element={<CollaborationHub />} />
                 
                 {/* New Feature Routes */}
                 <Route path="/team-dashboard" element={<TeamDashboard />} />
