@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   Search, Filter, TrendingUp, Star, Users, 
-  Clock, BookOpen, Tool, Video, MessageSquare
+  Clock, BookOpen, Wrench, Video, MessageSquare
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -25,7 +24,7 @@ const DiscoveryPage = () => {
       category: 'Natural Language Processing',
       rating: 4.8,
       users: 15420,
-      icon: <Tool className="h-5 w-5" />
+      icon: <Wrench className="h-5 w-5" />
     },
     {
       id: 2,
@@ -181,7 +180,7 @@ const DiscoveryPage = () => {
               {[
                 { name: 'Natural Language Processing', count: 125, icon: <MessageSquare className="h-8 w-8" /> },
                 { name: 'Computer Vision', count: 98, icon: <Video className="h-8 w-8" /> },
-                { name: 'Machine Learning', count: 156, icon: <Tool className="h-8 w-8" /> },
+                { name: 'Machine Learning', count: 156, icon: <Wrench className="h-8 w-8" /> },
                 { name: 'Deep Learning', count: 89, icon: <BookOpen className="h-8 w-8" /> },
               ].map((category, index) => (
                 <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow">
