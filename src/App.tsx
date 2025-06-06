@@ -19,6 +19,10 @@ import ComplianceCenter from "./pages/ComplianceCenter";
 import TeamDashboard from "./pages/TeamDashboard";
 import WorkflowDesigner from "./pages/WorkflowDesigner";
 import PipelineDesigner from "./pages/PipelineDesigner";
+import AIStudio from "./pages/AIStudio";
+import LearningAcademy from "./pages/LearningAcademy";
+import AIAssistant from "./pages/AIAssistant";
+import DiscoveryPage from "./pages/DiscoveryPage";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +50,14 @@ const App = () => (
                 <Route path="/pipeline-designer" element={<PipelineDesigner />} />
                 <Route path="/business-insights" element={<BusinessInsights />} />
                 <Route path="/compliance-center" element={<ComplianceCenter />} />
+                
+                {/* Pro Tier Routes */}
+                <Route path="/ai-studio" element={<AIStudio />} />
+                <Route path="/learning-academy" element={<LearningAcademy />} />
+                
+                {/* Global Routes */}
+                <Route path="/ai-assistant" element={<AIAssistant />} />
+                <Route path="/discovery" element={<DiscoveryPage />} />
               </Routes>
             </BrowserRouter>
           </UserProvider>
