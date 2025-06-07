@@ -26,6 +26,9 @@ import DiscoveryPage from "./pages/DiscoveryPage";
 import CommunityForums from "./pages/CommunityForums";
 import CollaborationHub from "./pages/CollaborationHub";
 import NewGroup from "./pages/NewGroup";
+import NewForumTopic from "./pages/NewForumTopic";
+import ForumTopic from "./pages/ForumTopic";
+import TopicDetails from "./pages/TopicDetails";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +53,9 @@ const App = () => (
                 {/* Community Routes */}
                 <Route path="/community" element={<CommunityForums />} />
                 <Route path="/community/new-group" element={<NewGroup />} />
+                <Route path="/community/new-topic/:categoryId" element={<NewForumTopic />} />
+                <Route path="/community/topic/:topicId" element={<ForumTopic />} />
+                <Route path="/community/category/:categoryId" element={<TopicDetails />} />
                 
                 {/* Collaboration Routes */}
                 <Route path="/collaboration-hub" element={<CollaborationHub />} />

@@ -33,8 +33,9 @@ interface ForumTopic {
   views: number;
   is_pinned: boolean;
   is_locked: boolean;
-  reply_count?: number;
-  author_username?: string;
+  replies?: number;
+  username?: string;
+  avatar_url?: string;
 }
 
 interface ForumCategory {
@@ -146,11 +147,11 @@ export const ForumCard: React.FC<ForumCardProps> = ({
                     <div className="flex items-center gap-3 text-sm text-gray-400">
                       <div className="flex items-center gap-1">
                         <Users className="h-4 w-4 text-[#00FFFF]/70" />
-                        <span>{topic.author_username}</span>
+                        <span>{topic.username || 'Anonymous'}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <MessageSquare className="h-4 w-4 text-[#00FFFF]/70" />
-                        <span>{topic.reply_count} replies</span>
+                        <span>{topic.replies || 0} replies</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock className="h-4 w-4 text-[#00FFFF]/70" />

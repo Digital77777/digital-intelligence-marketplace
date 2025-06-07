@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -82,6 +81,23 @@ const CommunityForums = () => {
     
     navigate('/community/new-group');
   };
+
+  const handleJoinDiscussion = () => {
+    if (!user) {
+      toast.error("Authentication required", {
+        description: "Please sign in to join discussions",
+        action: {
+          label: "Sign In",
+          onClick: () => navigate('/auth')
+        }
+      });
+      return;
+    }
+    
+    // Navigate to the community discussions
+    setActiveTab('beginner');
+    toast.success("Welcome to the discussions!");
+  };
   
   const filteredCategories = searchQuery.trim() !== '' 
     ? categories.filter((cat) => 
@@ -148,7 +164,7 @@ const CommunityForums = () => {
             
             {/* Welcome Tab */}
             <TabsContent value="welcome" className="mt-6">
-              <ForumWelcomeTab />
+              <ForumWelcomeTab onJoinDiscussion={handleJoinDiscussion} />
             </TabsContent>
             
             {/* Beginner Questions Tab */}
@@ -233,7 +249,7 @@ const CommunityForums = () => {
 };
 
 // Sub-components for tabs
-const ForumWelcomeTab: React.FC = () => {
+const ForumWelcomeTab: React.FC<{ onJoinDiscussion: () => void }> = ({ onJoinDiscussion }) => {
   return (
     <div className="bg-black/80 rounded-lg p-6 border border-[#00FFFF]/30 neon-border">
       <h2 className="text-2xl font-bold text-[#00FFFF] mb-4 neon-text">WELCOME TO THE NETWORK</h2>
@@ -272,7 +288,10 @@ const ForumWelcomeTab: React.FC = () => {
         <p className="text-gray-300 mb-4 font-light">
           Complete guide to building your first neural network using open-source tools. Optimized for those with minimal processing power.
         </p>
-        <button className="text-[#00FFFF] hover:text-[#4DFFFF] font-medium flex items-center group transition-all duration-300">
+        <button 
+          onClick={onJoinDiscussion}
+          className="text-[#00FFFF] hover:text-[#4DFFFF] font-medium flex items-center group transition-all duration-300"
+        >
           ACCESS DATA 
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
