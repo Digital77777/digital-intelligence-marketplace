@@ -1,37 +1,4 @@
 
-import React from 'react';
-import { 
-  LineChart, 
-  BarChart3, 
-  Code, 
-  HelpCircle, 
-  Settings, 
-  MessageSquare, 
-  Mic, 
-  Send, 
-  Satellite, 
-  CloudRain, 
-  Sprout,
-  ArrowLeft,
-  Bell,
-  User,
-  Check,
-  Info,
-  Key,
-  Lock,
-  Server,
-  ExternalLink,
-  ArrowUpRight,
-  Rocket,
-  Star,
-  Users,
-  Zap,
-  Shield,
-  Globe,
-  Play,
-  BookOpen
-} from 'lucide-react';
-
 export type AIToolTier = 'freemium' | 'basic' | 'pro';
 
 export interface AIToolItem {
@@ -40,387 +7,322 @@ export interface AIToolItem {
   description: string;
   category: string;
   tier: AIToolTier;
-  icon: React.ReactNode;
-  uniqueSellingPoint: string;
-  use_cases: string[];
-  rationale: string;
-  usageLimit?: string;
-  integrations?: string[];
-  image_url?: string;
+  icon: string;
   popularTool?: boolean;
-  demoAvailable?: boolean;
-  relatedCourses?: string[];
+  comingSoon?: boolean;
+  featured?: boolean;
 }
 
 export interface ToolCategory {
   id: string;
   name: string;
-  count: number;
-}
-
-export interface ToolCategoryInfo {
-  id: string;
-  name: string;
   description: string;
-  icon: React.ReactNode;
-  count: number;
+  icon: string;
+  color: string;
 }
 
-export const getTierBadgeColor = (tier: AIToolTier) => {
-  switch (tier) {
-    case 'freemium':
-      return 'bg-amber-50 text-amber-800 hover:bg-amber-100 dark:bg-amber-950/20';
-    case 'basic':
-      return 'bg-blue-50 text-blue-800 hover:bg-blue-100 dark:bg-blue-950/20';
-    case 'pro':
-      return 'bg-purple-50 text-purple-800 hover:bg-purple-100 dark:bg-purple-950/20';
-    default:
-      return 'bg-gray-100 text-gray-800';
+export const toolCategories: ToolCategory[] = [
+  {
+    id: 'content-creation',
+    name: 'Content Creation',
+    description: 'AI tools for generating text, images, and multimedia content',
+    icon: '✍️',
+    color: 'from-blue-500 to-indigo-600'
+  },
+  {
+    id: 'productivity',
+    name: 'Productivity',
+    description: 'Streamline workflows and boost efficiency',
+    icon: '⚡',
+    color: 'from-green-500 to-emerald-600'
+  },
+  {
+    id: 'nlp',
+    name: 'Natural Language Processing',
+    description: 'Advanced text analysis and language understanding',
+    icon: '🗣️',
+    color: 'from-purple-500 to-violet-600'
+  },
+  {
+    id: 'marketing',
+    name: 'Marketing & Sales',
+    description: 'AI-powered marketing automation and analytics',
+    icon: '📈',
+    color: 'from-pink-500 to-rose-600'
+  },
+  {
+    id: 'computer-vision',
+    name: 'Computer Vision',
+    description: 'Image and video analysis tools',
+    icon: '👁️',
+    color: 'from-cyan-500 to-blue-600'
+  },
+  {
+    id: 'video-audio',
+    name: 'Video & Audio',
+    description: 'Multimedia processing and generation',
+    icon: '🎥',
+    color: 'from-orange-500 to-red-600'
   }
-};
-
-export const getTierIcon = (tier: AIToolTier) => {
-  switch (tier) {
-    case 'freemium':
-      return React.createElement(Lock, { className: 'w-3 h-3' });
-    case 'basic':
-      return React.createElement(Key, { className: 'w-3 h-3' });
-    case 'pro':
-      return React.createElement(Rocket, { className: 'w-3 h-3' });
-    default:
-      return null;
-  }
-};
-
-export const getTierLabel = (tier: AIToolTier) => {
-  return tier.charAt(0).toUpperCase() + tier.slice(1);
-};
+];
 
 export const aiTools: AIToolItem[] = [
+  // Content Creation Tools (8 tools)
   {
-    id: 'cropmind-ai',
-    name: 'CropMind AI',
-    description: 'Smart farming assistant providing personalized crop advice via chat, voice, and WhatsApp integration',
-    category: 'agriculture',
-    tier: 'basic',
-    icon: React.createElement(Sprout),
-    uniqueSellingPoint: 'First AI assistant designed specifically for smallholder farmers with offline capabilities and local language support',
-    use_cases: [
-      'Get personalized crop advice based on satellite data',
-      'Receive weather-based farming recommendations',
-      'Monitor crop health through NDVI analysis',
-      'Connect with local agricultural experts',
-      'Access farming tips in local languages'
-    ],
-    rationale: 'Empowers farmers with AI-driven insights to increase crop yields and reduce losses through timely, data-driven recommendations',
-    usageLimit: 'Basic: 50 queries/month, Pro: Unlimited queries + WhatsApp integration',
-    integrations: ['WhatsApp', 'Satellite APIs', 'Weather APIs', 'Soil Analysis'],
-    image_url: '/placeholder.svg',
-    popularTool: true,
-    demoAvailable: true,
-    relatedCourses: ['sustainable-farming', 'precision-agriculture']
-  },
-  {
-    id: 'data-insights-analyzer',
-    name: 'Data Insights Analyzer',
-    description: 'Uncover hidden patterns in your data with AI-driven analytics and visualization tools',
-    category: 'analytics',
-    tier: 'pro',
-    icon: React.createElement(LineChart),
-    uniqueSellingPoint: 'Automatically identifies key trends and anomalies, saving hours of manual analysis',
-    use_cases: [
-      'Analyze sales data to identify top-performing products',
-      'Detect fraudulent transactions in real-time',
-      'Predict customer churn based on behavior patterns',
-      'Optimize marketing campaigns for maximum ROI',
-      'Improve supply chain efficiency through demand forecasting'
-    ],
-    rationale: 'Transforms raw data into actionable insights, empowering businesses to make smarter decisions and gain a competitive edge',
-    usageLimit: 'Pro: Unlimited data sources, advanced algorithms, and priority support',
-    integrations: ['Salesforce', 'Google Analytics', 'Tableau', 'Excel'],
-    image_url: '/placeholder.svg',
-    popularTool: true,
-    demoAvailable: false,
-    relatedCourses: ['data-analytics-101']
-  },
-  {
-    id: 'workflow-automator',
-    name: 'Workflow Automator',
-    description: 'Streamline your business processes with intelligent automation and robotic process automation (RPA)',
-    category: 'automation',
-    tier: 'basic',
-    icon: React.createElement(Code),
-    uniqueSellingPoint: 'Automates repetitive tasks across multiple systems, freeing up employees to focus on higher-value work',
-    use_cases: [
-      'Automate invoice processing and payment approvals',
-      'Generate personalized email campaigns based on customer data',
-      'Schedule social media posts and monitor engagement',
-      'Onboard new employees with automated task assignments',
-      'Manage inventory levels and trigger reorders'
-    ],
-    rationale: 'Reduces operational costs, improves accuracy, and accelerates business growth by automating routine tasks and workflows',
-    usageLimit: 'Basic: 10 automated workflows, 1000 tasks/month',
-    integrations: ['Slack', 'Trello', 'Asana', 'Zapier'],
-    image_url: '/placeholder.svg',
-    popularTool: false,
-    demoAvailable: true
-  },
-  {
-    id: 'content-generator-pro',
-    name: 'Content Generator Pro',
-    description: 'Create high-quality content in minutes with AI-powered writing assistance and content optimization tools',
-    category: 'content',
-    tier: 'pro',
-    icon: React.createElement(HelpCircle),
-    uniqueSellingPoint: 'Generates original, engaging content tailored to your brand voice and target audience',
-    use_cases: [
-      'Write blog posts, articles, and website copy',
-      'Create social media posts and ad copy',
-      'Generate email newsletters and marketing materials',
-      'Optimize content for search engines (SEO)',
-      'Translate content into multiple languages'
-    ],
-    rationale: 'Saves time and resources on content creation, enabling businesses to scale their content marketing efforts and drive more traffic and leads',
-    usageLimit: 'Pro: Unlimited content generation, advanced SEO tools, and plagiarism checker',
-    integrations: ['WordPress', 'Google Docs', 'HubSpot', 'SEMrush'],
-    image_url: '/placeholder.svg',
-    popularTool: true,
-    demoAvailable: true
-  },
-  {
-    id: 'ai-code-assistant',
-    name: 'AI Code Assistant',
-    description: 'Write code faster and more efficiently with AI-powered code completion, debugging, and code generation tools',
-    category: 'development',
-    tier: 'basic',
-    icon: React.createElement(Code),
-    uniqueSellingPoint: 'Suggests code snippets, identifies bugs, and generates code from natural language descriptions',
-    use_cases: [
-      'Write code in multiple programming languages',
-      'Debug code and identify errors',
-      'Generate code from natural language descriptions',
-      'Refactor code and improve code quality',
-      'Automate repetitive coding tasks'
-    ],
-    rationale: 'Accelerates software development, reduces errors, and improves code quality, enabling developers to build better software faster',
-    usageLimit: 'Basic: 500 code suggestions/month, limited language support',
-    integrations: ['VS Code', 'GitHub', 'GitLab', 'Stack Overflow'],
-    image_url: '/placeholder.svg',
-    popularTool: false,
-    demoAvailable: true
-  },
-  {
-    id: 'ai-tutor',
-    name: 'AI Tutor',
-    description: 'Personalized learning platform powered by AI',
-    category: 'learning',
+    id: 'chatgpt',
+    name: 'ChatGPT',
+    description: 'Advanced conversational AI for text generation, coding, and problem-solving',
+    category: 'content-creation',
     tier: 'freemium',
-    icon: React.createElement(BookOpen),
-    uniqueSellingPoint: 'Adaptive learning paths tailored to individual student needs',
-    use_cases: [
-      'Personalized learning',
-      'Adaptive assessments',
-      'Automated feedback',
-      'Content recommendations',
-      'Progress tracking'
-    ],
-    rationale: 'Democratizes education, making personalized learning accessible to all',
-    usageLimit: 'Freemium: Limited content, basic features',
-    integrations: ['Google Classroom', 'Zoom', 'Slack'],
-    image_url: '/placeholder.svg',
-    popularTool: false,
-    demoAvailable: true
+    icon: '🤖',
+    popularTool: true,
+    featured: true
   },
   {
-    id: 'team-collab-ai',
-    name: 'Team Collab AI',
-    description: 'AI-enhanced collaboration platform',
-    category: 'collaboration',
+    id: 'claude',
+    name: 'Claude',
+    description: 'Anthropic\'s AI assistant for analysis, writing, and complex reasoning',
+    category: 'content-creation',
+    tier: 'freemium',
+    icon: '🧠',
+    popularTool: true
+  },
+  {
+    id: 'jasper',
+    name: 'Jasper AI',
+    description: 'AI writing assistant for marketing copy, blogs, and creative content',
+    category: 'content-creation',
     tier: 'basic',
-    icon: React.createElement(Users),
-    uniqueSellingPoint: 'AI-driven task assignments and progress tracking',
-    use_cases: [
-      'Smart task assignments',
-      'Automated progress tracking',
-      'Meeting summaries',
-      'Sentiment analysis',
-      'Conflict resolution'
-    ],
-    rationale: 'Enhances team productivity and collaboration through AI-driven insights',
-    usageLimit: 'Basic: Limited users, basic features',
-    integrations: ['Slack', 'Microsoft Teams', 'Asana'],
-    image_url: '/placeholder.svg',
-    popularTool: false,
-    demoAvailable: false
+    icon: '✍️'
   },
   {
-    id: 'community-builder-ai',
-    name: 'Community Builder AI',
-    description: 'AI-powered community management tool',
-    category: 'community',
-    tier: 'pro',
-    icon: React.createElement(MessageSquare),
-    uniqueSellingPoint: 'Automated moderation and engagement analysis',
-    use_cases: [
-      'Automated moderation',
-      'Sentiment analysis',
-      'Engagement analysis',
-      'Content recommendations',
-      'Spam detection'
-    ],
-    rationale: 'Fosters healthy online communities with AI-driven moderation and engagement tools',
-    usageLimit: 'Pro: Unlimited members, advanced features',
-    integrations: ['Discord', 'Reddit', 'Facebook Groups'],
-    image_url: '/placeholder.svg',
-    popularTool: false,
-    demoAvailable: false
-  },
-  {
-    id: 'monetize-ai',
-    name: 'Monetize AI',
-    description: 'AI-driven monetization platform',
-    category: 'monetization',
-    tier: 'pro',
-    icon: React.createElement(Star),
-    uniqueSellingPoint: 'AI-powered pricing and revenue optimization',
-    use_cases: [
-      'Dynamic pricing',
-      'Revenue optimization',
-      'Churn prediction',
-      'Personalized offers',
-      'Automated A/B testing'
-    ],
-    rationale: 'Maximizes revenue and profitability with AI-driven pricing and monetization strategies',
-    usageLimit: 'Pro: Unlimited products, advanced features',
-    integrations: ['Stripe', 'PayPal', 'Shopify'],
-    image_url: '/placeholder.svg',
-    popularTool: false,
-    demoAvailable: false
-  },
-  {
-    id: 'security-guard-ai',
-    name: 'Security Guard AI',
-    description: 'AI-powered security solution',
-    category: 'security',
+    id: 'copy-ai',
+    name: 'Copy.ai',
+    description: 'Generate marketing copy, product descriptions, and social media content',
+    category: 'content-creation',
     tier: 'basic',
-    icon: React.createElement(Lock),
-    uniqueSellingPoint: 'Real-time threat detection and prevention',
-    use_cases: [
-      'Real-time threat detection',
-      'Anomaly detection',
-      'Fraud prevention',
-      'Automated incident response',
-      'Vulnerability scanning'
-    ],
-    rationale: 'Protects businesses from cyber threats with AI-driven security solutions',
-    usageLimit: 'Basic: Limited devices, basic features',
-    integrations: ['AWS', 'Azure', 'Google Cloud'],
-    image_url: '/placeholder.svg',
-    popularTool: false,
-    demoAvailable: true
+    icon: '📝'
   },
   {
-    id: 'integration-hub-ai',
-    name: 'Integration Hub AI',
-    description: 'AI-powered integration platform',
-    category: 'integration',
-    tier: 'pro',
-    icon: React.createElement(Zap),
-    uniqueSellingPoint: 'Automated integration and data mapping',
-    use_cases: [
-      'Automated integration',
-      'Data mapping',
-      'Workflow automation',
-      'API management',
-      'Real-time monitoring'
-    ],
-    rationale: 'Simplifies integration and data management with AI-driven automation',
-    usageLimit: 'Pro: Unlimited integrations, advanced features',
-    integrations: ['Salesforce', 'SAP', 'Oracle'],
-    image_url: '/placeholder.svg',
-    popularTool: false,
-    demoAvailable: false
+    id: 'grammarly',
+    name: 'Grammarly',
+    description: 'AI-powered writing assistant for grammar, style, and tone improvements',
+    category: 'content-creation',
+    tier: 'freemium',
+    icon: '📚'
   },
+  {
+    id: 'wordtune',
+    name: 'Wordtune',
+    description: 'AI writing companion that understands what you\'re trying to say',
+    category: 'content-creation',
+    tier: 'basic',
+    icon: '🎯'
+  },
+  {
+    id: 'writesonic',
+    name: 'Writesonic',
+    description: 'AI writer for articles, ads, landing pages, and product descriptions',
+    category: 'content-creation',
+    tier: 'basic',
+    icon: '🚀'
+  },
+  {
+    id: 'notion-ai',
+    name: 'Notion AI',
+    description: 'AI-powered writing assistant integrated into Notion workspace',
+    category: 'content-creation',
+    tier: 'pro',
+    icon: '📋'
+  },
+
+  // Productivity Tools (5 tools)
+  {
+    id: 'zapier',
+    name: 'Zapier',
+    description: 'Automate workflows between your favorite apps and services',
+    category: 'productivity',
+    tier: 'freemium',
+    icon: '⚡',
+    popularTool: true
+  },
+  {
+    id: 'microsoft-copilot',
+    name: 'Microsoft Copilot',
+    description: 'AI assistant integrated across Microsoft 365 applications',
+    category: 'productivity',
+    tier: 'pro',
+    icon: '🔧',
+    featured: true
+  },
+  {
+    id: 'github-copilot',
+    name: 'GitHub Copilot',
+    description: 'AI pair programmer that helps you write code faster',
+    category: 'productivity',
+    tier: 'pro',
+    icon: '💻',
+    popularTool: true
+  },
+  {
+    id: 'calendly',
+    name: 'Calendly AI',
+    description: 'Smart scheduling assistant with AI-powered meeting optimization',
+    category: 'productivity',
+    tier: 'basic',
+    icon: '📅'
+  },
+  {
+    id: 'otter-ai',
+    name: 'Otter.ai',
+    description: 'AI meeting assistant that records, transcribes, and summarizes meetings',
+    category: 'productivity',
+    tier: 'freemium',
+    icon: '🎙️'
+  },
+
+  // Natural Language Processing (4 tools)
+  {
+    id: 'huggingface',
+    name: 'Hugging Face',
+    description: 'Open-source platform for NLP models and datasets',
+    category: 'nlp',
+    tier: 'freemium',
+    icon: '🤗',
+    popularTool: true
+  },
+  {
+    id: 'openai-api',
+    name: 'OpenAI API',
+    description: 'Access to GPT models for custom applications',
+    category: 'nlp',
+    tier: 'pro',
+    icon: '🔑',
+    featured: true
+  },
+  {
+    id: 'spacy',
+    name: 'spaCy',
+    description: 'Industrial-strength natural language processing library',
+    category: 'nlp',
+    tier: 'freemium',
+    icon: '🐍'
+  },
+  {
+    id: 'dialogflow',
+    name: 'Dialogflow',
+    description: 'Google\'s conversational AI platform for chatbots and voice assistants',
+    category: 'nlp',
+    tier: 'basic',
+    icon: '💬'
+  },
+
+  // Marketing & Sales Tools (4 tools)
+  {
+    id: 'hubspot-ai',
+    name: 'HubSpot AI',
+    description: 'AI-powered CRM and marketing automation platform',
+    category: 'marketing',
+    tier: 'pro',
+    icon: '📊',
+    featured: true
+  },
+  {
+    id: 'salesforce-einstein',
+    name: 'Salesforce Einstein',
+    description: 'AI-powered CRM insights and automation',
+    category: 'marketing',
+    tier: 'pro',
+    icon: '☁️'
+  },
+  {
+    id: 'mailchimp-ai',
+    name: 'Mailchimp AI',
+    description: 'AI-powered email marketing optimization and personalization',
+    category: 'marketing',
+    tier: 'basic',
+    icon: '📧'
+  },
+  {
+    id: 'surfer-seo',
+    name: 'Surfer SEO',
+    description: 'AI-powered SEO optimization and content analysis',
+    category: 'marketing',
+    tier: 'basic',
+    icon: '🏄'
+  },
+
+  // Computer Vision Tools (3 tools)
+  {
+    id: 'opencv',
+    name: 'OpenCV',
+    description: 'Open-source computer vision and machine learning library',
+    category: 'computer-vision',
+    tier: 'freemium',
+    icon: '👁️'
+  },
+  {
+    id: 'roboflow',
+    name: 'Roboflow',
+    description: 'Computer vision platform for dataset management and model deployment',
+    category: 'computer-vision',
+    tier: 'basic',
+    icon: '🔍'
+  },
+  {
+    id: 'tensorflow-vision',
+    name: 'TensorFlow Vision',
+    description: 'Google\'s machine learning framework for computer vision tasks',
+    category: 'computer-vision',
+    tier: 'pro',
+    icon: '🧮'
+  },
+
+  // Video & Audio Tools (3 tools)
+  {
+    id: 'elevenlabs',
+    name: 'ElevenLabs',
+    description: 'AI voice synthesis and cloning platform',
+    category: 'video-audio',
+    tier: 'basic',
+    icon: '🎵',
+    popularTool: true
+  },
+  {
+    id: 'descript',
+    name: 'Descript',
+    description: 'AI-powered video and audio editing with transcription',
+    category: 'video-audio',
+    tier: 'basic',
+    icon: '🎬'
+  },
+  {
+    id: 'runway-ml',
+    name: 'Runway ML',
+    description: 'AI-powered creative tools for video generation and editing',
+    category: 'video-audio',
+    tier: 'pro',
+    icon: '🎭',
+    featured: true
+  }
 ];
 
-export const categories: ToolCategoryInfo[] = [
-  {
-    id: 'agriculture',
-    name: 'Agriculture & Farming',
-    description: 'AI tools for modern farming, crop management, and agricultural optimization',
-    icon: React.createElement(Sprout),
-    count: aiTools.filter(tool => tool.category === 'agriculture').length
-  },
-  {
-    id: 'analytics',
-    name: 'Analytics & BI',
-    description: 'AI tools for data analysis, visualization, and business intelligence',
-    icon: React.createElement(LineChart),
-    count: aiTools.filter(tool => tool.category === 'analytics').length
-  },
-  {
-    id: 'automation',
-    name: 'Automation',
-    description: 'AI tools for automating tasks, workflows, and processes',
-    icon: React.createElement(Code),
-    count: aiTools.filter(tool => tool.category === 'automation').length
-  },
-  {
-    id: 'content',
-    name: 'Content Creation',
-    description: 'AI tools for generating text, images, and other types of content',
-    icon: React.createElement(HelpCircle),
-    count: aiTools.filter(tool => tool.category === 'content').length
-  },
-  {
-    id: 'development',
-    name: 'Development',
-    description: 'AI tools for software development, testing, and deployment',
-    icon: React.createElement(Code),
-    count: aiTools.filter(tool => tool.category === 'development').length
-  },
-  {
-    id: 'learning',
-    name: 'Education & Learning',
-    description: 'AI tools for personalized learning and education',
-    icon: React.createElement(BookOpen),
-    count: aiTools.filter(tool => tool.category === 'learning').length
-  },
-  {
-    id: 'collaboration',
-    name: 'Collaboration',
-    description: 'AI tools for team collaboration and communication',
-    icon: React.createElement(Users),
-    count: aiTools.filter(tool => tool.category === 'collaboration').length
-  },
-  {
-    id: 'community',
-    name: 'Community',
-    description: 'AI tools for community management and engagement',
-    icon: React.createElement(MessageSquare),
-    count: aiTools.filter(tool => tool.category === 'community').length
-  },
-  {
-    id: 'monetization',
-    name: 'Monetization',
-    description: 'AI tools for revenue optimization and monetization',
-    icon: React.createElement(Star),
-    count: aiTools.filter(tool => tool.category === 'monetization').length
-  },
-  {
-    id: 'security',
-    name: 'Security',
-    description: 'AI tools for cybersecurity and threat detection',
-    icon: React.createElement(Lock),
-    count: aiTools.filter(tool => tool.category === 'security').length
-  },
-  {
-    id: 'integration',
-    name: 'Integration',
-    description: 'AI tools for system integration and data management',
-    icon: React.createElement(Zap),
-    count: aiTools.filter(tool => tool.category === 'integration').length
-  },
-];
+// Helper function to get tools by tier
+export const getToolsByTier = (tier: AIToolTier): AIToolItem[] => {
+  return aiTools.filter(tool => tool.tier === tier);
+};
 
-export const toolCategories = categories;
+// Helper function to get tools by category
+export const getToolsByCategory = (category: string): AIToolItem[] => {
+  return aiTools.filter(tool => tool.category === category);
+};
+
+// Helper function to get popular tools
+export const getPopularTools = (): AIToolItem[] => {
+  return aiTools.filter(tool => tool.popularTool);
+};
+
+// Helper function to get featured tools
+export const getFeaturedTools = (): AIToolItem[] => {
+  return aiTools.filter(tool => tool.featured);
+};

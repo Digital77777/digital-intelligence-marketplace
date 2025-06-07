@@ -50,7 +50,8 @@ const App = () => (
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/profile" element={<Profile />} />
                 
-                {/* Community Routes */}
+                {/* Forum Routes - Add redirect from /forums to /community */}
+                <Route path="/forums" element={<CommunityForums />} />
                 <Route path="/community" element={<CommunityForums />} />
                 <Route path="/community/new-group" element={<NewGroup />} />
                 <Route path="/community/new-topic/:categoryId" element={<NewForumTopic />} />
