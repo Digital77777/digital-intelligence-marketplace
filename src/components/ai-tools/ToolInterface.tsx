@@ -1,841 +1,423 @@
+
 import React, { useState } from 'react';
 import { AIToolItem } from '@/data/ai-tools-tiers';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Check, Settings, Terminal, Code, HelpCircle, LineChart } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { 
+  Play, 
+  Download, 
+  Share2, 
+  Settings, 
+  Lightbulb,
+  Cpu,
+  Zap,
+  FileText,
+  Image as ImageIcon,
+  Music,
+  Video,
+  Code,
+  BarChart3,
+  Users,
+  Globe,
+  Shield
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import CropMindInterface from './interfaces/CropMindInterface';
 
 interface ToolInterfaceProps {
   tool: AIToolItem;
   onBack: () => void;
-  connectionDetails: any;
 }
 
-const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack, connectionDetails }) => {
-  const [activeTab, setActiveTab] = useState<string>('main');
+const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack }) => {
+  const [input, setInput] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [result, setResult] = useState('');
   const { toast } = useToast();
-  
-  // Placeholder function for tool actions
-  const handleAction = (action: string) => {
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'image-generation': return <ImageIcon className="h-5 w-5" />;
+      case 'text-tools': return <FileText className="h-5 w-5" />;
+      case 'productivity': return <Zap className="h-5 w-5" />;
+      case 'data-analysis': return <BarChart3 className="h-5 w-5" />;
+      case 'automation': return <Cpu className="h-5 w-5" />;
+      case 'machine-learning': return <Cpu className="h-5 w-5" />;
+      case 'collaboration': return <Users className="h-5 w-5" />;
+      case 'development': return <Code className="h-5 w-5" />;
+      case 'music': return <Music className="h-5 w-5" />;
+      case 'video-editing': return <Video className="h-5 w-5" />;
+      case 'voice': return <Music className="h-5 w-5" />;
+      case 'seo': return <Globe className="h-5 w-5" />;
+      case 'marketing': return <BarChart3 className="h-5 w-5" />;
+      case 'ethics': return <Shield className="h-5 w-5" />;
+      case 'cloud': return <Globe className="h-5 w-5" />;
+      default: return <Zap className="h-5 w-5" />;
+    }
+  };
+
+  const getPlaceholderText = () => {
+    switch (tool.category) {
+      case 'image-generation':
+        return 'Describe the image you want to generate (e.g., "A futuristic city with flying cars at sunset")';
+      case 'text-tools':
+        return tool.id === 'ai-text-summarizer' 
+          ? 'Paste the text you want to summarize...'
+          : tool.id === 'ai-language-translator'
+          ? 'Enter text to translate (specify target language)'
+          : 'Enter your text here...';
+      case 'productivity':
+        return tool.id === 'ai-presentation-maker'
+          ? 'Enter your presentation topic (e.g., "Machine Learning Basics for Business")'
+          : tool.id === 'ai-email-writer'
+          ? 'Describe the email you want to write (e.g., "Professional follow-up after job interview")'
+          : 'Describe what you want to accomplish...';
+      case 'data-analysis':
+        return 'Upload your data file or describe the analysis you need...';
+      case 'automation':
+        return 'Describe the workflow you want to automate...';
+      case 'development':
+        return 'Describe the code you need or paste code for review...';
+      case 'music':
+        return 'Describe the type of music you want (e.g., "Upbeat jazz melody for intro")';
+      case 'machine-learning':
+        return 'Describe your ML problem or upload your dataset...';
+      default:
+        return 'Enter your input here...';
+    }
+  };
+
+  const getExamplePrompts = () => {
+    switch (tool.category) {
+      case 'image-generation':
+        return [
+          'A photorealistic portrait of a robot in a garden',
+          'Abstract art with vibrant blues and greens',
+          'A minimalist logo for a tech startup'
+        ];
+      case 'text-tools':
+        return tool.id === 'ai-text-summarizer' 
+          ? ['Summarize this research paper', 'Key points from meeting notes', 'Executive summary needed']
+          : tool.id === 'ai-language-translator'
+          ? ['Translate to Spanish: Hello world', 'French translation needed', 'Convert to German']
+          : ['Write a blog post about AI', 'Create product description', 'Generate social media copy'];
+      case 'productivity':
+        return ['Create quarterly review presentation', 'Write professional email template', 'Generate meeting agenda'];
+      case 'data-analysis':
+        return ['Analyze sales data trends', 'Customer behavior insights', 'Financial performance review'];
+      default:
+        return ['Get started with your input', 'Try an example', 'Explore capabilities'];
+    }
+  };
+
+  const handleProcess = async () => {
+    if (!input.trim()) {
+      toast({
+        title: "Input Required",
+        description: "Please enter some input to process.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+    
+    // Simulate processing with realistic delay
+    await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
+    
+    // Generate mock result based on tool type
+    const mockResult = generateMockResult(tool, input);
+    setResult(mockResult);
+    setIsProcessing(false);
+    
     toast({
-      title: "Action triggered",
-      description: `${action} action for ${tool.name}`,
+      title: "Processing Complete",
+      description: `${tool.name} has successfully processed your input.`,
     });
   };
-  
-  // Render different interfaces based on tool category
-  const renderToolInterface = () => {
-    // Handle new CropMind AI tool
-    if (tool.id === 'cropmind-ai') {
-      return <CropMindInterface tool={tool} onBack={onBack} />;
-    }
 
+  const generateMockResult = (tool: AIToolItem, input: string): string => {
     switch (tool.category) {
-      case 'analytics':
-        return <AnalyticsToolInterface tool={tool} handleAction={handleAction} />;
-      case 'automation':
-        return <AutomationToolInterface tool={tool} handleAction={handleAction} />;
-      case 'content':
-        return <ContentToolInterface tool={tool} handleAction={handleAction} />;
+      case 'image-generation':
+        return `Generated image: "${input}"\n\nImage created successfully with high resolution (1024x1024)\nStyle: Photorealistic\nQuality: Premium\n\n[Image would be displayed here in the actual implementation]`;
+      case 'text-tools':
+        if (tool.id === 'ai-text-summarizer') {
+          return `Summary of your text:\n\n• Key Point 1: Main concept identified from your input\n• Key Point 2: Supporting details and evidence\n• Key Point 3: Conclusion and implications\n\nOriginal length: ${input.length} characters\nSummary length: 150 characters\nCompression ratio: 75%`;
+        }
+        return `Generated content based on: "${input}"\n\nHere's your professionally crafted content that meets your requirements. The tone is optimized for your target audience and includes relevant keywords for better engagement.`;
+      case 'data-analysis':
+        return `Analysis Results:\n\n📊 Data Overview:\n- Processed ${Math.floor(Math.random() * 1000)} data points\n- Found ${Math.floor(Math.random() * 10)} key trends\n- Confidence level: ${85 + Math.floor(Math.random() * 10)}%\n\n🔍 Key Insights:\n1. Strong positive correlation in primary metrics\n2. Seasonal patterns detected in Q3 data\n3. Recommendation: Focus on high-performing segments`;
       case 'development':
-        return <DevelopmentToolInterface tool={tool} handleAction={handleAction} />;
-      case 'learning':
-        return <LearningToolInterface tool={tool} handleAction={handleAction} />;
-      case 'collaboration':
-        return <CollaborationToolInterface tool={tool} handleAction={handleAction} />;
-      case 'community':
-        return <CommunityToolInterface tool={tool} handleAction={handleAction} />;
-      case 'monetization':
-        return <MonetizationToolInterface tool={tool} handleAction={handleAction} />;
-      case 'security':
-        return <SecurityToolInterface tool={tool} handleAction={handleAction} />;
-      case 'integration':
-        return <IntegrationToolInterface tool={tool} handleAction={handleAction} />;
+        return `Code Analysis Complete:\n\n✅ Generated solution for: "${input}"\n\n\`\`\`python\n# Your optimized code solution\ndef solution():\n    # Implementation based on your requirements\n    return "Code generated successfully"\n\`\`\`\n\n📝 Code Quality Score: 95/100\n🔧 Suggestions: Consider adding error handling\n📚 Documentation: Auto-generated comments included`;
       default:
-        return <DefaultToolInterface tool={tool} handleAction={handleAction} />;
+        return `✨ Processing complete!\n\nYour request "${input}" has been processed successfully using ${tool.name}.\n\nResults are ready for download or further processing. The AI has optimized the output based on best practices and your specific requirements.`;
     }
   };
-  
+
+  const handleDownload = () => {
+    if (!result) return;
+    
+    const blob = new Blob([result], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${tool.name}-result.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Download Started",
+      description: "Your result has been downloaded successfully.",
+    });
+  };
+
+  const handleShare = () => {
+    if (navigator.share && result) {
+      navigator.share({
+        title: `Result from ${tool.name}`,
+        text: result.substring(0, 100) + '...',
+      });
+    } else {
+      navigator.clipboard.writeText(result);
+      toast({
+        title: "Copied to Clipboard",
+        description: "Result has been copied to your clipboard.",
+      });
+    }
+  };
+
   return (
-    <div className="bg-black min-h-[80vh] rounded-lg border border-[#00FFFF]/20 overflow-hidden">
-      <div className="p-4 border-b border-[#00FFFF]/20 flex items-center justify-between bg-black/50">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" onClick={onBack} className="text-[#00FFFF] hover:text-white hover:bg-[#00FFFF]/10">
-            <ArrowLeft className="h-4 w-4 mr-1" /> Back
-          </Button>
-          <div className="flex items-center">
-            <div className="h-8 w-8 bg-[#00FFFF]/10 rounded flex items-center justify-center text-[#00FFFF] mr-2">
-              {tool.icon}
-            </div>
-            <h2 className="text-lg font-bold text-white">{tool.name}</h2>
-          </div>
-        </div>
+    <div className="max-w-6xl mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <Button variant="outline" onClick={onBack}>
+          ← Back to Tools
+        </Button>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="border-[#00FFFF]/30 text-gray-300 hover:bg-[#00FFFF]/10">
-            <HelpCircle className="h-4 w-4 mr-1" /> Help
+          <Button variant="outline" size="sm">
+            <Settings className="h-4 w-4 mr-1" />
+            Settings
           </Button>
-          <Button variant="outline" size="sm" className="border-[#00FFFF]/30 text-gray-300 hover:bg-[#00FFFF]/10">
-            <Settings className="h-4 w-4 mr-1" /> Settings
+          <Button variant="outline" size="sm">
+            <Lightbulb className="h-4 w-4 mr-1" />
+            Help
           </Button>
         </div>
       </div>
-      
-      <div className="p-4">
-        <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="mb-4 bg-black/80 border border-[#00FFFF]/20">
-            <TabsTrigger value="main" className="data-[state=active]:bg-[#00FFFF]/10 data-[state=active]:text-[#00FFFF]">
-              Main
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="data-[state=active]:bg-[#00FFFF]/10 data-[state=active]:text-[#00FFFF]">
-              Settings
-            </TabsTrigger>
-            <TabsTrigger value="help" className="data-[state=active]:bg-[#00FFFF]/10 data-[state=active]:text-[#00FFFF]">
-              Documentation
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="main" className="p-2">
-            {renderToolInterface()}
-          </TabsContent>
-          
-          <TabsContent value="settings" className="p-2">
-            <Card className="bg-black/30 border-[#00FFFF]/20">
-              <CardHeader>
-                <CardTitle className="text-[#00FFFF]">Tool Settings</CardTitle>
-                <CardDescription className="text-gray-400">
-                  Configure {tool.name} settings for your workflow
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm text-gray-300 mb-1 block">API Key</label>
+
+      {/* Tool Header */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="text-4xl">{tool.icon}</div>
+              <div>
+                <CardTitle className="text-2xl">{tool.name}</CardTitle>
+                <CardDescription className="text-lg">{tool.description}</CardDescription>
+                <div className="flex items-center gap-2 mt-2">
+                  {getCategoryIcon(tool.category)}
+                  <span className="text-sm text-muted-foreground capitalize">
+                    {tool.category.replace('-', ' ')}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <Badge variant="outline" className="text-sm">
+              {tool.tier.charAt(0).toUpperCase() + tool.tier.slice(1)}
+            </Badge>
+          </div>
+        </CardHeader>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Input Section */}
+        <div className="lg:col-span-2 space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Play className="h-5 w-5" />
+                Input
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Example Prompts */}
+              <div>
+                <h4 className="text-sm font-medium mb-2">Quick Examples:</h4>
+                <div className="flex flex-wrap gap-2">
+                  {getExamplePrompts().map((prompt, index) => (
+                    <Button
+                      key={index}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setInput(prompt)}
+                      className="text-xs"
+                    >
+                      {prompt}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Input Area */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Your Input:</label>
+                {tool.category === 'data-analysis' ? (
+                  <div className="space-y-3">
                     <Input 
-                      placeholder="Enter your API key if needed" 
-                      className="bg-black/60 border-[#00FFFF]/20 text-white focus:border-[#00FFFF]"
+                      type="file" 
+                      accept=".csv,.xlsx,.json"
+                      className="cursor-pointer"
+                    />
+                    <Textarea
+                      placeholder="Or describe your data analysis needs..."
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      rows={4}
                     />
                   </div>
-                  <div>
-                    <label className="text-sm text-gray-300 mb-1 block">Default Output Format</label>
-                    <select className="w-full bg-black/60 border border-[#00FFFF]/20 rounded p-2 text-white">
-                      <option value="json">JSON</option>
-                      <option value="text">Plain Text</option>
-                      <option value="csv">CSV</option>
-                    </select>
+                ) : (
+                  <Textarea
+                    placeholder={getPlaceholderText()}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    rows={6}
+                    className="resize-none"
+                  />
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleProcess} 
+                  disabled={isProcessing || !input.trim()}
+                  className="flex-1"
+                >
+                  {isProcessing ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Play className="h-4 w-4 mr-2" />
+                      Process
+                    </>
+                  )}
+                </Button>
+                <Button variant="outline" onClick={() => setInput('')}>
+                  Clear
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Results Section */}
+          {result && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Zap className="h-5 w-5" />
+                    Results
+                  </CardTitle>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={handleDownload}>
+                      <Download className="h-4 w-4 mr-1" />
+                      Download
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={handleShare}>
+                      <Share2 className="h-4 w-4 mr-1" />
+                      Share
+                    </Button>
                   </div>
                 </div>
-              </CardContent>
-              <CardFooter>
-                <Button className="bg-[#00FFFF] text-black hover:bg-[#00FFFF]/80">
-                  <Check className="h-4 w-4 mr-2" /> Save Settings
-                </Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="help" className="p-2">
-            <Card className="bg-black/30 border-[#00FFFF]/20">
-              <CardHeader>
-                <CardTitle className="text-[#00FFFF]">Documentation</CardTitle>
-                <CardDescription className="text-gray-400">
-                  Learn how to use {tool.name} effectively
-                </CardDescription>
               </CardHeader>
-              <CardContent className="prose prose-invert">
-                <h3 className="text-lg text-gray-200">Getting Started</h3>
-                <p className="text-gray-400">
-                  This tool helps you {tool.description.toLowerCase()}. 
-                  Use the main interface to interact with its core functionality.
-                </p>
-                <h3 className="text-lg text-gray-200 mt-4">Unique Features</h3>
-                <p className="text-gray-400">{tool.uniqueSellingPoint}</p>
-                
-                <h3 className="text-lg text-gray-200 mt-4">Usage Examples</h3>
-                <div className="bg-black/60 p-3 rounded border border-[#00FFFF]/20 font-mono text-sm text-gray-300 my-2">
-                  # Example usage code or commands would go here
+              <CardContent>
+                <div className="bg-muted/50 rounded-lg p-4 whitespace-pre-wrap font-mono text-sm">
+                  {result}
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
-  );
-};
-
-// Specific tool interfaces based on category
-const AnalyticsToolInterface: React.FC<{tool: AIToolItem; handleAction: (action: string) => void}> = ({ tool, handleAction }) => {
-  return (
-    <div className="space-y-4">
-      <Alert className="bg-[#00FFFF]/5 border-[#00FFFF]/20">
-        <LineChart className="h-4 w-4 text-[#00FFFF]" />
-        <AlertDescription className="text-gray-300">
-          Welcome to {tool.name}. This analytics tool helps you visualize and interpret data.
-        </AlertDescription>
-      </Alert>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-black/30 col-span-2 border-[#00FFFF]/20">
-          <CardHeader>
-            <CardTitle className="text-[#00FFFF]">Dashboard</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[300px] flex items-center justify-center">
-            <div className="text-center">
-              <div className="h-[200px] w-full bg-gradient-to-tr from-[#00FFFF]/10 to-[#8000FF]/10 rounded-lg border border-dashed border-[#00FFFF]/30 flex items-center justify-center">
-                <p className="text-[#00FFFF]">Analytics Dashboard Preview</p>
-              </div>
-              <Button 
-                className="mt-4 bg-[#00FFFF] text-black hover:bg-[#00FFFF]/80"
-                onClick={() => handleAction('generate-report')}
-              >
-                Generate Report
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <div className="space-y-4">
-          <Card className="bg-black/30 border-[#00FFFF]/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-[#00FFFF] text-sm">Data Sources</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Website</span>
-                  <span className="text-[#00FFFF]">Connected</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">CRM</span>
-                  <span className="text-[#FF007F]">Disconnected</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Social Media</span>
-                  <span className="text-[#00FFFF]">Connected</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-black/30 border-[#00FFFF]/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-[#00FFFF] text-sm">Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10"
-                  onClick={() => handleAction('import-data')}
-                >
-                  Import Data
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10"
-                  onClick={() => handleAction('export-csv')}
-                >
-                  Export as CSV
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10"
-                  onClick={() => handleAction('scheduled-reports')}
-                >
-                  Scheduled Reports
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          )}
         </div>
-      </div>
-    </div>
-  );
-};
 
-const AutomationToolInterface: React.FC<{tool: AIToolItem; handleAction: (action: string) => void}> = ({ tool, handleAction }) => {
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="bg-black/30 border-[#00FFFF]/20">
-          <CardHeader>
-            <CardTitle className="text-[#00FFFF]">Workflow Builder</CardTitle>
-            <CardDescription className="text-gray-400">Create automated workflows with drag-and-drop</CardDescription>
-          </CardHeader>
-          <CardContent className="h-[300px] border border-dashed border-[#00FFFF]/30 bg-[#00FFFF]/5 rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-[#00FFFF] mb-4">Drag and drop workflow elements here</p>
-              <Button 
-                className="bg-[#00FFFF] text-black hover:bg-[#00FFFF]/80"
-                onClick={() => handleAction('create-workflow')}
-              >
-                Create New Workflow
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-        
+        {/* Sidebar */}
         <div className="space-y-4">
-          <Card className="bg-black/30 border-[#00FFFF]/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-[#00FFFF] text-sm">Templates</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full justify-start border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10"
-                  onClick={() => handleAction('load-template-email')}
-                >
-                  Email Response
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full justify-start border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10"
-                  onClick={() => handleAction('load-template-notification')}
-                >
-                  Notification System
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full justify-start border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10"
-                  onClick={() => handleAction('load-template-data')}
-                >
-                  Data Processor
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-black/30 border-[#00FFFF]/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-[#00FFFF] text-sm">Active Automations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Daily Report</span>
-                  <span className="text-[#00FFFF]">Active</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Lead Nurturing</span>
-                  <span className="text-[#00FFFF]">Active</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Social Media Posts</span>
-                  <span className="text-[#FF007F]">Paused</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const ContentToolInterface: React.FC<{tool: AIToolItem; handleAction: (action: string) => void}> = ({ tool, handleAction }) => {
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
-          <Card className="bg-black/30 border-[#00FFFF]/20 h-full">
+          {/* Tool Info */}
+          <Card>
             <CardHeader>
-              <CardTitle className="text-[#00FFFF]">Content Generator</CardTitle>
+              <CardTitle className="text-lg">Tool Information</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm text-gray-300 mb-1 block">Topic or Keywords</label>
-                  <Input 
-                    placeholder="E.g., AI tools, cryptocurrency, digital marketing" 
-                    className="bg-black/60 border-[#00FFFF]/20 text-white focus:border-[#00FFFF]"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-gray-300 mb-1 block">Content Type</label>
-                  <select className="w-full bg-black/60 border border-[#00FFFF]/20 rounded p-2 text-white">
-                    <option value="blog">Blog Post</option>
-                    <option value="social">Social Media Post</option>
-                    <option value="email">Email Newsletter</option>
-                    <option value="ad">Ad Copy</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-sm text-gray-300 mb-1 block">Tone</label>
-                  <select className="w-full bg-black/60 border border-[#00FFFF]/20 rounded p-2 text-white">
-                    <option value="professional">Professional</option>
-                    <option value="casual">Casual</option>
-                    <option value="enthusiastic">Enthusiastic</option>
-                    <option value="informative">Informative</option>
-                    <option value="persuasive">Persuasive</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-sm text-gray-300 mb-1 block">Additional Instructions</label>
-                  <Textarea 
-                    placeholder="Add any specific requirements for the content" 
-                    className="bg-black/60 border-[#00FFFF]/20 text-white focus:border-[#00FFFF]"
-                  />
-                </div>
-                <Button 
-                  className="w-full bg-[#00FFFF] text-black hover:bg-[#00FFFF]/80"
-                  onClick={() => handleAction('generate-content')}
-                >
-                  Generate Content
-                </Button>
+            <CardContent className="space-y-4 text-sm">
+              <div>
+                <h4 className="font-medium mb-2">Function:</h4>
+                <p className="text-muted-foreground">{tool.function}</p>
               </div>
+              
+              {tool.use_cases && (
+                <div>
+                  <h4 className="font-medium mb-2">Use Cases:</h4>
+                  <div className="flex flex-wrap gap-1">
+                    {tool.use_cases.map((useCase, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {useCase}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {tool.technologies && (
+                <div>
+                  <h4 className="font-medium mb-2">Technologies:</h4>
+                  <div className="flex flex-wrap gap-1">
+                    {tool.technologies.map((tech, index) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        {tech}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {tool.usageLimit && (
+                <div>
+                  <h4 className="font-medium mb-2">Usage Limits:</h4>
+                  <p className="text-muted-foreground text-xs">{tool.usageLimit}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Quick Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Button variant="outline" size="sm" className="w-full justify-start">
+                <FileText className="h-4 w-4 mr-2" />
+                View Documentation
+              </Button>
+              <Button variant="outline" size="sm" className="w-full justify-start">
+                <Code className="h-4 w-4 mr-2" />
+                API Reference
+              </Button>
+              <Button variant="outline" size="sm" className="w-full justify-start">
+                <Users className="h-4 w-4 mr-2" />
+                Community Forum
+              </Button>
             </CardContent>
           </Card>
         </div>
-        
-        <div className="space-y-4">
-          <Card className="bg-black/30 border-[#00FFFF]/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-[#00FFFF] text-sm">Content History</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full justify-start border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10"
-                  onClick={() => handleAction('load-content-1')}
-                >
-                  Blog Post: AI Tools Overview
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full justify-start border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10"
-                  onClick={() => handleAction('load-content-2')}
-                >
-                  Twitter Thread: Data Science
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full justify-start border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10"
-                  onClick={() => handleAction('load-content-3')}
-                >
-                  Email: Product Launch
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-black/30 border-[#00FFFF]/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-[#00FFFF] text-sm">Quick Tools</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10"
-                  onClick={() => handleAction('rephrase')}
-                >
-                  Rephrase Text
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10"
-                  onClick={() => handleAction('summarize')}
-                >
-                  Summarize Text
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10"
-                  onClick={() => handleAction('grammar-check')}
-                >
-                  Grammar Check
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const DevelopmentToolInterface: React.FC<{tool: AIToolItem; handleAction: (action: string) => void}> = ({ tool, handleAction }) => {
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="bg-black/30 border-[#00FFFF]/20">
-          <CardHeader>
-            <CardTitle className="text-[#00FFFF]">Model Builder</CardTitle>
-            <CardDescription className="text-gray-400">Create and train machine learning models</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm text-gray-300 mb-1 block">Model Type</label>
-                <select className="w-full bg-black/60 border border-[#00FFFF]/20 rounded p-2 text-white">
-                  <option value="classification">Classification</option>
-                  <option value="regression">Regression</option>
-                  <option value="nlp">Natural Language Processing</option>
-                  <option value="vision">Computer Vision</option>
-                </select>
-              </div>
-              
-              <div className="border border-dashed border-[#00FFFF]/30 bg-[#00FFFF]/5 rounded-lg p-4 text-center">
-                <p className="text-gray-400 mb-2">Drag and drop your dataset here</p>
-                <Button 
-                  variant="outline" 
-                  className="border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10"
-                  onClick={() => handleAction('upload-dataset')}
-                >
-                  Browse Files
-                </Button>
-              </div>
-              
-              <Button 
-                className="w-full bg-[#00FFFF] text-black hover:bg-[#00FFFF]/80"
-                onClick={() => handleAction('build-model')}
-              >
-                Build Model
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-black/30 border-[#00FFFF]/20">
-          <CardHeader>
-            <CardTitle className="text-[#00FFFF]">Code Editor</CardTitle>
-            <CardDescription className="text-gray-400">Custom code implementation</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="bg-black border border-[#00FFFF]/20 rounded-lg p-3 font-mono text-sm h-[240px] overflow-auto">
-                <pre className="text-[#00FFFF]">
-                  <code>
-{`# Sample Python code
-import numpy as np
-import pandas as pd
-
-def preprocess_data(data):
-    # Perform data cleaning and transformation
-    return processed_data
-
-# Load your model
-model = load_model('path/to/model')
-
-# Make predictions
-predictions = model.predict(data)`}
-                  </code>
-                </pre>
-              </div>
-              
-              <div className="flex justify-between">
-                <Button 
-                  variant="outline" 
-                  className="border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10"
-                  onClick={() => handleAction('run-code')}
-                >
-                  <Terminal className="h-4 w-4 mr-1" /> Run Code
-                </Button>
-                <Button 
-                  className="bg-[#00FFFF] text-black hover:bg-[#00FFFF]/80"
-                  onClick={() => handleAction('deploy-code')}
-                >
-                  <Code className="h-4 w-4 mr-1" /> Deploy Code
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <Card className="bg-black/30 border-[#00FFFF]/20">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-[#00FFFF] text-sm">Model Repository</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <div className="grid grid-cols-3 gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="justify-start border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10 overflow-hidden"
-                onClick={() => handleAction('load-model-1')}
-              >
-                <span className="truncate">Sentiment Analysis</span>
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="justify-start border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10 overflow-hidden"
-                onClick={() => handleAction('load-model-2')}
-              >
-                <span className="truncate">Image Classifier</span>
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="justify-start border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10 overflow-hidden"
-                onClick={() => handleAction('load-model-3')}
-              >
-                <span className="truncate">Recommendation Engine</span>
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
-
-// More simplified interfaces for other categories
-const LearningToolInterface: React.FC<{tool: AIToolItem; handleAction: (action: string) => void}> = ({ tool, handleAction }) => {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <Card className="bg-black/30 border-[#00FFFF]/20">
-        <CardHeader>
-          <CardTitle className="text-[#00FFFF]">Learning Modules</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <Button 
-              variant="outline" 
-              className="w-full justify-start text-left border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10"
-              onClick={() => handleAction('module-1')}
-            >
-              <div>
-                <div className="font-medium">Introduction to AI</div>
-                <div className="text-xs text-gray-400">Foundation concepts and history</div>
-              </div>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full justify-start text-left border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10"
-              onClick={() => handleAction('module-2')}
-            >
-              <div>
-                <div className="font-medium">Machine Learning Basics</div>
-                <div className="text-xs text-gray-400">Supervised and unsupervised learning</div>
-              </div>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full justify-start text-left border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10"
-              onClick={() => handleAction('module-3')}
-            >
-              <div>
-                <div className="font-medium">Neural Networks</div>
-                <div className="text-xs text-gray-400">Deep learning architectures</div>
-              </div>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card className="bg-black/30 border-[#00FFFF]/20">
-        <CardHeader>
-          <CardTitle className="text-[#00FFFF]">Interactive Lab</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[200px] border border-dashed border-[#00FFFF]/30 bg-[#00FFFF]/5 rounded-lg flex items-center justify-center mb-4">
-            <p className="text-[#00FFFF]">AI Simulation Environment</p>
-          </div>
-          <Button 
-            className="w-full bg-[#00FFFF] text-black hover:bg-[#00FFFF]/80"
-            onClick={() => handleAction('start-lab')}
-          >
-            Start Interactive Lab
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
-
-const CollaborationToolInterface: React.FC<{tool: AIToolItem; handleAction: (action: string) => void}> = ({ tool, handleAction }) => {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <Card className="md:col-span-2 bg-black/30 border-[#00FFFF]/20">
-        <CardHeader>
-          <CardTitle className="text-[#00FFFF]">Shared Workspace</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px] border border-dashed border-[#00FFFF]/30 bg-[#00FFFF]/5 rounded-lg flex items-center justify-center">
-            <p className="text-[#00FFFF]">Collaborative Document Editor</p>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <div className="space-y-4">
-        <Card className="bg-black/30 border-[#00FFFF]/20">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-[#00FFFF] text-sm">Team Members</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="h-6 w-6 rounded-full bg-[#00FFFF]/30"></div>
-                <span className="text-gray-300">Alex Kim</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="h-6 w-6 rounded-full bg-[#FF007F]/30"></div>
-                <span className="text-gray-300">Jamie Taylor</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="h-6 w-6 rounded-full bg-[#8000FF]/30"></div>
-                <span className="text-gray-300">Jordan Smith</span>
-              </div>
-            </div>
-            
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="w-full mt-4 border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10"
-              onClick={() => handleAction('invite-member')}
-            >
-              Invite Team Member
-            </Button>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-black/30 border-[#00FFFF]/20">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-[#00FFFF] text-sm">Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10"
-                onClick={() => handleAction('share-document')}
-              >
-                Share Document
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full border-[#00FFFF]/20 text-gray-300 hover:bg-[#00FFFF]/10"
-                onClick={() => handleAction('start-meeting')}
-              >
-                Start Meeting
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
-};
-
-// Simple generic interface for remaining categories
-const CommunityToolInterface: React.FC<{tool: AIToolItem; handleAction: (action: string) => void}> = ({ tool, handleAction }) => {
-  return (
-    <DefaultToolInterface tool={tool} handleAction={handleAction} />
-  );
-};
-
-const MonetizationToolInterface: React.FC<{tool: AIToolItem; handleAction: (action: string) => void}> = ({ tool, handleAction }) => {
-  return (
-    <DefaultToolInterface tool={tool} handleAction={handleAction} />
-  );
-};
-
-const SecurityToolInterface: React.FC<{tool: AIToolItem; handleAction: (action: string) => void}> = ({ tool, handleAction }) => {
-  return (
-    <DefaultToolInterface tool={tool} handleAction={handleAction} />
-  );
-};
-
-const IntegrationToolInterface: React.FC<{tool: AIToolItem; handleAction: (action: string) => void}> = ({ tool, handleAction }) => {
-  return (
-    <DefaultToolInterface tool={tool} handleAction={handleAction} />
-  );
-};
-
-// Default interface for any categories without specific implementation
-const DefaultToolInterface: React.FC<{tool: AIToolItem; handleAction: (action: string) => void}> = ({ tool, handleAction }) => {
-  return (
-    <div className="space-y-4">
-      <Alert className="bg-[#00FFFF]/5 border-[#00FFFF]/20">
-        <AlertDescription className="text-gray-300">
-          Welcome to {tool.name}. This tool helps you {tool.description.toLowerCase()}.
-        </AlertDescription>
-      </Alert>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="bg-black/30 border-[#00FFFF]/20">
-          <CardHeader>
-            <CardTitle className="text-[#00FFFF]">Main Functionality</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[200px] border border-dashed border-[#00FFFF]/30 bg-[#00FFFF]/5 rounded-lg flex items-center justify-center mb-4">
-              <p className="text-[#00FFFF]">{tool.name} Interface</p>
-            </div>
-            <Button 
-              className="w-full bg-[#00FFFF] text-black hover:bg-[#00FFFF]/80"
-              onClick={() => handleAction('start-tool')}
-            >
-              Start Using {tool.name}
-            </Button>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-black/30 border-[#00FFFF]/20">
-          <CardHeader>
-            <CardTitle className="text-[#00FFFF]">Quick Start Guide</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-start gap-2">
-                <div className="bg-[#00FFFF]/20 text-[#00FFFF] h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0">
-                  1
-                </div>
-                <p className="text-gray-300 text-sm">
-                  Configure your settings in the Settings tab
-                </p>
-              </div>
-              <div className="flex items-start gap-2">
-                <div className="bg-[#00FFFF]/20 text-[#00FFFF] h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0">
-                  2
-                </div>
-                <p className="text-gray-300 text-sm">
-                  Import your data or connect to existing data sources
-                </p>
-              </div>
-              <div className="flex items-start gap-2">
-                <div className="bg-[#00FFFF]/20 text-[#00FFFF] h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0">
-                  3
-                </div>
-                <p className="text-gray-300 text-sm">
-                  Use the main interface to interact with {tool.name}
-                </p>
-              </div>
-              <div className="flex items-start gap-2">
-                <div className="bg-[#00FFFF]/20 text-[#00FFFF] h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0">
-                  4
-                </div>
-                <p className="text-gray-300 text-sm">
-                  Export your results or share with your team
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

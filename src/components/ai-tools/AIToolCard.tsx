@@ -9,17 +9,24 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { AIToolItem, getTierBadgeColor, getTierIcon, getTierLabel } from '@/data/ai-tools-tiers';
-import { Check, Info, Key, Lock, Server, ExternalLink, ArrowUpRight } from 'lucide-react';
+import { 
+  ArrowRight, 
+  ExternalLink, 
+  Zap, 
+  Code, 
+  FileText, 
+  Image as ImageIcon, 
+  Music, 
+  Video, 
+  BarChart3, 
+  Users, 
+  Globe,
+  Shield,
+  Cpu
+} from 'lucide-react';
 import { useTier } from '@/context/TierContext';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import ToolActionButton from './ToolActionButton';
-import apiConnectionManager from '@/utils/apiConnectionManager';
 
 interface AIToolCardProps {
   tool: AIToolItem;
@@ -37,22 +44,39 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
     (tool.tier === 'pro' && currentTier === 'pro')
   );
 
-  // Check if this tool has an API connection
-  const isApiConnected = apiConnectionManager.hasConnection(tool.id);
-  const connectionDetails = isApiConnected ? apiConnectionManager.getConnection(tool.id) : null;
-  const hasOpenSourceOption = apiConnectionManager.hasOpenSourceAlternative(tool.id);
-  
-  const isUsingOpenSource = connectionDetails?.modelProvider === 'open-source';
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'image-generation': return <ImageIcon className="h-4 w-4" />;
+      case 'text-tools': return <FileText className="h-4 w-4" />;
+      case 'productivity': return <Zap className="h-4 w-4" />;
+      case 'data-analysis': return <BarChart3 className="h-4 w-4" />;
+      case 'automation': return <Cpu className="h-4 w-4" />;
+      case 'machine-learning': return <Cpu className="h-4 w-4" />;
+      case 'collaboration': return <Users className="h-4 w-4" />;
+      case 'development': return <Code className="h-4 w-4" />;
+      case 'music': return <Music className="h-4 w-4" />;
+      case 'video-editing': return <Video className="h-4 w-4" />;
+      case 'voice': return <Music className="h-4 w-4" />;
+      case 'seo': return <Globe className="h-4 w-4" />;
+      case 'marketing': return <BarChart3 className="h-4 w-4" />;
+      case 'ethics': return <Shield className="h-4 w-4" />;
+      case 'cloud': return <Globe className="h-4 w-4" />;
+      default: return <Zap className="h-4 w-4" />;
+    }
+  };
 
   if (compact) {
     return (
       <Card className={`overflow-hidden transition-all border ${hasAccess ? 'hover:shadow-md hover:border-blue-200' : 'opacity-80'}`}>
         <div className="p-4 flex justify-between items-start">
           <div className="flex items-center gap-3">
-            <div className="bg-blue-50 p-2 rounded-full">{tool.icon}</div>
+            <div className="bg-blue-50 p-2 rounded-full text-2xl">{tool.icon}</div>
             <div>
               <h3 className="font-medium text-sm">{tool.name}</h3>
-              <p className="text-xs text-muted-foreground">{tool.category}</p>
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                {getCategoryIcon(tool.category)}
+                <span className="capitalize">{tool.category.replace('-', ' ')}</span>
+              </div>
             </div>
           </div>
           <Badge variant="outline" className={`${getTierBadgeColor(tool.tier)} px-2 py-0.5 text-xs flex items-center gap-1`}>
@@ -60,162 +84,160 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
             <span>{getTierLabel(tool.tier)}</span>
           </Badge>
         </div>
-        <div className="px-4 pb-4 flex gap-2">
-          <ToolActionButton
-            tool={tool}
-            compact={true}
-            action="view"
-            className="flex-1"
-            onSelect={onSelect}
-          />
-          <ToolActionButton
-            tool={tool}
-            compact={true}
-            action={isApiConnected ? "launch" : "connect-api"}
-            onSelect={onSelect}
-            className="flex-1"
-          />
-        </div>
-        {isApiConnected && (
-          <div className="px-4 pb-2 flex items-center gap-1 text-xs">
-            {isUsingOpenSource ? (
-              <span className="text-green-600 flex items-center gap-1">
-                <Server className="h-3 w-3" /> Open Source
-              </span>
+        <div className="px-4 pb-4">
+          <Button 
+            variant={hasAccess ? "default" : "outline"} 
+            size="sm" 
+            className="w-full" 
+            onClick={() => onSelect?.(tool)}
+            disabled={!hasAccess}
+          >
+            {hasAccess ? (
+              <>
+                <ExternalLink className="h-3 w-3 mr-1" />
+                Launch Tool
+              </>
             ) : (
-              <span className="text-blue-600 flex items-center gap-1">
-                <Key className="h-3 w-3" /> API Connected
-              </span>
+              'Upgrade Required'
             )}
-          </div>
-        )}
+          </Button>
+        </div>
       </Card>
     );
   }
 
   return (
-    <Card className={`overflow-hidden h-full flex flex-col transition-all border ${hasAccess ? 'hover:shadow-md hover:border-blue-200' : 'opacity-80'}`}>
-      <CardHeader className="pb-3 bg-gradient-to-r from-blue-50/50 to-transparent">
+    <Card className={`overflow-hidden h-full flex flex-col transition-all border ${hasAccess ? 'hover:shadow-lg hover:border-blue-300 hover:-translate-y-1' : 'opacity-80'} group`}>
+      <CardHeader className="pb-3 bg-gradient-to-r from-blue-50/50 to-transparent relative">
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-3">
-            <div className="bg-blue-100/80 p-2.5 rounded-full shadow-sm">{tool.icon}</div>
+            <div className="bg-gradient-to-br from-blue-100 to-blue-200 p-3 rounded-xl shadow-sm text-3xl group-hover:scale-110 transition-transform">
+              {tool.icon}
+            </div>
             <div>
-              <CardTitle className="text-lg">{tool.name}</CardTitle>
-              <CardDescription className="capitalize">{tool.category.replace('-', ' ')}</CardDescription>
+              <CardTitle className="text-xl group-hover:text-blue-600 transition-colors">{tool.name}</CardTitle>
+              <div className="flex items-center gap-2 mt-1">
+                {getCategoryIcon(tool.category)}
+                <CardDescription className="capitalize font-medium">
+                  {tool.category.replace('-', ' ')}
+                </CardDescription>
+              </div>
             </div>
           </div>
-          <Badge variant="outline" className={`${getTierBadgeColor(tool.tier)} px-2.5 py-1 text-xs flex items-center gap-1.5`}>
-            {getTierIcon(tool.tier)}
-            <span>{getTierLabel(tool.tier)}</span>
-          </Badge>
+          <div className="flex flex-col items-end gap-2">
+            <Badge variant="outline" className={`${getTierBadgeColor(tool.tier)} px-3 py-1 text-xs flex items-center gap-1.5 shadow-sm`}>
+              {getTierIcon(tool.tier)}
+              <span>{getTierLabel(tool.tier)}</span>
+            </Badge>
+            {tool.popularTool && (
+              <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-800">
+                🔥 Popular
+              </Badge>
+            )}
+            {tool.featured && (
+              <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-800">
+                ⭐ Featured
+              </Badge>
+            )}
+          </div>
         </div>
       </CardHeader>
-      <CardContent className="flex-grow pt-4">
-        <p className="text-sm text-gray-700 mb-4">{tool.description}</p>
+      
+      <CardContent className="flex-grow pt-4 space-y-4">
+        <p className="text-sm text-gray-700 leading-relaxed">{tool.description}</p>
         
-        {tool.usageLimit && (
-          <div className="flex items-start gap-2 mb-3 bg-blue-50/50 p-2 rounded-md">
-            <Info className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
-            <p className="text-xs text-blue-700">{tool.usageLimit}</p>
+        {tool.function && (
+          <div className="bg-blue-50/50 rounded-lg p-3 border border-blue-100">
+            <h4 className="font-medium text-sm mb-1 text-blue-900">Function</h4>
+            <p className="text-xs text-blue-700">{tool.function}</p>
+          </div>
+        )}
+
+        {tool.uniqueSellingPoint && (
+          <div className="bg-green-50/50 rounded-lg p-3 border border-green-100">
+            <h4 className="font-medium text-sm mb-1 text-green-900">Key Advantage</h4>
+            <p className="text-xs text-green-700">{tool.uniqueSellingPoint}</p>
           </div>
         )}
         
-        <div className="bg-gray-50 rounded-lg p-3 mb-3 border border-gray-100">
-          <h4 className="font-medium text-sm mb-1">Unique Selling Point</h4>
-          <p className="text-xs text-gray-700">{tool.uniqueSellingPoint}</p>
-        </div>
-        
-        {hasOpenSourceOption && (
-          <div className="bg-green-50 rounded-lg p-3 mb-3 border border-green-100">
-            <h4 className="font-medium text-sm mb-1 flex items-center gap-1.5 text-green-800">
-              <Server className="h-4 w-4" /> Open Source Available
-            </h4>
-            <p className="text-xs text-green-700">
-              This tool can run using open source models in your browser
-            </p>
-          </div>
-        )}
-        
-        {tool.integrations && tool.integrations.length > 0 && (
+        {tool.use_cases && tool.use_cases.length > 0 && (
           <div>
-            <h4 className="font-medium text-xs mb-1 text-gray-500">Integrations</h4>
+            <h4 className="font-medium text-xs mb-2 text-gray-600">Use Cases</h4>
             <div className="flex flex-wrap gap-1.5">
-              {tool.integrations.map((integration, idx) => (
-                <Badge key={idx} variant="outline" className="text-xs py-0 px-2 bg-gray-50">
-                  {integration}
+              {tool.use_cases.slice(0, 3).map((useCase, idx) => (
+                <Badge key={idx} variant="outline" className="text-xs py-0.5 px-2 bg-gray-50 hover:bg-gray-100 transition-colors">
+                  {useCase}
                 </Badge>
               ))}
+              {tool.use_cases.length > 3 && (
+                <Badge variant="outline" className="text-xs py-0.5 px-2 bg-gray-50">
+                  +{tool.use_cases.length - 3} more
+                </Badge>
+              )}
             </div>
           </div>
         )}
-        
-        {isApiConnected && (
-          <div className="mt-3 flex items-center gap-2 text-sm">
-            {isUsingOpenSource ? (
-              <div className="text-green-700 bg-green-50 px-3 py-1.5 rounded-md flex items-center gap-2 w-full border border-green-100">
-                <Server className="h-4 w-4" />
-                <span className="font-medium">Using Open Source Models</span>
-              </div>
-            ) : (
-              <div className="text-blue-700 bg-blue-50 px-3 py-1.5 rounded-md flex items-center gap-2 w-full border border-blue-100">
-                <Key className="h-4 w-4" />
-                <span className="font-medium">API Connected</span>
-              </div>
-            )}
+
+        {tool.technologies && tool.technologies.length > 0 && (
+          <div>
+            <h4 className="font-medium text-xs mb-2 text-gray-600">Technologies</h4>
+            <div className="flex flex-wrap gap-1">
+              {tool.technologies.slice(0, 4).map((tech, idx) => (
+                <Badge key={idx} variant="secondary" className="text-xs py-0 px-1.5 bg-purple-50 text-purple-700">
+                  {tech}
+                </Badge>
+              ))}
+              {tool.technologies.length > 4 && (
+                <Badge variant="secondary" className="text-xs py-0 px-1.5 bg-purple-50 text-purple-700">
+                  +{tool.technologies.length - 4}
+                </Badge>
+              )}
+            </div>
+          </div>
+        )}
+
+        {tool.usageLimit && (
+          <div className="bg-amber-50/50 rounded-lg p-3 border border-amber-100">
+            <h4 className="font-medium text-sm mb-1 text-amber-900">Usage Limits</h4>
+            <p className="text-xs text-amber-700">{tool.usageLimit}</p>
           </div>
         )}
       </CardContent>
       
-      <CardFooter className="pt-2 border-t mt-auto bg-gray-50/50">
-        <div className="w-full flex justify-between items-center">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex items-center gap-1.5">
-                  <div className={`h-2.5 w-2.5 rounded-full ${hasAccess ? 'bg-green-500' : 'bg-amber-500'}`}></div>
-                  <span className="text-xs text-gray-600">
-                    {hasAccess ? (isApiConnected ? "Ready to use" : "Available") : "Requires upgrade"}
-                  </span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                {hasAccess 
-                  ? (isApiConnected 
-                    ? (isUsingOpenSource ? "Using open source models" : "API connected and ready to use")
-                    : "You have access to this tool with your current subscription") 
-                  : `This tool requires a ${getTierLabel(tool.tier)} subscription`}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          
-          <div className="flex gap-2">
-            <ToolActionButton 
-              tool={tool}
-              action="view"
-              size="sm"
-              variant="outline"
-              className="flex items-center gap-1"
-              onSelect={onSelect}
-            >
-              <ArrowUpRight className="h-3.5 w-3.5" />
-              Details
-            </ToolActionButton>
-            <ToolActionButton 
-              tool={tool}
-              action={isApiConnected ? "launch" : "connect-api"}
-              size="sm"
-              onSelect={onSelect}
-            >
-              {isApiConnected ? (
-                <>
-                  <ExternalLink className="h-3.5 w-3.5 mr-1" />
-                  Launch
-                </>
-              ) : (
-                'Connect'
-              )}
-            </ToolActionButton>
+      <CardFooter className="pt-4 border-t mt-auto bg-gradient-to-r from-gray-50/50 to-transparent">
+        <div className="w-full">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className={`h-2.5 w-2.5 rounded-full ${hasAccess ? 'bg-green-500' : 'bg-amber-500'}`}></div>
+              <span className="text-xs text-gray-600">
+                {hasAccess ? "Available" : "Requires upgrade"}
+              </span>
+            </div>
+            {tool.demoAvailable && (
+              <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
+                Demo Available
+              </Badge>
+            )}
           </div>
+          
+          <Button 
+            className={`w-full ${hasAccess ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800' : ''}`}
+            variant={hasAccess ? "default" : "outline"}
+            onClick={() => onSelect?.(tool)}
+            disabled={!hasAccess}
+          >
+            {hasAccess ? (
+              <>
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Launch Tool
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </>
+            ) : (
+              <>
+                Upgrade to {getTierLabel(tool.tier)}
+              </>
+            )}
+          </Button>
         </div>
       </CardFooter>
     </Card>

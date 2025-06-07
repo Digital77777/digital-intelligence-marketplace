@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { aiTools, toolCategories } from '@/data/ai-tools-tiers';
@@ -11,7 +12,7 @@ interface SearchItem {
   type: 'tool' | 'course' | 'forum' | 'category';
   category?: string;
   url: string;
-  route: string; // Added to match SearchableItem interface
+  route: string;
   icon?: React.ReactNode;
 }
 
@@ -33,7 +34,9 @@ export const useSearchCommands = () => {
         tool.name.toLowerCase().includes(lowerQuery) ||
         tool.description.toLowerCase().includes(lowerQuery) ||
         tool.category.toLowerCase().includes(lowerQuery) ||
-        tool.use_cases?.some(useCase => useCase.toLowerCase().includes(lowerQuery))
+        tool.function?.toLowerCase().includes(lowerQuery) ||
+        tool.use_cases?.some(useCase => useCase.toLowerCase().includes(lowerQuery)) ||
+        tool.technologies?.some(tech => tech.toLowerCase().includes(lowerQuery))
       ) {
         results.push({
           id: tool.id,
@@ -48,7 +51,7 @@ export const useSearchCommands = () => {
       }
     });
     
-    // Search Categories (including agriculture)
+    // Search Categories
     toolCategories.forEach(category => {
       if (
         category.name.toLowerCase().includes(lowerQuery) ||
