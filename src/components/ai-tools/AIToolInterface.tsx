@@ -31,8 +31,6 @@ const AIToolInterface: React.FC<AIToolInterfaceProps> = ({ tool, connectionDetai
     if (result.success) {
       setOutput(result.result);
       setCurrentTab('result');
-    } else if (result.error) {
-      // Error is already handled within the hook
     }
   };
 

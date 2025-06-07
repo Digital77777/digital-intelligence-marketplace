@@ -30,26 +30,31 @@ import { useToast } from '@/hooks/use-toast';
 interface ToolInterfaceProps {
   tool: AIToolItem;
   onBack: () => void;
+  connectionDetails?: {
+    apiKey: string;
+    endpoint: string;
+    isConnected: boolean;
+  };
 }
 
-const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack }) => {
+const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack, connectionDetails }) => {
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState('');
   const { toast } = useToast();
 
   const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'image-generation': return <ImageIcon className="h-5 w-5" />;
-      case 'text-tools': return <FileText className="h-5 w-5" />;
+    switch (category.toLowerCase()) {
+      case 'image generation': return <ImageIcon className="h-5 w-5" />;
+      case 'text tools': return <FileText className="h-5 w-5" />;
       case 'productivity': return <Zap className="h-5 w-5" />;
-      case 'data-analysis': return <BarChart3 className="h-5 w-5" />;
+      case 'data analysis': return <BarChart3 className="h-5 w-5" />;
       case 'automation': return <Cpu className="h-5 w-5" />;
-      case 'machine-learning': return <Cpu className="h-5 w-5" />;
+      case 'machine learning': return <Cpu className="h-5 w-5" />;
       case 'collaboration': return <Users className="h-5 w-5" />;
       case 'development': return <Code className="h-5 w-5" />;
       case 'music': return <Music className="h-5 w-5" />;
-      case 'video-editing': return <Video className="h-5 w-5" />;
+      case 'video editing': return <Video className="h-5 w-5" />;
       case 'voice': return <Music className="h-5 w-5" />;
       case 'seo': return <Globe className="h-5 w-5" />;
       case 'marketing': return <BarChart3 className="h-5 w-5" />;
@@ -60,10 +65,10 @@ const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack }) => {
   };
 
   const getPlaceholderText = () => {
-    switch (tool.category) {
-      case 'image-generation':
+    switch (tool.category.toLowerCase()) {
+      case 'image generation':
         return 'Describe the image you want to generate (e.g., "A futuristic city with flying cars at sunset")';
-      case 'text-tools':
+      case 'text tools':
         return tool.id === 'ai-text-summarizer' 
           ? 'Paste the text you want to summarize...'
           : tool.id === 'ai-language-translator'
@@ -75,7 +80,7 @@ const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack }) => {
           : tool.id === 'ai-email-writer'
           ? 'Describe the email you want to write (e.g., "Professional follow-up after job interview")'
           : 'Describe what you want to accomplish...';
-      case 'data-analysis':
+      case 'data analysis':
         return 'Upload your data file or describe the analysis you need...';
       case 'automation':
         return 'Describe the workflow you want to automate...';
@@ -83,7 +88,7 @@ const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack }) => {
         return 'Describe the code you need or paste code for review...';
       case 'music':
         return 'Describe the type of music you want (e.g., "Upbeat jazz melody for intro")';
-      case 'machine-learning':
+      case 'machine learning':
         return 'Describe your ML problem or upload your dataset...';
       default:
         return 'Enter your input here...';
@@ -91,14 +96,14 @@ const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack }) => {
   };
 
   const getExamplePrompts = () => {
-    switch (tool.category) {
-      case 'image-generation':
+    switch (tool.category.toLowerCase()) {
+      case 'image generation':
         return [
           'A photorealistic portrait of a robot in a garden',
           'Abstract art with vibrant blues and greens',
           'A minimalist logo for a tech startup'
         ];
-      case 'text-tools':
+      case 'text tools':
         return tool.id === 'ai-text-summarizer' 
           ? ['Summarize this research paper', 'Key points from meeting notes', 'Executive summary needed']
           : tool.id === 'ai-language-translator'
@@ -106,7 +111,7 @@ const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack }) => {
           : ['Write a blog post about AI', 'Create product description', 'Generate social media copy'];
       case 'productivity':
         return ['Create quarterly review presentation', 'Write professional email template', 'Generate meeting agenda'];
-      case 'data-analysis':
+      case 'data analysis':
         return ['Analyze sales data trends', 'Customer behavior insights', 'Financial performance review'];
       default:
         return ['Get started with your input', 'Try an example', 'Explore capabilities'];
@@ -140,15 +145,15 @@ const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack }) => {
   };
 
   const generateMockResult = (tool: AIToolItem, input: string): string => {
-    switch (tool.category) {
-      case 'image-generation':
+    switch (tool.category.toLowerCase()) {
+      case 'image generation':
         return `Generated image: "${input}"\n\nImage created successfully with high resolution (1024x1024)\nStyle: Photorealistic\nQuality: Premium\n\n[Image would be displayed here in the actual implementation]`;
-      case 'text-tools':
+      case 'text tools':
         if (tool.id === 'ai-text-summarizer') {
           return `Summary of your text:\n\n• Key Point 1: Main concept identified from your input\n• Key Point 2: Supporting details and evidence\n• Key Point 3: Conclusion and implications\n\nOriginal length: ${input.length} characters\nSummary length: 150 characters\nCompression ratio: 75%`;
         }
         return `Generated content based on: "${input}"\n\nHere's your professionally crafted content that meets your requirements. The tone is optimized for your target audience and includes relevant keywords for better engagement.`;
-      case 'data-analysis':
+      case 'data analysis':
         return `Analysis Results:\n\n📊 Data Overview:\n- Processed ${Math.floor(Math.random() * 1000)} data points\n- Found ${Math.floor(Math.random() * 10)} key trends\n- Confidence level: ${85 + Math.floor(Math.random() * 10)}%\n\n🔍 Key Insights:\n1. Strong positive correlation in primary metrics\n2. Seasonal patterns detected in Q3 data\n3. Recommendation: Focus on high-performing segments`;
       case 'development':
         return `Code Analysis Complete:\n\n✅ Generated solution for: "${input}"\n\n\`\`\`python\n# Your optimized code solution\ndef solution():\n    # Implementation based on your requirements\n    return "Code generated successfully"\n\`\`\`\n\n📝 Code Quality Score: 95/100\n🔧 Suggestions: Consider adding error handling\n📚 Documentation: Auto-generated comments included`;
@@ -268,7 +273,7 @@ const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack }) => {
               {/* Input Area */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Your Input:</label>
-                {tool.category === 'data-analysis' ? (
+                {tool.category.toLowerCase() === 'data analysis' ? (
                   <div className="space-y-3">
                     <Input 
                       type="file" 
@@ -385,13 +390,6 @@ const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack }) => {
                       </Badge>
                     ))}
                   </div>
-                </div>
-              )}
-
-              {tool.usageLimit && (
-                <div>
-                  <h4 className="font-medium mb-2">Usage Limits:</h4>
-                  <p className="text-muted-foreground text-xs">{tool.usageLimit}</p>
                 </div>
               )}
             </CardContent>
