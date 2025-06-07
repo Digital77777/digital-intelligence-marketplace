@@ -175,6 +175,13 @@ export const toolCategories: ToolCategory[] = [
     description: 'Cloud deployment and management',
     icon: '☁️',
     color: 'from-sky-500 to-blue-600'
+  },
+  {
+    id: 'agriculture',
+    name: 'Agriculture',
+    description: 'Smart farming and agricultural AI solutions',
+    icon: '🌾',
+    color: 'from-green-500 to-lime-600'
   }
 ];
 
@@ -554,6 +561,182 @@ export const aiTools: AIToolItem[] = [
     uniqueSellingPoint: 'Universal cloud management for AI workloads',
     technologies: ['AWS', 'GCP', 'Azure APIs', 'Terraform', 'Kubernetes'],
     integrations: ['AWS', 'Google Cloud', 'Microsoft Azure', 'DigitalOcean']
+  },
+
+  // AGRICULTURE TOOLS - FREEMIUM TIER (4 tools)
+  {
+    id: 'cropmind-ai',
+    name: 'CropMind AI',
+    description: 'Generative Agronomist for Smallholders - Daily crop insights using satellite and soil data',
+    category: 'agriculture',
+    tier: 'freemium',
+    icon: '🌱',
+    popularTool: true,
+    featured: true,
+    function: 'Provide AI-driven daily crop insights for smallholder farmers',
+    use_cases: ['Daily crop monitoring', 'Fertilizer recommendations', 'Irrigation alerts', 'Pest management'],
+    uniqueSellingPoint: 'Chat interface with voice support in local languages',
+    usageLimit: 'Free tier: 3 fields monitoring, 10 daily insights',
+    technologies: ['GPT-4', 'Satellite APIs', 'Soil sensors', 'WhatsApp API'],
+    integrations: ['WhatsApp', 'CropX API', 'Weather APIs', 'SMS gateways'],
+    demoAvailable: true
+  },
+  {
+    id: 'smartpest-sentinel',
+    name: 'SmartPest Sentinel',
+    description: 'Pest trap + camera + AI network for real-time pest detection and mitigation advice',
+    category: 'agriculture',
+    tier: 'freemium',
+    icon: '🐛',
+    function: 'Real-time pest detection and mitigation recommendations',
+    use_cases: ['Pest identification', 'Outbreak alerts', 'Treatment advice', 'Pest lifecycle tracking'],
+    uniqueSellingPoint: 'Community-shared pest outbreak data with local heatmaps',
+    usageLimit: 'Free tier: 20 pest identifications per month',
+    technologies: ['Computer Vision', 'IoT cameras', 'GPT-4', 'Geographic mapping'],
+    integrations: ['IoT trap devices', 'Weather APIs', 'Pesticide suppliers', 'Community platforms'],
+    demoAvailable: true
+  },
+  {
+    id: 'livestock-guardian-vision',
+    name: 'Livestock Guardian Vision',
+    description: 'Vision-based animal health alert system using low-cost cameras',
+    category: 'agriculture',
+    tier: 'freemium',
+    icon: '🐄',
+    function: 'Monitor animal health through computer vision analysis',
+    use_cases: ['Health monitoring', 'Behavior analysis', 'Alert notifications', 'Activity tracking'],
+    uniqueSellingPoint: 'Detect limping, isolation, and abnormal behavior patterns',
+    usageLimit: 'Free tier: 5 animals monitoring, basic alerts',
+    technologies: ['Computer Vision', 'Mobile cameras', 'CCTV integration', 'Alert systems'],
+    integrations: ['CCTV systems', 'Mobile apps', 'RFID tags', 'CattleEye'],
+    demoAvailable: true
+  },
+  {
+    id: 'agrimesh-network',
+    name: 'AgriMesh Network',
+    description: 'Hyperlocal Crop Intelligence Network - Peer-powered decentralized farming insights',
+    category: 'agriculture',
+    tier: 'freemium',
+    icon: '🌐',
+    function: 'Share and access real-time farming insights from peer network',
+    use_cases: ['Peer insights', 'Regional trends', 'Crop reporting', 'Community knowledge'],
+    uniqueSellingPoint: 'Decentralized network for real-time farming intelligence',
+    usageLimit: 'Free tier: Basic regional dashboard, limited reports',
+    technologies: ['Blockchain', 'P2P networking', 'GPT-4', 'Geographic mapping'],
+    integrations: ['WhatsApp bot', 'CropMind AI', 'Government portals', 'NGO platforms'],
+    demoAvailable: true
+  },
+
+  // AGRICULTURE TOOLS - BASIC TIER (4 tools)
+  {
+    id: 'agrobot-commander',
+    name: 'AgroBot Commander',
+    description: 'Centralized control system for autonomous farm robots with optimization and analytics',
+    category: 'agriculture',
+    tier: 'basic',
+    icon: '🤖',
+    featured: true,
+    function: 'Control and optimize autonomous farm robot operations',
+    use_cases: ['Robot fleet management', 'Route optimization', 'Task scheduling', 'Performance analytics'],
+    uniqueSellingPoint: 'AI-optimized route planning with weather-aware scheduling',
+    technologies: ['IoT', 'GPS mapping', 'AI optimization', 'Weather APIs'],
+    integrations: ['John Deere', 'Solinftec', 'Weather stations', 'Farm management systems']
+  },
+  {
+    id: 'aquayield-os',
+    name: 'AquaYield OS',
+    description: 'AI irrigation scheduler that integrates weather, crop stage, and soil sensors',
+    category: 'agriculture',
+    tier: 'basic',
+    icon: '💧',
+    function: 'Optimize irrigation scheduling using AI and sensor data',
+    use_cases: ['Irrigation scheduling', 'Water optimization', 'Crop stage monitoring', 'Soil moisture tracking'],
+    uniqueSellingPoint: 'ML models optimize irrigation by crop stage with real-time control',
+    technologies: ['ML models', 'Soil sensors', 'Weather APIs', 'IoT controls'],
+    integrations: ['Soil moisture sensors', 'Weather stations', 'Pump controllers', 'Farm sensors']
+  },
+  {
+    id: 'farmpnl-ai',
+    name: 'FarmP&L AI',
+    description: 'Automated profitability tracking tool for fields, crops, and seasons',
+    category: 'agriculture',
+    tier: 'basic',
+    icon: '📊',
+    function: 'Track and analyze farm profitability across fields and seasons',
+    use_cases: ['Profit tracking', 'Cost analysis', 'ROI calculation', 'Financial planning'],
+    uniqueSellingPoint: 'AI suggestions for profit-maximizing input use with commodity forecasts',
+    technologies: ['AI analytics', 'Financial modeling', 'API integrations', 'Reporting'],
+    integrations: ['John Deere', 'Climate FieldView', 'Bushel', 'Financial systems']
+  },
+  {
+    id: 'agrorisk-navigator',
+    name: 'AgroRisk Navigator',
+    description: 'Risk simulator for weather/climate-driven yield and insurance planning',
+    category: 'agriculture',
+    tier: 'basic',
+    icon: '🌦️',
+    function: 'Simulate weather risks and optimize insurance planning',
+    use_cases: ['Risk assessment', 'Weather simulation', 'Insurance planning', 'Yield prediction'],
+    uniqueSellingPoint: 'Climate scenario modeling with insurance product recommendations',
+    technologies: ['Weather simulation', 'Risk modeling', 'Insurance APIs', 'Climate data'],
+    integrations: ['Weather stations', 'Insurance providers', 'Arable Mark 3', 'Sencrop stations']
+  },
+
+  // AGRICULTURE TOOLS - PRO TIER (4 tools)
+  {
+    id: 'agritrial-ai',
+    name: 'AgriTrial AI',
+    description: 'Field trial management & analytics platform for ag companies and co-ops',
+    category: 'agriculture',
+    tier: 'pro',
+    icon: '🧠',
+    featured: true,
+    function: 'Manage and analyze agricultural field trials with AI insights',
+    use_cases: ['Trial management', 'Statistical analysis', 'Research insights', 'Report generation'],
+    uniqueSellingPoint: 'White-label platform with automatic insights from trial results',
+    technologies: ['Statistical analysis', 'Drone integration', 'AI insights', 'Report generation'],
+    integrations: ['Drone platforms', 'Satellite imagery', 'Research databases', 'Report systems']
+  },
+  {
+    id: 'regencert-hub',
+    name: 'RegenCert Hub',
+    description: 'Digital tool for managing, verifying, and marketing regenerative agriculture practices',
+    category: 'agriculture',
+    tier: 'pro',
+    icon: '🔄',
+    featured: true,
+    function: 'Manage regenerative agriculture certification and carbon tracking',
+    use_cases: ['Practice logging', 'Carbon tracking', 'Certification management', 'Traceability'],
+    uniqueSellingPoint: 'Blockchain-based certification with carbon credit integration',
+    technologies: ['Blockchain', 'Carbon tracking', 'IoT sensors', 'QR traceability'],
+    integrations: ['CropX', 'Agmatix', 'Carbon exchanges', 'Buyer marketplaces']
+  },
+  {
+    id: 'agroapi-marketplace',
+    name: 'AgroAPI Marketplace',
+    description: 'Centralized API store for AgriTech developers to access agriculture datasets',
+    category: 'agriculture',
+    tier: 'pro',
+    icon: '📶',
+    function: 'Provide APIs for weather, soil, satellite, and agricultural data',
+    use_cases: ['API integration', 'Data monetization', 'Developer tools', 'Agriculture datasets'],
+    uniqueSellingPoint: 'Embedded AI models marketplace with curated data bundles',
+    technologies: ['API management', 'Data processing', 'SDKs', 'Analytics'],
+    integrations: ['Weather services', 'Satellite providers', 'Soil databases', 'Developer platforms']
+  },
+  {
+    id: 'fieldsim-xr',
+    name: 'FieldSim XR',
+    description: 'Immersive farm training simulator using real-world data and mixed reality',
+    category: 'agriculture',
+    tier: 'pro',
+    icon: '🌍',
+    featured: true,
+    function: 'Provide immersive VR/AR training for farming practices',
+    use_cases: ['Training simulation', 'Skill development', 'Educational content', 'Certification'],
+    uniqueSellingPoint: 'Real farm data integration with multiplayer training modes',
+    technologies: ['VR/AR', 'Real-world data', 'Training systems', 'Certification'],
+    integrations: ['VR headsets', 'Android apps', 'Farm data systems', 'Training platforms']
   }
 ];
 

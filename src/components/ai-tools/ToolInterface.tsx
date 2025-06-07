@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { AIToolItem } from '@/data/ai-tools-tiers';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -60,6 +59,7 @@ const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack, connectionD
       case 'marketing': return <BarChart3 className="h-5 w-5" />;
       case 'ethics': return <Shield className="h-5 w-5" />;
       case 'cloud': return <Globe className="h-5 w-5" />;
+      case 'agriculture': return <span className="h-5 w-5">🌾</span>;
       default: return <Zap className="h-5 w-5" />;
     }
   };
@@ -90,8 +90,41 @@ const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack, connectionD
         return 'Describe the type of music you want (e.g., "Upbeat jazz melody for intro")';
       case 'machine learning':
         return 'Describe your ML problem or upload your dataset...';
+      case 'agriculture':
+        return getAgriculturePlaceholder(tool.id);
       default:
         return 'Enter your input here...';
+    }
+  };
+
+  const getAgriculturePlaceholder = (toolId: string) => {
+    switch (toolId) {
+      case 'cropmind-ai':
+        return 'Ask about your crops: "How are my tomatoes doing?" or "When should I water my corn field?"';
+      case 'agrobot-commander':
+        return 'Plan robot tasks: "Schedule harvesting for Field A tomorrow at 8 AM"';
+      case 'aquayield-os':
+        return 'Set irrigation: "Create watering schedule for corn field based on weather forecast"';
+      case 'farmpnl-ai':
+        return 'Analyze costs: "Calculate profit for wheat field after harvest expenses"';
+      case 'agrorisk-navigator':
+        return 'Assess risks: "Analyze drought risk for soybean crop in Iowa for next season"';
+      case 'smartpest-sentinel':
+        return 'Report pests: "Found small green insects on tomato leaves" or upload pest image';
+      case 'livestock-guardian-vision':
+        return 'Monitor animals: "Check health status of cattle in barn 2"';
+      case 'agritrial-ai':
+        return 'Plan trial: "Set up fertilizer comparison trial for corn across 4 plots"';
+      case 'regencert-hub':
+        return 'Log practices: "Record no-till planting for Field C, 50 acres"';
+      case 'agroapi-marketplace':
+        return 'Search data: "Find soil moisture APIs for California almond orchards"';
+      case 'fieldsim-xr':
+        return 'Start training: "Begin irrigation simulation for new farming techniques"';
+      case 'agrimesh-network':
+        return 'Share insight: "Report pest outbreak in tomatoes, need community advice"';
+      default:
+        return 'Enter your agricultural query or request...';
     }
   };
 
@@ -113,8 +146,31 @@ const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack, connectionD
         return ['Create quarterly review presentation', 'Write professional email template', 'Generate meeting agenda'];
       case 'data analysis':
         return ['Analyze sales data trends', 'Customer behavior insights', 'Financial performance review'];
+      case 'agriculture':
+        return getAgricultureExamples(tool.id);
       default:
         return ['Get started with your input', 'Try an example', 'Explore capabilities'];
+    }
+  };
+
+  const getAgricultureExamples = (toolId: string) => {
+    switch (toolId) {
+      case 'cropmind-ai':
+        return ['Check corn growth stage', 'Fertilizer recommendations for tomatoes', 'Pest alert for Field A'];
+      case 'agrobot-commander':
+        return ['Schedule planting robots', 'Optimize harvest routes', 'Check battery status'];
+      case 'aquayield-os':
+        return ['Water schedule for drought', 'Soil moisture analysis', 'Irrigation zone setup'];
+      case 'farmpnl-ai':
+        return ['Corn field profitability', 'Seed cost analysis', 'Harvest ROI calculation'];
+      case 'agrorisk-navigator':
+        return ['Drought risk assessment', 'Frost damage prediction', 'Insurance planning'];
+      case 'smartpest-sentinel':
+        return ['Identify aphids on crops', 'Pest treatment advice', 'Community pest alerts'];
+      case 'livestock-guardian-vision':
+        return ['Monitor cattle health', 'Detect limping animals', 'Behavior analysis'];
+      default:
+        return ['Monitor crop health', 'Optimize resources', 'Get recommendations'];
     }
   };
 
@@ -157,8 +213,27 @@ const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack, connectionD
         return `Analysis Results:\n\n📊 Data Overview:\n- Processed ${Math.floor(Math.random() * 1000)} data points\n- Found ${Math.floor(Math.random() * 10)} key trends\n- Confidence level: ${85 + Math.floor(Math.random() * 10)}%\n\n🔍 Key Insights:\n1. Strong positive correlation in primary metrics\n2. Seasonal patterns detected in Q3 data\n3. Recommendation: Focus on high-performing segments`;
       case 'development':
         return `Code Analysis Complete:\n\n✅ Generated solution for: "${input}"\n\n\`\`\`python\n# Your optimized code solution\ndef solution():\n    # Implementation based on your requirements\n    return "Code generated successfully"\n\`\`\`\n\n📝 Code Quality Score: 95/100\n🔧 Suggestions: Consider adding error handling\n📚 Documentation: Auto-generated comments included`;
+      case 'agriculture':
+        return generateAgricultureResult(tool.id, input);
       default:
         return `✨ Processing complete!\n\nYour request "${input}" has been processed successfully using ${tool.name}.\n\nResults are ready for download or further processing. The AI has optimized the output based on best practices and your specific requirements.`;
+    }
+  };
+
+  const generateAgricultureResult = (toolId: string, input: string): string => {
+    switch (toolId) {
+      case 'cropmind-ai':
+        return `🌱 CropMind Analysis for: "${input}"\n\n📊 Current Status:\n- Growth Stage: Vegetative (Week 6)\n- Soil Moisture: 65% (Optimal)\n- Weather: 3 days of rain predicted\n\n💡 Recommendations:\n✅ Reduce irrigation for next 4 days\n✅ Apply nitrogen fertilizer in 2 weeks\n⚠️ Monitor for fungal diseases due to humidity\n\n📱 Alert: WhatsApp notifications enabled\n🛰️ Next satellite update: Tomorrow 6 AM`;
+      case 'agrobot-commander':
+        return `🤖 Robot Command Center - Task: "${input}"\n\n📍 Fleet Status:\n- Robot A: Active, Battery 85%, Field 2\n- Robot B: Charging, Battery 45%, Base\n- Robot C: Maintenance needed\n\n📋 Scheduled Tasks:\n✅ Field mapping: 85% complete\n⏳ Seeding operation: Starting in 2 hours\n📅 Harvest prep: Scheduled for next week\n\n🛣️ Optimized Routes: Generated\n⚡ Estimated completion: 6.5 hours`;
+      case 'aquayield-os':
+        return `💧 Irrigation Analysis: "${input}"\n\n🌡️ Environmental Conditions:\n- Soil temperature: 22°C\n- Humidity: 45%\n- Wind speed: 8 km/h\n\n💦 Watering Schedule:\n- Zone A: 25 minutes at 6 AM\n- Zone B: 30 minutes at 7 AM\n- Zone C: Skip (recent rainfall)\n\n📊 Water Usage:\n- Today: 245L (15% below target)\n- Weekly savings: 450L\n- Efficiency score: 92%`;
+      case 'farmpnl-ai':
+        return `📊 Farm P&L Analysis: "${input}"\n\n💰 Financial Summary:\n- Revenue: $12,450\n- Input costs: $3,200\n- Labor costs: $1,800\n- Net profit: $7,450\n\n📈 Performance Metrics:\n- ROI: 232%\n- Cost per acre: $85\n- Profit margin: 59.8%\n\n🎯 Optimization Tips:\n• Reduce fertilizer costs by 12%\n• Consider bulk seed purchasing\n• Harvest timing optimal for price`;
+      case 'smartpest-sentinel':
+        return `🐛 Pest Detection Result: "${input}"\n\n🔍 Identified Species:\n- Primary: Aphids (Green peach aphid)\n- Confidence: 94%\n- Threat level: Medium\n\n📊 Population Analysis:\n- Estimated count: 150-200 per plant\n- Growth rate: +15% daily\n- Economic threshold: 75% reached\n\n💊 Treatment Recommendations:\n1. Apply insecticidal soap (organic)\n2. Introduce ladybugs (biological)\n3. Monitor for 5 days\n\n🌍 Community Alert: 3 nearby farms reported similar`;
+      default:
+        return `🌾 Agricultural Analysis Complete!\n\nProcessed: "${input}"\n\nYour request has been analyzed using advanced agricultural AI models. Results show optimal growing conditions with actionable recommendations for improved yield and sustainability.\n\n📈 Expected improvement: 15-25%\n🌱 Sustainability score: 8.5/10`;
     }
   };
 
@@ -240,7 +315,7 @@ const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack, connectionD
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Input Section */}
+        {/* Main Content */}
         <div className="lg:col-span-2 space-y-4">
           <Card>
             <CardHeader>
