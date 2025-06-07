@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { AIToolItem } from '@/data/ai-tools-tiers';
-import { ToolCategoryInfo } from '@/data/ai-tools-tiers';
+import { ToolCategoryInfo } from '@/types/tools';
 import AIToolCard from './AIToolCard';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';

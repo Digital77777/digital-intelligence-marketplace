@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { aiTools, categories } from '@/data/ai-tools-tiers';
+import { aiTools, toolCategories } from '@/data/ai-tools-tiers';
 import { Course } from '@/data/courses';
 import { forumData } from '@/data/forum';
 
@@ -50,7 +49,7 @@ export const useSearchCommands = () => {
     });
     
     // Search Categories (including agriculture)
-    categories.forEach(category => {
+    toolCategories.forEach(category => {
       if (
         category.name.toLowerCase().includes(lowerQuery) ||
         category.description.toLowerCase().includes(lowerQuery)
