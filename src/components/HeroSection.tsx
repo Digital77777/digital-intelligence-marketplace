@@ -132,9 +132,7 @@ const HeroSection = () => {
                 <span className="absolute -bottom-1 left-0 right-0 h-[5px] bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"></span>
               </span>
             </span>
-            <span className="block my-4 text-transparent bg-clip-text bg-gradient-to-r from-[#2A5C8D] via-indigo-600 to-purple-600">
-              with Digital Intelligence
-            </span>
+            <span className="block my-4 text-transparent bg-clip-text bg-gradient-to-r from-[#2A5C8D] via-indigo-600 to-purple-600 text-3xl">with Digital Intelligence Marketplace</span>
             <div className="relative h-20 md:h-24 flex items-center justify-center overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-pulse" style={{
               animationDuration: '3s'
