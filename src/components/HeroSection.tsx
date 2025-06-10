@@ -124,7 +124,7 @@ const HeroSection = () => {
           </Badge>
           
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-tight">
-            <span className="block mb-2">
+            <span className="block mb-2 text-4xl">
               <span className="inline-block px-4 py-1.5 bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-10 border border-gray-200/20 rounded-lg shadow-lg">Empower</span>
               {" "}
               <span className="relative">
