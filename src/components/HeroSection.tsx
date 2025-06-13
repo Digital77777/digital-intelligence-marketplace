@@ -124,7 +124,7 @@ const HeroSection = () => {
           </Badge>
           
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-tight">
-            <span className="block mb-2 text-4xl">
+            <span className="block mb-2 text-4xl py-px font-semibold">
               <span className="inline-block px-4 py-1.5 bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-10 border border-gray-200/20 rounded-lg shadow-lg">Empower</span>
               {" "}
               <span className="relative">
@@ -132,7 +132,7 @@ const HeroSection = () => {
                 <span className="absolute -bottom-1 left-0 right-0 h-[5px] bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"></span>
               </span>
             </span>
-            <span className="block my-4 text-transparent bg-clip-text bg-gradient-to-r from-[#2A5C8D] via-indigo-600 to-purple-600 text-3xl">with Digital Intelligence Marketplace</span>
+            <span className="block my-4 text-transparent bg-clip-text bg-gradient-to-r from-[#2A5C8D] via-indigo-600 to-purple-600 text-5xl py-px">with Digital Intelligence Marketplace</span>
             <div className="relative h-20 md:h-24 flex items-center justify-center overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-pulse" style={{
               animationDuration: '3s'
