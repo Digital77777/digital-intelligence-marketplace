@@ -137,7 +137,7 @@ const HeroSection = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-pulse" style={{
               animationDuration: '3s'
             }}></div>
-              <span className="relative z-10 bg-clip-text text-transparent bg-gradient-to-r from-[#2A5C8D] to-[#00FF88] shadow-text inline-flex items-center text-4xl">
+              <span className="relative z-10 bg-clip-text text-transparent bg-gradient-to-r from-[#2A5C8D] to-[#00FF88] shadow-text inline-flex items-center text-6xl">
                 <Bot className="h-8 w-8 mr-2 text-[#00FF88]" />
                 {aiTool}
               </span>
