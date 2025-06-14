@@ -8,6 +8,8 @@ import { useUser } from '@/context/UserContext';
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import SearchCommand from '@/components/search/SearchCommand';
 import { useTier } from '@/context/TierContext';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import NotificationPanel from './NotificationPanel';
 
 const NavbarActions = () => {
   const navigate = useNavigate();
@@ -15,7 +17,7 @@ const NavbarActions = () => {
   const { currentTier } = useTier();
   const [notificationCount, setNotificationCount] = useState(3);
 
-  const handleNotificationClick = () => {
+  const handleClearNotifications = () => {
     toast.success("Notifications cleared");
     setNotificationCount(0);
   };
@@ -74,20 +76,29 @@ const NavbarActions = () => {
         </Button>
         
         {/* Notification Button */}
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-9 w-9 rounded-full text-white hover:bg-white/20 relative" 
-          onClick={handleNotificationClick} 
-          title="Notifications"
-        >
-          <Bell className="h-4 w-4" />
-          {notificationCount > 0 && (
-            <span className="absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-r from-[#00AAFF] to-[#0066cc] text-[10px] font-medium text-white">
-              {notificationCount}
-            </span>
-          )}
-        </Button>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-9 w-9 rounded-full text-white hover:bg-white/20 relative" 
+              title="Notifications"
+            >
+              <Bell className="h-4 w-4" />
+              {notificationCount > 0 && (
+                <span className="absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-r from-[#00AAFF] to-[#0066cc] text-[10px] font-medium text-white">
+                  {notificationCount}
+                </span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 p-0" align="end">
+            <NotificationPanel 
+              onClear={handleClearNotifications}
+              notificationCount={notificationCount}
+            />
+          </PopoverContent>
+        </Popover>
       </div>
       
       {/* Global Search Command Dialog */}
