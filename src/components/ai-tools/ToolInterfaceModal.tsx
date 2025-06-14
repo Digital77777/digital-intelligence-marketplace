@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import apiConnectionManager from '@/utils/apiConnectionManager';
 import AIToolInterface from './AIToolInterface';
 import ConnectionSection from './components/ConnectionSection';
 import WelcomeScreen from './components/WelcomeScreen';
+import ImageGeneratorInterface from "./interfaces/ImageGeneratorInterface";
 
 interface ToolInterfaceModalProps {
   open: boolean;
@@ -128,7 +128,10 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
         </DialogHeader>
         
         <div className="flex-grow overflow-auto p-6">
-          {showConnectionForm ? (
+          {/* Render custom interface for AI Image Generator */}
+          {tool.name === "AI Image Generator" ? (
+            <ImageGeneratorInterface />
+          ) : showConnectionForm ? (
             <APIConnectionForm 
               tool={tool}
               onSuccess={handleApiConnectionSuccess}
