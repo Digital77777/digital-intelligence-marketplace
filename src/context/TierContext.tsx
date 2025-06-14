@@ -1,6 +1,5 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
 import { supabase } from '@/integrations/supabase/client';
 import { AIToolTier } from '@/data/ai-tools-tiers';
@@ -27,7 +26,6 @@ export const TierProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
   const { user, session } = useUser();
 
   // Check subscription status on user login/session change
@@ -81,9 +79,7 @@ export const TierProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const upgradePrompt = (requiredTier: TierType) => {
-    toast.error("Upgrade Required", {
-      description: `This feature requires a ${requiredTier} subscription. Please upgrade to continue.`,
-    });
+    toast.error(`This feature requires a ${requiredTier} subscription. Please upgrade to continue.`);
   };
 
   const setTier = (tier: TierType) => {
