@@ -14,13 +14,16 @@ import AdvancedStepEditor from './AdvancedStepEditor';
 import WorkflowTemplates from './WorkflowTemplates';
 import SchedulingPanel from './SchedulingPanel';
 
+type AllowedStepType = "action" | "condition" | "ai-model" | "api-call" | "timer" | "notification";
 interface WorkflowStep {
   id: string;
   name: string;
   description: string;
-  type: string;
+  type: AllowedStepType;
   config: any;
   order: number;
+  triggers?: string[];
+  dependencies?: string[];
 }
 
 interface Workflow {
@@ -51,10 +54,10 @@ const WorkflowEditor = () => {
   ]);
   const [schedulingConfig, setSchedulingConfig] = useState({
     enabled: false,
-    type: 'once' as const,
+    type: 'once' as "once" | "recurring" | "trigger",
     schedule: '',
     timezone: 'UTC',
-    conditions: []
+    conditions: [] as string[],
   });
   const [activeTab, setActiveTab] = useState('workflows');
   const { toast } = useToast();
@@ -180,7 +183,7 @@ const WorkflowEditor = () => {
   };
 
   const addAdvancedStep = (workflow: Workflow) => {
-    const newStep = {
+    const newStep: WorkflowStep = {
       id: Date.now().toString(),
       name: `Advanced Step ${workflow.steps.length + 1}`,
       description: '',
@@ -200,7 +203,7 @@ const WorkflowEditor = () => {
     updateWorkflow(updatedWorkflow);
   };
 
-  const updateAdvancedStep = (workflow: Workflow, stepId: string, updatedStep: any) => {
+  const updateAdvancedStep = (workflow: Workflow, stepId: string, updatedStep: WorkflowStep) => {
     const updatedWorkflow = {
       ...workflow,
       steps: workflow.steps.map(step => 
@@ -374,8 +377,8 @@ const WorkflowEditor = () => {
                         <div key={step.id} className="flex items-center space-x-4">
                           {canAccess('ai-studio') ? (
                             <AdvancedStepEditor
-                              step={step}
-                              onUpdate={(updatedStep) => updateAdvancedStep(selectedWorkflow, step.id, updatedStep)}
+                              step={step as import("./AdvancedStepEditor").default extends React.FC<infer P> ? P['step'] : never}
+                              onUpdate={(updatedStep) => updateAdvancedStep(selectedWorkflow, step.id, updatedStep as WorkflowStep)}
                               onDelete={() => removeStep(selectedWorkflow, step.id)}
                               availableModels={availableModels}
                             />
@@ -458,7 +461,7 @@ const WorkflowEditor = () => {
           {canAccess('ai-studio') ? (
             <SchedulingPanel
               config={schedulingConfig}
-              onChange={setSchedulingConfig}
+              onChange={(config) => setSchedulingConfig(config)}
             />
           ) : (
             <Card>
