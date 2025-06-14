@@ -5,69 +5,23 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Calendar, Clock, Users, CheckCircle, AlertCircle, Plus } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  priority: string;
-  due_date: string;
-  assigned_to: string;
-  created_at: string;
-}
-
-interface Team {
-  id: string;
-  name: string;
-  description: string;
-  created_at: string;
-}
+import { mockTasks, mockTeams, Task, Team } from '@/data/teamDashboardMockData';
 
 const TeamDashboard = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      
-      // Fetch user's teams
-      const { data: teamsData, error: teamsError } = await supabase
-        .from('teams')
-        .select('*');
-
-      if (teamsError) throw teamsError;
-
-      // Fetch tasks for user's teams
-      const { data: tasksData, error: tasksError } = await supabase
-        .from('tasks')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (tasksError) throw tasksError;
-
-      setTeams(teamsData || []);
-      setTasks(tasksData || []);
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load dashboard data",
-        variant: "destructive"
-      });
-    } finally {
+    setLoading(true);
+    const timer = setTimeout(() => {
+      setTasks(mockTasks);
+      setTeams(mockTeams);
       setLoading(false);
-    }
-  };
+    }, 500); // Simulate network latency
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const getTaskStats = () => {
     const total = tasks.length;
