@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
@@ -80,7 +81,7 @@ export const useLearningResources = ({
           title: entry.API,
           description: entry.Description,
           category: entry.Category,
-          difficulty: ['beginner', 'intermediate', 'advanced'][Math.floor(Math.random() * 3)],
+          difficulty: (['beginner', 'intermediate', 'advanced'] as const)[Math.floor(Math.random() * 3)],
           duration: Math.floor(Math.random() * (180 - 30 + 1) + 30),
           instructor: 'External Provider',
           content: `This resource is provided by an external API. You can find more information at the following link: ${entry.Link}`,
