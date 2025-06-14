@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
@@ -28,8 +29,18 @@ export const TierProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(false);
   const { user, session } = useUser();
 
-  // Check subscription status on user login/session change
+  // Superuser email for override
+  const SUPERUSER_EMAIL = "bbadibanga@55gmail.com";
+
   useEffect(() => {
+    // If this is the superuser, force pro tier and access
+    if (user && user.email === SUPERUSER_EMAIL) {
+      setCurrentTier('pro');
+      setIsSubscribed(true);
+      setSubscriptionEnd(null);
+      return;
+    }
+
     if (user && session) {
       refreshSubscription();
     } else {
@@ -39,33 +50,36 @@ export const TierProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [user, session]);
 
-  // Check for URL parameters indicating successful payment
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('success') === 'true') {
       toast.success("Payment successful! Your subscription is being activated.");
       refreshSubscription();
-      // Clean up URL
       window.history.replaceState({}, '', window.location.pathname);
     } else if (urlParams.get('canceled') === 'true') {
       toast.error("Payment was canceled.");
-      // Clean up URL
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
 
   const refreshSubscription = async () => {
+    // Skip real checks for superuser
+    if (user && user.email === SUPERUSER_EMAIL) {
+      setCurrentTier('pro');
+      setIsSubscribed(true);
+      setSubscriptionEnd(null);
+      return;
+    }
+
     if (!user || !session) return;
 
     setIsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('check-subscription');
-      
       if (error) {
         console.error('Error checking subscription:', error);
         return;
       }
-
       if (data) {
         setCurrentTier(data.subscription_tier || 'freemium');
         setIsSubscribed(data.subscribed || false);
@@ -92,6 +106,9 @@ export const TierProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const canAccess = (feature: string): boolean => {
+    // Superuser: allow all
+    if (user && user.email === SUPERUSER_EMAIL) return true;
+
     const tierHierarchy = {
       'freemium': 0,
       'basic': 1,
@@ -119,7 +136,6 @@ export const TierProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const requiredLevel = featureRequirements[feature] ?? 0;
     const userLevel = tierHierarchy[currentTier];
-    
     return userLevel >= requiredLevel;
   };
 
