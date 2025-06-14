@@ -33,9 +33,9 @@ export function useNavItems() {
       visible: canAccess('marketplace')
     },
     {
-      // Forums now appears in the primary navigation group
       title: "Forums",
       path: "/forums",
+      icon: <span className="mr-1.5">💬</span>,
       visible: canAccess('forums')
     },
   ];
@@ -47,10 +47,10 @@ export function useNavItems() {
     // Start with base items minus Forums
     const baseItems: NavItem[] = [
       {
-        // Collaboration is now a secondary nav item
+        // Collaboration is now a secondary nav item and has no icon here
         title: "Collaboration",
         path: "/collaboration-hub",
-        icon: <span className="mr-1.5">👥</span>,
+        // icon removed per user request
         visible: canAccess('team-dashboard')
       },
       {
