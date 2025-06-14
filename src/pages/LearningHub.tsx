@@ -45,12 +45,14 @@ import { useUser } from '@/context/UserContext';
 import { useTier } from '@/context/TierContext';
 import { useLearningResources } from '@/hooks/useLearningResources';
 import YouTubeCourses from '@/components/learning/YouTubeCourses';
+import LearningHubAIAssistant from "@/components/learning/LearningHubAIAssistant";
 
 const LearningHub = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState('');
   const [activeTab, setActiveTab] = useState('courses');
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
   const { user } = useUser();
   const { currentTier, upgradePrompt, getTierFeatures } = useTier();
   const location = useLocation();
@@ -276,9 +278,18 @@ const LearningHub = () => {
 
             {/* Courses Tab */}
             <TabsContent value="courses" className="mt-6">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold mb-2">Available Courses</h2>
-                <p className="text-muted-foreground">Choose from {totalCount} courses across various AI topics</p>
+              <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Available Courses</h2>
+                  <p className="text-muted-foreground">Choose from {totalCount} courses across various AI topics</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-700"
+                  onClick={() => setShowAIAssistant(true)}
+                >
+                  <Sparkles className="h-5 w-5 text-amber-500" /> Ask the AI
+                </Button>
               </div>
               
               {isLoading ? (
