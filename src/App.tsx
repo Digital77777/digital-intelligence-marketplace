@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -36,8 +37,8 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <TooltipProvider>
-        <TierProvider>
-          <UserProvider>
+        <UserProvider>
+          <TierProvider>
             <Toaster />
             <Sonner />
             <BrowserRouter>
@@ -78,11 +79,12 @@ const App = () => (
                 <Route path="/discovery" element={<DiscoveryPage />} />
               </Routes>
             </BrowserRouter>
-          </UserProvider>
-        </TierProvider>
+          </TierProvider>
+        </UserProvider>
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );
 
 export default App;
+
