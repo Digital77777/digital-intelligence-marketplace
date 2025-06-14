@@ -18,87 +18,126 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const supabaseClient = createClient(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    { auth: { persistSession: false } }
-  );
-
   try {
     logStep("Function started");
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
-    logStep("Stripe key verified");
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+    if (!stripeKey || !supabaseUrl || !supabaseServiceKey) {
+      logStep("ERROR: Missing required environment variables");
+      return new Response(JSON.stringify({ error: "Server configuration error" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      });
+    }
+
+    logStep("Environment variables verified");
+
+    const supabaseClient = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { persistSession: false }
+    });
 
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header provided");
+    if (!authHeader) {
+      logStep("ERROR: No authorization header");
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+      });
+    }
     
     const token = authHeader.replace("Bearer ", "");
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
+    
+    if (userError || !userData.user?.email) {
+      logStep("ERROR: Authentication failed", { error: userError?.message });
+      return new Response(JSON.stringify({ error: "Authentication failed" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+      });
+    }
+
     const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { tier } = await req.json();
-    if (!tier) throw new Error("Tier is required");
+    const requestBody = await req.json();
+    const { tier } = requestBody;
+    
+    if (!tier || !['basic', 'pro'].includes(tier)) {
+      logStep("ERROR: Invalid tier specified", { tier });
+      return new Response(JSON.stringify({ error: "Invalid tier specified" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      });
+    }
+
     logStep("Tier specified", { tier });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
     
-    // Check if customer exists
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    let customerId;
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
-      logStep("Existing customer found", { customerId });
-    } else {
-      logStep("No existing customer found");
+    try {
+      const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+      let customerId;
+      
+      if (customers.data.length > 0) {
+        customerId = customers.data[0].id;
+        logStep("Existing customer found", { customerId });
+      } else {
+        logStep("No existing customer found");
+      }
+
+      const pricing = {
+        basic: { amount: 2100, name: "Basic Plan" },
+        pro: { amount: 4600, name: "Pro Plan" }
+      };
+
+      const tierPricing = pricing[tier as keyof typeof pricing];
+
+      const origin = req.headers.get("origin") || "http://localhost:3000";
+
+      const session = await stripe.checkout.sessions.create({
+        customer: customerId,
+        customer_email: customerId ? undefined : user.email,
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: { name: tierPricing.name },
+              unit_amount: tierPricing.amount,
+              recurring: { interval: "month" },
+            },
+            quantity: 1,
+          },
+        ],
+        mode: "subscription",
+        success_url: `${origin}/pricing?success=true`,
+        cancel_url: `${origin}/pricing?canceled=true`,
+        metadata: {
+          user_id: user.id,
+          tier: tier,
+        },
+      });
+
+      logStep("Checkout session created", { sessionId: session.id, url: session.url });
+
+      return new Response(JSON.stringify({ url: session.url }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+
+    } catch (stripeError) {
+      logStep("Stripe API error", { error: stripeError instanceof Error ? stripeError.message : String(stripeError) });
+      return new Response(JSON.stringify({ error: "Payment service unavailable" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 503,
+      });
     }
 
-    // Define pricing based on tier
-    const pricing = {
-      basic: { amount: 2100, name: "Basic Plan" }, // $21
-      pro: { amount: 4600, name: "Pro Plan" }      // $46
-    };
-
-    const tierPricing = pricing[tier as keyof typeof pricing];
-    if (!tierPricing) throw new Error("Invalid tier specified");
-
-    const session = await stripe.checkout.sessions.create({
-      customer: customerId,
-      customer_email: customerId ? undefined : user.email,
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            product_data: { name: tierPricing.name },
-            unit_amount: tierPricing.amount,
-            recurring: { interval: "month" },
-          },
-          quantity: 1,
-        },
-      ],
-      mode: "subscription",
-      success_url: `${req.headers.get("origin")}/pricing?success=true`,
-      cancel_url: `${req.headers.get("origin")}/pricing?canceled=true`,
-      metadata: {
-        user_id: user.id,
-        tier: tier,
-      },
-    });
-
-    logStep("Checkout session created", { sessionId: session.id, url: session.url });
-
-    return new Response(JSON.stringify({ url: session.url }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    logStep("ERROR in create-checkout", { message: errorMessage });
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    logStep("ERROR in create-checkout", { message: error instanceof Error ? error.message : String(error) });
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });

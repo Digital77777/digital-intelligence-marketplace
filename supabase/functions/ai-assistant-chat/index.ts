@@ -9,19 +9,38 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const logStep = (step: string, details?: any) => {
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  console.log(`[AI-ASSISTANT-CHAT] ${step}${detailsStr}`);
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    logStep("Function started");
+
+    if (!openAIApiKey) {
+      logStep("ERROR: OpenAI API key not configured");
+      return new Response(JSON.stringify({ error: "OpenAI API key not configured" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      });
+    }
+
     const { messages } = await req.json();
+    
     if (!Array.isArray(messages) || messages.length === 0) {
-      return new Response(JSON.stringify({ error: "No messages provided" }), {
+      logStep("ERROR: Invalid messages format");
+      return new Response(JSON.stringify({ error: "Invalid messages format" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
       });
     }
+
+    logStep("Sending request to OpenAI", { messageCount: messages.length });
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -33,20 +52,32 @@ serve(async (req) => {
         model: 'gpt-4o-mini',
         messages: messages,
         temperature: 0.8,
+        max_tokens: 1000,
       }),
     });
 
+    if (!response.ok) {
+      const errorText = await response.text();
+      logStep("OpenAI API error", { status: response.status, error: errorText });
+      return new Response(JSON.stringify({ error: "OpenAI API error" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: response.status,
+      });
+    }
+
     const data = await response.json();
     const generatedText = data.choices?.[0]?.message?.content || "I'm having trouble generating a response right now.";
+
+    logStep("Response generated successfully");
 
     return new Response(JSON.stringify({ content: generatedText }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
   } catch (error) {
-    console.error('[AI ASSISTANT CHAT ERROR]', error);
+    logStep("ERROR in ai-assistant-chat", { message: error instanceof Error ? error.message : String(error) });
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
+      JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
