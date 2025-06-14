@@ -87,25 +87,26 @@ export const useVirtualScroll = (
 };
 
 // Component error boundary utility
-export const withErrorBoundary = <P extends object>(
+export const withErrorBoundary = <P extends React.ComponentProps<any>>(
   Component: React.ComponentType<P>
 ) => {
-  return React.forwardRef<any, P>((props, ref) => {
+  const WrappedComponent = React.forwardRef<any, P>((props, ref) => {
     try {
-      return React.createElement(Component, { ...props, ref });
+      return <Component {...props} ref={ref} />;
     } catch (error) {
       console.error('Component error:', error);
-      return React.createElement(
-        'div',
-        { className: 'p-4 border border-red-200 rounded-lg bg-red-50' },
-        React.createElement(
-          'p',
-          { className: 'text-red-600 text-sm' },
-          'Something went wrong. Please try refreshing the page.'
-        )
+      return (
+        <div className="p-4 border border-red-200 rounded-lg bg-red-50">
+          <p className="text-red-600 text-sm">
+            Something went wrong. Please try refreshing the page.
+          </p>
+        </div>
       );
     }
   });
+
+  WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`;
+  return WrappedComponent;
 };
 
 // Bundle splitting utility
