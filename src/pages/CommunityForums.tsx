@@ -1,9 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useUser } from '@/context/UserContext';
 import { toast } from 'sonner';
+// Import Button from shadcn/ui
+import { Button } from "@/components/ui/button";
 
 import { useForumData } from '@/hooks/useForumData';
 import ForumCategorySidebar from "@/components/forums/ForumCategorySidebar";
