@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -136,7 +137,7 @@ const LearningHub = () => {
     },
     {
       id: '3',
-4 title: 'AI Expert Certification',
+      title: 'AI Expert Certification',
       description: 'Industry-recognized expert-level certification',
       requirements: ['Complete all paths', '5 projects', 'Capstone project', 'Mentor review'],
       tier: 'pro',
