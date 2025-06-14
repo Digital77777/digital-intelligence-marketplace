@@ -1,3 +1,41 @@
+import React from 'react';
+import { 
+  Brain, 
+  FileText, 
+  Presentation, 
+  Languages, 
+  BarChart3, 
+  Bot, 
+  PenTool, 
+  Cpu, 
+  Users, 
+  Code, 
+  Mail, 
+  Music, 
+  Zap, 
+  Settings, 
+  Share2, 
+  Video, 
+  Mic, 
+  TrendingUp, 
+  Network, 
+  Workflow, 
+  Upload, 
+  Shield, 
+  Cloud,
+  Sprout,
+  MapPin,
+  Droplets,
+  DollarSign,
+  CloudRain,
+  Eye,
+  TestTube,
+  Bug,
+  Recycle,
+  Database,
+  Globe,
+  Gamepad2
+} from 'lucide-react';
 
 export type AIToolTier = 'freemium' | 'basic' | 'pro';
 
@@ -7,7 +45,7 @@ export interface AIToolItem {
   description: string;
   category: string;
   tier: AIToolTier;
-  icon: string;
+  icon: string | React.ReactNode;
   popularTool?: boolean;
   comingSoon?: boolean;
   featured?: boolean;
@@ -188,12 +226,12 @@ export const toolCategories: ToolCategory[] = [
 export const aiTools: AIToolItem[] = [
   // FREEMIUM TIER (9 tools)
   {
-    id: 'ai-image-generator',
+    id: '1',
     name: 'AI Image Generator',
     description: 'Generate stunning images from text prompts using advanced AI models',
     category: 'image-generation',
     tier: 'freemium',
-    icon: '🎨',
+    icon: <Brain className="h-6 w-6" />,
     popularTool: true,
     featured: true,
     function: 'Generate images from text prompts',
@@ -205,12 +243,12 @@ export const aiTools: AIToolItem[] = [
     demoAvailable: true
   },
   {
-    id: 'ai-text-summarizer',
+    id: '2',
     name: 'AI Text Summarizer',
     description: 'Summarize long documents, articles, and research papers instantly',
     category: 'text-tools',
     tier: 'freemium',
-    icon: '📄',
+    icon: <FileText className="h-6 w-6" />,
     popularTool: true,
     function: 'Summarize long documents or articles',
     use_cases: ['Research papers', 'News articles', 'Meeting notes', 'Legal documents'],
@@ -221,12 +259,12 @@ export const aiTools: AIToolItem[] = [
     demoAvailable: true
   },
   {
-    id: 'ai-presentation-maker',
+    id: '3',
     name: 'AI Presentation Maker',
     description: 'Generate professional slide decks from topic prompts',
     category: 'productivity',
     tier: 'freemium',
-    icon: '📊',
+    icon: <Presentation className="h-6 w-6" />,
     function: 'Generate slide decks from topic prompts',
     use_cases: ['Business presentations', 'Educational content', 'Pitch decks', 'Training materials'],
     uniqueSellingPoint: 'Complete presentations with visuals and speaker notes',
@@ -236,12 +274,12 @@ export const aiTools: AIToolItem[] = [
     demoAvailable: true
   },
   {
-    id: 'ai-language-translator',
+    id: '4',
     name: 'AI Language Translator',
     description: 'Translate text between 100+ languages with context awareness',
     category: 'text-tools',
     tier: 'freemium',
-    icon: '🌐',
+    icon: <Languages className="h-6 w-6" />,
     popularTool: true,
     function: 'Translate text between multiple languages',
     use_cases: ['Document translation', 'Website localization', 'Email communication', 'Travel assistance'],
@@ -252,12 +290,12 @@ export const aiTools: AIToolItem[] = [
     demoAvailable: true
   },
   {
-    id: 'insightlite',
+    id: '5',
     name: 'InsightLite',
     description: 'Analyze CSV/Excel data and generate actionable insights',
     category: 'data-analysis',
     tier: 'freemium',
-    icon: '📈',
+    icon: <BarChart3 className="h-6 w-6" />,
     function: 'Analyze simple CSV/Excel data and generate insights',
     use_cases: ['Sales analysis', 'Customer insights', 'Financial reports', 'Survey data'],
     uniqueSellingPoint: 'Natural language insights from your data',
@@ -267,12 +305,12 @@ export const aiTools: AIToolItem[] = [
     demoAvailable: true
   },
   {
-    id: 'taskbot-mini',
+    id: '6',
     name: 'TaskBot Mini',
     description: 'Simple task automation for scheduling and notifications',
     category: 'automation',
     tier: 'freemium',
-    icon: '⏰',
+    icon: <Bot className="h-6 w-6" />,
     function: 'Simple task automation like scheduling and notifications',
     use_cases: ['Meeting reminders', 'Follow-up emails', 'Social media posts', 'Data backups'],
     uniqueSellingPoint: 'Natural language task creation and management',
@@ -282,12 +320,12 @@ export const aiTools: AIToolItem[] = [
     demoAvailable: true
   },
   {
-    id: 'copycraft-free',
+    id: '7',
     name: 'CopyCraft Free',
     description: 'Generate marketing copy, blogs, and product descriptions',
     category: 'text-tools',
     tier: 'freemium',
-    icon: '✍️',
+    icon: <PenTool className="h-6 w-6" />,
     popularTool: true,
     function: 'Generate marketing copy, blogs, and product descriptions',
     use_cases: ['Blog posts', 'Social media captions', 'Product descriptions', 'Email campaigns'],
@@ -298,12 +336,12 @@ export const aiTools: AIToolItem[] = [
     demoAvailable: true
   },
   {
-    id: 'ai-basic-simulator',
+    id: '8',
     name: 'AI Basic Simulator',
     description: 'Simulate simple ML models with interactive visualizations',
     category: 'machine-learning',
     tier: 'freemium',
-    icon: '🧪',
+    icon: <Cpu className="h-6 w-6" />,
     function: 'Simulate simple ML models with dummy data',
     use_cases: ['Learning ML concepts', 'Model prototyping', 'Educational demos', 'Algorithm comparison'],
     uniqueSellingPoint: 'Interactive ML simulations with real-time visualization',
@@ -313,12 +351,12 @@ export const aiTools: AIToolItem[] = [
     demoAvailable: true
   },
   {
-    id: 'forum-assistant',
+    id: '9',
     name: 'Forum Assistant',
     description: 'AI-powered forum moderation and discussion assistance',
     category: 'collaboration',
     tier: 'freemium',
-    icon: '💬',
+    icon: <Users className="h-6 w-6" />,
     function: 'Moderates and assists in forum discussions',
     use_cases: ['Community moderation', 'Response suggestions', 'Spam detection', 'Topic categorization'],
     uniqueSellingPoint: 'Intelligent moderation with context understanding',
@@ -330,12 +368,12 @@ export const aiTools: AIToolItem[] = [
 
   // BASIC TIER (8 tools)
   {
-    id: 'ai-code-assistant',
+    id: '10',
     name: 'AI Code Assistant',
     description: 'Advanced code generation, debugging, and explanation tool',
     category: 'development',
     tier: 'basic',
-    icon: '💻',
+    icon: <Code className="h-6 w-6" />,
     popularTool: true,
     featured: true,
     function: 'Help with code generation, debugging, and explanations',
@@ -346,12 +384,12 @@ export const aiTools: AIToolItem[] = [
     rationale: 'Essential for modern development workflows'
   },
   {
-    id: 'ai-email-writer',
+    id: '11',
     name: 'AI Email Writer',
     description: 'Compose professional emails with tone and context awareness',
     category: 'productivity',
     tier: 'basic',
-    icon: '📧',
+    icon: <Mail className="h-6 w-6" />,
     function: 'Compose emails based on prompts or replies',
     use_cases: ['Business emails', 'Customer support', 'Sales outreach', 'Follow-up messages'],
     uniqueSellingPoint: 'Context-aware email composition with tone control',
@@ -359,12 +397,12 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Gmail', 'Outlook', 'Mailchimp', 'Salesforce']
   },
   {
-    id: 'ai-music-composer-basic',
+    id: '12',
     name: 'AI Music Composer Basic',
     description: 'Generate melodies and short musical loops',
     category: 'music',
     tier: 'basic',
-    icon: '🎵',
+    icon: <Music className="h-6 w-6" />,
     function: 'Generate melodies or short loops',
     use_cases: ['Background music', 'Jingles', 'Podcast intros', 'Video soundtracks'],
     uniqueSellingPoint: 'MIDI-compatible music generation with style control',
@@ -372,12 +410,12 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Spotify', 'SoundCloud', 'GarageBand', 'Ableton Live']
   },
   {
-    id: 'dataflow-pro',
+    id: '13',
     name: 'DataFlow Pro',
     description: 'Analyze complex datasets with AI-powered recommendations',
     category: 'data-analysis',
     tier: 'basic',
-    icon: '📊',
+    icon: <BarChart3 className="h-6 w-6" />,
     featured: true,
     function: 'Analyze complex datasets and recommend actions',
     use_cases: ['Business intelligence', 'Predictive analytics', 'Data visualization', 'Trend analysis'],
@@ -386,12 +424,12 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Tableau', 'Power BI', 'Google Analytics', 'Salesforce']
   },
   {
-    id: 'autopilot-studio',
+    id: '14',
     name: 'AutoPilot Studio',
     description: 'Build custom automation workflows with visual interface',
     category: 'automation',
     tier: 'basic',
-    icon: '🔧',
+    icon: <Zap className="h-6 w-6" />,
     function: 'Build custom automation workflows',
     use_cases: ['Business processes', 'Data pipelines', 'API integrations', 'Notification systems'],
     uniqueSellingPoint: 'Visual workflow builder with AI-suggested optimizations',
@@ -399,12 +437,12 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Zapier', 'Make', 'Microsoft Flow', 'IFTTT']
   },
   {
-    id: 'modelmaker-lite',
+    id: '15',
     name: 'ModelMaker Lite',
     description: 'Build and evaluate basic ML models with intuitive UI',
     category: 'machine-learning',
     tier: 'basic',
-    icon: '🤖',
+    icon: <Settings className="h-6 w-6" />,
     function: 'Build and evaluate basic ML models with UI',
     use_cases: ['Classification models', 'Regression analysis', 'Model comparison', 'Feature selection'],
     uniqueSellingPoint: 'No-code ML model creation with automated evaluation',
@@ -412,12 +450,12 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Jupyter', 'Google Colab', 'MLflow', 'Weights & Biases']
   },
   {
-    id: 'seo-boost-ai',
+    id: '16',
     name: 'SEO Boost AI',
     description: 'Analyze and optimize content for search engines',
     category: 'seo',
     tier: 'basic',
-    icon: '🔍',
+    icon: <TrendingUp className="h-6 w-6" />,
     function: 'Analyze and optimize content for SEO',
     use_cases: ['Content optimization', 'Keyword research', 'Competitor analysis', 'SERP tracking'],
     uniqueSellingPoint: 'AI-powered SEO recommendations with real-time scoring',
@@ -425,12 +463,12 @@ export const aiTools: AIToolItem[] = [
     integrations: ['WordPress', 'Shopify', 'Webflow', 'Squarespace']
   },
   {
-    id: 'teamsync-ai',
+    id: '17',
     name: 'TeamSync AI',
     description: 'Sync team tasks, summaries, and collaborative notes',
     category: 'collaboration',
     tier: 'basic',
-    icon: '👥',
+    icon: <Share2 className="h-6 w-6" />,
     function: 'Sync team tasks, summaries, and notes',
     use_cases: ['Project management', 'Meeting summaries', 'Task automation', 'Team communication'],
     uniqueSellingPoint: 'AI-powered team coordination with smart task prioritization',
@@ -440,12 +478,12 @@ export const aiTools: AIToolItem[] = [
 
   // PRO TIER (9 tools)
   {
-    id: 'ai-social-media-manager',
+    id: '18',
     name: 'AI Social Media Manager',
     description: 'Complete social media management with content creation and scheduling',
     category: 'marketing',
     tier: 'pro',
-    icon: '📱',
+    icon: <Share2 className="h-6 w-6" />,
     popularTool: true,
     featured: true,
     function: 'Plan, write, schedule, and post social content',
@@ -455,12 +493,12 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Hootsuite', 'Buffer', 'Sprout Social', 'Later']
   },
   {
-    id: 'ai-video-editor',
+    id: '19',
     name: 'AI Video Editor',
     description: 'Auto-edit videos with captions, transitions, and effects',
     category: 'video-editing',
     tier: 'pro',
-    icon: '🎬',
+    icon: <Video className="h-6 w-6" />,
     featured: true,
     function: 'Auto-edit clips, captions, transitions',
     use_cases: ['Video editing', 'Auto-captioning', 'Scene detection', 'Color correction'],
@@ -469,12 +507,12 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Adobe Premiere', 'Final Cut Pro', 'DaVinci Resolve', 'YouTube']
   },
   {
-    id: 'ai-voice-generator',
+    id: '20',
     name: 'AI Voice Generator',
     description: 'Generate realistic speech from text with voice cloning',
     category: 'voice',
     tier: 'pro',
-    icon: '🎤',
+    icon: <Mic className="h-6 w-6" />,
     popularTool: true,
     function: 'Generate speech from text',
     use_cases: ['Voiceovers', 'Audiobooks', 'Podcasts', 'Voice assistants'],
@@ -483,12 +521,12 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Audacity', 'Adobe Audition', 'Spotify', 'Apple Podcasts']
   },
   {
-    id: 'predictirix-enterprise',
+    id: '21',
     name: 'Predictirix Enterprise',
     description: 'Predict business KPIs and outcomes from historical data',
     category: 'data-analysis',
     tier: 'pro',
-    icon: '🔮',
+    icon: <TrendingUp className="h-6 w-6" />,
     featured: true,
     function: 'Predict business KPIs from datasets',
     use_cases: ['Sales forecasting', 'Demand planning', 'Risk assessment', 'Market analysis'],
@@ -497,12 +535,12 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Salesforce', 'SAP', 'Oracle', 'Microsoft Dynamics']
   },
   {
-    id: 'neuroforge-pro',
+    id: '22',
     name: 'NeuroForge Pro',
     description: 'Train and deploy custom deep learning models',
     category: 'machine-learning',
     tier: 'pro',
-    icon: '🧠',
+    icon: <Network className="h-6 w-6" />,
     featured: true,
     function: 'Train and deploy deep learning models',
     use_cases: ['Custom AI models', 'Computer vision', 'NLP models', 'Model deployment'],
@@ -511,12 +549,12 @@ export const aiTools: AIToolItem[] = [
     integrations: ['AWS SageMaker', 'Google AI Platform', 'Azure ML', 'Paperspace']
   },
   {
-    id: 'omniflow-ai',
+    id: '23',
     name: 'OmniFlow AI',
     description: 'Enterprise-level workflow automation and orchestration',
     category: 'automation',
     tier: 'pro',
-    icon: '⚙️',
+    icon: <Workflow className="h-6 w-6" />,
     function: 'Enterprise-level workflow automation',
     use_cases: ['Complex workflows', 'Business process automation', 'Data orchestration', 'System integration'],
     uniqueSellingPoint: 'Enterprise-grade automation with AI-powered optimization',
@@ -524,12 +562,12 @@ export const aiTools: AIToolItem[] = [
     integrations: ['SAP', 'Oracle', 'Salesforce', 'Microsoft Dynamics']
   },
   {
-    id: 'ai-marketplace-publisher',
+    id: '24',
     name: 'AI Marketplace Publisher',
     description: 'Publish and monetize AI models and APIs',
     category: 'development',
     tier: 'pro',
-    icon: '🏪',
+    icon: <Upload className="h-6 w-6" />,
     function: 'Publish AI models/APIs for others to use',
     use_cases: ['Model marketplace', 'API monetization', 'Developer tools', 'Model sharing'],
     uniqueSellingPoint: 'Complete marketplace solution for AI model monetization',
@@ -537,12 +575,12 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Hugging Face', 'GitHub', 'Docker Hub', 'AWS Marketplace']
   },
   {
-    id: 'ethicsguard-ai',
+    id: '25',
     name: 'EthicsGuard AI',
     description: 'Analyze AI systems for ethical risks and bias detection',
     category: 'ethics',
     tier: 'pro',
-    icon: '⚖️',
+    icon: <Shield className="h-6 w-6" />,
     function: 'Analyze AI systems for ethical risks and bias',
     use_cases: ['Bias detection', 'Fairness assessment', 'Ethical compliance', 'Model auditing'],
     uniqueSellingPoint: 'Comprehensive AI ethics and bias analysis platform',
@@ -550,12 +588,12 @@ export const aiTools: AIToolItem[] = [
     integrations: ['MLflow', 'Weights & Biases', 'TensorBoard', 'Neptune']
   },
   {
-    id: 'cloudbridge-ai',
+    id: '26',
     name: 'CloudBridge AI',
     description: 'Manage and deploy AI projects across cloud platforms',
     category: 'cloud',
     tier: 'pro',
-    icon: '☁️',
+    icon: <Cloud className="h-6 w-6" />,
     function: 'Manage and deploy AI projects on the cloud',
     use_cases: ['Multi-cloud deployment', 'Resource management', 'Cost optimization', 'Performance monitoring'],
     uniqueSellingPoint: 'Universal cloud management for AI workloads',
@@ -565,12 +603,12 @@ export const aiTools: AIToolItem[] = [
 
   // AGRICULTURE TOOLS - FREEMIUM TIER (4 tools)
   {
-    id: 'cropmind-ai',
+    id: '27',
     name: 'CropMind AI',
     description: 'Generative Agronomist for Smallholders - Daily crop insights using satellite and soil data',
     category: 'agriculture',
     tier: 'freemium',
-    icon: '🌱',
+    icon: <Sprout className="h-6 w-6" />,
     popularTool: true,
     featured: true,
     function: 'Provide AI-driven daily crop insights for smallholder farmers',
@@ -582,12 +620,12 @@ export const aiTools: AIToolItem[] = [
     demoAvailable: true
   },
   {
-    id: 'smartpest-sentinel',
+    id: '28',
     name: 'SmartPest Sentinel',
     description: 'Pest trap + camera + AI network for real-time pest detection and mitigation advice',
     category: 'agriculture',
     tier: 'freemium',
-    icon: '🐛',
+    icon: <Bug className="h-6 w-6" />,
     function: 'Real-time pest detection and mitigation recommendations',
     use_cases: ['Pest identification', 'Outbreak alerts', 'Treatment advice', 'Pest lifecycle tracking'],
     uniqueSellingPoint: 'Community-shared pest outbreak data with local heatmaps',
@@ -597,12 +635,12 @@ export const aiTools: AIToolItem[] = [
     demoAvailable: true
   },
   {
-    id: 'livestock-guardian-vision',
+    id: '29',
     name: 'Livestock Guardian Vision',
     description: 'Vision-based animal health alert system using low-cost cameras',
     category: 'agriculture',
     tier: 'freemium',
-    icon: '🐄',
+    icon: <Eye className="h-6 w-6" />,
     function: 'Monitor animal health through computer vision analysis',
     use_cases: ['Health monitoring', 'Behavior analysis', 'Alert notifications', 'Activity tracking'],
     uniqueSellingPoint: 'Detect limping, isolation, and abnormal behavior patterns',
@@ -612,12 +650,12 @@ export const aiTools: AIToolItem[] = [
     demoAvailable: true
   },
   {
-    id: 'agrimesh-network',
+    id: '30',
     name: 'AgriMesh Network',
     description: 'Hyperlocal Crop Intelligence Network - Peer-powered decentralized farming insights',
     category: 'agriculture',
     tier: 'freemium',
-    icon: '🌐',
+    icon: <Globe className="h-6 w-6" />,
     function: 'Share and access real-time farming insights from peer network',
     use_cases: ['Peer insights', 'Regional trends', 'Crop reporting', 'Community knowledge'],
     uniqueSellingPoint: 'Decentralized network for real-time farming intelligence',
@@ -629,12 +667,12 @@ export const aiTools: AIToolItem[] = [
 
   // AGRICULTURE TOOLS - BASIC TIER (4 tools)
   {
-    id: 'agrobot-commander',
+    id: '31',
     name: 'AgroBot Commander',
     description: 'Centralized control system for autonomous farm robots with optimization and analytics',
     category: 'agriculture',
     tier: 'basic',
-    icon: '🤖',
+    icon: <Bot className="h-6 w-6" />,
     featured: true,
     function: 'Control and optimize autonomous farm robot operations',
     use_cases: ['Robot fleet management', 'Route optimization', 'Task scheduling', 'Performance analytics'],
@@ -643,12 +681,12 @@ export const aiTools: AIToolItem[] = [
     integrations: ['John Deere', 'Solinftec', 'Weather stations', 'Farm management systems']
   },
   {
-    id: 'aquayield-os',
-    name: 'AquaYield OS',
+    id: '32',
+    name: 'Aquayield OS',
     description: 'AI irrigation scheduler that integrates weather, crop stage, and soil sensors',
     category: 'agriculture',
     tier: 'basic',
-    icon: '💧',
+    icon: <Droplets className="h-6 w-6" />,
     function: 'Optimize irrigation scheduling using AI and sensor data',
     use_cases: ['Irrigation scheduling', 'Water optimization', 'Crop stage monitoring', 'Soil moisture tracking'],
     uniqueSellingPoint: 'ML models optimize irrigation by crop stage with real-time control',
@@ -656,12 +694,12 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Soil moisture sensors', 'Weather stations', 'Pump controllers', 'Farm sensors']
   },
   {
-    id: 'farmpnl-ai',
+    id: '33',
     name: 'FarmP&L AI',
     description: 'Automated profitability tracking tool for fields, crops, and seasons',
     category: 'agriculture',
     tier: 'basic',
-    icon: '📊',
+    icon: <DollarSign className="h-6 w-6" />,
     function: 'Track and analyze farm profitability across fields and seasons',
     use_cases: ['Profit tracking', 'Cost analysis', 'ROI calculation', 'Financial planning'],
     uniqueSellingPoint: 'AI suggestions for profit-maximizing input use with commodity forecasts',
@@ -669,12 +707,12 @@ export const aiTools: AIToolItem[] = [
     integrations: ['John Deere', 'Climate FieldView', 'Bushel', 'Financial systems']
   },
   {
-    id: 'agrorisk-navigator',
+    id: '34',
     name: 'AgroRisk Navigator',
     description: 'Risk simulator for weather/climate-driven yield and insurance planning',
     category: 'agriculture',
     tier: 'basic',
-    icon: '🌦️',
+    icon: <CloudRain className="h-6 w-6" />,
     function: 'Simulate weather risks and optimize insurance planning',
     use_cases: ['Risk assessment', 'Weather simulation', 'Insurance planning', 'Yield prediction'],
     uniqueSellingPoint: 'Climate scenario modeling with insurance product recommendations',
@@ -684,12 +722,12 @@ export const aiTools: AIToolItem[] = [
 
   // AGRICULTURE TOOLS - PRO TIER (4 tools)
   {
-    id: 'agritrial-ai',
+    id: '35',
     name: 'AgriTrial AI',
     description: 'Field trial management & analytics platform for ag companies and co-ops',
     category: 'agriculture',
     tier: 'pro',
-    icon: '🧠',
+    icon: <TestTube className="h-6 w-6" />,
     featured: true,
     function: 'Manage and analyze agricultural field trials with AI insights',
     use_cases: ['Trial management', 'Statistical analysis', 'Research insights', 'Report generation'],
@@ -698,12 +736,12 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Drone platforms', 'Satellite imagery', 'Research databases', 'Report systems']
   },
   {
-    id: 'regencert-hub',
+    id: '36',
     name: 'RegenCert Hub',
     description: 'Digital tool for managing, verifying, and marketing regenerative agriculture practices',
     category: 'agriculture',
     tier: 'pro',
-    icon: '🔄',
+    icon: <Recycle className="h-6 w-6" />,
     featured: true,
     function: 'Manage regenerative agriculture certification and carbon tracking',
     use_cases: ['Practice logging', 'Carbon tracking', 'Certification management', 'Traceability'],
@@ -712,12 +750,12 @@ export const aiTools: AIToolItem[] = [
     integrations: ['CropX', 'Agmatix', 'Carbon exchanges', 'Buyer marketplaces']
   },
   {
-    id: 'agroapi-marketplace',
+    id: '37',
     name: 'AgroAPI Marketplace',
     description: 'Centralized API store for AgriTech developers to access agriculture datasets',
     category: 'agriculture',
     tier: 'pro',
-    icon: '📶',
+    icon: <Database className="h-6 w-6" />,
     function: 'Provide APIs for weather, soil, satellite, and agricultural data',
     use_cases: ['API integration', 'Data monetization', 'Developer tools', 'Agriculture datasets'],
     uniqueSellingPoint: 'Embedded AI models marketplace with curated data bundles',
@@ -725,12 +763,12 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Weather services', 'Satellite providers', 'Soil databases', 'Developer platforms']
   },
   {
-    id: 'fieldsim-xr',
-    name: 'FieldSim XR',
+    id: '38',
+    name: 'Fieldsim Xr',
     description: 'Immersive farm training simulator using real-world data and mixed reality',
     category: 'agriculture',
     tier: 'pro',
-    icon: '🌍',
+    icon: <Gamepad2 className="h-6 w-6" />,
     featured: true,
     function: 'Provide immersive VR/AR training for farming practices',
     use_cases: ['Training simulation', 'Skill development', 'Educational content', 'Certification'],
