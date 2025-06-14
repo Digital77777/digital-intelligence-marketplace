@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -13,10 +12,11 @@ import Footer from '@/components/Footer';
 import ChatContainer, { ChatMessage } from '@/components/chat/ChatContainer';
 import ChatInput from '@/components/chat/ChatInput';
 import useScrollToTop from '@/hooks/useScrollToTop';
+import { supabase } from '@/integrations/supabase/client';
 
 const AIAssistant: React.FC = () => {
-  useScrollToTop(); // Add scroll to top on navigation
-  
+  useScrollToTop();
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +30,8 @@ const AIAssistant: React.FC = () => {
         {
           id: 'welcome-message',
           role: 'assistant',
-          content: "Hello! I'm your Pro AI Assistant for the Digital Intelligence Marketplace. I can help you navigate the platform, answer questions about AI tools, and provide personalized recommendations. What would you like to know?",
+          content:
+            "Hello! I'm your Pro AI Assistant for the Digital Intelligence Marketplace. I can help you navigate the platform, answer questions about AI tools, and provide personalized recommendations. What would you like to know?",
           timestamp: new Date()
         }
       ]);
@@ -43,36 +44,59 @@ const AIAssistant: React.FC = () => {
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
-    
+
     if (!user) {
       toast("You need to be logged in to use the Pro AI Assistant");
       return;
     }
-    
+
     const userMessage: ChatMessage = {
       id: `user-${Date.now()}`,
       role: 'user',
       content: inputValue,
       timestamp: new Date()
     };
-    
+
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     setIsLoading(true);
-    
+
     try {
-      // Simulate AI response
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      // Call Edge Function for AI response
+      const contextMessages = [
+        // Initial system prompt for the OpenAI model
+        {
+          role: "system",
+          content: "You are a helpful AI assistant specialized in digital intelligence and AI tools. Your answers should be concise, friendly, and helpful."
+        },
+        // All previous user/assistant messages (for full chat context)
+        ...messages.map(m => ({
+          role: m.role === "assistant" ? "assistant" : "user",
+          content: m.content
+        })),
+        {
+          role: "user",
+          content: inputValue
+        }
+      ];
+
+      const { data, error } = await supabase.functions.invoke('ai-assistant-chat', {
+        body: { messages: contextMessages }
+      });
+
+      if (error || !data?.content) {
+        throw new Error(error?.message || data?.error || "No response from assistant.");
+      }
+
       const assistantMessage: ChatMessage = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
-        content: "This is a simulated response from the AI Assistant.",
+        content: data.content,
         timestamp: new Date()
       };
-      
+
       setMessages(prev => [...prev, assistantMessage]);
-      
+
     } catch (error) {
       console.error("Error sending message:", error);
       toast("Error communicating with AI Assistant");
@@ -99,7 +123,6 @@ const AIAssistant: React.FC = () => {
               </div>
             </div>
           </div>
-          
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
             <div className="hidden xl:block bg-card border rounded-md p-6 xl:basis-1/3">
               <div className="mb-6">
@@ -135,15 +158,15 @@ const AIAssistant: React.FC = () => {
                   Ask questions about AI tools, platform navigation, or get personalized recommendations.
                 </p>
               </div>
-              
+
               <div className="border rounded-md h-[400px] mb-4 bg-background overflow-hidden flex flex-col">
-                <ChatContainer 
-                  messages={messages} 
-                  isLoading={isLoading} 
+                <ChatContainer
+                  messages={messages}
+                  isLoading={isLoading}
                 />
               </div>
-              
-              <ChatInput 
+
+              <ChatInput
                 value={inputValue}
                 onChange={handleInputChange}
                 onSubmit={handleSendMessage}
