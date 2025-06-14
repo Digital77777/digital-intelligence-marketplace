@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,10 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Play, Pause, Edit, Trash2, Save, ArrowRight } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Play, Pause, Edit, Trash2, Save, ArrowRight, Zap, Bot } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useTier } from '@/context/TierContext';
+import AdvancedStepEditor from './AdvancedStepEditor';
+import WorkflowTemplates from './WorkflowTemplates';
+import SchedulingPanel from './SchedulingPanel';
 
 interface WorkflowStep {
   id: string;
@@ -30,6 +33,7 @@ interface Workflow {
 }
 
 const WorkflowEditor = () => {
+  const { canAccess } = useTier();
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -39,6 +43,20 @@ const WorkflowEditor = () => {
     description: '',
     steps: [] as WorkflowStep[]
   });
+  const [availableModels, setAvailableModels] = useState([
+    { id: 'text-generator', name: 'Text Generator Model' },
+    { id: 'classifier', name: 'Classification Model' },
+    { id: 'intent-classifier', name: 'Intent Classifier' },
+    { id: 'response-generator', name: 'Response Generator' }
+  ]);
+  const [schedulingConfig, setSchedulingConfig] = useState({
+    enabled: false,
+    type: 'once' as const,
+    schedule: '',
+    timezone: 'UTC',
+    conditions: []
+  });
+  const [activeTab, setActiveTab] = useState('workflows');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -161,6 +179,39 @@ const WorkflowEditor = () => {
     updateWorkflow(updatedWorkflow);
   };
 
+  const addAdvancedStep = (workflow: Workflow) => {
+    const newStep = {
+      id: Date.now().toString(),
+      name: `Advanced Step ${workflow.steps.length + 1}`,
+      description: '',
+      type: 'action',
+      config: {},
+      order: workflow.steps.length,
+      triggers: [],
+      dependencies: []
+    };
+
+    const updatedWorkflow = {
+      ...workflow,
+      steps: [...workflow.steps, newStep]
+    };
+
+    setSelectedWorkflow(updatedWorkflow);
+    updateWorkflow(updatedWorkflow);
+  };
+
+  const updateAdvancedStep = (workflow: Workflow, stepId: string, updatedStep: any) => {
+    const updatedWorkflow = {
+      ...workflow,
+      steps: workflow.steps.map(step => 
+        step.id === stepId ? updatedStep : step
+      )
+    };
+
+    setSelectedWorkflow(updatedWorkflow);
+    updateWorkflow(updatedWorkflow);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'bg-green-100 text-green-800';
@@ -170,22 +221,49 @@ const WorkflowEditor = () => {
     }
   };
 
+  const handleTemplateSelect = (template: any) => {
+    if (template.isPro && !canAccess('ai-studio')) {
+      toast({
+        title: "Pro Feature",
+        description: "This template requires a Pro subscription",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newWorkflowFromTemplate = {
+      name: template.name,
+      description: template.description,
+      steps: template.template.steps.map((step: any, index: number) => ({
+        ...step,
+        id: Date.now().toString() + index,
+        order: index
+      }))
+    };
+
+    setNewWorkflow(newWorkflowFromTemplate);
+    setIsCreateDialogOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Workflow Designer</h1>
-          <p className="text-gray-600">Create and manage automated workflows</p>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Bot className="h-8 w-8 text-[#6AC8FF]" />
+            Workflow Designer
+          </h1>
+          <p className="text-gray-600">Create and manage automated workflows with AI integration</p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button className="bg-[#6AC8FF] hover:bg-[#6AC8FF]/90 text-gray-900">
               <Plus className="w-4 h-4 mr-2" />
               New Workflow
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Create New Workflow</DialogTitle>
             </DialogHeader>
@@ -208,133 +286,193 @@ const WorkflowEditor = () => {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Workflows List */}
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle>Workflows</CardTitle>
-              <CardDescription>Your automated workflows</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {workflows.map((workflow) => (
-                  <div
-                    key={workflow.id}
-                    className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                      selectedWorkflow?.id === workflow.id ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'
-                    }`}
-                    onClick={() => setSelectedWorkflow(workflow)}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-medium">{workflow.name}</h4>
-                        <p className="text-sm text-gray-600">{workflow.description}</p>
-                        <div className="flex items-center mt-2 space-x-2">
-                          <Badge className={getStatusColor(workflow.status)}>
-                            {workflow.status}
-                          </Badge>
-                          <span className="text-xs text-gray-500">
-                            {workflow.steps.length} steps
-                          </span>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="workflows">My Workflows</TabsTrigger>
+          <TabsTrigger value="templates">
+            Templates
+            {canAccess('ai-studio') && <Badge className="ml-2 bg-purple-100 text-purple-800">PRO</Badge>}
+          </TabsTrigger>
+          <TabsTrigger value="scheduling">
+            Automation
+            {canAccess('ai-studio') && <Badge className="ml-2 bg-purple-100 text-purple-800">PRO</Badge>}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="workflows">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Workflows List */}
+            <div className="lg:col-span-1">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Workflows</CardTitle>
+                  <CardDescription>Your automated workflows</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {workflows.map((workflow) => (
+                      <div
+                        key={workflow.id}
+                        className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                          selectedWorkflow?.id === workflow.id ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'
+                        }`}
+                        onClick={() => setSelectedWorkflow(workflow)}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-medium">{workflow.name}</h4>
+                            <p className="text-sm text-gray-600">{workflow.description}</p>
+                            <div className="flex items-center mt-2 space-x-2">
+                              <Badge className={getStatusColor(workflow.status)}>
+                                {workflow.status}
+                              </Badge>
+                              <span className="text-xs text-gray-500">
+                                {workflow.steps.length} steps
+                              </span>
+                            </div>
+                          </div>
                         </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Workflow Editor */}
+            <div className="lg:col-span-2">
+              {selectedWorkflow ? (
+                <Card>
+                  <CardHeader>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <CardTitle>{selectedWorkflow.name}</CardTitle>
+                        <CardDescription>{selectedWorkflow.description}</CardDescription>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button variant="outline" onClick={() => addAdvancedStep(selectedWorkflow)}>
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Step
+                        </Button>
+                        {selectedWorkflow.status === 'active' ? (
+                          <Button variant="outline">
+                            <Pause className="w-4 h-4 mr-2" />
+                            Pause
+                          </Button>
+                        ) : (
+                          <Button className="bg-[#6AC8FF] hover:bg-[#6AC8FF]/90 text-gray-900">
+                            <Play className="w-4 h-4 mr-2" />
+                            Start
+                          </Button>
+                        )}
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Workflow Editor */}
-        <div className="lg:col-span-2">
-          {selectedWorkflow ? (
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <CardTitle>{selectedWorkflow.name}</CardTitle>
-                    <CardDescription>{selectedWorkflow.description}</CardDescription>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button variant="outline" onClick={() => addStep(selectedWorkflow)}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Step
-                    </Button>
-                    {selectedWorkflow.status === 'active' ? (
-                      <Button variant="outline">
-                        <Pause className="w-4 h-4 mr-2" />
-                        Pause
-                      </Button>
-                    ) : (
-                      <Button>
-                        <Play className="w-4 h-4 mr-2" />
-                        Start
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {selectedWorkflow.steps.map((step, index) => (
-                    <div key={step.id} className="flex items-center space-x-4">
-                      <div className="flex-1 p-4 border rounded-lg">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h4 className="font-medium">{step.name}</h4>
-                            <p className="text-sm text-gray-600">{step.description}</p>
-                            <Badge variant="outline" className="mt-2">
-                              {step.type}
-                            </Badge>
-                          </div>
-                          <div className="flex space-x-2">
-                            <Button variant="ghost" size="sm">
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeStep(selectedWorkflow, step.id)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {selectedWorkflow.steps.map((step, index) => (
+                        <div key={step.id} className="flex items-center space-x-4">
+                          {canAccess('ai-studio') ? (
+                            <AdvancedStepEditor
+                              step={step}
+                              onUpdate={(updatedStep) => updateAdvancedStep(selectedWorkflow, step.id, updatedStep)}
+                              onDelete={() => removeStep(selectedWorkflow, step.id)}
+                              availableModels={availableModels}
+                            />
+                          ) : (
+                            <div className="flex-1 p-4 border rounded-lg">
+                              <div className="flex justify-between items-center">
+                                <div>
+                                  <h4 className="font-medium">{step.name}</h4>
+                                  <p className="text-sm text-gray-600">{step.description}</p>
+                                  <Badge variant="outline" className="mt-2">
+                                    {step.type}
+                                  </Badge>
+                                </div>
+                                <div className="flex space-x-2">
+                                  <Button variant="ghost" size="sm">
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => removeStep(selectedWorkflow, step.id)}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          {index < selectedWorkflow.steps.length - 1 && (
+                            <ArrowRight className="w-4 h-4 text-gray-400" />
+                          )}
                         </div>
-                      </div>
-                      {index < selectedWorkflow.steps.length - 1 && (
-                        <ArrowRight className="w-4 h-4 text-gray-400" />
+                      ))}
+                      
+                      {selectedWorkflow.steps.length === 0 && (
+                        <div className="text-center py-8 text-gray-500">
+                          <p>No steps added yet.</p>
+                          <Button 
+                            variant="outline" 
+                            onClick={() => addAdvancedStep(selectedWorkflow)}
+                            className="mt-2"
+                          >
+                            Add First Step
+                          </Button>
+                        </div>
                       )}
                     </div>
-                  ))}
-                  
-                  {selectedWorkflow.steps.length === 0 && (
-                    <div className="text-center py-8 text-gray-500">
-                      <p>No steps added yet.</p>
-                      <Button 
-                        variant="outline" 
-                        onClick={() => addStep(selectedWorkflow)}
-                        className="mt-2"
-                      >
-                        Add First Step
-                      </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card>
+                  <CardContent className="flex items-center justify-center h-96">
+                    <div className="text-center text-gray-500">
+                      <p>Select a workflow to edit</p>
                     </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="templates">
+          {canAccess('ai-studio') ? (
+            <WorkflowTemplates onSelectTemplate={handleTemplateSelect} />
           ) : (
             <Card>
               <CardContent className="flex items-center justify-center h-96">
-                <div className="text-center text-gray-500">
-                  <p>Select a workflow to edit</p>
+                <div className="text-center">
+                  <Zap className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium mb-2">Pro Feature Required</h3>
+                  <p className="text-gray-600">Upgrade to Pro to access advanced workflow templates</p>
                 </div>
               </CardContent>
             </Card>
           )}
-        </div>
-      </div>
+        </TabsContent>
+
+        <TabsContent value="scheduling">
+          {canAccess('ai-studio') ? (
+            <SchedulingPanel
+              config={schedulingConfig}
+              onChange={setSchedulingConfig}
+            />
+          ) : (
+            <Card>
+              <CardContent className="flex items-center justify-center h-96">
+                <div className="text-center">
+                  <Zap className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium mb-2">Pro Feature Required</h3>
+                  <p className="text-gray-600">Upgrade to Pro to access advanced scheduling and automation</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
