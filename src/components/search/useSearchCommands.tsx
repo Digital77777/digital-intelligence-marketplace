@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { aiTools, toolCategories } from '@/data/ai-tools-tiers';
-import { Course } from '@/data/courses';
+import { allCourses } from '@/data/courses'; // <-- FIX: Added import for allCourses
 import { forumData } from '@/data/forum';
 
 interface SearchItem {
