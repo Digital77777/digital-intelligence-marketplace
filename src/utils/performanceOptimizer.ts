@@ -92,15 +92,17 @@ export const withErrorBoundary = <P extends object>(
 ) => {
   return React.forwardRef<any, P>((props, ref) => {
     try {
-      return <Component {...props} ref={ref} />;
+      return React.createElement(Component, { ...props, ref });
     } catch (error) {
       console.error('Component error:', error);
-      return (
-        <div className="p-4 border border-red-200 rounded-lg bg-red-50">
-          <p className="text-red-600 text-sm">
-            Something went wrong. Please try refreshing the page.
-          </p>
-        </div>
+      return React.createElement(
+        'div',
+        { className: 'p-4 border border-red-200 rounded-lg bg-red-50' },
+        React.createElement(
+          'p',
+          { className: 'text-red-600 text-sm' },
+          'Something went wrong. Please try refreshing the page.'
+        )
       );
     }
   });
