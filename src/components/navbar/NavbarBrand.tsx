@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Brain } from 'lucide-react';
@@ -8,7 +9,7 @@ const NavbarBrand = () => {
       </div>
       <div className="flex flex-col items-start">
         <span className="text-white font-bold tracking-tight leading-none text-lg">
-          DIGITAL<span className="opacity-85 text-sm font-normal ml-0.5"></span>
+          DIGITAL INTELLIGENCE MARKETPLACE<span className="opacity-85 text-sm font-normal ml-0.5"></span>
         </span>
         <span className="text-xs font-normal text-blue-100 opacity-80 leading-none mt-0.5">Marketplace for AI Solutions</span>
       </div>
