@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { useTier } from '@/context/TierContext';
 import { Search } from 'lucide-react';
@@ -33,26 +32,26 @@ export function useNavItems() {
       icon: <span className="mr-1.5">🛒</span>,
       visible: canAccess('marketplace')
     },
+    {
+      // Forums now appears in the primary navigation group
+      title: "Forums",
+      path: "/forums",
+      visible: canAccess('forums')
+    },
   ];
   
-  // Only show Collaboration Hub for Basic and Pro tiers
-  if (currentTier === 'basic' || currentTier === 'pro') {
-    primaryNavItems.push({
-      title: "Collaboration",
-      path: "/collaboration-hub",
-      icon: <span className="mr-1.5">👥</span>,
-      visible: canAccess('team-dashboard')
-    });
-  }
+  // Remove Collaboration from primary, so we no longer add it here
 
   // Secondary navigation items - enhanced based on the image provided
   const getSecondaryNavItems = useCallback((): NavItem[] => {
-    // Base items for all tiers (freemium, basic, and pro)
+    // Start with base items minus Forums
     const baseItems: NavItem[] = [
       {
-        title: "Forums",
-        path: "/forums",
-        visible: canAccess('forums')
+        // Collaboration is now a secondary nav item
+        title: "Collaboration",
+        path: "/collaboration-hub",
+        icon: <span className="mr-1.5">👥</span>,
+        visible: canAccess('team-dashboard')
       },
       {
         title: "Pricing",
