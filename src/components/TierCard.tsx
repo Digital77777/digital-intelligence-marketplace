@@ -1,9 +1,12 @@
 
-import React from 'react';
-import { Check, Shield, Sparkles, Zap } from 'lucide-react';
+import React, { useState } from 'react';
+import { Check, Shield, Sparkles, Zap, Loader2 } from 'lucide-react';
 import Button from './Button';
 import { useTier, TierType } from '@/context/TierContext';
+import { useUser } from '@/context/UserContext';
+import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface TierCardProps {
   type: TierType;
@@ -21,10 +24,49 @@ const TierCard: React.FC<TierCardProps> = ({
   popular = false 
 }) => {
   const { currentTier, setTier } = useTier();
+  const { user } = useUser();
+  const [isLoading, setIsLoading] = useState(false);
   const isActive = currentTier === type;
 
-  const handleSelectTier = () => {
-    setTier(type);
+  const handleSelectTier = async () => {
+    if (!user) {
+      toast.error("Please sign in to upgrade your plan");
+      return;
+    }
+
+    if (type === 'freemium') {
+      setTier(type);
+      toast.success("Switched to Freemium plan");
+      return;
+    }
+
+    if (isActive) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { tier: type }
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (data?.url) {
+        // Open Stripe checkout in a new tab
+        window.open(data.url, '_blank');
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      toast.error('Failed to start checkout process');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const getTierIcon = () => {
@@ -47,6 +89,12 @@ const TierCard: React.FC<TierCardProps> = ({
       default:
         return "from-amber-500 to-orange-500";
     }
+  };
+
+  const getButtonText = () => {
+    if (isActive) return 'Current Tier';
+    if (type === 'freemium') return 'Switch to Free';
+    return `Upgrade to ${name}`;
   };
 
   return (
@@ -111,9 +159,16 @@ const TierCard: React.FC<TierCardProps> = ({
               !isActive && type === 'freemium' && "hover:from-amber-500 hover:to-orange-500"
             )}
             onClick={handleSelectTier}
-            disabled={isActive}
+            disabled={isActive || isLoading}
           >
-            {isActive ? 'Current Tier' : 'Select Tier'}
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              getButtonText()
+            )}
           </Button>
         </div>
       </div>

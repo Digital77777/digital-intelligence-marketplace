@@ -1,6 +1,8 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useUser } from '@/context/UserContext';
+import { supabase } from '@/integrations/supabase/client';
 import { AIToolTier } from '@/data/ai-tools-tiers';
 
 export type TierType = AIToolTier;
@@ -12,28 +14,88 @@ interface TierContextType {
   upgradePrompt: (requiredTier: TierType) => void;
   canAccess: (feature: string) => boolean;
   getTierFeatures: (tier: TierType) => string[];
+  isSubscribed: boolean;
+  subscriptionEnd: string | null;
+  refreshSubscription: () => Promise<void>;
+  isLoading: boolean;
 }
 
 const TierContext = createContext<TierContextType | undefined>(undefined);
 
 export const TierProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [currentTier, setCurrentTier] = useState<TierType>('freemium');
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { user, session } = useUser();
+
+  // Check subscription status on user login/session change
+  useEffect(() => {
+    if (user && session) {
+      refreshSubscription();
+    } else {
+      setCurrentTier('freemium');
+      setIsSubscribed(false);
+      setSubscriptionEnd(null);
+    }
+  }, [user, session]);
+
+  // Check for URL parameters indicating successful payment
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success') === 'true') {
+      toast.success("Payment successful! Your subscription is being activated.");
+      refreshSubscription();
+      // Clean up URL
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (urlParams.get('canceled') === 'true') {
+      toast.error("Payment was canceled.");
+      // Clean up URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
+  const refreshSubscription = async () => {
+    if (!user || !session) return;
+
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('check-subscription');
+      
+      if (error) {
+        console.error('Error checking subscription:', error);
+        return;
+      }
+
+      if (data) {
+        setCurrentTier(data.subscription_tier || 'freemium');
+        setIsSubscribed(data.subscribed || false);
+        setSubscriptionEnd(data.subscription_end || null);
+      }
+    } catch (error) {
+      console.error('Failed to check subscription:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const upgradePrompt = (requiredTier: TierType) => {
-    toast({
-      title: "Upgrade Required",
+    toast.error("Upgrade Required", {
       description: `This feature requires a ${requiredTier} subscription. Please upgrade to continue.`,
-      variant: "destructive",
     });
   };
 
   const setTier = (tier: TierType) => {
-    setCurrentTier(tier);
+    if (tier === 'freemium') {
+      setCurrentTier(tier);
+      setIsSubscribed(false);
+      setSubscriptionEnd(null);
+    }
+    // For paid tiers, this will be handled by the payment flow
   };
 
   const canAccess = (feature: string): boolean => {
-    // Define feature access rules based on tier
     const tierHierarchy = {
       'freemium': 0,
       'basic': 1,
@@ -105,7 +167,11 @@ export const TierProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setTier,
       upgradePrompt, 
       canAccess, 
-      getTierFeatures 
+      getTierFeatures,
+      isSubscribed,
+      subscriptionEnd,
+      refreshSubscription,
+      isLoading
     }}>
       {children}
     </TierContext.Provider>

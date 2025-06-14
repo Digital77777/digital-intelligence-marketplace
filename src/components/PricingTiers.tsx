@@ -1,12 +1,18 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import TierCard from './TierCard';
 import { useTier } from '@/context/TierContext';
+import { useUser } from '@/context/UserContext';
+import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info, Shield, Sparkles, Zap } from 'lucide-react';
+import { Info, Shield, Sparkles, Zap, Loader2, CreditCard } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const PricingTiers = () => {
-  const { currentTier } = useTier();
+  const { currentTier, isSubscribed, subscriptionEnd, refreshSubscription, isLoading } = useTier();
+  const { user } = useUser();
+  const [isPortalLoading, setIsPortalLoading] = useState(false);
 
   const freemiumFeatures = [
     'Access to 10 core AI tools',
@@ -65,6 +71,33 @@ const PricingTiers = () => {
     }
   };
 
+  const handleManageSubscription = async () => {
+    if (!user) {
+      toast.error("Please sign in to manage your subscription");
+      return;
+    }
+
+    setIsPortalLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      } else {
+        throw new Error('No portal URL received');
+      }
+    } catch (error) {
+      console.error('Error opening customer portal:', error);
+      toast.error('Failed to open subscription management');
+    } finally {
+      setIsPortalLoading(false);
+    }
+  };
+
   return (
     <section id="pricing" className="py-24 px-4 relative overflow-hidden">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
@@ -87,6 +120,11 @@ const PricingTiers = () => {
               {currentTier === 'freemium' && "You have access to 10 core AI tools and community features. Upgrade to Basic or Pro for advanced features."}
               {currentTier === 'basic' && "You now have access to the advanced collaboration features, team dashboard, workflow automation, and extended AI tool access."}
               {currentTier === 'pro' && "You have unlimited access to all features, tools, and premium support services."}
+              {isSubscribed && subscriptionEnd && (
+                <div className="mt-2 text-sm">
+                  <span className="font-medium">Subscription ends:</span> {new Date(subscriptionEnd).toLocaleDateString()}
+                </div>
+              )}
             </AlertDescription>
           </Alert>
         )}
@@ -126,11 +164,48 @@ const PricingTiers = () => {
             <div>
               <h3 className="text-xl font-semibold">Your Current Plan: <span className="text-blue-600 capitalize">{currentTier}</span></h3>
               <p className="mt-2 text-foreground/70">
-                You can switch between plans anytime
+                {isSubscribed ? 'Manage your subscription anytime' : 'You can upgrade between plans anytime'}
               </p>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-full px-4 py-2 border border-gray-200 dark:border-gray-700 shadow-sm">
-              <span className="text-sm text-foreground/70">Need help choosing? <a href="#" className="text-blue-600 font-medium">Contact us</a></span>
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                onClick={refreshSubscription}
+                disabled={isLoading}
+                className="flex items-center gap-2"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Checking...
+                  </>
+                ) : (
+                  <>
+                    <Info className="h-4 w-4" />
+                    Refresh Status
+                  </>
+                )}
+              </Button>
+              
+              {isSubscribed && (
+                <Button 
+                  onClick={handleManageSubscription}
+                  disabled={isPortalLoading}
+                  className="flex items-center gap-2"
+                >
+                  {isPortalLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Opening...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="h-4 w-4" />
+                      Manage Subscription
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
           </div>
         </div>
