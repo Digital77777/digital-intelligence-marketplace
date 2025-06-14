@@ -47,6 +47,7 @@ import { useLearningResources } from '@/hooks/useLearningResources';
 import YouTubeCourses from '@/components/learning/YouTubeCourses';
 import LearningHubAIAssistant from "@/components/learning/LearningHubAIAssistant";
 import LearningHubHero from "@/components/learning/learning-hub/LearningHubHero";
+import LearningHubFilters from "@/components/learning/learning-hub/LearningHubFilters";
 
 const LearningHub = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -135,7 +136,7 @@ const LearningHub = () => {
     },
     {
       id: '3',
-      title: 'AI Expert Certification',
+4 title: 'AI Expert Certification',
       description: 'Industry-recognized expert-level certification',
       requirements: ['Complete all paths', '5 projects', 'Capstone project', 'Mentor review'],
       tier: 'pro',
@@ -180,49 +181,12 @@ const LearningHub = () => {
           />
 
           {/* Search and filters */}
-          <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search courses, events, certifications..."
-                className="pl-9"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <div className="flex gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline">
-                    Category <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setCategoryFilter('')}>All Categories</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setCategoryFilter('AI Fundamentals')}>AI Fundamentals</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setCategoryFilter('Machine Learning')}>Machine Learning</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setCategoryFilter('Deep Learning')}>Deep Learning</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setCategoryFilter('Computer Vision')}>Computer Vision</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setCategoryFilter('NLP')}>Natural Language Processing</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline">
-                    Difficulty <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setDifficultyFilter('')}>All Levels</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setDifficultyFilter('beginner')}>Beginner</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setDifficultyFilter('intermediate')}>Intermediate</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setDifficultyFilter('advanced')}>Advanced</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
+          <LearningHubFilters
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            setCategoryFilter={setCategoryFilter}
+            setDifficultyFilter={setDifficultyFilter}
+          />
 
           {/* Main content tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
