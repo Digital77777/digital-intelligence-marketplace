@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { NavItem } from './NavbarTypes';
 import { Link } from 'react-router-dom';
@@ -10,13 +11,14 @@ const PrimaryNavigation = ({ items }: { items: NavItem[] }) => {
 
   return (
     <nav className="primary-navigation flex items-center">
-      {items.map((item) => (
+      {items.filter(item => item.visible).map((item) => (
         <Link
-          key={item.label}
-          to={item.href}
+          key={item.path}
+          to={item.path}
           className={navigationMenuTriggerStyle()}
         >
-          {item.label}
+          {item.icon}
+          {item.title}
         </Link>
       ))}
       <button
@@ -32,3 +34,4 @@ const PrimaryNavigation = ({ items }: { items: NavItem[] }) => {
 };
 
 export default PrimaryNavigation;
+
