@@ -50,6 +50,22 @@ export const useLearningResources = ({
   const { user } = useUser();
   const { currentTier } = useTier();
   
+  // Map function to convert data courses into API-style courses with needed fields
+  function mapCourseToApiCourse(course: any): import("@/utils/learningApiService").Course {
+    return {
+      id: course.id,
+      title: course.title,
+      description: course.description,
+      category: course.category ?? "",      // fallback to "" if missing
+      difficulty: course.difficulty ?? "",
+      duration: course.duration ?? 60,
+      instructor: course.instructor ?? "",
+      content: course.content ?? "",
+      exercises: course.exercises ?? [],
+      requiredTier: course.tier || course.requiredTier || 'freemium', // fallback
+    };
+  }
+  
   // Fetch all learning content
   useEffect(() => {
     const fetchLearningContent = async () => {
@@ -57,11 +73,10 @@ export const useLearningResources = ({
       setError(null);
       
       try {
-        // NEW: Filter from our allCourses & allLearningPaths imports
+        // Filter and MAP to API Course interface
         let filteredCourses = allCourses;
         let filteredPaths = allLearningPaths;
 
-        // Add your filters as needed (category, difficulty, etc.)
         if (searchQuery) {
           const q = searchQuery.toLowerCase();
           filteredCourses = filteredCourses.filter(course =>
@@ -70,7 +85,7 @@ export const useLearningResources = ({
           );
           filteredPaths = filteredPaths.filter(path =>
             path.title.toLowerCase().includes(q) ||
-            path.outcome.toLowerCase().includes(q)
+            path.outcome?.toLowerCase().includes(q)
           );
         }
         // Only show courses/paths for the user's tier or below
@@ -81,11 +96,12 @@ export const useLearningResources = ({
           filteredCourses = filteredCourses.filter(c => c.tier === "freemium" || c.tier === "basic");
           filteredPaths = filteredPaths.filter(p => p.tier === "freemium" || p.tier === "basic");
         }
-        // Else pro gets all
+        // Map to API-style courses
+        const mappedCourses = filteredCourses.map(mapCourseToApiCourse);
 
-        setResources(filteredCourses.slice(0, limit));
-        setTotalCount(filteredCourses.length);
-        setHasMore(filteredCourses.length > limit);
+        setResources(mappedCourses.slice(0, limit));
+        setTotalCount(mappedCourses.length);
+        setHasMore(mappedCourses.length > limit);
         // Provide learningPaths for return value
         (setLearningPaths as any)?.(filteredPaths);
 

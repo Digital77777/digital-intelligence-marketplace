@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { aiTools, toolCategories } from '@/data/ai-tools-tiers';
@@ -70,11 +69,11 @@ export const useSearchCommands = () => {
     });
     
     // Search Courses
-    Course.forEach(course => {
+    allCourses.forEach(course => {
       if (
         course.title.toLowerCase().includes(lowerQuery) ||
         course.description.toLowerCase().includes(lowerQuery) ||
-        course.tags?.some(tag => tag.toLowerCase().includes(lowerQuery))
+        (course as any).tags?.some?.((tag: string) => tag.toLowerCase().includes(lowerQuery))
       ) {
         results.push({
           id: course.id,

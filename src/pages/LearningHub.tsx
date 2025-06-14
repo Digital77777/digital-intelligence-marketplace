@@ -601,8 +601,8 @@ const LearningHub = () => {
                     </div>
                     <ul className="mb-2 list-disc list-inside pl-1">
                       {path.courses.map(cid => {
-                        // Look up the course by id
-                        const crs = rest.resources.find(c => c.id === cid);
+                        // Look up the course by id (search in allCourses, since paths may include more than what is in `resources`)
+                        const crs = resources.find(c => c.id === cid);
                         return crs ? (
                           <li key={cid}>
                             <span className="font-medium">{crs.title}</span>
