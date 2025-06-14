@@ -6,6 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AIToolItem } from '@/data/ai-tools-tiers';
 import { Loader2, Play, Download, Info, Sparkles, ArrowLeft } from 'lucide-react';
+import ToolInfoHeader from "./components/ToolInfoHeader";
+import TabsInputPanel from "./components/TabsInputPanel";
+import TabsResultPanel from "./components/TabsResultPanel";
 
 interface ToolInterfaceProps {
   tool: AIToolItem;
@@ -17,7 +20,11 @@ interface ToolInterfaceProps {
   };
 }
 
-const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack, connectionDetails }) => {
+const ToolInterface: React.FC<ToolInterfaceProps> = ({
+  tool,
+  onBack,
+  connectionDetails,
+}) => {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -25,14 +32,9 @@ const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack, connectionD
 
   const handleProcess = async () => {
     if (!input.trim()) return;
-    
     setIsProcessing(true);
     setActiveTab('result');
-    
-    // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Generate mock output based on tool category
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     const mockOutput = generateMockOutput(tool.category, input);
     setOutput(mockOutput);
     setIsProcessing(false);
@@ -101,35 +103,7 @@ const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack, connectionD
       </div>
 
       {/* Tool Info Header */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-lg p-4 mb-4">
-        <div className="flex items-start gap-3">
-          <div className="bg-blue-100 p-2 rounded-lg text-2xl">{tool.icon}</div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-lg text-gray-900">{tool.name}</h3>
-            <p className="text-gray-600 text-sm mb-2">{tool.description}</p>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">
-                {tool.category}
-              </Badge>
-              {tool.popularTool && (
-                <Badge className="bg-amber-100 text-amber-800 text-xs">
-                  🔥 Popular
-                </Badge>
-              )}
-            </div>
-          </div>
-        </div>
-        
-        {tool.function && (
-          <div className="mt-3 p-3 bg-white rounded-md border border-blue-100">
-            <div className="flex items-center gap-2 mb-1">
-              <Info className="h-4 w-4 text-blue-600" />
-              <span className="text-sm font-medium text-blue-900">Function</span>
-            </div>
-            <p className="text-sm text-gray-700">{tool.function}</p>
-          </div>
-        )}
-      </div>
+      <ToolInfoHeader tool={tool} />
 
       {/* Main Interface */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
@@ -137,93 +111,34 @@ const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack, connectionD
           <TabsTrigger value="input">Input</TabsTrigger>
           <TabsTrigger value="result">Result</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="input" className="flex-1 flex flex-col mt-4">
-          <Card className="flex-1 flex flex-col">
-            <CardHeader>
-              <CardTitle className="text-lg">Input</CardTitle>
-              <CardDescription>
-                {getInputDescription(tool.category)}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 flex flex-col">
-              <Textarea
-                placeholder={getPlaceholder()}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                className="flex-1 min-h-[200px] resize-none"
-              />
-              <div className="mt-4 flex gap-2">
-                <Button
-                  onClick={handleProcess}
-                  disabled={!input.trim() || isProcessing}
-                  className="flex-1"
-                >
-                  {isProcessing ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <Play className="h-4 w-4 mr-2" />
-                      {getButtonText()}
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <TabsInputPanel
+            toolCategory={tool.category}
+            placeholder={getPlaceholder()}
+            input={input}
+            setInput={setInput}
+            onProcess={handleProcess}
+            isProcessing={isProcessing}
+            getButtonText={getButtonText}
+          />
         </TabsContent>
-        
         <TabsContent value="result" className="flex-1 flex flex-col mt-4">
-          <Card className="flex-1 flex flex-col">
-            <CardHeader>
-              <CardTitle className="text-lg">Result</CardTitle>
-              <CardDescription>
-                Generated output from {tool.name}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 flex flex-col">
-              {isProcessing ? (
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="text-center">
-                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
-                    <p className="text-gray-600">Processing your request...</p>
-                  </div>
-                </div>
-              ) : output ? (
-                <>
-                  <div className="flex-1 bg-gray-50 rounded-lg p-4 overflow-auto">
-                    <pre className="whitespace-pre-wrap text-sm">{output}</pre>
-                  </div>
-                  <div className="mt-4 flex gap-2">
-                    <Button onClick={handleSave} variant="outline">
-                      <Download className="h-4 w-4 mr-2" />
-                      Save Result
-                    </Button>
-                    <Button onClick={() => setActiveTab('input')} variant="outline">
-                      Process Again
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                <div className="flex-1 flex items-center justify-center text-gray-500">
-                  <div className="text-center">
-                    <Sparkles className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p>Run the tool to see results here</p>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <TabsResultPanel
+            toolName={tool.name}
+            output={output}
+            isProcessing={isProcessing}
+            onSave={handleSave}
+            onProcessAgain={() => setActiveTab('input')}
+          />
         </TabsContent>
       </Tabs>
     </div>
   );
 };
 
-const getInputDescription = (category: string): string => {
+// Export for TabsInputPanel
+export const getInputDescription = (category: string): string => {
   switch (category.toLowerCase()) {
     case 'image-generation':
       return 'Describe the image you want to create in detail, including style, colors, and composition.';

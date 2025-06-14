@@ -89,9 +89,10 @@ export const useVirtualScroll = (
 export const withErrorBoundary = <P extends object>(
   Component: React.ComponentType<P>
 ) => {
+  // We cast to any here for the props spread to avoid TS errors about ref
   const WrappedComponent = React.forwardRef<any, P>((props, ref) => {
     try {
-      return React.createElement(Component, { ...(props as object), ref });
+      return React.createElement(Component, { ...(props as any), ref });
     } catch (error) {
       console.error('Component error:', error);
       return React.createElement(
