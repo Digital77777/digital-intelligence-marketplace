@@ -859,6 +859,54 @@ export type Database = {
         }
         Relationships: []
       }
+      marketplace_services: {
+        Row: {
+          average_rating: number | null
+          category: string | null
+          created_at: string
+          delivery_time_days: number | null
+          description: string | null
+          id: string
+          is_active: boolean
+          is_featured: boolean
+          price: number
+          seller_id: string
+          tags: string[] | null
+          title: string
+          total_reviews: number | null
+        }
+        Insert: {
+          average_rating?: number | null
+          category?: string | null
+          created_at?: string
+          delivery_time_days?: number | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_featured?: boolean
+          price: number
+          seller_id: string
+          tags?: string[] | null
+          title: string
+          total_reviews?: number | null
+        }
+        Update: {
+          average_rating?: number | null
+          category?: string | null
+          created_at?: string
+          delivery_time_days?: number | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_featured?: boolean
+          price?: number
+          seller_id?: string
+          tags?: string[] | null
+          title?: string
+          total_reviews?: number | null
+        }
+        Relationships: []
+      }
       marketplace_tools: {
         Row: {
           api_documentation: string | null
