@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
 import { useTier } from '@/context/TierContext';
 import { learningContentService, Course, LiveEvent, Certification } from '@/utils/learningApiService';
-import { allCourses, allLearningPaths, LearningPath } from "@/data/courses";
+import { allLearningPaths, LearningPath } from "@/data/courses";
+import { useQuery } from '@tanstack/react-query';
+import { v4 as uuidv4 } from 'uuid';
 
 interface UseLearningResourcesProps {
   categoryFilter?: string;
@@ -27,6 +29,13 @@ interface UseLearningResourcesResult {
   learningPaths: LearningPath[];
 }
 
+interface PublicApiEntry {
+  API: string;
+  Description: string;
+  Link: string;
+  Category: string;
+}
+
 export const useLearningResources = ({
   categoryFilter,
   difficultyFilter,
@@ -35,110 +44,100 @@ export const useLearningResources = ({
 }: UseLearningResourcesProps = {}): UseLearningResourcesResult & {
   learningPaths: LearningPath[];
 } => {
-  const [resources, setResources] = useState<Course[]>([]);
   const [liveEvents, setLiveEvents] = useState<LiveEvent[]>([]);
   const [certifications, setCertifications] = useState<Certification[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
   const [userProgress, setUserProgress] = useState<Record<string, number>>({});
   const [completedResources, setCompletedResources] = useState<Set<string>>(new Set());
-  const [totalCount, setTotalCount] = useState(0);
-  const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
   const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
   
   const { user } = useUser();
   const { currentTier } = useTier();
-  
-  // Map function to convert data courses into API-style courses with needed fields
-  function mapCourseToApiCourse(course: any): import("@/utils/learningApiService").Course {
-    return {
-      id: course.id,
-      title: course.title,
-      description: course.description,
-      category: course.category ?? "",      // fallback to "" if missing
-      difficulty: course.difficulty ?? "",
-      duration: course.duration ?? 60,
-      instructor: course.instructor ?? "",
-      content: course.content ?? "",
-      exercises: course.exercises ?? [],
-      requiredTier: course.tier || course.requiredTier || 'freemium', // fallback
-    };
-  }
-  
-  // Fetch all learning content
-  useEffect(() => {
-    const fetchLearningContent = async () => {
-      setIsLoading(true);
-      setError(null);
-      
+
+  const { data: allResources, isLoading, error } = useQuery<Course[]>({
+    queryKey: ['learningResourcesFromApi'],
+    queryFn: async () => {
       try {
-        // Filter and MAP to API Course interface
-        let filteredCourses = allCourses;
-        let filteredPaths = allLearningPaths;
-
-        if (searchQuery) {
-          const q = searchQuery.toLowerCase();
-          filteredCourses = filteredCourses.filter(course =>
-            course.title.toLowerCase().includes(q) ||
-            course.description.toLowerCase().includes(q)
-          );
-          filteredPaths = filteredPaths.filter(path =>
-            path.title.toLowerCase().includes(q) ||
-            path.outcome?.toLowerCase().includes(q)
-          );
+        const response = await fetch('https://api.publicapis.org/entries');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
         }
-        // Only show courses/paths for the user's tier or below
-        if (currentTier === "freemium") {
-          filteredCourses = filteredCourses.filter(c => c.tier === "freemium");
-          filteredPaths = filteredPaths.filter(p => p.tier === "freemium");
-        } else if (currentTier === "basic") {
-          filteredCourses = filteredCourses.filter(c => c.tier === "freemium" || c.tier === "basic");
-          filteredPaths = filteredPaths.filter(p => p.tier === "freemium" || p.tier === "basic");
-        }
-        // Map to API-style courses
-        const mappedCourses = filteredCourses.map(mapCourseToApiCourse);
-
-        setResources(mappedCourses.slice(0, limit));
-        setTotalCount(mappedCourses.length);
-        setHasMore(mappedCourses.length > limit);
-        // Provide learningPaths for return value
-        (setLearningPaths as any)?.(filteredPaths);
-
-        // Load user progress from localStorage (simulating database)
-        loadUserProgress();
+        const data = await response.json();
+        const relevantCategories = [
+          'books', 
+          'science & math', 
+          'education', 
+          'documents & productivity',
+          'text analysis',
+          'development'
+        ];
         
-      } catch (err: any) {
-        console.error("Error fetching learning resources:", err);
-        setError(err);
-        toast.error("Failed to load learning resources");
-      } finally {
-        setIsLoading(false);
+        const relevantEntries = data.entries.filter((entry: PublicApiEntry) => 
+          relevantCategories.includes(entry.Category.toLowerCase().replace(/ & /g, ' & ').replace(/ and /g, ' & '))
+        );
+
+        return relevantEntries.map((entry: PublicApiEntry): Course => ({
+          id: uuidv4(),
+          title: entry.API,
+          description: entry.Description,
+          category: entry.Category,
+          difficulty: ['beginner', 'intermediate', 'advanced'][Math.floor(Math.random() * 3)],
+          duration: Math.floor(Math.random() * (180 - 30 + 1) + 30),
+          instructor: 'External Provider',
+          content: `This resource is provided by an external API. You can find more information at the following link: ${entry.Link}`,
+          exercises: [],
+          requiredTier: 'freemium',
+        }));
+      } catch (err) {
+        console.error("Failed to fetch learning resources:", err);
+        toast.error("Failed to load learning resources from API.");
+        return []; // Return empty array on error
       }
-    };
+    },
+    staleTime: 1000 * 60 * 60, // 1 hour
+  });
+
+  const filteredResources = useMemo(() => {
+    if (!allResources) return [];
+
+    let filtered = [...allResources];
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(res =>
+        res.title.toLowerCase().includes(q) ||
+        res.description.toLowerCase().includes(q)
+      );
+    }
     
-    fetchLearningContent();
-  }, [categoryFilter, difficultyFilter, searchQuery, currentTier, limit]);
+    if (categoryFilter) {
+      filtered = filtered.filter(res => res.category === categoryFilter);
+    }
+
+    if (difficultyFilter) {
+      filtered = filtered.filter(res => res.difficulty === difficultyFilter);
+    }
+    
+    if (currentTier === "freemium") {
+      filtered = filtered.filter(c => c.requiredTier === "freemium");
+    } else if (currentTier === "basic") {
+      filtered = filtered.filter(c => c.requiredTier === "freemium" || c.requiredTier === "basic");
+    }
+
+    return filtered;
+  }, [allResources, searchQuery, categoryFilter, difficultyFilter, currentTier]);
   
   // Load user progress from localStorage
-  const loadUserProgress = () => {
+  useEffect(() => {
     if (!user) return;
-    
     try {
       const storedProgress = localStorage.getItem(`learning_progress_${user.id}`);
       const storedCompleted = localStorage.getItem(`completed_resources_${user.id}`);
-      
-      if (storedProgress) {
-        setUserProgress(JSON.parse(storedProgress));
-      }
-      
-      if (storedCompleted) {
-        setCompletedResources(new Set(JSON.parse(storedCompleted)));
-      }
+      if (storedProgress) setUserProgress(JSON.parse(storedProgress));
+      if (storedCompleted) setCompletedResources(new Set(JSON.parse(storedCompleted)));
     } catch (error) {
       console.error("Error loading user progress:", error);
     }
-  };
+  }, [user]);
   
   // Mark a resource as complete
   const markResourceComplete = async (resourceId: string) => {
@@ -177,7 +176,7 @@ export const useLearningResources = ({
   };
   
   return {
-    resources,
+    resources: filteredResources.slice(0, limit),
     liveEvents,
     certifications,
     isLoading,
@@ -185,9 +184,9 @@ export const useLearningResources = ({
     userProgress,
     completedResources,
     markResourceComplete,
-    totalCount,
+    totalCount: filteredResources.length,
     fetchMore,
-    hasMore,
+    hasMore: filteredResources.length > limit,
     learningPaths
   };
 };
