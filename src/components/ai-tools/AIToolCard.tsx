@@ -39,7 +39,7 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
   const { currentTier } = useTier();
   
   const hasAccess = (
-    tool.externalUrl || // External tools are always accessible
+    !!tool.externalUrl || // External tools are always accessible
     (tool.tier === 'freemium') || 
     (tool.tier === 'basic' && (currentTier === 'basic' || currentTier === 'pro')) ||
     (tool.tier === 'pro' && currentTier === 'pro')
