@@ -1197,7 +1197,7 @@ export type Database = {
           subscription_end: string | null
           subscription_tier: string | null
           updated_at: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           created_at?: string
@@ -1208,7 +1208,7 @@ export type Database = {
           subscription_end?: string | null
           subscription_tier?: string | null
           updated_at?: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           created_at?: string
@@ -1219,7 +1219,7 @@ export type Database = {
           subscription_end?: string | null
           subscription_tier?: string | null
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -1269,38 +1269,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "tasks_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      team_members: {
-        Row: {
-          id: string
-          joined_at: string | null
-          role: string
-          team_id: string | null
-          user_id: string | null
-        }
-        Insert: {
-          id?: string
-          joined_at?: string | null
-          role: string
-          team_id?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          id?: string
-          joined_at?: string | null
-          role?: string
-          team_id?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "team_members_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
@@ -1444,7 +1412,6 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
-          tier: string
           updated_at: string
           username: string
         }
@@ -1454,7 +1421,6 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
-          tier?: string
           updated_at?: string
           username: string
         }
@@ -1464,7 +1430,6 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
-          tier?: string
           updated_at?: string
           username?: string
         }
@@ -1507,6 +1472,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
       }
       vlogs: {
         Row: {
@@ -1641,6 +1627,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "super_admin" | "user"
       freelancer_badge: "bronze" | "silver" | "gold"
       issue_status: "Open" | "In Progress" | "Resolved"
       project_status:
@@ -1768,6 +1755,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["super_admin", "user"],
       freelancer_badge: ["bronze", "silver", "gold"],
       issue_status: ["Open", "In Progress", "Resolved"],
       project_status: [

@@ -7,10 +7,12 @@ import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import SearchCommand from '@/components/search/SearchCommand';
+import { useTier } from '@/context/TierContext';
 
 const NavbarActions = () => {
   const navigate = useNavigate();
   const { profile } = useUser();
+  const { currentTier } = useTier();
   const [notificationCount, setNotificationCount] = useState(3);
 
   const handleNotificationClick = () => {
@@ -19,7 +21,7 @@ const NavbarActions = () => {
   };
 
   const handleProClick = () => {
-    if (profile?.tier !== 'pro') {
+    if (currentTier !== 'pro') {
       navigate('/pricing');
       toast("Upgrade required", {
         description: "This feature is available for Pro tier users only"
@@ -42,7 +44,7 @@ const NavbarActions = () => {
     <>
       <div className="flex items-center gap-2 md:gap-4">
         {/* Pro Feature Button - Only visible for non-Pro users */}
-        {profile?.tier !== 'pro' && (
+        {currentTier !== 'pro' && (
           <Tooltip>
             <TooltipTrigger asChild>
               <Button 

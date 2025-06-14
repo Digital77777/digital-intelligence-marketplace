@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from '@supabase/supabase-js';
@@ -8,7 +7,6 @@ interface UserProfile {
   id: string;
   username: string | null;
   avatar_url: string | null;
-  tier: string;
 }
 
 interface UserContextType {
@@ -16,7 +14,7 @@ interface UserContextType {
   session: Session | null;
   profile: UserProfile | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password:string) => Promise<void>;
   register: (email: string, password: string, username?: string) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (data: Partial<UserProfile>) => Promise<void>;
@@ -69,7 +67,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const fetchUserProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from('profiles')
+        .from('user_profiles')
         .select('*')
         .eq('id', userId)
         .single();
@@ -173,7 +171,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     
     try {
       const { error } = await supabase
-        .from('profiles')
+        .from('user_profiles')
         .update(data)
         .eq('id', user.id);
 
