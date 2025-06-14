@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -226,15 +225,15 @@ const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onBack, connectionD
 
 const getInputDescription = (category: string): string => {
   switch (category.toLowerCase()) {
-    case 'image generation':
+    case 'image-generation':
       return 'Describe the image you want to create in detail, including style, colors, and composition.';
-    case 'text tools':
+    case 'text-tools':
       return 'Provide the text content you want to analyze, summarize, or process.';
     case 'agriculture':
       return 'Share information about your farm, crops, or agricultural challenge for AI-powered insights.';
     case 'development':
       return 'Describe the code functionality you need or paste existing code for analysis.';
-    case 'data analysis':
+    case 'data-analysis':
       return 'Describe your dataset or paste sample data for AI-powered analysis.';
     case 'productivity':
       return 'Describe the task or workflow you want to automate or optimize.';
@@ -357,29 +356,6 @@ Results:
 Generated using advanced AI models optimized for accuracy and performance.
 
 Additional insights and recommendations would be displayed here based on the specific tool functionality.`;
-  }
-};
-
-const getInputDescription = (category: string): string => {
-  switch (category.toLowerCase()) {
-    case 'image-generation':
-      return 'Describe the image you want to create in detail, including style, colors, and composition.';
-    case 'text-tools':
-      return 'Provide the text content you want to analyze, summarize, or process.';
-    case 'agriculture':
-      return 'Share information about your farm, crops, or agricultural challenge for AI-powered insights.';
-    case 'development':
-      return 'Describe the code functionality you need or paste existing code for analysis.';
-    case 'data-analysis':
-      return 'Describe your dataset or paste sample data for AI-powered analysis.';
-    case 'productivity':
-      return 'Describe the task or workflow you want to automate or optimize.';
-    case 'music':
-      return 'Describe the musical style, mood, or specific requirements for your composition.';
-    case 'voice':
-      return 'Enter the text you want to convert to speech or describe voice characteristics.';
-    default:
-      return 'Enter your input and click process to see AI-generated results.';
   }
 };
 

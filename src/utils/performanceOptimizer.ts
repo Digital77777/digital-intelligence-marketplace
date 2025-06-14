@@ -1,4 +1,3 @@
-
 import React, { useCallback, useMemo, useEffect, useState } from 'react';
 
 // Debounce hook for search and input fields
@@ -86,13 +85,13 @@ export const useVirtualScroll = (
   }, [itemHeight, containerHeight, itemCount, scrollTop]);
 };
 
-// Component error boundary utility
-export const withErrorBoundary = <P extends React.ComponentProps<any>>(
+// Update type constraint to ensure P is an object and fix the spread usage
+export const withErrorBoundary = <P extends object>(
   Component: React.ComponentType<P>
 ) => {
   const WrappedComponent = React.forwardRef<any, P>((props, ref) => {
     try {
-      return React.createElement(Component, { ...props, ref });
+      return React.createElement(Component, { ...(props as object), ref });
     } catch (error) {
       console.error('Component error:', error);
       return React.createElement(
