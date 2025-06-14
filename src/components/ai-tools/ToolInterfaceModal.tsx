@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,11 @@ import AIToolInterface from './AIToolInterface';
 import ConnectionSection from './components/ConnectionSection';
 import WelcomeScreen from './components/WelcomeScreen';
 import ImageGeneratorInterface from "./interfaces/ImageGeneratorInterface";
+import TaskBotMiniInterface from "./interfaces/TaskBotMiniInterface";
+import CopyCraftFreeInterface from "./interfaces/CopyCraftFreeInterface";
+import FieldSimXRInterface from "./interfaces/FieldSimXRInterface";
+import AITextSummarizerInterface from "./interfaces/AITextSummarizerInterface";
+import InsightLiteInterface from "./interfaces/InsightLiteInterface";
 
 interface ToolInterfaceModalProps {
   open: boolean;
@@ -103,60 +109,97 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
       handleQuickStart();
     }
   }, [open, tool, connectionDetails]);
+
+  // Function to render the appropriate custom interface
+  const renderCustomInterface = () => {
+    switch (tool.name) {
+      case "TaskBot Mini":
+        return <TaskBotMiniInterface />;
+      case "CopyCraft Free":
+        return <CopyCraftFreeInterface />;
+      case "FieldSim XR":
+        return <FieldSimXRInterface />;
+      case "AI Text Summarizer":
+        return <AITextSummarizerInterface />;
+      case "InsightLite":
+        return <InsightLiteInterface />;
+      case "AI Image Generator":
+        return <ImageGeneratorInterface />;
+      default:
+        return null;
+    }
+  };
+
+  // Check if this tool has a custom interface
+  const hasCustomInterface = [
+    "TaskBot Mini",
+    "CopyCraft Free", 
+    "FieldSim XR",
+    "AI Text Summarizer",
+    "InsightLite",
+    "AI Image Generator"
+  ].includes(tool.name);
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[900px] max-h-[90vh] flex flex-col p-0">
-        <DialogHeader className="p-6 border-b">
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}>
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-              <DialogTitle className="text-lg font-medium">
-                {tool.name}
-              </DialogTitle>
-            </div>
-            
-            <ConnectionSection 
-              connectionDetails={connectionDetails}
-              showConnectionForm={showConnectionForm}
-              handleConnectApi={handleConnectApi}
-              handleUpdateConfig={handleUpdateConfig}
-            />
+        {hasCustomInterface ? (
+          // For custom interfaces, render them full-screen without the dialog chrome
+          <div className="flex-grow overflow-auto">
+            {renderCustomInterface()}
           </div>
-        </DialogHeader>
-        
-        <div className="flex-grow overflow-auto p-6">
-          {/* Render custom interface for AI Image Generator */}
-          {tool.name === "AI Image Generator" ? (
-            <ImageGeneratorInterface />
-          ) : showConnectionForm ? (
-            <APIConnectionForm 
-              tool={tool}
-              onSuccess={handleApiConnectionSuccess}
-              onCancel={() => setShowConnectionForm(false)}
-            />
-          ) : (
-            connectionDetails ? (
-              <AIToolInterface 
-                tool={tool} 
-                connectionDetails={connectionDetails}
-              />
-            ) : (
-              <div className="text-center py-4">
-                <p>Initializing tool...</p>
-                <Button 
-                  variant="default" 
-                  className="mt-2"
-                  onClick={handleQuickStart}
-                >
-                  Quick Start
-                </Button>
+        ) : (
+          // For standard tools, use the existing interface with header
+          <>
+            <DialogHeader className="p-6 border-b">
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-3">
+                  <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}>
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                  <DialogTitle className="text-lg font-medium">
+                    {tool.name}
+                  </DialogTitle>
+                </div>
+                
+                <ConnectionSection 
+                  connectionDetails={connectionDetails}
+                  showConnectionForm={showConnectionForm}
+                  handleConnectApi={handleConnectApi}
+                  handleUpdateConfig={handleUpdateConfig}
+                />
               </div>
-            )
-          )}
-        </div>
+            </DialogHeader>
+            
+            <div className="flex-grow overflow-auto p-6">
+              {showConnectionForm ? (
+                <APIConnectionForm 
+                  tool={tool}
+                  onSuccess={handleApiConnectionSuccess}
+                  onCancel={() => setShowConnectionForm(false)}
+                />
+              ) : (
+                connectionDetails ? (
+                  <AIToolInterface 
+                    tool={tool} 
+                    connectionDetails={connectionDetails}
+                  />
+                ) : (
+                  <div className="text-center py-4">
+                    <p>Initializing tool...</p>
+                    <Button 
+                      variant="default" 
+                      className="mt-2"
+                      onClick={handleQuickStart}
+                    >
+                      Quick Start
+                    </Button>
+                  </div>
+                )
+              )}
+            </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
