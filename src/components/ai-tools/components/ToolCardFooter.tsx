@@ -7,9 +7,9 @@ import { AIToolItem, getTierLabel } from '@/data/ai-tools-tiers';
 import { useTier } from '@/context/TierContext';
 
 interface ToolCardFooterProps {
-  tool: any;
+  tool: AIToolItem;
   hasAccess: boolean;
-  onSelect?: (tool: any) => void;
+  onSelect?: (tool: AIToolItem) => void;
 }
 
 const ToolCardFooter: React.FC<ToolCardFooterProps> = ({ tool, hasAccess, onSelect }) => {

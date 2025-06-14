@@ -7,11 +7,11 @@ import { Spinner } from '@/components/ui/spinner';
 
 interface ToolsTabContentProps {
   isLoading: boolean;
-  filteredTools: any[] | undefined;
+  filteredTools: AIToolItem[] | undefined;
   title: string;
   description: string;
   alertColor?: string;
-  onToolSelect: (tool: any) => void;
+  onToolSelect: (tool: AIToolItem) => void;
   viewControls?: React.ReactNode;
   viewType?: 'grid' | 'list';
 }

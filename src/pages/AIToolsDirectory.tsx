@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -69,8 +70,8 @@ const AIToolsDirectory = () => {
   // Filter tools based on search, category, and tier
   const { data: allPlatformTools, isLoading: isLoadingTools } = useQuery({
     queryKey: ['allPlatformTools'],
-    queryFn: async (): Promise<any[]> => {
-      let externalTools: any[] = [];
+    queryFn: async (): Promise<AIToolItem[]> => {
+      let externalTools: AIToolItem[] = [];
       try {
         const response = await fetch('https://api.publicapis.org/entries');
         if (response.ok) {
@@ -88,7 +89,7 @@ const AIToolsDirectory = () => {
             relevantCategories.includes(entry.Category)
           );
 
-          externalTools = relevantEntries.map((entry: PublicApiEntry) => ({
+          externalTools = relevantEntries.map((entry: PublicApiEntry): AIToolItem => ({
             id: uuidv4(),
             name: entry.API,
             description: entry.Description,
@@ -97,7 +98,6 @@ const AIToolsDirectory = () => {
             icon: <Zap className="h-full w-full" />,
             externalUrl: entry.Link,
             use_cases: [entry.Category],
-            hasAccess: true,
           }));
         }
       } catch (error) {
@@ -111,10 +111,10 @@ const AIToolsDirectory = () => {
 
   const { data: filteredTools, isLoading: isLoadingFiltered } = useQuery({
     queryKey: ['aiTools', allPlatformTools, debouncedSearchQuery, selectedCategory, selectedTier, activeTab],
-    queryFn: () => {
+    queryFn: (): AIToolItem[] => {
       if (!allPlatformTools) return [];
 
-      let filtered = [...allPlatformTools];
+      let filtered: AIToolItem[] = [...allPlatformTools];
       
       // Filter by search query
       if (debouncedSearchQuery) {

@@ -30,9 +30,9 @@ import ToolCardContent from './components/ToolCardContent';
 import ToolCardFooter from './components/ToolCardFooter';
 
 interface AIToolCardProps {
-  tool: any; // Allow for extended tool properties
+  tool: AIToolItem;
   compact?: boolean;
-  onSelect?: (tool: any) => void;
+  onSelect?: (tool: AIToolItem) => void;
 }
 
 const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect }) => {

@@ -46,6 +46,7 @@ export interface AIToolItem {
   relatedCourses?: string[];
   technologies?: string[];
   function?: string;
+  externalUrl?: string;
 }
 
 export interface ToolCategory {
