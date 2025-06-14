@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -29,6 +28,7 @@ import NewGroup from "./pages/NewGroup";
 import NewForumTopic from "./pages/NewForumTopic";
 import ForumTopic from "./pages/ForumTopic";
 import TopicDetails from "./pages/TopicDetails";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +49,7 @@ const App = () => (
                 <Route path="/marketplace" element={<Marketplace />} />
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/auth" element={<Auth />} />
                 
                 {/* Forum Routes - Add redirect from /forums to /community */}
                 <Route path="/forums" element={<CommunityForums />} />
