@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Calendar, Clock, Users, CheckCircle, AlertCircle, Plus } from 'lucide-react';
 import { mockTasks, mockTeams, Task, Team } from '@/data/teamDashboardMockData';
-import SampleDataBanner from './SampleDataBanner';
 
 const TeamDashboard = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -60,9 +59,6 @@ const TeamDashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Sample Data Banner */}
-      <SampleDataBanner />
-
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>

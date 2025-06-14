@@ -10,7 +10,6 @@ import TierSpecificContent from '@/components/TierSpecificContent';
 import { useTier } from '@/context/TierContext';
 import FeaturedResources from '@/components/FeaturedResources';
 import TrendingToolsCarousel from '@/components/TrendingToolsCarousel';
-import TeamDashboardCTA from '@/components/TeamDashboardCTA';
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/context/UserContext";
 import { Sparkles, Users, BarChart, Code2, ShoppingCart, ArrowRight, ArrowDownRight, Shield, Star, MessageCircle } from "lucide-react";
@@ -150,9 +149,6 @@ const Index = () => {
             </div>
           </div>
         </section>
-
-        {/* TEAM DASHBOARD CTA */}
-        <TeamDashboardCTA />
 
         {/* FRICTIONLESS SIGN-UP: 3 steps */}
         <section className="py-16 px-2 bg-gradient-to-t from-white to-blue-50">
