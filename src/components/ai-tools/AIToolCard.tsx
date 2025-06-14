@@ -30,15 +30,16 @@ import ToolCardContent from './components/ToolCardContent';
 import ToolCardFooter from './components/ToolCardFooter';
 
 interface AIToolCardProps {
-  tool: AIToolItem;
+  tool: any; // Allow for extended tool properties
   compact?: boolean;
-  onSelect?: (tool: AIToolItem) => void;
+  onSelect?: (tool: any) => void;
 }
 
 const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect }) => {
   const { currentTier } = useTier();
   
   const hasAccess = (
+    tool.externalUrl || // External tools are always accessible
     (tool.tier === 'freemium') || 
     (tool.tier === 'basic' && (currentTier === 'basic' || currentTier === 'pro')) ||
     (tool.tier === 'pro' && currentTier === 'pro')
@@ -87,25 +88,35 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
           </Badge>
         </div>
         <div className="px-3 pb-3 border-t dark:border-gray-700/50 pt-3"> {/* Added border-t and padding */}
-          <Button 
-            variant={hasAccess ? "default" : "outline"} 
-            size="sm" 
-            className={`w-full ${hasAccess ? 'bg-primary hover:bg-primary/90 text-primary-foreground' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200'}`}
-            onClick={() => onSelect?.(tool)}
-          >
-            {hasAccess ? (
-              <>
+          {tool.externalUrl ? (
+            <Button variant="default" size="sm" className="w-full" asChild>
+              <a href={tool.externalUrl} target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="h-3.5 w-3.5 mr-1" />
-                Launch
+                Visit Tool
                 <ArrowRight className="h-3.5 w-3.5 ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-300" />
-              </>
-            ) : (
-              <>
-                <Lock className="h-3.5 w-3.5 mr-1" />
-                Upgrade
-              </>
-            )}
-          </Button>
+              </a>
+            </Button>
+          ) : (
+            <Button 
+              variant={hasAccess ? "default" : "outline"} 
+              size="sm" 
+              className={`w-full ${hasAccess ? 'bg-primary hover:bg-primary/90 text-primary-foreground' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200'}`}
+              onClick={() => onSelect?.(tool)}
+            >
+              {hasAccess ? (
+                <>
+                  <ExternalLink className="h-3.5 w-3.5 mr-1" />
+                  Launch
+                  <ArrowRight className="h-3.5 w-3.5 ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-300" />
+                </>
+              ) : (
+                <>
+                  <Lock className="h-3.5 w-3.5 mr-1" />
+                  Upgrade
+                </>
+              )}
+            </Button>
+          )}
         </div>
       </Card>
     );

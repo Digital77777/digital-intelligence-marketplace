@@ -7,12 +7,36 @@ import { AIToolItem, getTierLabel } from '@/data/ai-tools-tiers';
 import { useTier } from '@/context/TierContext';
 
 interface ToolCardFooterProps {
-  tool: AIToolItem;
+  tool: any;
   hasAccess: boolean;
-  onSelect?: (tool: AIToolItem) => void;
+  onSelect?: (tool: any) => void;
 }
 
 const ToolCardFooter: React.FC<ToolCardFooterProps> = ({ tool, hasAccess, onSelect }) => {
+  if (tool.externalUrl) {
+    return (
+      <div className="pt-3 border-t mt-auto bg-gray-50/30 dark:bg-gray-800/20 dark:border-gray-700/50">
+        <div className="w-full">
+          <div className="flex items-center justify-between mb-2.5">
+            <div className="flex items-center gap-1.5">
+              <div className="h-2 w-2 rounded-full bg-green-500"></div>
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                External Tool
+              </span>
+            </div>
+          </div>
+          <Button className="w-full group-hover:shadow-lg transition-shadow duration-300" asChild>
+            <a href={tool.externalUrl} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="h-4 w-4 mr-1.5" />
+              Visit Tool
+              <ArrowRight className="h-4 w-4 ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
+            </a>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="pt-3 border-t mt-auto bg-gray-50/30 dark:bg-gray-800/20 dark:border-gray-700/50"> {/* Adjusted padding and background */}
       <div className="w-full">

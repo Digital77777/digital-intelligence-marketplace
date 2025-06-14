@@ -9,7 +9,7 @@ import { Spinner } from '@/components/ui/spinner';
 
 interface AllToolsTabProps {
   isLoading: boolean;
-  filteredTools: AIToolItem[] | undefined;
+  filteredTools: any[] | undefined;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   selectedCategory: string;
@@ -19,7 +19,7 @@ interface AllToolsTabProps {
   viewType: 'grid' | 'list';
   setViewType: (viewType: 'grid' | 'list') => void;
   totalTools: number;
-  onToolSelect: (tool: AIToolItem) => void;
+  onToolSelect: (tool: any) => void;
 }
 
 const AllToolsTab: React.FC<AllToolsTabProps> = ({

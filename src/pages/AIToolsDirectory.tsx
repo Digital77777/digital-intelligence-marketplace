@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -18,6 +17,15 @@ import DirectoryTabs from '@/components/ai-tools/components/DirectoryTabs';
 import useScrollToTop from '@/hooks/useScrollToTop';
 import { LayoutGrid, ListFilter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { v4 as uuidv4 } from 'uuid';
+import { Zap } from 'lucide-react';
+
+interface PublicApiEntry {
+  API: string;
+  Description: string;
+  Link: string;
+  Category: string;
+}
 
 const AIToolsDirectory = () => {
   useScrollToTop();
@@ -59,10 +67,54 @@ const AIToolsDirectory = () => {
   }, [debouncedSearchQuery, selectedCategory, selectedTier, viewType, activeTab, setSearchParams]);
   
   // Filter tools based on search, category, and tier
-  const { data: filteredTools, isLoading } = useQuery({
-    queryKey: ['aiTools', debouncedSearchQuery, selectedCategory, selectedTier, activeTab],
+  const { data: allPlatformTools, isLoading: isLoadingTools } = useQuery({
+    queryKey: ['allPlatformTools'],
+    queryFn: async (): Promise<any[]> => {
+      let externalTools: any[] = [];
+      try {
+        const response = await fetch('https://api.publicapis.org/entries');
+        if (response.ok) {
+          const data = await response.json();
+          const relevantCategories = [
+            'Machine Learning', 
+            'Development', 
+            'Data Validation', 
+            'Text Analysis',
+            'Documents & Productivity',
+            'Cloud Storage & File Sharing'
+          ];
+          
+          const relevantEntries = data.entries.filter((entry: PublicApiEntry) => 
+            relevantCategories.includes(entry.Category)
+          );
+
+          externalTools = relevantEntries.map((entry: PublicApiEntry) => ({
+            id: uuidv4(),
+            name: entry.API,
+            description: entry.Description,
+            category: entry.Category,
+            tier: 'freemium',
+            icon: <Zap className="h-full w-full" />,
+            externalUrl: entry.Link,
+            use_cases: [entry.Category],
+            hasAccess: true,
+          }));
+        }
+      } catch (error) {
+        console.error("Failed to fetch external AI tools:", error);
+        // Silently fail to not block UI
+      }
+      return [...aiTools, ...externalTools];
+    },
+    staleTime: 1000 * 60 * 60, // 1 hour
+  });
+
+  const { data: filteredTools, isLoading: isLoadingFiltered } = useQuery({
+    queryKey: ['aiTools', allPlatformTools, debouncedSearchQuery, selectedCategory, selectedTier, activeTab],
     queryFn: () => {
-      let filtered = [...aiTools];
+      if (!allPlatformTools) return [];
+
+      let filtered = [...allPlatformTools];
       
       // Filter by search query
       if (debouncedSearchQuery) {
@@ -75,7 +127,10 @@ const AIToolsDirectory = () => {
       
       // Filter by category
       if (selectedCategory !== 'all') {
-        filtered = filtered.filter(tool => tool.category === selectedCategory);
+        const category = toolCategories.find(c => c.id === selectedCategory);
+        if (category) {
+            filtered = filtered.filter(tool => tool.category.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-') === category.id);
+        }
       }
       
       // Filter by tier
@@ -97,14 +152,16 @@ const AIToolsDirectory = () => {
         const categoryId = activeTab;
         filtered = filtered.filter(tool => {
           const category = toolCategories.find(c => c.id === categoryId);
-          return category && tool.category === category.name.toLowerCase();
+          return category && tool.category.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-') === category.name.toLowerCase();
         });
       }
       
       return filtered;
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    enabled: !!allPlatformTools,
   });
+
+  const isLoading = isLoadingTools || (isLoadingFiltered && !filteredTools);
   
   // Group tools by tier for the Tiers tab
   const tierGroups: AIToolTier[] = ['freemium', 'basic', 'pro'];
@@ -115,6 +172,9 @@ const AIToolsDirectory = () => {
 
   // Handle tool selection
   const handleToolSelect = (tool: AIToolItem) => {
+    // External tools are handled by the card footer directly
+    if (tool.externalUrl) return;
+
     setSelectedTool(tool);
     setToolModalOpen(true);
   };
@@ -124,7 +184,7 @@ const AIToolsDirectory = () => {
       <Navbar />
       <main className="flex-1 pt-24 px-4 md:px-6 pb-12 bg-white">
         <div className="max-w-7xl mx-auto">
-          <DirectoryHeader totalTools={aiTools.length} />
+          <DirectoryHeader totalTools={allPlatformTools?.length || aiTools.length} />
           
           <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="mb-8">
             <DirectoryTabs activeTab={activeTab} onTabChange={setActiveTab} />
@@ -142,7 +202,7 @@ const AIToolsDirectory = () => {
                 setSelectedTier={setSelectedTier}
                 viewType={viewType}
                 setViewType={setViewType}
-                totalTools={aiTools.length}
+                totalTools={allPlatformTools?.length || aiTools.length}
                 onToolSelect={handleToolSelect}
               />
             </TabsContent>
