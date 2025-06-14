@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,14 +12,18 @@ import { useTier } from '@/context/TierContext';
 import LearningPaths from './LearningPaths';
 import Certifications from './Certifications';
 import LiveEvents from './LiveEvents';
+import CourseGrid from './CourseGrid';
 
 // Sample data - in a real app, you would fetch this from your API
 import { sampleLearningPaths, sampleCertifications, sampleLiveEvents } from './sampleLearningData';
+import { useMoodleCourses } from '@/hooks/useMoodleCourses';
 
 const TierLearningFeatures = () => {
   const { currentTier, upgradePrompt } = useTier();
   const [activeTab, setActiveTab] = React.useState<string>("courses");
   
+  const { courses: allCourses, isLoading: coursesLoading } = useMoodleCourses();
+
   const getTierIcon = () => {
     switch (currentTier) {
       case 'pro':
@@ -53,6 +56,17 @@ const TierLearningFeatures = () => {
         return "Explore foundational AI courses and community resources to begin your learning journey.";
     }
   };
+  
+  const filteredCourses = useMemo(() => {
+    if (!allCourses) return [];
+    if (currentTier === 'pro') {
+      return allCourses;
+    }
+    if (currentTier === 'basic') {
+      return allCourses.filter(c => c.required_tier === 'freemium' || c.required_tier === 'basic');
+    }
+    return allCourses.filter(c => c.required_tier === 'freemium');
+  }, [allCourses, currentTier]);
   
   const getFilteredLearningPaths = () => {
     if (currentTier === 'pro') {
@@ -123,235 +137,11 @@ const TierLearningFeatures = () => {
         </TabsList>
         
         <TabsContent value="courses" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {currentTier === 'freemium' && (
-              <>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">AI 101: Understanding Machine Learning</CardTitle>
-                    <CardDescription>Beginner friendly introduction to AI concepts</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4 mr-1" />
-                      <span>30 minutes</span>
-                      <span className="mx-2">•</span>
-                      <FileText className="h-4 w-4 mr-1" />
-                      <span>5 lessons</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Learn the fundamentals of machine learning and AI terminology.
-                    </p>
-                  </CardContent>
-                  <div className="p-6 pt-0">
-                    <Button className="w-full">
-                      <Play className="mr-2 h-4 w-4" /> Start Course
-                    </Button>
-                  </div>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Getting Started with Data Visualization</CardTitle>
-                    <CardDescription>Learn to create meaningful data visualizations</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4 mr-1" />
-                      <span>45 minutes</span>
-                      <span className="mx-2">•</span>
-                      <FileText className="h-4 w-4 mr-1" />
-                      <span>4 lessons</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Explore techniques for visualizing data to extract meaningful insights.
-                    </p>
-                  </CardContent>
-                  <div className="p-6 pt-0">
-                    <Button className="w-full">
-                      <Play className="mr-2 h-4 w-4" /> Start Course
-                    </Button>
-                  </div>
-                </Card>
-                
-                <Card className="opacity-70">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Building Machine Learning Pipelines</CardTitle>
-                    <CardDescription>Intermediate level ML workflows</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4 mr-1" />
-                      <span>2 hours</span>
-                      <span className="mx-2">•</span>
-                      <FileText className="h-4 w-4 mr-1" />
-                      <span>8 lessons</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Learn to create end-to-end machine learning pipelines for production.
-                    </p>
-                  </CardContent>
-                  <div className="p-6 pt-0">
-                    <Button variant="outline" className="w-full" onClick={() => upgradePrompt('basic')}>
-                      <Lock className="mr-2 h-4 w-4" /> Upgrade to Access
-                    </Button>
-                  </div>
-                </Card>
-              </>
-            )}
-            
-            {currentTier === 'basic' && (
-              <>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Building Machine Learning Pipelines</CardTitle>
-                    <CardDescription>Intermediate level ML workflows</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4 mr-1" />
-                      <span>2 hours</span>
-                      <span className="mx-2">•</span>
-                      <FileText className="h-4 w-4 mr-1" />
-                      <span>8 lessons</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Learn to create end-to-end machine learning pipelines for production.
-                    </p>
-                  </CardContent>
-                  <div className="p-6 pt-0">
-                    <Button className="w-full">
-                      <Play className="mr-2 h-4 w-4" /> Start Course
-                    </Button>
-                  </div>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">AI for Business Analytics</CardTitle>
-                    <CardDescription>Apply AI to solve business problems</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4 mr-1" />
-                      <span>3 hours</span>
-                      <span className="mx-2">•</span>
-                      <FileText className="h-4 w-4 mr-1" />
-                      <span>10 lessons</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Discover how to apply AI solutions to real business analytics challenges.
-                    </p>
-                  </CardContent>
-                  <div className="p-6 pt-0">
-                    <Button className="w-full">
-                      <Play className="mr-2 h-4 w-4" /> Start Course
-                    </Button>
-                  </div>
-                </Card>
-                
-                <Card className="opacity-70">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Mastering Neural Networks with TensorFlow</CardTitle>
-                    <CardDescription>Advanced deep learning techniques</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4 mr-1" />
-                      <span>5 hours</span>
-                      <span className="mx-2">•</span>
-                      <FileText className="h-4 w-4 mr-1" />
-                      <span>15 lessons</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Deep dive into neural network architectures and TensorFlow implementation.
-                    </p>
-                  </CardContent>
-                  <div className="p-6 pt-0">
-                    <Button variant="outline" className="w-full" onClick={() => upgradePrompt('pro')}>
-                      <Lock className="mr-2 h-4 w-4" /> Upgrade to Access
-                    </Button>
-                  </div>
-                </Card>
-              </>
-            )}
-            
-            {currentTier === 'pro' && (
-              <>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Mastering Neural Networks with TensorFlow</CardTitle>
-                    <CardDescription>Advanced deep learning techniques</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4 mr-1" />
-                      <span>5 hours</span>
-                      <span className="mx-2">•</span>
-                      <FileText className="h-4 w-4 mr-1" />
-                      <span>15 lessons</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Deep dive into neural network architectures and TensorFlow implementation.
-                    </p>
-                  </CardContent>
-                  <div className="p-6 pt-0">
-                    <Button className="w-full">
-                      <Play className="mr-2 h-4 w-4" /> Start Course
-                    </Button>
-                  </div>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Ethical AI & Bias Mitigation</CardTitle>
-                    <CardDescription>Ensuring responsible AI implementation</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4 mr-1" />
-                      <span>4 hours</span>
-                      <span className="mx-2">•</span>
-                      <FileText className="h-4 w-4 mr-1" />
-                      <span>12 lessons</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Learn strategies to identify and mitigate bias in AI systems and models.
-                    </p>
-                  </CardContent>
-                  <div className="p-6 pt-0">
-                    <Button className="w-full">
-                      <Play className="mr-2 h-4 w-4" /> Start Course
-                    </Button>
-                  </div>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Enterprise AI Integration</CardTitle>
-                    <CardDescription>Scaling AI solutions for enterprise</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4 mr-1" />
-                      <span>6 hours</span>
-                      <span className="mx-2">•</span>
-                      <FileText className="h-4 w-4 mr-1" />
-                      <span>18 lessons</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Strategies for successfully deploying AI solutions at enterprise scale.
-                    </p>
-                  </CardContent>
-                  <div className="p-6 pt-0">
-                    <Button className="w-full">
-                      <Play className="mr-2 h-4 w-4" /> Start Course
-                    </Button>
-                  </div>
-                </Card>
-              </>
-            )}
-          </div>
+          <CourseGrid 
+            courses={filteredCourses}
+            isLoading={coursesLoading}
+            emptyMessage="No courses are available for your current tier."
+          />
           
           <div className="flex justify-center">
             <Button variant="outline">View All Courses</Button>
