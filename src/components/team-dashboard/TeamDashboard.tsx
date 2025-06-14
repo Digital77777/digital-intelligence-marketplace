@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Calendar, Clock, Users, CheckCircle, AlertCircle, Plus } from 'lucide-react';
 import { mockTasks, mockTeams, Task, Team } from '@/data/teamDashboardMockData';
+import SampleDataBanner from './SampleDataBanner';
 
 const TeamDashboard = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -59,6 +59,8 @@ const TeamDashboard = () => {
 
   return (
     <div className="space-y-6">
+      <SampleDataBanner />
+      
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
