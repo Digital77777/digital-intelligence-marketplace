@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
 import { useTier } from '@/context/TierContext';
 import { learningContentService, Course, LiveEvent, Certification } from '@/utils/learningApiService';
+import { allCourses, allLearningPaths, LearningPath } from "@/data/courses";
 
 interface UseLearningResourcesProps {
   categoryFilter?: string;
@@ -24,6 +24,7 @@ interface UseLearningResourcesResult {
   totalCount: number;
   fetchMore: () => Promise<void>;
   hasMore: boolean;
+  learningPaths: LearningPath[];
 }
 
 export const useLearningResources = ({
@@ -31,7 +32,9 @@ export const useLearningResources = ({
   difficultyFilter,
   searchQuery = '',
   limit = 12
-}: UseLearningResourcesProps = {}): UseLearningResourcesResult => {
+}: UseLearningResourcesProps = {}): UseLearningResourcesResult & {
+  learningPaths: LearningPath[];
+} => {
   const [resources, setResources] = useState<Course[]>([]);
   const [liveEvents, setLiveEvents] = useState<LiveEvent[]>([]);
   const [certifications, setCertifications] = useState<Certification[]>([]);
@@ -42,6 +45,7 @@ export const useLearningResources = ({
   const [totalCount, setTotalCount] = useState(0);
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
   
   const { user } = useUser();
   const { currentTier } = useTier();
@@ -53,56 +57,38 @@ export const useLearningResources = ({
       setError(null);
       
       try {
-        // Fetch courses, events, and certifications concurrently
-        const [coursesData, eventsData, certificationsData] = await Promise.all([
-          learningContentService.fetchOpenSourceCourses(),
-          learningContentService.fetchLiveEvents(),
-          learningContentService.fetchCertifications()
-        ]);
-        
-        // Apply filters
-        let filteredCourses = coursesData;
-        
-        // Category filter
-        if (categoryFilter) {
-          filteredCourses = filteredCourses.filter(course => 
-            course.category.toLowerCase().includes(categoryFilter.toLowerCase())
-          );
-        }
-        
-        // Difficulty filter
-        if (difficultyFilter) {
-          filteredCourses = filteredCourses.filter(course => 
-            course.difficulty === difficultyFilter
-          );
-        }
-        
-        // Search query filter
+        // NEW: Filter from our allCourses & allLearningPaths imports
+        let filteredCourses = allCourses;
+        let filteredPaths = allLearningPaths;
+
+        // Add your filters as needed (category, difficulty, etc.)
         if (searchQuery) {
-          const query = searchQuery.toLowerCase();
-          filteredCourses = filteredCourses.filter(course => 
-            course.title.toLowerCase().includes(query) ||
-            course.description.toLowerCase().includes(query) ||
-            course.category.toLowerCase().includes(query) ||
-            course.instructor.toLowerCase().includes(query)
+          const q = searchQuery.toLowerCase();
+          filteredCourses = filteredCourses.filter(course =>
+            course.title.toLowerCase().includes(q) ||
+            course.description.toLowerCase().includes(q)
+          );
+          filteredPaths = filteredPaths.filter(path =>
+            path.title.toLowerCase().includes(q) ||
+            path.outcome.toLowerCase().includes(q)
           );
         }
-        
-        // Tier filtering - only show resources available to the current tier
-        if (currentTier === 'freemium') {
-          filteredCourses = filteredCourses.filter(course => course.requiredTier === 'freemium');
-        } else if (currentTier === 'basic') {
-          filteredCourses = filteredCourses.filter(course => 
-            course.requiredTier === 'freemium' || course.requiredTier === 'basic'
-          );
+        // Only show courses/paths for the user's tier or below
+        if (currentTier === "freemium") {
+          filteredCourses = filteredCourses.filter(c => c.tier === "freemium");
+          filteredPaths = filteredPaths.filter(p => p.tier === "freemium");
+        } else if (currentTier === "basic") {
+          filteredCourses = filteredCourses.filter(c => c.tier === "freemium" || c.tier === "basic");
+          filteredPaths = filteredPaths.filter(p => p.tier === "freemium" || p.tier === "basic");
         }
-        
-        setResources(filteredCourses);
-        setLiveEvents(eventsData);
-        setCertifications(certificationsData);
+        // Else pro gets all
+
+        setResources(filteredCourses.slice(0, limit));
         setTotalCount(filteredCourses.length);
-        setHasMore(false); // All data is loaded at once for simplicity
-        
+        setHasMore(filteredCourses.length > limit);
+        // Provide learningPaths for return value
+        (setLearningPaths as any)?.(filteredPaths);
+
         // Load user progress from localStorage (simulating database)
         loadUserProgress();
         
@@ -116,7 +102,7 @@ export const useLearningResources = ({
     };
     
     fetchLearningContent();
-  }, [categoryFilter, difficultyFilter, searchQuery, currentTier]);
+  }, [categoryFilter, difficultyFilter, searchQuery, currentTier, limit]);
   
   // Load user progress from localStorage
   const loadUserProgress = () => {
@@ -185,6 +171,7 @@ export const useLearningResources = ({
     markResourceComplete,
     totalCount,
     fetchMore,
-    hasMore
+    hasMore,
+    learningPaths
   };
 };

@@ -61,7 +61,8 @@ const LearningHub = () => {
     userProgress,
     completedResources,
     markResourceComplete,
-    totalCount
+    totalCount,
+    learningPaths
   } = useLearningResources({
     categoryFilter,
     difficultyFilter,
@@ -246,7 +247,7 @@ const LearningHub = () => {
 
           {/* Main content tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="courses" className="flex items-center gap-2">
                 <BookOpen className="h-4 w-4" />
                 Courses
@@ -266,6 +267,10 @@ const LearningHub = () => {
               <TabsTrigger value="resources" className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
                 Resources
+              </TabsTrigger>
+              <TabsTrigger value="paths" className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                Learning Paths
               </TabsTrigger>
             </TabsList>
 
@@ -571,6 +576,46 @@ const LearningHub = () => {
                     </Button>
                   </CardFooter>
                 </Card>
+              </div>
+            </TabsContent>
+
+            {/* Learning Paths Tab */}
+            <TabsContent value="paths" className="mt-6">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-2">Curated Learning Paths</h2>
+                <p className="text-muted-foreground">
+                  Each path combines high-impact courses leading to a practical outcome and credential.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {learningPaths.length === 0 && (
+                  <div className="text-center text-muted-foreground col-span-full py-8">
+                    No learning paths found for your tier.
+                  </div>
+                )}
+                {learningPaths.map(path => (
+                  <div key={path.id} className="bg-white rounded-xl border shadow p-6 flex flex-col">
+                    <h3 className="font-semibold text-lg mb-2">{path.title}</h3>
+                    <div className="text-sm text-muted-foreground mb-2">
+                      {path.pathDescription}
+                    </div>
+                    <ul className="mb-2 list-disc list-inside pl-1">
+                      {path.courses.map(cid => {
+                        // Look up the course by id
+                        const crs = rest.resources.find(c => c.id === cid);
+                        return crs ? (
+                          <li key={cid}>
+                            <span className="font-medium">{crs.title}</span>
+                            <span className="ml-2 text-xs text-muted-foreground">{crs.description}</span>
+                          </li>
+                        ) : <li key={cid}>{cid}</li>;
+                      })}
+                    </ul>
+                    <div className="text-purple-700 font-medium mt-auto">
+                      Outcome: {path.outcome}
+                    </div>
+                  </div>
+                ))}
               </div>
             </TabsContent>
           </Tabs>
