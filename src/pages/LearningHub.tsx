@@ -46,6 +46,7 @@ import { useTier } from '@/context/TierContext';
 import { useLearningResources } from '@/hooks/useLearningResources';
 import YouTubeCourses from '@/components/learning/YouTubeCourses';
 import LearningHubAIAssistant from "@/components/learning/LearningHubAIAssistant";
+import LearningHubHero from "@/components/learning/learning-hub/LearningHubHero";
 
 const LearningHub = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -173,34 +174,10 @@ const LearningHub = () => {
       <main className="flex-1 pt-24 px-4 md:px-6 pb-12 bg-gradient-to-b from-indigo-50/30 to-white dark:from-indigo-950/10 dark:to-gray-950">
         <div className="max-w-7xl mx-auto">
           {/* Hero section */}
-          <div className="relative rounded-xl overflow-hidden mb-10">
-            <div className="bg-gradient-to-r from-indigo-800 via-purple-800 to-purple-900 py-16 px-8 rounded-xl">
-              <div className="max-w-3xl">
-                <div className="flex items-center gap-2 mb-2">
-                  {getTierIcon(currentTier)}
-                  <Badge variant="outline" className="capitalize bg-white/10 text-white border-white/20">
-                    {currentTier} Tier
-                  </Badge>
-                </div>
-                <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">Learning Hub</h1>
-                <p className="text-indigo-100 text-lg mb-6">
-                  {currentTier === 'pro' 
-                    ? 'Access expert-level training, industry certifications, and exclusive events.' 
-                    : currentTier === 'basic'
-                    ? 'Enhance your skills with intermediate courses, learning paths, and live webinars.'
-                    : 'Explore foundational AI courses and community resources to begin your learning journey.'}
-                </p>
-                <div className="flex gap-4">
-                  <Button className="bg-white text-purple-900 hover:bg-indigo-50">
-                    Start Learning
-                  </Button>
-                  <Button variant="outline" className="border-white text-white hover:bg-white/10">
-                    Browse Catalog
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
+          <LearningHubHero
+            currentTier={currentTier}
+            getTierIcon={getTierIcon}
+          />
 
           {/* Search and filters */}
           <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
