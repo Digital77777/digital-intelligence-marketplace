@@ -35,6 +35,14 @@ interface Workflow {
   created_at: string;
 }
 
+interface SchedulingConfig {
+  enabled: boolean;
+  type: 'once' | 'recurring' | 'trigger';
+  schedule: string;
+  timezone: string;
+  conditions?: string[];
+}
+
 const WorkflowEditor = () => {
   const { canAccess } = useTier();
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
@@ -52,12 +60,12 @@ const WorkflowEditor = () => {
     { id: 'intent-classifier', name: 'Intent Classifier' },
     { id: 'response-generator', name: 'Response Generator' }
   ]);
-  const [schedulingConfig, setSchedulingConfig] = useState({
+  const [schedulingConfig, setSchedulingConfig] = useState<SchedulingConfig>({
     enabled: false,
-    type: 'once' as "once" | "recurring" | "trigger",
+    type: 'once',
     schedule: '',
     timezone: 'UTC',
-    conditions: [] as string[],
+    conditions: [],
   });
   const [activeTab, setActiveTab] = useState('workflows');
   const { toast } = useToast();
@@ -377,8 +385,8 @@ const WorkflowEditor = () => {
                         <div key={step.id} className="flex items-center space-x-4">
                           {canAccess('ai-studio') ? (
                             <AdvancedStepEditor
-                              step={step as import("./AdvancedStepEditor").default extends React.FC<infer P> ? P['step'] : never}
-                              onUpdate={(updatedStep) => updateAdvancedStep(selectedWorkflow, step.id, updatedStep as WorkflowStep)}
+                              step={step}
+                              onUpdate={(updatedStep) => updateAdvancedStep(selectedWorkflow, step.id, updatedStep)}
                               onDelete={() => removeStep(selectedWorkflow, step.id)}
                               availableModels={availableModels}
                             />
@@ -461,7 +469,7 @@ const WorkflowEditor = () => {
           {canAccess('ai-studio') ? (
             <SchedulingPanel
               config={schedulingConfig}
-              onChange={(config) => setSchedulingConfig(config)}
+              onChange={setSchedulingConfig}
             />
           ) : (
             <Card>
