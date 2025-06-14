@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
@@ -30,7 +29,7 @@ export const TierProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const { user, session } = useUser();
 
   // Superuser email for override
-  const SUPERUSER_EMAIL = "bbadibanga@55gmail.com";
+  const SUPERUSER_EMAIL = "bbadibanga55@gmail.com";
 
   useEffect(() => {
     // If this is the superuser, force pro tier and access
