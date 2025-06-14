@@ -1,34 +1,33 @@
-
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
 import { NavItem } from './NavbarTypes';
+import { Link } from 'react-router-dom';
+import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu"
+import { Search } from 'lucide-react';
+import useGlobalSearchModal from '@/components/search/useGlobalSearchModal';
 
-interface PrimaryNavigationProps {
-  items: NavItem[];
-}
+const PrimaryNavigation = ({ items }: { items: NavItem[] }) => {
+  const { openSearch } = useGlobalSearchModal();
 
-const PrimaryNavigation: React.FC<PrimaryNavigationProps> = ({ items }) => {
-  const navigate = useNavigate();
-  
   return (
-    <div className="bg-[#0071c2]/90 backdrop-blur-sm px-4 border-t border-white/10">
-      <div className="container overflow-x-auto scrollbar-none">
-        <div className="flex space-x-2 py-3">
-          {items.filter(item => item.visible).map((item) => (
-            <Button
-              key={item.path}
-              variant="ghost"
-              className="rounded-full bg-white/10 hover:bg-white/20 text-white py-2 px-4 min-w-fit flex items-center whitespace-nowrap transition-all"
-              onClick={() => navigate(item.path)}
-            >
-              {item.icon}
-              {item.title}
-            </Button>
-          ))}
-        </div>
-      </div>
-    </div>
+    <nav className="primary-navigation flex items-center">
+      {items.map((item) => (
+        <Link
+          key={item.label}
+          to={item.href}
+          className={navigationMenuTriggerStyle()}
+        >
+          {item.label}
+        </Link>
+      ))}
+      <button
+        type="button"
+        onClick={openSearch}
+        className="ml-auto flex items-center justify-center h-9 w-9 rounded-full text-white hover:bg-white/20"
+        title="Open search"
+      >
+        <Search className="h-5 w-5" />
+      </button>
+    </nav>
   );
 };
 

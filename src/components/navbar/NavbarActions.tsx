@@ -7,11 +7,13 @@ import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import SearchCommand from '@/components/search/SearchCommand';
+import useGlobalSearchModal from '@/components/search/useGlobalSearchModal';
 
 const NavbarActions = () => {
   const navigate = useNavigate();
   const { profile } = useUser();
   const [notificationCount, setNotificationCount] = useState(3);
+  const { openSearch } = useGlobalSearchModal();
 
   const handleNotificationClick = () => {
     toast.success("Notifications cleared");
@@ -29,14 +31,7 @@ const NavbarActions = () => {
     }
   };
 
-  const openSearch = () => {
-    // Trigger keyboard shortcut to open search
-    document.dispatchEvent(new KeyboardEvent('keydown', {
-      key: 'k',
-      ctrlKey: true,
-      bubbles: true
-    }));
-  };
+  // Remove old openSearch that dispatched keyboard event!
 
   return (
     <>
