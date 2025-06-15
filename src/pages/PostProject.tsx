@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/context/UserContext';
+import TierGuard from '@/components/auth/TierGuard';
 import ProjectBasicsForm from '@/components/post-project/ProjectBasicsForm';
 import BudgetTimelineForm from '@/components/post-project/BudgetTimelineForm';
 import SkillsExperienceForm from '@/components/post-project/SkillsExperienceForm';
@@ -124,46 +125,48 @@ const PostProject = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-1 pt-24 px-6 pb-12">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Post a Project</h1>
-            <p className="text-muted-foreground">
-              Tell us about your project and we'll connect you with the perfect AI experts.
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <ProjectBasicsForm 
-              formData={formData}
-              onInputChange={handleInputChange}
-            />
-
-            <BudgetTimelineForm 
-              formData={formData}
-              onInputChange={handleInputChange}
-            />
-
-            <SkillsExperienceForm 
-              formData={formData}
-              onInputChange={handleInputChange}
-            />
-
-            <div className="flex gap-4">
-              <Button type="button" variant="outline" onClick={() => navigate('/marketplace')}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={loading} className="flex-1">
-                {loading ? 'Posting...' : 'Post Project'}
-              </Button>
+    <TierGuard requiredTier="basic" feature="Project posting">
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 pt-24 px-6 pb-12">
+          <div className="max-w-4xl mx-auto">
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold mb-2">Post a Project</h1>
+              <p className="text-muted-foreground">
+                Tell us about your project and we'll connect you with the perfect AI experts.
+              </p>
             </div>
-          </form>
-        </div>
-      </main>
-      <Footer />
-    </div>
+
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <ProjectBasicsForm 
+                formData={formData}
+                onInputChange={handleInputChange}
+              />
+
+              <BudgetTimelineForm 
+                formData={formData}
+                onInputChange={handleInputChange}
+              />
+
+              <SkillsExperienceForm 
+                formData={formData}
+                onInputChange={handleInputChange}
+              />
+
+              <div className="flex gap-4">
+                <Button type="button" variant="outline" onClick={() => navigate('/marketplace')}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={loading} className="flex-1">
+                  {loading ? 'Posting...' : 'Post Project'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    </TierGuard>
   );
 };
 
