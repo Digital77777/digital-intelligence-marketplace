@@ -11,13 +11,15 @@ interface BasicTierLayoutProps {
   pageTitle: string;
   requiredFeature?: string;
   requiredTier?: 'basic' | 'pro';
+  headerActions?: React.ReactNode;
 }
 
 const BasicTierLayout: React.FC<BasicTierLayoutProps> = ({
   children,
   pageTitle,
   requiredFeature,
-  requiredTier = 'basic'
+  requiredTier = 'basic',
+  headerActions
 }) => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -26,6 +28,11 @@ const BasicTierLayout: React.FC<BasicTierLayoutProps> = ({
       </Helmet>
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8 pb-20 md:pb-8">
+        {headerActions && (
+          <div className="mb-6 flex justify-end">
+            {headerActions}
+          </div>
+        )}
         {requiredTier ? (
           <TierGuard requiredTier={requiredTier} feature={requiredFeature}>
             {children}
