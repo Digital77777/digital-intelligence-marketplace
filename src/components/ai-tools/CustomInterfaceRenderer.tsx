@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { AIToolItem } from '@/data/ai-tools-tiers';
 import ImageGeneratorInterface from "./interfaces/ImageGeneratorInterface";
@@ -30,6 +31,7 @@ import AISocialMediaManagerInterface from "./interfaces/AISocialMediaManagerInte
 import AIVideoEditerInterface from "./interfaces/AIVideoEditerInterface";
 import AIVoiceGeneratorInterface from "./interfaces/AIVoiceGeneratorInterface";
 import PredictirixEnterpriseInterface from "./interfaces/PredictirixEnterpriseInterface";
+import NeuroForgeProInterface from "./interfaces/NeuroForgeProInterface";
 
 interface CustomInterfaceRendererProps {
   tool: AIToolItem;
@@ -102,6 +104,8 @@ const CustomInterfaceRenderer: React.FC<CustomInterfaceRendererProps> = ({ tool,
         return <AIVoiceGeneratorInterface onBack={() => onOpenChange(false)} />;
       case "Predictirix Enterprise":
         return <PredictirixEnterpriseInterface onBack={() => onOpenChange(false)} />;
+      case "NeuroForge Pro":
+        return <NeuroForgeProInterface onBack={() => onOpenChange(false)} />;
       default:
         console.log('CustomInterfaceRenderer: No custom interface found for:', tool.name);
         return null;
@@ -138,7 +142,8 @@ export const CUSTOM_INTERFACES = [
     "AI Social Media Manager",
     "AI Video Editer",
     "AI Voice Generator",
-    "Predictirix Enterprise"
+    "Predictirix Enterprise",
+    "NeuroForge Pro"
 ];
 
 export default CustomInterfaceRenderer;
