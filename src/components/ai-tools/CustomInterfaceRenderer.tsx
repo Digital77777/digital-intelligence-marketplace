@@ -21,6 +21,7 @@ import DataFlowProInterface from "./interfaces/DataFlowProInterface";
 import AutoPilotStudioInterface from "./interfaces/AutoPilotStudioInterface";
 import ModelMakerLiteInterface from "./interfaces/ModelMakerLiteInterface";
 import SEOBoostAIInterface from "./interfaces/SEOBoostAIInterface";
+import TeamSyncAIInterface from "./interfaces/TeamSyncAIInterface";
 
 interface CustomInterfaceRendererProps {
   tool: AIToolItem;
@@ -71,6 +72,8 @@ const CustomInterfaceRenderer: React.FC<CustomInterfaceRendererProps> = ({ tool,
         return <ModelMakerLiteInterface onBack={() => onOpenChange(false)} />;
       case "SEO Boost AI":
         return <SEOBoostAIInterface onBack={() => onOpenChange(false)} />;
+      case "TeamSync AI":
+        return <TeamSyncAIInterface onBack={() => onOpenChange(false)} />;
       default:
         return null;
     }
@@ -97,7 +100,8 @@ export const CUSTOM_INTERFACES = [
     "DataFlow Pro",
     "AutoPilot Studio",
     "ModelMaker Lite",
-    "SEO Boost AI"
+    "SEO Boost AI",
+    "TeamSync AI"
 ];
 
 export default CustomInterfaceRenderer;
