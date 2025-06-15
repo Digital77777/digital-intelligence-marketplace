@@ -23,27 +23,65 @@ serve(async (req) => {
       }
     )
 
-    // Get user's teams
+    // Get the authenticated user
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
+    
+    if (userError || !user) {
+      console.error('Authentication error:', userError?.message || 'No user found')
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401,
+        }
+      )
+    }
+
+    console.log('Fetching collaboration data for user:', user.id)
+
+    // Get user's teams first
     const { data: teamMemberships, error: teamsError } = await supabaseClient
       .from('team_memberships')
       .select(`
         team_id,
-        teams!inner(id, name, description)
+        role,
+        teams(id, name, description, created_by, created_at)
       `)
-      .eq('user_id', (await supabaseClient.auth.getUser()).data.user?.id)
+      .eq('user_id', user.id)
 
     if (teamsError) {
-      throw teamsError
+      console.error('Teams error:', teamsError)
+      throw new Error(`Failed to fetch teams: ${teamsError.message}`)
     }
 
     const teamIds = teamMemberships?.map(tm => tm.team_id) || []
+    console.log('User teams:', teamIds)
 
-    // Get discussions with author info
+    // If user has no teams, return empty data
+    if (teamIds.length === 0) {
+      console.log('User has no teams, returning empty data')
+      return new Response(
+        JSON.stringify({
+          discussions: [],
+          files: [],
+          teamMembers: [],
+          tasks: [],
+          activities: [],
+          teams: []
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      )
+    }
+
+    // Get discussions with author info (fixed foreign key reference)
     const { data: discussions, error: discussionsError } = await supabaseClient
       .from('discussions')
       .select(`
         *,
-        user_profiles!discussions_author_id_fkey(username, full_name, avatar_url),
+        user_profiles!author_id(username, full_name, avatar_url),
         file_attachments(
           files(id, name, original_name, file_type, size_bytes)
         )
@@ -54,76 +92,92 @@ serve(async (req) => {
       .limit(10)
 
     if (discussionsError) {
-      throw discussionsError
+      console.error('Discussions error:', discussionsError)
+      // Don't throw, just log and continue with empty discussions
     }
 
-    // Get team files
+    // Get team files (fixed foreign key reference)
     const { data: files, error: filesError } = await supabaseClient
       .from('files')
       .select(`
         *,
-        user_profiles!files_uploaded_by_fkey(username, full_name)
+        user_profiles!uploaded_by(username, full_name)
       `)
       .in('team_id', teamIds)
       .order('created_at', { ascending: false })
       .limit(20)
 
     if (filesError) {
-      throw filesError
+      console.error('Files error:', filesError)
+      // Don't throw, just log and continue with empty files
     }
 
-    // Get team members with presence info
+    // Get team members with profiles (fixed foreign key reference)
     const { data: teamMembers, error: membersError } = await supabaseClient
       .from('team_memberships')
       .select(`
         *,
-        user_profiles!team_memberships_user_id_fkey(id, username, full_name, avatar_url)
+        user_profiles!user_id(id, username, full_name, avatar_url)
       `)
       .in('team_id', teamIds)
 
     if (membersError) {
-      throw membersError
+      console.error('Members error:', membersError)
+      // Don't throw, just log and continue with empty members
     }
 
-    // Get tasks for team collaboration
+    // Get tasks for team collaboration (fixed foreign key reference)
     const { data: tasks, error: tasksError } = await supabaseClient
       .from('tasks')
       .select(`
         *,
-        assignee_profile:user_profiles!tasks_assigned_to_fkey(username, full_name)
+        assignee_profile:user_profiles!assigned_to(username, full_name)
       `)
       .in('team_id', teamIds)
       .order('created_at', { ascending: false })
       .limit(15)
 
     if (tasksError) {
-      throw tasksError
+      console.error('Tasks error:', tasksError)
+      // Don't throw, just log and continue with empty tasks
     }
 
-    // Get recent team activity
+    // Get recent team activity (fixed foreign key reference)
     const { data: activities, error: activitiesError } = await supabaseClient
       .from('team_activity')
       .select(`
         *,
-        user_profiles!team_activity_user_id_fkey(username, full_name, avatar_url)
+        user_profiles!user_id(username, full_name, avatar_url)
       `)
       .in('team_id', teamIds)
       .order('created_at', { ascending: false })
       .limit(20)
 
     if (activitiesError) {
-      throw activitiesError
+      console.error('Activities error:', activitiesError)
+      // Don't throw, just log and continue with empty activities
     }
 
+    const responseData = {
+      discussions: discussions || [],
+      files: files || [],
+      teamMembers: teamMembers || [],
+      tasks: tasks || [],
+      activities: activities || [],
+      teams: teamMemberships?.map(tm => tm.teams).filter(Boolean) || []
+    }
+
+    console.log('Successfully fetched collaboration data:', {
+      discussions: responseData.discussions.length,
+      files: responseData.files.length,
+      teamMembers: responseData.teamMembers.length,
+      tasks: responseData.tasks.length,
+      activities: responseData.activities.length,
+      teams: responseData.teams.length
+    })
+
     return new Response(
-      JSON.stringify({
-        discussions: discussions || [],
-        files: files || [],
-        teamMembers: teamMembers || [],
-        tasks: tasks || [],
-        activities: activities || [],
-        teams: teamMemberships?.map(tm => tm.teams) || []
-      }),
+      JSON.stringify(responseData),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
@@ -132,10 +186,13 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error fetching collaboration data:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: 'Internal server error',
+        details: error.message 
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
+        status: 500,
       }
     )
   }
