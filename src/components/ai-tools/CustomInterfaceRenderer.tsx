@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { AIToolItem } from '@/data/ai-tools-tiers';
 import ImageGeneratorInterface from "./interfaces/ImageGeneratorInterface";
@@ -21,6 +20,7 @@ import AIMusicComposerBasicInterface from "./interfaces/AIMusicComposerBasicInte
 import DataFlowProInterface from "./interfaces/DataFlowProInterface";
 import AutoPilotStudioInterface from "./interfaces/AutoPilotStudioInterface";
 import ModelMakerLiteInterface from "./interfaces/ModelMakerLiteInterface";
+import SEOBoostAIInterface from "./interfaces/SEOBoostAIInterface";
 
 interface CustomInterfaceRendererProps {
   tool: AIToolItem;
@@ -69,6 +69,8 @@ const CustomInterfaceRenderer: React.FC<CustomInterfaceRendererProps> = ({ tool,
         return <AutoPilotStudioInterface onBack={() => onOpenChange(false)} />;
       case "ModelMaker Lite":
         return <ModelMakerLiteInterface onBack={() => onOpenChange(false)} />;
+      case "SEO Boost AI":
+        return <SEOBoostAIInterface onBack={() => onOpenChange(false)} />;
       default:
         return null;
     }
@@ -94,7 +96,8 @@ export const CUSTOM_INTERFACES = [
     "AI Music Composer Basic",
     "DataFlow Pro",
     "AutoPilot Studio",
-    "ModelMaker Lite"
+    "ModelMaker Lite",
+    "SEO Boost AI"
 ];
 
 export default CustomInterfaceRenderer;
