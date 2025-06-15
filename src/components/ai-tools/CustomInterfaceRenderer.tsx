@@ -22,6 +22,7 @@ import AutoPilotStudioInterface from "./interfaces/AutoPilotStudioInterface";
 import ModelMakerLiteInterface from "./interfaces/ModelMakerLiteInterface";
 import SEOBoostAIInterface from "./interfaces/SEOBoostAIInterface";
 import TeamSyncAIInterface from "./interfaces/TeamSyncAIInterface";
+import AgroBotCommanderInterface from "./interfaces/AgroBotCommanderInterface";
 
 interface CustomInterfaceRendererProps {
   tool: AIToolItem;
@@ -74,6 +75,8 @@ const CustomInterfaceRenderer: React.FC<CustomInterfaceRendererProps> = ({ tool,
         return <SEOBoostAIInterface onBack={() => onOpenChange(false)} />;
       case "TeamSync AI":
         return <TeamSyncAIInterface onBack={() => onOpenChange(false)} />;
+      case "AgroBot Commander":
+        return <AgroBotCommanderInterface onBack={() => onOpenChange(false)} />;
       default:
         return null;
     }
@@ -101,7 +104,8 @@ export const CUSTOM_INTERFACES = [
     "AutoPilot Studio",
     "ModelMaker Lite",
     "SEO Boost AI",
-    "TeamSync AI"
+    "TeamSync AI",
+    "AgroBot Commander"
 ];
 
 export default CustomInterfaceRenderer;
