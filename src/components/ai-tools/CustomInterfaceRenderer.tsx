@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { AIToolItem } from '@/data/ai-tools-tiers';
 import ImageGeneratorInterface from "./interfaces/ImageGeneratorInterface";
@@ -26,6 +25,7 @@ import TeamSyncAIInterface from "./interfaces/TeamSyncAIInterface";
 import AgroBotCommanderInterface from "./interfaces/AgroBotCommanderInterface";
 import AquaYieldOSInterface from "./interfaces/AquaYieldOSInterface";
 import FarmPLAIInterface from "./interfaces/FarmPLAIInterface";
+import AgroRiskNavigatorInterface from "./interfaces/AgroRiskNavigatorInterface";
 
 interface CustomInterfaceRendererProps {
   tool: AIToolItem;
@@ -88,6 +88,8 @@ const CustomInterfaceRenderer: React.FC<CustomInterfaceRendererProps> = ({ tool,
       case "Farm P&L AI":
         console.log('CustomInterfaceRenderer: Rendering Farm P&L AI interface');
         return <FarmPLAIInterface onBack={() => onOpenChange(false)} />;
+      case "AgroRisk Navigator":
+        return <AgroRiskNavigatorInterface onBack={() => onOpenChange(false)} />;
       default:
         console.log('CustomInterfaceRenderer: No custom interface found for:', tool.name);
         return null;
@@ -119,7 +121,8 @@ export const CUSTOM_INTERFACES = [
     "TeamSync AI",
     "AgroBot Commander",
     "AquaYield OS",
-    "Farm P&L AI"
+    "Farm P&L AI",
+    "AgroRisk Navigator"
 ];
 
 export default CustomInterfaceRenderer;
