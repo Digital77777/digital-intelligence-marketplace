@@ -17,6 +17,7 @@ import AITextSummarizerInterface from "./interfaces/AITextSummarizerInterface";
 import InsightLiteInterface from "./interfaces/InsightLiteInterface";
 import AIPresentationMakerInterface from "../interfaces/AIPresentationMakerInterface";
 import AITranslatorInterface from "../interfaces/AITranslatorInterface";
+import AIBasicSimulatorInterface from "./interfaces/AIBasicSimulatorInterface";
 
 interface ToolInterfaceModalProps {
   open: boolean;
@@ -130,6 +131,8 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
         return <AIPresentationMakerInterface />;
       case "AI Language Translator":
         return <AITranslatorInterface />;
+      case "AI Basic Simulator":
+        return <AIBasicSimulatorInterface />;
       default:
         return null;
     }
@@ -144,7 +147,8 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
     "InsightLite",
     "AI Image Generator",
     "AI Presentation Maker",
-    "AI Language Translator"
+    "AI Language Translator",
+    "AI Basic Simulator"
   ].includes(tool.name);
   
   return (
