@@ -5,7 +5,7 @@ import { useMarketplaceProjects } from '@/hooks/useMarketplaceProjects';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { DollarSign, Clock, Calendar, MapPin, ArrowRight } from 'lucide-react';
+import { DollarSign, Clock, Calendar, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 
 const ProjectsTab: React.FC = () => {

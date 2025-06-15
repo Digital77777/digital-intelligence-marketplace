@@ -7,8 +7,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { navItems } from "./nav-items";
 import { UserProvider } from "./context/UserContext";
 import { TierProvider } from "./context/TierContext";
-import { ErrorBoundary } from "./components/ErrorBoundary";
-import { Loading } from "./components/ui/loading-indicator";
+import ErrorBoundary from "./components/ErrorBoundary";
+import LoadingIndicator from "./components/ui/loading-indicator";
 
 // Lazy load components for better performance
 const ProjectDetail = lazy(() => import("./pages/ProjectDetail"));
@@ -39,7 +39,7 @@ const App = () => {
                   <Route 
                     path="/marketplace/project/:id" 
                     element={
-                      <Suspense fallback={<Loading />}>
+                      <Suspense fallback={<LoadingIndicator />}>
                         <ProjectDetail />
                       </Suspense>
                     } 

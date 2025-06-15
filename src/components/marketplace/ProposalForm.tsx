@@ -38,10 +38,15 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ projectId }) => {
   });
 
   const onSubmit = (data: ProposalFormData) => {
-    createProposal.mutate({
+    // Ensure all required fields are present
+    const proposalData = {
       project_id: projectId,
-      ...data,
-    });
+      cover_letter: data.cover_letter,
+      proposed_amount: data.proposed_amount,
+      proposed_timeline: data.proposed_timeline,
+    };
+    
+    createProposal.mutate(proposalData);
     form.reset();
   };
 
