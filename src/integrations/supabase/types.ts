@@ -2103,6 +2103,60 @@ export type Database = {
         }
         Relationships: []
       }
+      video_streams: {
+        Row: {
+          category: string
+          code_snippets: Json | null
+          created_at: string
+          description: string | null
+          duration: string | null
+          id: string
+          is_flagged: boolean
+          is_public: boolean
+          status: Database["public"]["Enums"]["stream_status"]
+          thumbnail_storage_path: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          video_storage_path: string | null
+          views: number
+        }
+        Insert: {
+          category: string
+          code_snippets?: Json | null
+          created_at?: string
+          description?: string | null
+          duration?: string | null
+          id?: string
+          is_flagged?: boolean
+          is_public?: boolean
+          status?: Database["public"]["Enums"]["stream_status"]
+          thumbnail_storage_path?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          video_storage_path?: string | null
+          views?: number
+        }
+        Update: {
+          category?: string
+          code_snippets?: Json | null
+          created_at?: string
+          description?: string | null
+          duration?: string | null
+          id?: string
+          is_flagged?: boolean
+          is_public?: boolean
+          status?: Database["public"]["Enums"]["stream_status"]
+          thumbnail_storage_path?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          video_storage_path?: string | null
+          views?: number
+        }
+        Relationships: []
+      }
       vlogs: {
         Row: {
           caption: string | null
@@ -2329,6 +2383,10 @@ export type Database = {
           team_id: string
         }[]
       }
+      get_user_tier: {
+        Args: { p_user_id: string }
+        Returns: string
+      }
       get_workflow_runs_with_details: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -2413,6 +2471,7 @@ export type Database = {
       regulation_type: "GDPR" | "HIPAA" | "SOC2"
       risk_level: "Critical" | "High" | "Medium" | "Low"
       skill_level: "beginner" | "intermediate" | "advanced" | "expert"
+      stream_status: "pending" | "processing" | "published" | "error"
       task_status: "todo" | "in_progress" | "completed"
       training_status:
         | "pending"
@@ -2567,6 +2626,7 @@ export const Constants = {
       regulation_type: ["GDPR", "HIPAA", "SOC2"],
       risk_level: ["Critical", "High", "Medium", "Low"],
       skill_level: ["beginner", "intermediate", "advanced", "expert"],
+      stream_status: ["pending", "processing", "published", "error"],
       task_status: ["todo", "in_progress", "completed"],
       training_status: [
         "pending",

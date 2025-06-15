@@ -1,31 +1,28 @@
-
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { AIStream } from '@/types/AIStreams';
 import { useUser } from '@/context/UserContext';
 import { toast } from 'sonner';
 import { Upload, FileVideo, ChevronRight } from 'lucide-react';
 import LoadingIndicator from '@/components/ui/loading-indicator';
+import { useVideoUpload } from '@/hooks/useVideoUpload';
 
 interface UploadFormProps {
   onUploadSuccess: () => void;
 }
 
 const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
-  const { user, profile } = useUser();
-  const navigate = useNavigate();
+  const { user } = useUser();
+  const { uploading, uploadStream } = useVideoUpload(onUploadSuccess);
   
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<'tutorial' | 'research' | 'demo' | 'live'>('tutorial');
   const [file, setFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,17 +31,15 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
       if (selectedFile.type.startsWith('video/')) {
         setFile(selectedFile);
         
-        // Create preview URL
         const url = URL.createObjectURL(selectedFile);
         setPreviewUrl(url);
         
-        // Auto-populate title from filename
-        const fileName = selectedFile.name.replace(/\.[^/.]+$/, ""); // Remove extension
+        const fileName = selectedFile.name.replace(/\.[^/.]+$/, "");
         if (!title) {
           setTitle(fileName);
         }
       } else {
-        toast.error('Please select a valid video file');
+        toast.error('Please select a valid video file (MP4, WebM, etc.)');
       }
     }
   };
@@ -67,44 +62,7 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
       return;
     }
     
-    setUploading(true);
-    
-    try {
-      // In a real app, this would upload the file to a storage bucket
-      // and create the database entry for the stream
-      
-      // Simulating upload delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Sample stream data that would be returned from the backend
-      const newStream: AIStream = {
-        id: `stream-${Date.now()}`,
-        user_id: user.id,
-        title,
-        description,
-        category,
-        duration: '00:00:00', // Would be calculated by the backend
-        views: 0,
-        created_at: new Date().toISOString(),
-        image_url: previewUrl || undefined,
-        is_flagged: false,
-        author: {
-          id: user.id,
-          username: profile?.username || user.email?.split('@')[0] || 'Anonymous',
-          avatar_url: profile?.avatar_url
-        }
-      };
-      
-      // In a real app, this would be created in the database
-      
-      toast.success('Stream uploaded successfully!');
-      onUploadSuccess();
-    } catch (error) {
-      console.error('Error uploading stream:', error);
-      toast.error('Failed to upload stream. Please try again.');
-    } finally {
-      setUploading(false);
-    }
+    await uploadStream({ title, description, category, file });
   };
 
   return (
@@ -155,12 +113,13 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
                         className="sr-only"
                         accept="video/*"
                         onChange={handleFileChange}
+                        disabled={uploading}
                       />
                     </label>
                     <p className="pl-1">or drag and drop</p>
                   </div>
                   <p className="text-xs text-gray-500">
-                    MP4, WebM or OGG up to 100MB
+                    MP4, WebM, MOV up to 100MB
                   </p>
                 </div>
               )}
@@ -175,6 +134,7 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   required
+                  disabled={uploading}
                 />
               </div>
               
@@ -186,6 +146,7 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   className="min-h-[120px]"
+                  disabled={uploading}
                 />
               </div>
               
@@ -194,6 +155,7 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
                 <Select
                   value={category}
                   onValueChange={(value: 'tutorial' | 'research' | 'demo' | 'live') => setCategory(value)}
+                  disabled={uploading}
                 >
                   <SelectTrigger id="category">
                     <SelectValue placeholder="Select a category" />

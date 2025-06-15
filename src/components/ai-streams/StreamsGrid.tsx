@@ -1,12 +1,12 @@
 
 import React from 'react';
 import StreamCard from './StreamCard';
-import { AIStream } from '@/types/AIStreams';
+import { VideoStream } from '@/types/videoStreams';
 import { SearchX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface StreamsGridProps {
-  streams: AIStream[];
+  streams: VideoStream[];
   isLoading: boolean;
   getCategoryIcon: (category: string) => JSX.Element;
   formatDate: (dateString: string) => string;

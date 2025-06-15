@@ -3,23 +3,29 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { User, Play, Clock, Eye } from 'lucide-react';
-import { AIStream } from '@/types/AIStreams';
+import { VideoStream } from '@/types/videoStreams';
+import { getSupabasePublicUrl } from '@/lib/utils';
 
 interface StreamCardProps {
-  stream: AIStream;
+  stream: VideoStream;
   getCategoryIcon: (category: string) => JSX.Element;
   formatDate: (dateString: string) => string;
 }
 
 const StreamCard: React.FC<StreamCardProps> = ({ stream, getCategoryIcon, formatDate }) => {
+  const thumbnailUrl = getSupabasePublicUrl('stream-thumbnails', stream.thumbnail_storage_path) || getSupabasePublicUrl('video-streams', stream.video_storage_path);
+
   return (
     <Card className="overflow-hidden relative group">
+      <Link to={`/ai-stream/${stream.id}`} className="absolute inset-0 z-10">
+        <span className="sr-only">View {stream.title}</span>
+      </Link>
       <div className="relative h-40 bg-gray-800">
-        {stream.image_url ? (
+        {thumbnailUrl ? (
           <img 
-            src={stream.image_url} 
+            src={thumbnailUrl} 
             alt={stream.title}
             className="w-full h-full object-cover"
           />
@@ -50,18 +56,15 @@ const StreamCard: React.FC<StreamCardProps> = ({ stream, getCategoryIcon, format
       </div>
       <CardContent className="pt-4">
         <h3 className="font-medium line-clamp-1 mb-1">{stream.title}</h3>
-        <p className="text-sm text-muted-foreground line-clamp-2">{stream.description}</p>
+        <p className="text-sm text-muted-foreground line-clamp-2">{stream.description || 'No description available.'}</p>
       </CardContent>
       <CardFooter className="border-t pt-4 flex justify-between">
         <div className="flex items-center space-x-2">
           <Avatar className="h-6 w-6">
-            {stream.author?.avatar_url ? (
-              <img src={stream.author.avatar_url} alt={stream.author.username} />
-            ) : (
-              <User className="h-3 w-3" />
-            )}
+            <AvatarImage src={stream.author?.avatar_url || undefined} alt={stream.author?.username} />
+            <AvatarFallback><User className="h-3 w-3" /></AvatarFallback>
           </Avatar>
-          <span className="text-xs font-medium">{stream.author?.username}</span>
+          <span className="text-xs font-medium">{stream.author?.username || 'Anonymous'}</span>
         </div>
         <div className="flex items-center space-x-3 text-xs text-muted-foreground">
           <span className="flex items-center">
@@ -70,9 +73,6 @@ const StreamCard: React.FC<StreamCardProps> = ({ stream, getCategoryIcon, format
           <span>{formatDate(stream.created_at)}</span>
         </div>
       </CardFooter>
-      <Link to={`/ai-streams/${stream.id}`} className="absolute inset-0">
-        <span className="sr-only">View {stream.title}</span>
-      </Link>
     </Card>
   );
 };
