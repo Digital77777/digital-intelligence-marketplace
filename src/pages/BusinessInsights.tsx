@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,6 +8,8 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import ProTierLayout from '@/components/layouts/ProTierLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useBusinessInsights } from '@/utils/businessInsightsService';
+import { usePerformanceMetrics, useMetricSnapshots } from '@/services/performanceMetricsService';
 
 interface InsightData {
   id: string;
@@ -21,74 +22,43 @@ interface InsightData {
 }
 
 const BusinessInsightsPage = () => {
-  const [insights, setInsights] = useState<InsightData[]>([]);
-  const [selectedPeriod, setSelectedPeriod] = useState('30d');
-  const [loading, setLoading] = useState(true);
+  const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d'>('30d');
   const { toast } = useToast();
 
+  const { data: performanceMetrics = [], isLoading: metricsLoading, isError: metricsError } = usePerformanceMetrics();
+  const { data: metricSnapshots = [], isLoading: snapshotsLoading, isError: snapshotsError } = useMetricSnapshots(selectedPeriod);
+  
+  // This is for the AI Insights panel at the bottom, we'll keep it for now.
+  const { data: aiInsights, isLoading: aiInsightsLoading } = useBusinessInsights();
+  
   useEffect(() => {
-    fetchInsights();
-  }, [selectedPeriod]);
-
-  const fetchInsights = async () => {
-    try {
-      setLoading(true);
-      
-      // Calculate date range based on selected period
-      const now = new Date();
-      const daysBack = selectedPeriod === '7d' ? 7 : selectedPeriod === '30d' ? 30 : 90;
-      const startDate = new Date(now.getTime() - (daysBack * 24 * 60 * 60 * 1000));
-      
-      const { data, error } = await supabase
-        .from('insights_data')
-        .select('*')
-        .gte('date', startDate.toISOString().split('T')[0])
-        .order('date', { ascending: true });
-
-      if (error) throw error;
-      setInsights(data || []);
-    } catch (error) {
-      console.error('Error fetching insights:', error);
+    if (metricsError || snapshotsError) {
       toast({
         title: "Error",
-        description: "Failed to load business insights",
+        description: "Failed to load business insights data. Please try again later.",
         variant: "destructive"
       });
-    } finally {
-      setLoading(false);
     }
+  }, [metricsError, snapshotsError, toast]);
+
+  const getMetric = (name: string) => {
+    return performanceMetrics.find(m => m.metric_name === name) || { value: 0, change_value: 0 };
   };
+  
+  const totalRevenueMetric = getMetric('Total Revenue');
+  const activeUsersMetric = getMetric('Active Users');
+  const conversionRateMetric = getMetric('Conversion Rate');
+  const customerSatisfactionMetric = getMetric('Customer Satisfaction');
 
-  // Generate sample data for demonstration
-  const generateSampleData = () => {
-    const sampleInsights: InsightData[] = [
-      // Revenue data
-      { id: '1', type: 'revenue', category: 'sales', value: 12500, meta: {}, date: '2024-01-01', timestamp: '2024-01-01T00:00:00Z' },
-      { id: '2', type: 'revenue', category: 'sales', value: 15200, meta: {}, date: '2024-01-02', timestamp: '2024-01-02T00:00:00Z' },
-      { id: '3', type: 'revenue', category: 'sales', value: 18700, meta: {}, date: '2024-01-03', timestamp: '2024-01-03T00:00:00Z' },
-      // User engagement
-      { id: '4', type: 'users', category: 'engagement', value: 1250, meta: {}, date: '2024-01-01', timestamp: '2024-01-01T00:00:00Z' },
-      { id: '5', type: 'users', category: 'engagement', value: 1420, meta: {}, date: '2024-01-02', timestamp: '2024-01-02T00:00:00Z' },
-      { id: '6', type: 'users', category: 'engagement', value: 1680, meta: {}, date: '2024-01-03', timestamp: '2024-01-03T00:00:00Z' },
-    ];
-    return sampleInsights;
-  };
+  const revenueData = metricSnapshots.map(item => ({
+    date: new Date(item.snapshot_date).toLocaleDateString(),
+    value: item.total_revenue || 0
+  }));
 
-  const displayData = insights.length > 0 ? insights : generateSampleData();
-
-  const revenueData = displayData
-    .filter(item => item.type === 'revenue')
-    .map(item => ({
-      date: new Date(item.date).toLocaleDateString(),
-      value: item.value
-    }));
-
-  const userEngagementData = displayData
-    .filter(item => item.type === 'users')
-    .map(item => ({
-      date: new Date(item.date).toLocaleDateString(),
-      users: item.value
-    }));
+  const userEngagementData = metricSnapshots.map(item => ({
+    date: new Date(item.snapshot_date).toLocaleDateString(),
+    users: item.active_users || 0
+  }));
 
   const categoryData = [
     { name: 'Sales', value: 45, fill: '#8884d8' },
@@ -97,19 +67,24 @@ const BusinessInsightsPage = () => {
     { name: 'Development', value: 10, fill: '#ff7300' }
   ];
 
-  const getTrendIcon = (trend: 'up' | 'down') => {
-    return trend === 'up' ? (
-      <TrendingUp className="h-4 w-4 text-green-600" />
-    ) : (
-      <TrendingDown className="h-4 w-4 text-red-600" />
-    );
+  const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
+    if (trend === 'up') return <TrendingUp className="h-4 w-4 text-green-600" />;
+    if (trend === 'down') return <TrendingDown className="h-4 w-4 text-red-600" />;
+    return null;
   };
 
-  const getTrendColor = (trend: 'up' | 'down') => {
-    return trend === 'up' ? 'text-green-600' : 'text-red-600';
+  const getTrendColor = (trend: 'up' | 'down' | 'stable') => {
+    if (trend === 'up') return 'text-green-600';
+    if (trend === 'down') return 'text-red-600';
+    return 'text-gray-500';
   };
+  
+  const getTrend = (value: number | null | undefined) => {
+      if (value === null || value === undefined || value === 0) return 'stable';
+      return value > 0 ? 'up' : 'down';
+  }
 
-  if (loading) {
+  if (metricsLoading || snapshotsLoading) {
     return (
       <ProTierLayout pageTitle="Business Insights" requiredFeature="business-insights">
         <div className="flex items-center justify-center h-64">Loading insights...</div>
@@ -126,7 +101,7 @@ const BusinessInsightsPage = () => {
             <h2 className="text-2xl font-bold">Analytics Dashboard</h2>
             <p className="text-gray-600">Track your business performance and growth</p>
           </div>
-          <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+          <Select value={selectedPeriod} onValueChange={(value: '7d' | '30d' | '90d') => setSelectedPeriod(value)}>
             <SelectTrigger className="w-32">
               <SelectValue />
             </SelectTrigger>
@@ -146,11 +121,13 @@ const BusinessInsightsPage = () => {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">$46,400</div>
+              <div className="text-2xl font-bold">${totalRevenueMetric.value.toLocaleString()}</div>
               <div className="flex items-center space-x-1 text-xs">
-                {getTrendIcon('up')}
-                <span className={getTrendColor('up')}>+12.5%</span>
-                <span className="text-muted-foreground">from last month</span>
+                {getTrendIcon(getTrend(totalRevenueMetric.change_value))}
+                <span className={getTrendColor(getTrend(totalRevenueMetric.change_value))}>
+                  {totalRevenueMetric.change_value > 0 ? '+' : ''}{totalRevenueMetric.change_value}%
+                </span>
+                <span className="text-muted-foreground">from last period</span>
               </div>
             </CardContent>
           </Card>
@@ -161,11 +138,13 @@ const BusinessInsightsPage = () => {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">4,350</div>
+              <div className="text-2xl font-bold">{activeUsersMetric.value.toLocaleString()}</div>
               <div className="flex items-center space-x-1 text-xs">
-                {getTrendIcon('up')}
-                <span className={getTrendColor('up')}>+8.2%</span>
-                <span className="text-muted-foreground">from last month</span>
+                {getTrendIcon(getTrend(activeUsersMetric.change_value))}
+                <span className={getTrendColor(getTrend(activeUsersMetric.change_value))}>
+                   {activeUsersMetric.change_value > 0 ? '+' : ''}{activeUsersMetric.change_value}%
+                </span>
+                <span className="text-muted-foreground">from last period</span>
               </div>
             </CardContent>
           </Card>
@@ -176,11 +155,13 @@ const BusinessInsightsPage = () => {
               <BarChart3 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">3.2%</div>
+              <div className="text-2xl font-bold">{conversionRateMetric.value}%</div>
               <div className="flex items-center space-x-1 text-xs">
-                {getTrendIcon('down')}
-                <span className={getTrendColor('down')}>-0.5%</span>
-                <span className="text-muted-foreground">from last month</span>
+                {getTrendIcon(getTrend(conversionRateMetric.change_value))}
+                <span className={getTrendColor(getTrend(conversionRateMetric.change_value))}>
+                   {conversionRateMetric.change_value > 0 ? '+' : ''}{conversionRateMetric.change_value}%
+                </span>
+                <span className="text-muted-foreground">from last period</span>
               </div>
             </CardContent>
           </Card>
@@ -191,11 +172,13 @@ const BusinessInsightsPage = () => {
               <PieChart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">4.8</div>
+              <div className="text-2xl font-bold">{customerSatisfactionMetric.value}</div>
               <div className="flex items-center space-x-1 text-xs">
-                {getTrendIcon('up')}
-                <span className={getTrendColor('up')}>+0.3</span>
-                <span className="text-muted-foreground">from last month</span>
+                {getTrendIcon(getTrend(customerSatisfactionMetric.change_value))}
+                <span className={getTrendColor(getTrend(customerSatisfactionMetric.change_value))}>
+                  {customerSatisfactionMetric.change_value > 0 ? '+' : ''}{customerSatisfactionMetric.change_value}
+                </span>
+                <span className="text-muted-foreground">from last period</span>
               </div>
             </CardContent>
           </Card>
@@ -299,31 +282,29 @@ const BusinessInsightsPage = () => {
             <CardDescription>AI-powered insights based on your data</CardDescription>
           </CardHeader>
           <CardContent>
+            {aiInsights && aiInsights.length > 0 ? (
             <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <Badge className="bg-green-100 text-green-800">Positive</Badge>
-                <div>
-                  <p className="font-medium">Revenue Growth Acceleration</p>
-                  <p className="text-sm text-gray-600">Your revenue growth rate has increased by 12.5% compared to the previous period, indicating strong business momentum.</p>
+              {aiInsights.slice(0,3).map((insight) => (
+                <div key={insight.id} className="flex items-start space-x-3">
+                  <Badge className={
+                    insight.trend_direction === 'up' ? "bg-green-100 text-green-800" :
+                    insight.trend_direction === 'down' ? "bg-yellow-100 text-yellow-800" :
+                    "bg-blue-100 text-blue-800"
+                  }>
+                    {insight.trend_direction === 'up' ? 'Positive' : insight.trend_direction === 'down' ? 'Attention' : 'Opportunity'}
+                  </Badge>
+                  <div>
+                    <p className="font-medium">{insight.title}</p>
+                    <p className="text-sm text-gray-600">{insight.summary}</p>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="flex items-start space-x-3">
-                <Badge className="bg-blue-100 text-blue-800">Opportunity</Badge>
-                <div>
-                  <p className="font-medium">User Engagement Optimization</p>
-                  <p className="text-sm text-gray-600">While user numbers are growing, engagement metrics suggest opportunities for improving user experience and retention.</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-3">
-                <Badge className="bg-yellow-100 text-yellow-800">Attention</Badge>
-                <div>
-                  <p className="font-medium">Conversion Rate Decline</p>
-                  <p className="text-sm text-gray-600">A slight decrease in conversion rate warrants investigation into potential friction points in your customer journey.</p>
-                </div>
-              </div>
+              ))}
             </div>
+            ) : (
+              <div className="text-center text-gray-500 py-8">
+                {aiInsightsLoading ? 'Generating AI insights...' : 'No AI insights available yet.'}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

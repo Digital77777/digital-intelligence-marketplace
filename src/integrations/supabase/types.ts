@@ -1119,6 +1119,36 @@ export type Database = {
         }
         Relationships: []
       }
+      metric_snapshots: {
+        Row: {
+          active_users: number | null
+          conversion_rate: number | null
+          created_at: string
+          customer_satisfaction: number | null
+          id: string
+          snapshot_date: string
+          total_revenue: number | null
+        }
+        Insert: {
+          active_users?: number | null
+          conversion_rate?: number | null
+          created_at?: string
+          customer_satisfaction?: number | null
+          id?: string
+          snapshot_date: string
+          total_revenue?: number | null
+        }
+        Update: {
+          active_users?: number | null
+          conversion_rate?: number | null
+          created_at?: string
+          customer_satisfaction?: number | null
+          id?: string
+          snapshot_date?: string
+          total_revenue?: number | null
+        }
+        Relationships: []
+      }
       model_metrics: {
         Row: {
           epoch: number | null
@@ -1194,6 +1224,33 @@ export type Database = {
           is_active?: boolean | null
           model_type?: Database["public"]["Enums"]["dataset_type"]
           name?: string
+        }
+        Relationships: []
+      }
+      performance_metrics: {
+        Row: {
+          change_period: string | null
+          change_value: number | null
+          id: string
+          metric_name: string
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          change_period?: string | null
+          change_value?: number | null
+          id?: string
+          metric_name: string
+          updated_at?: string
+          value: number
+        }
+        Update: {
+          change_period?: string | null
+          change_value?: number | null
+          id?: string
+          metric_name?: string
+          updated_at?: string
+          value?: number
         }
         Relationships: []
       }
