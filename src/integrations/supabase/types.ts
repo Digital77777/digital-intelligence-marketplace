@@ -1577,7 +1577,7 @@ export type Database = {
           due_date: string | null
           id: string
           priority: string | null
-          status: string
+          status: Database["public"]["Enums"]["task_status"]
           team_id: string | null
           title: string
           updated_at: string
@@ -1591,7 +1591,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           priority?: string | null
-          status?: string
+          status?: Database["public"]["Enums"]["task_status"]
           team_id?: string | null
           title: string
           updated_at?: string
@@ -1605,7 +1605,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           priority?: string | null
-          status?: string
+          status?: Database["public"]["Enums"]["task_status"]
           team_id?: string | null
           title?: string
           updated_at?: string
@@ -2163,6 +2163,10 @@ export type Database = {
         Args: { "": unknown }
         Returns: unknown
       }
+      is_team_member: {
+        Args: { p_team_id: string; p_user_id: string }
+        Returns: boolean
+      }
       run_compliance_scan: {
         Args: {
           p_user_id: string
@@ -2211,6 +2215,7 @@ export type Database = {
       regulation_type: "GDPR" | "HIPAA" | "SOC2"
       risk_level: "Critical" | "High" | "Medium" | "Low"
       skill_level: "beginner" | "intermediate" | "advanced" | "expert"
+      task_status: "todo" | "in_progress" | "completed"
       training_status:
         | "pending"
         | "running"
@@ -2362,6 +2367,7 @@ export const Constants = {
       regulation_type: ["GDPR", "HIPAA", "SOC2"],
       risk_level: ["Critical", "High", "Medium", "Low"],
       skill_level: ["beginner", "intermediate", "advanced", "expert"],
+      task_status: ["todo", "in_progress", "completed"],
       training_status: [
         "pending",
         "running",

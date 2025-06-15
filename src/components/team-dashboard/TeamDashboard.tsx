@@ -1,27 +1,36 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useUser } from '@/context/UserContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Calendar, Clock, Users, CheckCircle, AlertCircle, Plus } from 'lucide-react';
-import { mockTasks, mockTeams, Task, Team } from '@/data/teamDashboardMockData';
+import { Task, Team, TeamDashboardData } from './types';
+
+const fetchTeamDashboardData = async () => {
+  const { data, error } = await supabase.functions.invoke<TeamDashboardData>('team-dashboard-data', {
+    method: 'GET',
+  });
+
+  if (error) {
+    throw new Error(`Failed to fetch team dashboard data: ${error.message}`);
+  }
+  return data;
+};
 
 const TeamDashboard = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { user } = useUser();
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['team-dashboard', user?.id],
+    queryFn: fetchTeamDashboardData,
+    enabled: !!user,
+  });
 
-  useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => {
-      setTasks(mockTasks);
-      setTeams(mockTeams);
-      setLoading(false);
-    }, 500); // Simulate network latency
-
-    return () => clearTimeout(timer);
-  }, []);
+  const tasks = data?.tasks || [];
+  const teams = data?.teams || [];
 
   const getTaskStats = () => {
     const total = tasks.length;
@@ -41,7 +50,7 @@ const TeamDashboard = () => {
     }
   };
 
-  const getPriorityColor = (priority: string) => {
+  const getPriorityColor = (priority: string | null) => {
     switch (priority) {
       case 'high': return 'text-red-600 bg-red-100';
       case 'medium': return 'text-yellow-600 bg-yellow-100';
@@ -53,8 +62,12 @@ const TeamDashboard = () => {
   const stats = getTaskStats();
   const completionRate = stats.total > 0 ? (stats.completed / stats.total) * 100 : 0;
 
-  if (loading) {
+  if (isLoading) {
     return <div className="flex items-center justify-center h-64">Loading dashboard...</div>;
+  }
+
+  if (isError) {
+    return <div className="flex items-center justify-center h-64 text-red-500">Error: {error.message}</div>;
   }
 
   return (
@@ -139,7 +152,7 @@ const TeamDashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {tasks.slice(0, 5).map((task) => (
+            {tasks.slice(0, 5).map((task: Task) => (
               <div key={task.id} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center space-x-4">
                   <div className={`w-3 h-3 rounded-full ${getStatusColor(task.status)}`} />
@@ -173,7 +186,7 @@ const TeamDashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {teams.map((team) => (
+            {teams.map((team: Team) => (
               <div key={team.id} className="p-4 border rounded-lg">
                 <div className="flex items-center justify-between">
                   <div>
@@ -192,3 +205,4 @@ const TeamDashboard = () => {
 };
 
 export default TeamDashboard;
+
