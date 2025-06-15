@@ -1,62 +1,29 @@
+
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Play, Pause, Edit, Trash2, Save, ArrowRight, Zap, Bot } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { Plus, Bot, Zap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useTier } from '@/context/TierContext';
-import { useUser } from '@/context/UserContext';
-import AdvancedStepEditor from './AdvancedStepEditor';
 import WorkflowTemplates from './WorkflowTemplates';
 import SchedulingPanel from './SchedulingPanel';
-
-type AllowedStepType = "action" | "condition" | "ai-model" | "api-call" | "timer" | "notification";
-interface WorkflowStep {
-  id: string;
-  name: string;
-  description: string;
-  type: AllowedStepType;
-  config: any;
-  order: number;
-  triggers?: string[];
-  dependencies?: string[];
-}
-
-interface Workflow {
-  id: string;
-  name: string;
-  description: string;
-  steps: WorkflowStep[];
-  status: string;
-  created_at: string;
-}
-
-interface SchedulingConfig {
-  enabled: boolean;
-  type: 'once' | 'recurring' | 'trigger';
-  schedule: string;
-  timezone: string;
-  conditions?: string[];
-}
+import { Workflow, SchedulingConfig, WorkflowStep } from './types';
+import { useWorkflows } from '@/hooks/useWorkflows';
+import WorkflowList from './WorkflowList';
+import WorkflowDetail from './WorkflowDetail';
+import CreateWorkflowForm from './CreateWorkflowForm';
+import { Button } from '../ui/button';
 
 const WorkflowEditor = () => {
   const { canAccess } = useTier();
-  const { user } = useUser();
-  const [workflows, setWorkflows] = useState<Workflow[]>([]);
+  const { workflows, isLoading, createWorkflow, updateWorkflow } = useWorkflows();
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [newWorkflow, setNewWorkflow] = useState({
-    name: '',
-    description: '',
-    steps: [] as WorkflowStep[]
-  });
-  const [availableModels, setAvailableModels] = useState([
+  const [newWorkflowFromTemplate, setNewWorkflowFromTemplate] = useState<any | undefined>(undefined);
+
+  const [availableModels] = useState([
     { id: 'text-generator', name: 'Text Generator Model' },
     { id: 'classifier', name: 'Classification Model' },
     { id: 'intent-classifier', name: 'Intent Classifier' },
@@ -73,173 +40,45 @@ const WorkflowEditor = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchWorkflows();
-  }, []);
+    if (selectedWorkflow) {
+        const updatedWorkflow = workflows.find(w => w.id === selectedWorkflow.id);
+        if (updatedWorkflow) {
+            setSelectedWorkflow(updatedWorkflow);
+        } else {
+            setSelectedWorkflow(null);
+        }
+    } else if (!isLoading && workflows.length > 0) {
+        setSelectedWorkflow(workflows[0]);
+    }
+  }, [workflows, isLoading, selectedWorkflow]);
 
-  const fetchWorkflows = async () => {
+  const handleUpdateWorkflow = async (workflow: Partial<Workflow> & { id: string }) => {
     try {
-      const { data, error } = await supabase
-        .from('workflows')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      const formattedWorkflows = data?.map(workflow => ({
-        ...workflow,
-        steps: Array.isArray(workflow.steps) ? workflow.steps : []
-      })) || [];
-
-      setWorkflows(formattedWorkflows);
-    } catch (error) {
-      console.error('Error fetching workflows:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load workflows",
-        variant: "destructive"
-      });
+      await updateWorkflow.mutateAsync(workflow);
+    } catch(e) {
+      // Error is handled by the mutation's onError hook
     }
   };
 
-  const createWorkflow = async () => {
-    if (!user) {
-      toast({
-        title: "Authentication Error",
-        description: "You must be logged in to create a workflow.",
-        variant: "destructive"
-      });
-      return;
-    }
+  const handleCreateWorkflow = async (workflowData: { name: string; description: string; }) => {
     try {
-      const { data, error } = await supabase
-        .from('workflows')
-        .insert([{
-          name: newWorkflow.name,
-          description: newWorkflow.description,
-          steps: newWorkflow.steps,
-          status: 'draft',
-          created_by: user.id,
-        }])
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      setWorkflows([data, ...workflows]);
+      const newWorkflow = await createWorkflow.mutateAsync(workflowData);
+      if (newWorkflow && newWorkflowFromTemplate?.template?.steps) {
+        const workflowWithSteps = {
+            ...newWorkflow,
+            steps: newWorkflowFromTemplate.template.steps.map((step: any, index: number): WorkflowStep => ({
+                ...step,
+                id: Date.now().toString() + index,
+                order: index
+            }))
+        };
+        await handleUpdateWorkflow(workflowWithSteps);
+        setSelectedWorkflow(workflowWithSteps);
+      }
       setIsCreateDialogOpen(false);
-      setNewWorkflow({ name: '', description: '', steps: [] });
-      
-      toast({
-        title: "Success",
-        description: "Workflow created successfully"
-      });
-    } catch (error: any) {
-      console.error('Error creating workflow:', error);
-      toast({
-        title: "Error",
-        description: `Failed to create workflow: ${error.message}`,
-        variant: "destructive"
-      });
-    }
-  };
-
-  const updateWorkflow = async (workflow: Workflow) => {
-    try {
-      const { error } = await supabase
-        .from('workflows')
-        .update({
-          name: workflow.name,
-          description: workflow.description,
-          steps: workflow.steps,
-          status: workflow.status
-        })
-        .eq('id', workflow.id);
-
-      if (error) throw error;
-
-      setWorkflows(workflows.map(w => w.id === workflow.id ? workflow : w));
-      toast({
-        title: "Success",
-        description: "Workflow updated successfully"
-      });
-    } catch (error) {
-      console.error('Error updating workflow:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update workflow",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const addStep = (workflow: Workflow) => {
-    const newStep: WorkflowStep = {
-      id: Date.now().toString(),
-      name: `Step ${workflow.steps.length + 1}`,
-      description: '',
-      type: 'action',
-      config: {},
-      order: workflow.steps.length
-    };
-
-    const updatedWorkflow = {
-      ...workflow,
-      steps: [...workflow.steps, newStep]
-    };
-
-    setSelectedWorkflow(updatedWorkflow);
-    updateWorkflow(updatedWorkflow);
-  };
-
-  const removeStep = (workflow: Workflow, stepId: string) => {
-    const updatedWorkflow = {
-      ...workflow,
-      steps: workflow.steps.filter(step => step.id !== stepId)
-    };
-
-    setSelectedWorkflow(updatedWorkflow);
-    updateWorkflow(updatedWorkflow);
-  };
-
-  const addAdvancedStep = (workflow: Workflow) => {
-    const newStep: WorkflowStep = {
-      id: Date.now().toString(),
-      name: `Advanced Step ${workflow.steps.length + 1}`,
-      description: '',
-      type: 'action',
-      config: {},
-      order: workflow.steps.length,
-      triggers: [],
-      dependencies: []
-    };
-
-    const updatedWorkflow = {
-      ...workflow,
-      steps: [...workflow.steps, newStep]
-    };
-
-    setSelectedWorkflow(updatedWorkflow);
-    updateWorkflow(updatedWorkflow);
-  };
-
-  const updateAdvancedStep = (workflow: Workflow, stepId: string, updatedStep: WorkflowStep) => {
-    const updatedWorkflow = {
-      ...workflow,
-      steps: workflow.steps.map(step => 
-        step.id === stepId ? updatedStep : step
-      )
-    };
-
-    setSelectedWorkflow(updatedWorkflow);
-    updateWorkflow(updatedWorkflow);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'paused': return 'bg-yellow-100 text-yellow-800';
-      case 'draft': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      setNewWorkflowFromTemplate(undefined);
+    } catch(e) {
+      // Error is handled by the mutation's onError hook
     }
   };
 
@@ -252,24 +91,13 @@ const WorkflowEditor = () => {
       });
       return;
     }
-
-    const newWorkflowFromTemplate = {
-      name: template.name,
-      description: template.description,
-      steps: template.template.steps.map((step: any, index: number) => ({
-        ...step,
-        id: Date.now().toString() + index,
-        order: index
-      }))
-    };
-
-    setNewWorkflow(newWorkflowFromTemplate);
+    
+    setNewWorkflowFromTemplate(template);
     setIsCreateDialogOpen(true);
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -280,7 +108,10 @@ const WorkflowEditor = () => {
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-[#6AC8FF] hover:bg-[#6AC8FF]/90 text-gray-900">
+            <Button 
+              onClick={() => { setNewWorkflowFromTemplate(undefined); setIsCreateDialogOpen(true); }} 
+              className="bg-[#6AC8FF] hover:bg-[#6AC8FF]/90 text-gray-900"
+            >
               <Plus className="w-4 h-4 mr-2" />
               New Workflow
             </Button>
@@ -289,21 +120,11 @@ const WorkflowEditor = () => {
             <DialogHeader>
               <DialogTitle>Create New Workflow</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
-              <Input
-                placeholder="Workflow name"
-                value={newWorkflow.name}
-                onChange={(e) => setNewWorkflow({ ...newWorkflow, name: e.target.value })}
-              />
-              <Textarea
-                placeholder="Workflow description"
-                value={newWorkflow.description}
-                onChange={(e) => setNewWorkflow({ ...newWorkflow, description: e.target.value })}
-              />
-              <Button onClick={createWorkflow} className="w-full">
-                Create Workflow
-              </Button>
-            </div>
+            <CreateWorkflowForm 
+              onSubmit={handleCreateWorkflow} 
+              isSubmitting={createWorkflow.isLoading || updateWorkflow.isLoading}
+              initialData={newWorkflowFromTemplate ? { name: newWorkflowFromTemplate.name, description: newWorkflowFromTemplate.description } : undefined}
+            />
           </DialogContent>
         </Dialog>
       </div>
@@ -323,135 +144,27 @@ const WorkflowEditor = () => {
 
         <TabsContent value="workflows">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Workflows List */}
             <div className="lg:col-span-1">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Workflows</CardTitle>
-                  <CardDescription>Your automated workflows</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {workflows.map((workflow) => (
-                      <div
-                        key={workflow.id}
-                        className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                          selectedWorkflow?.id === workflow.id ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'
-                        }`}
-                        onClick={() => setSelectedWorkflow(workflow)}
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-medium">{workflow.name}</h4>
-                            <p className="text-sm text-gray-600">{workflow.description}</p>
-                            <div className="flex items-center mt-2 space-x-2">
-                              <Badge className={getStatusColor(workflow.status)}>
-                                {workflow.status}
-                              </Badge>
-                              <span className="text-xs text-gray-500">
-                                {workflow.steps.length} steps
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              <WorkflowList
+                workflows={workflows}
+                selectedWorkflow={selectedWorkflow}
+                onSelectWorkflow={setSelectedWorkflow}
+                isLoading={isLoading}
+              />
             </div>
 
-            {/* Workflow Editor */}
             <div className="lg:col-span-2">
               {selectedWorkflow ? (
-                <Card>
-                  <CardHeader>
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <CardTitle>{selectedWorkflow.name}</CardTitle>
-                        <CardDescription>{selectedWorkflow.description}</CardDescription>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button variant="outline" onClick={() => addAdvancedStep(selectedWorkflow)}>
-                          <Plus className="w-4 h-4 mr-2" />
-                          Add Step
-                        </Button>
-                        {selectedWorkflow.status === 'active' ? (
-                          <Button variant="outline">
-                            <Pause className="w-4 h-4 mr-2" />
-                            Pause
-                          </Button>
-                        ) : (
-                          <Button className="bg-[#6AC8FF] hover:bg-[#6AC8FF]/90 text-gray-900">
-                            <Play className="w-4 h-4 mr-2" />
-                            Start
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {selectedWorkflow.steps.map((step, index) => (
-                        <div key={step.id} className="flex items-center space-x-4">
-                          {canAccess('ai-studio') ? (
-                            <AdvancedStepEditor
-                              step={step}
-                              onUpdate={(updatedStep) => updateAdvancedStep(selectedWorkflow, step.id, updatedStep)}
-                              onDelete={() => removeStep(selectedWorkflow, step.id)}
-                              availableModels={availableModels}
-                            />
-                          ) : (
-                            <div className="flex-1 p-4 border rounded-lg">
-                              <div className="flex justify-between items-center">
-                                <div>
-                                  <h4 className="font-medium">{step.name}</h4>
-                                  <p className="text-sm text-gray-600">{step.description}</p>
-                                  <Badge variant="outline" className="mt-2">
-                                    {step.type}
-                                  </Badge>
-                                </div>
-                                <div className="flex space-x-2">
-                                  <Button variant="ghost" size="sm">
-                                    <Edit className="w-4 h-4" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => removeStep(selectedWorkflow, step.id)}
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                          {index < selectedWorkflow.steps.length - 1 && (
-                            <ArrowRight className="w-4 h-4 text-gray-400" />
-                          )}
-                        </div>
-                      ))}
-                      
-                      {selectedWorkflow.steps.length === 0 && (
-                        <div className="text-center py-8 text-gray-500">
-                          <p>No steps added yet.</p>
-                          <Button 
-                            variant="outline" 
-                            onClick={() => addAdvancedStep(selectedWorkflow)}
-                            className="mt-2"
-                          >
-                            Add First Step
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                <WorkflowDetail
+                  workflow={selectedWorkflow}
+                  onUpdateWorkflow={handleUpdateWorkflow}
+                  availableModels={availableModels}
+                />
               ) : (
                 <Card>
                   <CardContent className="flex items-center justify-center h-96">
                     <div className="text-center text-gray-500">
-                      <p>Select a workflow to edit</p>
+                      {isLoading ? 'Loading workflows...' : 'Select a workflow to edit or create a new one.'}
                     </div>
                   </CardContent>
                 </Card>
