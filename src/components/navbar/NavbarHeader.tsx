@@ -13,7 +13,7 @@ const NavbarHeader: React.FC<NavbarHeaderProps> = ({
   isScrolled
 }) => {
   return <div className="navbar-header-content bg-gradient-to-r from-[#005ea8] to-[#0071c2] text-white shadow-lg">
-      <div className="container px-4 py-[11px]">
+      <div className="container px-4 py-[12px]">
         <div className="flex items-center justify-between">
           <NavbarBrand />
           <div className="flex items-center gap-2">
