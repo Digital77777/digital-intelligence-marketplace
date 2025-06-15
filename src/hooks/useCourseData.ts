@@ -1,15 +1,9 @@
-
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
-import { useTier } from '@/context/TierContext';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { 
-  fetchCourseById, 
-  getOrInitUserProgress, 
-  updateUserProgress,
-  Course
-} from '@/utils/courseService';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { LearningCourse, LearningProgress } from '@/types/learning';
 
 export interface CourseResource {
   id: string;
@@ -19,83 +13,87 @@ export interface CourseResource {
   url: string;
 }
 
-/**
- * Custom hook to fetch and manage course data and user progress
- */
 export const useCourseData = (courseId: string | undefined) => {
   const { user } = useUser();
-  const { canAccess } = useTier();
+  const queryClient = useQueryClient();
   
-  const [userProgress, setUserProgress] = useState<number>(0);
   const [courseResources, setCourseResources] = useState<CourseResource[]>([]);
   
-  // Fetch course data
   const { 
     data: course,
     isLoading: courseLoading,
     error: courseError
-  } = useQuery({
+  } = useQuery<LearningCourse | null>({
     queryKey: ['course', courseId],
-    queryFn: () => courseId ? fetchCourseById(courseId) : null,
+    queryFn: async () => {
+      if (!courseId) return null;
+      const { data, error } = await supabase
+        .from('learning_courses')
+        .select('*')
+        .eq('id', courseId)
+        .single();
+      if (error) throw new Error(error.message);
+      return data;
+    },
     enabled: !!courseId
   });
   
-  // Fetch user progress if user is logged in
   const { 
-    data: progress,
+    data: userProgress,
     isLoading: progressLoading,
-  } = useQuery({
+  } = useQuery<LearningProgress | null>({
     queryKey: ['course-progress', courseId, user?.id],
     queryFn: async () => {
-      if (!user?.id || !courseId || !course) return null;
-      return await getOrInitUserProgress(user.id, parseInt(courseId, 10));
+      if (!user?.id || !courseId) return null;
+      const { data, error } = await supabase
+        .from('learning_progress')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('course_id', courseId)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      return data;
     },
-    enabled: !!user?.id && !!courseId && !!course
+    enabled: !!user?.id && !!courseId
   });
-  
-  // Update progress when data is loaded
-  useEffect(() => {
-    if (progress) {
-      setUserProgress(progress.completion_percent || 0);
-    }
-  }, [progress]);
-  
-  // Update progress mutation
-  const { mutate: updateProgress, isPending: isUpdating } = useMutation({
-    mutationFn: async (newProgress: number) => {
-      if (!user?.id || !courseId || !course) return false;
-      return await updateUserProgress(user.id, parseInt(courseId, 10), newProgress);
+
+  const updateProgressMutation = useMutation({
+    mutationFn: async (newProgress: { percent: number; courseId: string }) => {
+      if (!user?.id) throw new Error("User not authenticated");
+      const { error } = await supabase.from('learning_progress').upsert({
+        user_id: user.id,
+        course_id: newProgress.courseId,
+        completion_percent: newProgress.percent,
+        completed: newProgress.percent === 100,
+        last_accessed: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'user_id,course_id' });
+
+      if (error) throw error;
+      return newProgress.percent;
     },
-    onSuccess: (success, newProgress) => {
-      if (success) {
-        setUserProgress(newProgress);
-        if (newProgress === 100) {
-          toast.success("Congratulations! You've completed this course.");
-        }
+    onSuccess: (newProgress) => {
+      queryClient.invalidateQueries({ queryKey: ['course-progress', courseId, user?.id] });
+      if (newProgress === 100) {
+        toast.success("Congratulations! You've completed this course.");
       } else {
-        toast.error("Failed to update progress");
+        toast.info("Progress saved.");
       }
     },
-    onError: () => {
-      toast.error("Error updating progress");
+    onError: (err: Error) => {
+      toast.error(`Failed to update progress: ${err.message}`);
     }
   });
+
+  const handleUpdateProgress = (progress: number) => {
+    if (!courseId) return;
+    updateProgressMutation.mutate({ percent: progress, courseId });
+  };
   
-  // Check course access based on tier
-  const checkCourseAccess = useCallback(() => {
-    if (!course) return true; // No course to check yet
-    if (course.required_tier && !canAccess(course.required_tier)) {
-      toast.error(`This course requires ${course.required_tier} tier access`);
-      return false;
-    }
-    return true;
-  }, [course, canAccess]);
-  
-  // Generate course resources based on course data
   useEffect(() => {
     if (!course) return;
     
-    // Generate resources based on course data
+    // Generate course resources based on course data
     const resources: CourseResource[] = [];
     
     // Add syllabus resource
@@ -143,26 +141,13 @@ export const useCourseData = (courseId: string | undefined) => {
     setCourseResources(resources);
   }, [course]);
   
-  // Check access when course data is loaded
-  useEffect(() => {
-    if (course && !courseLoading) {
-      checkCourseAccess();
-    }
-  }, [course, courseLoading, checkCourseAccess]);
-  
-  const handleUpdateProgress = (progress: number) => {
-    if (isUpdating) return;
-    updateProgress(progress);
-  };
-  
   return {
     course,
     loading: courseLoading || progressLoading,
-    isUpdating,
-    error: courseError,
-    userProgress,
+    isUpdating: updateProgressMutation.isPending,
+    error: courseError as Error | null,
+    userProgress: userProgress?.completion_percent || 0,
     setUserProgress: handleUpdateProgress,
-    courseResources,
-    hasAccess: checkCourseAccess()
+    courseResources
   };
 };

@@ -1,6 +1,5 @@
-
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
 import CourseSidebar from './CourseSidebar';
@@ -10,7 +9,7 @@ import CourseErrorState from './course/CourseErrorState';
 import { useCourseData } from '@/hooks/useCourseData';
 import { updateUserProgress } from '@/utils/courseService';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import { Download, ArrowLeft } from 'lucide-react';
 
 const CourseInterface = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -27,20 +26,7 @@ const CourseInterface = () => {
   
   const handleUpdateProgress = async (progress: number) => {
     if (!user || !courseId || !course) return;
-    
-    try {
-      setUserProgress(progress);
-      
-      if (user) {
-        const success = await updateUserProgress(user.id, course.id, progress);
-        if (!success) {
-          throw new Error("Failed to update progress");
-        }
-      }
-    } catch (error) {
-      console.error('Error updating progress:', error);
-      toast("Failed to update progress");
-    }
+    setUserProgress(progress);
   };
   
   const handleDownloadCertificate = () => {
@@ -116,37 +102,47 @@ ${course.content || 'Content not available for offline viewing.'}
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-      <div className="lg:col-span-3">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">{course.title}</h1>
-          <Button 
-            variant="outline" 
-            onClick={handleSaveCourseContent}
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Save for Offline
-          </Button>
+    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="mb-6">
+        <Button asChild variant="ghost">
+          <Link to="/learning-hub">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Learning Hub
+          </Link>
+        </Button>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="lg:col-span-3">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold">{course.title}</h1>
+            <Button 
+              variant="outline" 
+              onClick={handleSaveCourseContent}
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Save for Offline
+            </Button>
+          </div>
+          
+          <CourseTabs
+            course={course}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            onProgressUpdate={handleUpdateProgress}
+            courseResources={courseResources}
+            courseId={courseId || ''}
+          />
         </div>
         
-        <CourseTabs
-          course={course}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          onProgressUpdate={handleUpdateProgress}
-          courseResources={courseResources}
-          courseId={courseId || ''}
-        />
-      </div>
-      
-      <div className="col-span-1 order-first lg:order-last">
-        <CourseSidebar 
-          course={course} 
-          progress={userProgress} 
-          onMarkComplete={() => handleUpdateProgress(100)}
-          onTabChange={setActiveTab}
-          onDownloadCertificate={userProgress === 100 ? handleDownloadCertificate : undefined}
-        />
+        <div className="col-span-1 order-first lg:order-last">
+          <CourseSidebar 
+            course={course} 
+            progress={userProgress} 
+            onMarkComplete={() => handleUpdateProgress(100)}
+            onTabChange={setActiveTab}
+            onDownloadCertificate={userProgress === 100 ? handleDownloadCertificate : undefined}
+          />
+        </div>
       </div>
     </div>
   );

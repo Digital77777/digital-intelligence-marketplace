@@ -298,6 +298,42 @@ export type Database = {
         }
         Relationships: []
       }
+      certifications: {
+        Row: {
+          badge_image: string
+          created_at: string
+          description: string
+          expiration_period: number | null
+          id: string
+          is_industry_recognized: boolean
+          required_tier: string
+          requirements: string[]
+          title: string
+        }
+        Insert: {
+          badge_image: string
+          created_at?: string
+          description: string
+          expiration_period?: number | null
+          id?: string
+          is_industry_recognized: boolean
+          required_tier: string
+          requirements: string[]
+          title: string
+        }
+        Update: {
+          badge_image?: string
+          created_at?: string
+          description?: string
+          expiration_period?: number | null
+          id?: string
+          is_industry_recognized?: boolean
+          required_tier?: string
+          requirements?: string[]
+          title?: string
+        }
+        Relationships: []
+      }
       compliance_issues: {
         Row: {
           created_at: string
@@ -999,6 +1035,98 @@ export type Database = {
         }
         Relationships: []
       }
+      learning_courses: {
+        Row: {
+          category: string
+          certification_available: boolean | null
+          content: string | null
+          created_at: string
+          description: string | null
+          difficulty: string
+          duration: number
+          id: string
+          image_url: string | null
+          instructor: string | null
+          is_featured: boolean | null
+          prerequisites: string[] | null
+          required_tier: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          certification_available?: boolean | null
+          content?: string | null
+          created_at?: string
+          description?: string | null
+          difficulty: string
+          duration: number
+          id?: string
+          image_url?: string | null
+          instructor?: string | null
+          is_featured?: boolean | null
+          prerequisites?: string[] | null
+          required_tier?: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          certification_available?: boolean | null
+          content?: string | null
+          created_at?: string
+          description?: string | null
+          difficulty?: string
+          duration?: number
+          id?: string
+          image_url?: string | null
+          instructor?: string | null
+          is_featured?: boolean | null
+          prerequisites?: string[] | null
+          required_tier?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      learning_feedback: {
+        Row: {
+          comment: string | null
+          course_id: string
+          created_at: string
+          id: string
+          rating: number | null
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          course_id: string
+          created_at?: string
+          id?: string
+          rating?: number | null
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          course_id?: string
+          created_at?: string
+          id?: string
+          rating?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_feedback_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "learning_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learning_modules: {
         Row: {
           category: string | null
@@ -1035,6 +1163,89 @@ export type Database = {
         }
         Relationships: []
       }
+      learning_paths: {
+        Row: {
+          badge_name: string | null
+          category: string
+          courses: string[]
+          created_at: string
+          description: string
+          difficulty: string
+          id: string
+          image_url: string | null
+          required_tier: string
+          title: string
+          total_duration: number
+        }
+        Insert: {
+          badge_name?: string | null
+          category: string
+          courses: string[]
+          created_at?: string
+          description: string
+          difficulty: string
+          id?: string
+          image_url?: string | null
+          required_tier: string
+          title: string
+          total_duration: number
+        }
+        Update: {
+          badge_name?: string | null
+          category?: string
+          courses?: string[]
+          created_at?: string
+          description?: string
+          difficulty?: string
+          id?: string
+          image_url?: string | null
+          required_tier?: string
+          title?: string
+          total_duration?: number
+        }
+        Relationships: []
+      }
+      learning_progress: {
+        Row: {
+          completed: boolean
+          completion_percent: number
+          course_id: string
+          created_at: string
+          id: string
+          last_accessed: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          completion_percent?: number
+          course_id: string
+          created_at?: string
+          id?: string
+          last_accessed?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          completion_percent?: number
+          course_id?: string
+          created_at?: string
+          id?: string
+          last_accessed?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_progress_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "learning_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       likes: {
         Row: {
           created_at: string
@@ -1063,6 +1274,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      live_events: {
+        Row: {
+          datetime: string
+          description: string
+          duration: number
+          event_type: string
+          host_name: string
+          id: string
+          image_url: string | null
+          max_participants: number | null
+          registration_deadline: string | null
+          required_tier: string
+          title: string
+        }
+        Insert: {
+          datetime: string
+          description: string
+          duration: number
+          event_type: string
+          host_name: string
+          id?: string
+          image_url?: string | null
+          max_participants?: number | null
+          registration_deadline?: string | null
+          required_tier: string
+          title: string
+        }
+        Update: {
+          datetime?: string
+          description?: string
+          duration?: number
+          event_type?: string
+          host_name?: string
+          id?: string
+          image_url?: string | null
+          max_participants?: number | null
+          registration_deadline?: string | null
+          required_tier?: string
+          title?: string
+        }
+        Relationships: []
       }
       marketplace_items: {
         Row: {

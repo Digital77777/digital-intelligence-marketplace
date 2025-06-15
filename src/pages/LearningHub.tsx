@@ -1,47 +1,14 @@
-
-import React, { useState, useEffect } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import MobileStickyFooter from '@/components/MobileStickyFooter';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle
-} from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Search, 
-  SlidersHorizontal, 
-  ChevronDown, 
-  Clock, 
-  Lock,
-  BookOpen,
-  CheckCircle,
-  Sparkles,
-  Shield,
-  Zap,
-  ArrowRight,
-  Play,
-  Users,
-  Award,
-  Video,
-  FileText,
-  Download
-} from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem
-} from '@/components/ui/dropdown-menu';
+import { Clock, Lock, BookOpen, CheckCircle, Sparkles, Shield, Zap, ArrowRight, Play, Users, Award, Video, FileText, Download } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import { useTier } from '@/context/TierContext';
 import { useLearningResources } from '@/hooks/useLearningResources';
@@ -49,6 +16,7 @@ import YouTubeCourses from '@/components/learning/YouTubeCourses';
 import LearningHubAIAssistant from "@/components/learning/LearningHubAIAssistant";
 import LearningHubHero from "@/components/learning/learning-hub/LearningHubHero";
 import LearningHubFilters from "@/components/learning/learning-hub/LearningHubFilters";
+import CourseCard from '@/components/learning/CourseCard';
 
 const LearningHub = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -57,107 +25,45 @@ const LearningHub = () => {
   const [activeTab, setActiveTab] = useState('courses');
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   const { user } = useUser();
-  const { currentTier, upgradePrompt, getTierFeatures } = useTier();
-  const location = useLocation();
+  const { currentTier, upgradePrompt } = useTier();
 
   const {
-    resources,
+    courses,
+    liveEvents,
+    certifications,
+    learningPaths,
     isLoading,
     userProgress,
-    completedResources,
-    markResourceComplete,
+    completedCourses,
+    markCourseComplete,
     totalCount,
-    learningPaths
   } = useLearningResources({
     categoryFilter,
     difficultyFilter,
-    searchQuery
+    searchQuery,
   });
 
   const getTierIcon = (tier: string) => {
     switch (tier) {
-      case 'pro': 
-        return <Zap className="h-4 w-4 text-purple-400" />;
-      case 'basic': 
-        return <Shield className="h-4 w-4 text-blue-400" />;
-      default: 
-        return <Sparkles className="h-4 w-4 text-amber-400" />;
+      case 'pro': return <Zap className="h-4 w-4 text-purple-400" />;
+      case 'basic': return <Shield className="h-4 w-4 text-blue-400" />;
+      default: return <Sparkles className="h-4 w-4 text-amber-400" />;
     }
   };
 
-  const mockLiveEvents = [
-    {
-      id: '1',
-      title: 'AI Fundamentals Workshop',
-      instructor: 'Dr. Sarah Chen',
-      date: '2025-06-10',
-      time: '14:00 UTC',
-      duration: '2 hours',
-      tier: 'freemium',
-      attendees: 234
-    },
-    {
-      id: '2',
-      title: 'Advanced ML Techniques',
-      instructor: 'Prof. Michael Rodriguez',
-      date: '2025-06-12',
-      time: '16:00 UTC',
-      duration: '1.5 hours',
-      tier: 'basic',
-      attendees: 156
-    },
-    {
-      id: '3',
-      title: 'Deep Learning Masterclass',
-      instructor: 'Dr. Emily Watson',
-      date: '2025-06-15',
-      time: '18:00 UTC',
-      duration: '3 hours',
-      tier: 'pro',
-      attendees: 89
-    }
-  ];
-
-  const mockCertifications = [
-    {
-      id: '1',
-      title: 'AI Fundamentals Certificate',
-      description: 'Basic understanding of AI concepts and applications',
-      requirements: ['Complete 5 foundational courses', 'Pass final assessment'],
-      tier: 'freemium',
-      estimatedTime: '40 hours'
-    },
-    {
-      id: '2',
-      title: 'Machine Learning Specialist',
-      description: 'Advanced ML techniques and practical implementation',
-      requirements: ['Complete ML learning path', 'Build 3 projects', 'Peer review'],
-      tier: 'basic',
-      estimatedTime: '80 hours'
-    },
-    {
-      id: '3',
-      title: 'AI Expert Certification',
-      description: 'Industry-recognized expert-level certification',
-      requirements: ['Complete all paths', '5 projects', 'Capstone project', 'Mentor review'],
-      tier: 'pro',
-      estimatedTime: '150 hours'
-    }
-  ];
-
-  const isContentLocked = (tier: string) => {
-    if (tier === 'freemium') return false;
+  const isContentLocked = (requiredTier: string) => {
+    if (requiredTier === 'freemium') return false;
     if (currentTier === 'pro') return false;
-    if (tier === 'basic' && currentTier === 'basic') return false;
+    if (requiredTier === 'basic' && (currentTier === 'basic' || currentTier === 'pro')) return false;
+    if (requiredTier === 'pro' && currentTier === 'pro') return false;
     return true;
   };
-
+  
   const handleJoinEvent = (eventId: string, tier: string) => {
     if (isContentLocked(tier)) {
       upgradePrompt(tier === 'basic' ? 'basic' : 'pro');
       return;
     }
-    
     toast.success("You've been registered for the event!");
   };
 
@@ -166,7 +72,6 @@ const LearningHub = () => {
       upgradePrompt(tier === 'basic' ? 'basic' : 'pro');
       return;
     }
-    
     toast.success("Certification path started!");
   };
 
@@ -175,50 +80,32 @@ const LearningHub = () => {
       <Navbar />
       <main className="flex-1 pt-24 px-4 md:px-6 pb-12 bg-gradient-to-b from-indigo-50/30 to-white dark:from-indigo-950/10 dark:to-gray-950">
         <div className="max-w-7xl mx-auto">
-          {/* Hero section */}
-          <LearningHubHero
-            currentTier={currentTier}
-            getTierIcon={getTierIcon}
-          />
-
-          {/* Search and filters */}
+          <LearningHubHero currentTier={currentTier} getTierIcon={getTierIcon} />
           <LearningHubFilters
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
             setCategoryFilter={setCategoryFilter}
             setDifficultyFilter={setDifficultyFilter}
           />
-
-          {/* Main content tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="courses" className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4" />
-                Courses
-              </TabsTrigger>
-              <TabsTrigger value="youtube" className="flex items-center gap-2">
-                <Video className="h-4 w-4" />
-                YouTube
-              </TabsTrigger>
-              <TabsTrigger value="events" className="flex items-center gap-2">
-                <Video className="h-4 w-4" />
-                Live Events
-              </TabsTrigger>
-              <TabsTrigger value="certifications" className="flex items-center gap-2">
-                <Award className="h-4 w-4" />
-                Certifications
-              </TabsTrigger>
-              <TabsTrigger value="resources" className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                Resources
+                <BookOpen className="h-4 w-4" /> Courses
               </TabsTrigger>
               <TabsTrigger value="paths" className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4" />
-                Learning Paths
+                <BookOpen className="h-4 w-4" /> Learning Paths
+              </TabsTrigger>
+              <TabsTrigger value="events" className="flex items-center gap-2">
+                <Video className="h-4 w-4" /> Live Events
+              </TabsTrigger>
+              <TabsTrigger value="certifications" className="flex items-center gap-2">
+                <Award className="h-4 w-4" /> Certifications
+              </TabsTrigger>
+              <TabsTrigger value="youtube" className="flex items-center gap-2">
+                <Video className="h-4 w-4" /> YouTube
               </TabsTrigger>
             </TabsList>
 
-            {/* Courses Tab */}
             <TabsContent value="courses" className="mt-6">
               <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                 <div>
@@ -233,343 +120,145 @@ const LearningHub = () => {
                   <Sparkles className="h-5 w-5 text-amber-500" /> Ask the AI
                 </Button>
               </div>
-              
-              {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[...Array(6)].map((_, index) => (
-                    <Card key={index} className="overflow-hidden">
-                      <div className="h-40 bg-muted animate-pulse" />
-                      <CardContent className="pt-4">
-                        <div className="h-5 bg-muted animate-pulse mb-2 w-3/4" />
-                        <div className="h-4 bg-muted animate-pulse mb-1 w-full" />
-                        <div className="h-4 bg-muted animate-pulse w-2/3" />
-                      </CardContent>
-                    </Card>
-                  ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {isLoading && [...Array(6)].map((_, index) => (
+                  <Card key={index} className="overflow-hidden">
+                    <div className="h-40 bg-muted animate-pulse" />
+                    <CardContent className="pt-4">
+                      <div className="h-5 bg-muted animate-pulse mb-2 w-3/4" />
+                      <div className="h-4 bg-muted animate-pulse mb-1 w-full" />
+                      <div className="h-4 bg-muted animate-pulse w-2/3" />
+                    </CardContent>
+                  </Card>
+                ))}
+                {courses.map((course) => (
+                  <CourseCard 
+                    key={course.id}
+                    course={course}
+                    progress={userProgress[course.id] || 0}
+                    isCompleted={completedCourses.has(course.id)}
+                    onMarkComplete={() => markCourseComplete(course.id)}
+                  />
+                ))}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="paths" className="mt-6">
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold mb-2">Curated Learning Paths</h2>
+                  <p className="text-muted-foreground">
+                    Each path combines high-impact courses leading to a practical outcome and credential.
+                  </p>
                 </div>
-              ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {resources.map((course) => (
-                    <Card key={course.id} className="overflow-hidden hover:shadow-lg transition-all duration-300">
-                      <div className="relative h-40 bg-gradient-to-br from-indigo-500 to-purple-600">
-                        <div className="flex items-center justify-center h-full w-full">
-                          <BookOpen className="h-12 w-12 text-white opacity-70" />
-                        </div>
-                        {isContentLocked(course.requiredTier) && (
-                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                            <Lock className="h-6 w-6 text-white opacity-70" />
-                          </div>
-                        )}
-                        {completedResources.has(course.id) && (
-                          <div className="absolute top-2 right-2">
-                            <Badge variant="secondary" className="bg-green-100 text-green-800">
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              Completed
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
-                      <CardContent className="pt-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <Badge variant="secondary">{course.category}</Badge>
-                          <Badge variant="outline">{course.difficulty}</Badge>
-                        </div>
-                        <h3 className="font-semibold line-clamp-1 mb-2">{course.title}</h3>
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{course.description}</p>
-                        <div className="flex items-center justify-between text-sm text-muted-foreground">
-                          <div className="flex items-center">
-                            <Clock className="h-3 w-3 mr-1" />
-                            {course.duration} min
-                          </div>
-                          {course.requiredTier !== 'freemium' && (
-                            <Badge variant="outline" className="text-xs">
-                              {course.requiredTier}
-                            </Badge>
-                          )}
+                  {isLoading && <p>Loading paths...</p>}
+                  {learningPaths.length === 0 && !isLoading && (
+                    <div className="text-center text-muted-foreground col-span-full py-8">
+                      No learning paths found for your tier.
+                    </div>
+                  )}
+                  {learningPaths.map(path => (
+                    <Card key={path.id} className="overflow-hidden hover:shadow-lg transition-all duration-300">
+                      <CardHeader>
+                        <h3 className="font-semibold text-lg">{path.title}</h3>
+                        <p className="text-sm text-muted-foreground">{path.description}</p>
+                      </CardHeader>
+                      <CardContent>
+                        <ul className="mb-4 list-disc list-inside pl-1 space-y-1">
+                          {path.courses.map(course => (
+                            <li key={course.id}>
+                              <span className="font-medium">{course.title}</span>
+                            </li>
+                          ))}
+                        </ul>
+                         <div className="text-sm text-muted-foreground">
+                          Total Duration: {path.total_duration} min
                         </div>
                       </CardContent>
-                      <CardFooter className="pt-0">
-                        {isContentLocked(course.requiredTier) ? (
-                          <Button 
-                            className="w-full" 
-                            onClick={() => upgradePrompt(course.requiredTier === 'basic' ? 'basic' : 'pro')}
-                          >
-                            <Lock className="mr-2 h-4 w-4" />
-                            Upgrade to Access
-                          </Button>
-                        ) : (
-                          <div className="flex gap-2 w-full">
-                            <Button className="flex-1" asChild>
-                              <Link to={`/courses/${course.id}`}>
-                                <Play className="mr-2 h-4 w-4" />
-                                Start Course
-                              </Link>
-                            </Button>
-                            {user && !completedResources.has(course.id) && (
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => markResourceComplete(course.id)}
-                              >
-                                Mark Complete
-                              </Button>
-                            )}
-                          </div>
-                        )}
+                      <CardFooter>
+                        <Button className="w-full" disabled>View Path</Button>
                       </CardFooter>
                     </Card>
                   ))}
                 </div>
-              )}
+            </TabsContent>
+            
+            <TabsContent value="events" className="mt-6">
+               <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-2">Upcoming Live Events</h2>
+                <p className="text-muted-foreground">Join live workshops, webinars, and masterclasses</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {isLoading && <p>Loading events...</p>}
+                {liveEvents.map((event) => (
+                  <Card key={event.id} className="overflow-hidden">
+                    <div className="relative h-32 bg-gradient-to-r from-green-500 to-blue-600 flex items-center justify-center">
+                      <Video className="h-8 w-8 text-white" />
+                      {isContentLocked(event.required_tier) && (
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                          <Lock className="h-5 w-5 text-white" />
+                        </div>
+                      )}
+                    </div>
+                    <CardContent className="pt-4">
+                      <h3 className="font-semibold mb-2">{event.title}</h3>
+                      <p className="text-sm text-muted-foreground mb-2">by {event.host_name}</p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button 
+                        className="w-full" 
+                        onClick={() => handleJoinEvent(event.id, event.required_tier)}
+                        disabled={isContentLocked(event.required_tier)}
+                      >
+                         {isContentLocked(event.required_tier) ? 'Upgrade Required' : 'Register Now'}
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="certifications" className="mt-6">
+               <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-2">Available Certifications</h2>
+                <p className="text-muted-foreground">Earn industry-recognized certificates</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {isLoading && <p>Loading certifications...</p>}
+                {certifications.map((cert) => (
+                  <Card key={cert.id} className="overflow-hidden">
+                     <div className="relative h-32 bg-gradient-to-r from-yellow-500 to-orange-600 flex items-center justify-center">
+                       <Award className="h-8 w-8 text-white" />
+                        {isContentLocked(cert.required_tier) && (
+                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                            <Lock className="h-5 w-5 text-white" />
+                          </div>
+                        )}
+                    </div>
+                    <CardContent className="pt-4">
+                       <h3 className="font-semibold mb-2">{cert.title}</h3>
+                       <p className="text-sm text-muted-foreground mb-3">{cert.description}</p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button 
+                        className="w-full" 
+                        onClick={() => handleStartCertification(cert.id, cert.required_tier)}
+                        disabled={isContentLocked(cert.required_tier)}
+                      >
+                         {isContentLocked(cert.required_tier) ? 'Upgrade Required' : 'Start Certification'}
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
             </TabsContent>
 
-            {/* YouTube Courses Tab */}
             <TabsContent value="youtube" className="mt-6">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold mb-2">YouTube Learning Videos</h2>
-                <p className="text-muted-foreground">Access educational content from top YouTube creators and channels</p>
-              </div>
-              
               <YouTubeCourses 
                 searchQuery={searchQuery}
                 category={categoryFilter}
                 difficulty={difficultyFilter}
               />
-            </TabsContent>
-
-            {/* Live Events Tab */}
-            <TabsContent value="events" className="mt-6">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold mb-2">Upcoming Live Events</h2>
-                <p className="text-muted-foreground">Join live workshops, webinars, and masterclasses</p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mockLiveEvents.map((event) => (
-                  <Card key={event.id} className="overflow-hidden">
-                    <div className="relative h-32 bg-gradient-to-r from-green-500 to-blue-600">
-                      <div className="flex items-center justify-center h-full">
-                        <Video className="h-8 w-8 text-white" />
-                      </div>
-                      {isContentLocked(event.tier) && (
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                          <Lock className="h-5 w-5 text-white" />
-                        </div>
-                      )}
-                    </div>
-                    <CardContent className="pt-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <Badge variant="secondary">Live Event</Badge>
-                        {event.tier !== 'freemium' && (
-                          <Badge variant="outline">{event.tier}</Badge>
-                        )}
-                      </div>
-                      <h3 className="font-semibold mb-2">{event.title}</h3>
-                      <p className="text-sm text-muted-foreground mb-2">by {event.instructor}</p>
-                      <div className="space-y-1 text-sm text-muted-foreground">
-                        <div>📅 {event.date} at {event.time}</div>
-                        <div>⏱️ Duration: {event.duration}</div>
-                        <div className="flex items-center">
-                          <Users className="h-3 w-3 mr-1" />
-                          {event.attendees} registered
-                        </div>
-                      </div>
-                    </CardContent>
-                    <CardFooter>
-                      <Button 
-                        className="w-full" 
-                        onClick={() => handleJoinEvent(event.id, event.tier)}
-                        disabled={isContentLocked(event.tier)}
-                      >
-                        {isContentLocked(event.tier) ? (
-                          <>
-                            <Lock className="mr-2 h-4 w-4" />
-                            Upgrade Required
-                          </>
-                        ) : (
-                          <>
-                            <Video className="mr-2 h-4 w-4" />
-                            Register Now
-                          </>
-                        )}
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-
-            {/* Certifications Tab */}
-            <TabsContent value="certifications" className="mt-6">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold mb-2">Available Certifications</h2>
-                <p className="text-muted-foreground">Earn industry-recognized certificates</p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mockCertifications.map((cert) => (
-                  <Card key={cert.id} className="overflow-hidden">
-                    <div className="relative h-32 bg-gradient-to-r from-yellow-500 to-orange-600">
-                      <div className="flex items-center justify-center h-full">
-                        <Award className="h-8 w-8 text-white" />
-                      </div>
-                      {isContentLocked(cert.tier) && (
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                          <Lock className="h-5 w-5 text-white" />
-                        </div>
-                      )}
-                    </div>
-                    <CardContent className="pt-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <Badge variant="secondary">Certification</Badge>
-                        {cert.tier !== 'freemium' && (
-                          <Badge variant="outline">{cert.tier}</Badge>
-                        )}
-                      </div>
-                      <h3 className="font-semibold mb-2">{cert.title}</h3>
-                      <p className="text-sm text-muted-foreground mb-3">{cert.description}</p>
-                      <div className="space-y-2">
-                        <div className="text-sm">
-                          <strong>Requirements:</strong>
-                          <ul className="list-disc list-inside text-muted-foreground mt-1">
-                            {cert.requirements.map((req, index) => (
-                              <li key={index}>{req}</li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          ⏱️ Estimated time: {cert.estimatedTime}
-                        </div>
-                      </div>
-                    </CardContent>
-                    <CardFooter>
-                      <Button 
-                        className="w-full" 
-                        onClick={() => handleStartCertification(cert.id, cert.tier)}
-                        disabled={isContentLocked(cert.tier)}
-                      >
-                        {isContentLocked(cert.tier) ? (
-                          <>
-                            <Lock className="mr-2 h-4 w-4" />
-                            Upgrade Required
-                          </>
-                        ) : (
-                          <>
-                            <Award className="mr-2 h-4 w-4" />
-                            Start Certification
-                          </>
-                        )}
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-
-            {/* Resources Tab */}
-            <TabsContent value="resources" className="mt-6">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold mb-2">Learning Resources</h2>
-                <p className="text-muted-foreground">Additional materials and tools to support your learning</p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card className="text-center">
-                  <CardContent className="pt-6">
-                    <FileText className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-                    <h3 className="font-semibold mb-2">Study Guides</h3>
-                    <p className="text-sm text-muted-foreground">Comprehensive guides for each topic</p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" className="w-full">
-                      <Download className="mr-2 h-4 w-4" />
-                      Download
-                    </Button>
-                  </CardFooter>
-                </Card>
-                
-                <Card className="text-center">
-                  <CardContent className="pt-6">
-                    <Video className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                    <h3 className="font-semibold mb-2">Video Library</h3>
-                    <p className="text-sm text-muted-foreground">Extensive collection of tutorial videos</p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" className="w-full">
-                      <Play className="mr-2 h-4 w-4" />
-                      Watch
-                    </Button>
-                  </CardFooter>
-                </Card>
-                
-                <Card className="text-center">
-                  <CardContent className="pt-6">
-                    <Users className="h-12 w-12 text-purple-500 mx-auto mb-4" />
-                    <h3 className="font-semibold mb-2">Study Groups</h3>
-                    <p className="text-sm text-muted-foreground">Connect with fellow learners</p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" className="w-full">
-                      <Users className="mr-2 h-4 w-4" />
-                      Join
-                    </Button>
-                  </CardFooter>
-                </Card>
-                
-                <Card className="text-center">
-                  <CardContent className="pt-6">
-                    <BookOpen className="h-12 w-12 text-orange-500 mx-auto mb-4" />
-                    <h3 className="font-semibold mb-2">Practice Labs</h3>
-                    <p className="text-sm text-muted-foreground">Hands-on coding exercises</p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" className="w-full">
-                      <Play className="mr-2 h-4 w-4" />
-                      Start Lab
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </div>
-            </TabsContent>
-
-            {/* Learning Paths Tab */}
-            <TabsContent value="paths" className="mt-6">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold mb-2">Curated Learning Paths</h2>
-                <p className="text-muted-foreground">
-                  Each path combines high-impact courses leading to a practical outcome and credential.
-                </p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {learningPaths.length === 0 && (
-                  <div className="text-center text-muted-foreground col-span-full py-8">
-                    No learning paths found for your tier.
-                  </div>
-                )}
-                {learningPaths.map(path => (
-                  <div key={path.id} className="bg-white rounded-xl border shadow p-6 flex flex-col">
-                    <h3 className="font-semibold text-lg mb-2">{path.title}</h3>
-                    <div className="text-sm text-muted-foreground mb-2">
-                      {path.pathDescription}
-                    </div>
-                    <ul className="mb-2 list-disc list-inside pl-1">
-                      {path.courses.map(cid => {
-                        // Look up the course by id (search in allCourses, since paths may include more than what is in `resources`)
-                        const crs = resources.find(c => c.id === cid);
-                        return crs ? (
-                          <li key={cid}>
-                            <span className="font-medium">{crs.title}</span>
-                            <span className="ml-2 text-xs text-muted-foreground">{crs.description}</span>
-                          </li>
-                        ) : <li key={cid}>{cid}</li>;
-                      })}
-                    </ul>
-                    <div className="text-purple-700 font-medium mt-auto">
-                      Outcome: {path.outcome}
-                    </div>
-                  </div>
-                ))}
-              </div>
             </TabsContent>
           </Tabs>
 
@@ -602,6 +291,7 @@ const LearningHub = () => {
       </main>
       <Footer />
       <MobileStickyFooter />
+      {showAIAssistant && <LearningHubAIAssistant open={showAIAssistant} onOpenChange={setShowAIAssistant} />}
     </div>
   );
 };

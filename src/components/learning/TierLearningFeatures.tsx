@@ -1,28 +1,27 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  BookOpen, Award, Users, Play, Video, Calendar, 
-  MessageSquare, FileText, Brain, ArrowRight, Clock,
-  Shield, Zap, Lock
-} from 'lucide-react';
+import { BookOpen, Brain, Award, Calendar, ArrowRight, Zap, Shield } from 'lucide-react';
 import { useTier } from '@/context/TierContext';
+import { useLearningResources } from '@/hooks/useLearningResources';
 import LearningPaths from './LearningPaths';
 import Certifications from './Certifications';
 import LiveEvents from './LiveEvents';
 import CourseGrid from './CourseGrid';
 
-// Sample data - in a real app, you would fetch this from your API
-import { sampleLearningPaths, sampleCertifications, sampleLiveEvents } from './sampleLearningData';
-import { useMoodleCourses } from '@/hooks/useMoodleCourses';
-
 const TierLearningFeatures = () => {
   const { currentTier, upgradePrompt } = useTier();
   const [activeTab, setActiveTab] = React.useState<string>("courses");
   
-  const { courses: allCourses, isLoading: coursesLoading } = useMoodleCourses();
+  const { 
+    courses, 
+    learningPaths, 
+    certifications, 
+    liveEvents, 
+    isLoading 
+  } = useLearningResources();
 
   const getTierIcon = () => {
     switch (currentTier) {
@@ -54,47 +53,6 @@ const TierLearningFeatures = () => {
         return "Enhance your skills with intermediate courses, structured learning paths, and live webinars.";
       default:
         return "Explore foundational AI courses and community resources to begin your learning journey.";
-    }
-  };
-  
-  const filteredCourses = useMemo(() => {
-    if (!allCourses) return [];
-    if (currentTier === 'pro') {
-      return allCourses;
-    }
-    if (currentTier === 'basic') {
-      return allCourses.filter(c => c.required_tier === 'freemium' || c.required_tier === 'basic');
-    }
-    return allCourses.filter(c => c.required_tier === 'freemium');
-  }, [allCourses, currentTier]);
-  
-  const getFilteredLearningPaths = () => {
-    if (currentTier === 'pro') {
-      return sampleLearningPaths;
-    } else if (currentTier === 'basic') {
-      return sampleLearningPaths.filter(path => path.required_tier !== 'pro');
-    } else {
-      return sampleLearningPaths.filter(path => path.required_tier === 'freemium');
-    }
-  };
-  
-  const getFilteredCertifications = () => {
-    if (currentTier === 'pro') {
-      return sampleCertifications;
-    } else if (currentTier === 'basic') {
-      return sampleCertifications.filter(cert => cert.required_tier !== 'pro');
-    } else {
-      return sampleCertifications.filter(cert => cert.required_tier === 'freemium');
-    }
-  };
-  
-  const getFilteredLiveEvents = () => {
-    if (currentTier === 'pro') {
-      return sampleLiveEvents;
-    } else if (currentTier === 'basic') {
-      return sampleLiveEvents.filter(event => event.required_tier !== 'pro');
-    } else {
-      return sampleLiveEvents.filter(event => event.required_tier === 'freemium');
     }
   };
   
@@ -138,38 +96,22 @@ const TierLearningFeatures = () => {
         
         <TabsContent value="courses" className="space-y-6">
           <CourseGrid 
-            courses={filteredCourses}
-            isLoading={coursesLoading}
+            courses={courses}
+            isLoading={isLoading}
             emptyMessage="No courses are available for your current tier."
           />
-          
-          <div className="flex justify-center">
-            <Button variant="outline">View All Courses</Button>
-          </div>
         </TabsContent>
         
         <TabsContent value="paths" className="space-y-6">
-          <LearningPaths paths={getFilteredLearningPaths()} />
-          
-          <div className="flex justify-center">
-            <Button variant="outline">View All Learning Paths</Button>
-          </div>
+          <LearningPaths paths={learningPaths} />
         </TabsContent>
         
         <TabsContent value="certifications" className="space-y-6">
-          <Certifications certifications={getFilteredCertifications()} />
-          
-          <div className="flex justify-center">
-            <Button variant="outline">View All Certifications</Button>
-          </div>
+          <Certifications certifications={certifications} />
         </TabsContent>
         
         <TabsContent value="events" className="space-y-6">
-          <LiveEvents events={getFilteredLiveEvents()} />
-          
-          <div className="flex justify-center">
-            <Button variant="outline">View All Events</Button>
-          </div>
+          <LiveEvents events={liveEvents} />
         </TabsContent>
       </Tabs>
       

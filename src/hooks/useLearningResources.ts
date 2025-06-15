@@ -1,12 +1,11 @@
 
-import { useState, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
 import { useTier } from '@/context/TierContext';
-import { learningContentService, Course, LiveEvent, Certification } from '@/utils/learningApiService';
-import { allLearningPaths, LearningPath } from "@/data/courses";
-import { useQuery } from '@tanstack/react-query';
-import { v4 as uuidv4 } from 'uuid';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { LearningCourse, LearningPath, Certification, LiveEvent, LearningProgress } from '@/types/learning';
 
 interface UseLearningResourcesProps {
   categoryFilter?: string;
@@ -16,25 +15,16 @@ interface UseLearningResourcesProps {
 }
 
 interface UseLearningResourcesResult {
-  resources: Course[];
+  courses: LearningCourse[];
   liveEvents: LiveEvent[];
   certifications: Certification[];
+  learningPaths: LearningPath[];
   isLoading: boolean;
   error: Error | null;
   userProgress: Record<string, number>;
-  completedResources: Set<string>;
-  markResourceComplete: (resourceId: string) => Promise<void>;
+  completedCourses: Set<string>;
+  markCourseComplete: (courseId: string) => Promise<void>;
   totalCount: number;
-  fetchMore: () => Promise<void>;
-  hasMore: boolean;
-  learningPaths: LearningPath[];
-}
-
-interface PublicApiEntry {
-  API: string;
-  Description: string;
-  Link: string;
-  Category: string;
 }
 
 export const useLearningResources = ({
@@ -42,71 +32,58 @@ export const useLearningResources = ({
   difficultyFilter,
   searchQuery = '',
   limit = 12
-}: UseLearningResourcesProps = {}): UseLearningResourcesResult & {
-  learningPaths: LearningPath[];
-} => {
-  const [liveEvents, setLiveEvents] = useState<LiveEvent[]>([]);
-  const [certifications, setCertifications] = useState<Certification[]>([]);
-  const [userProgress, setUserProgress] = useState<Record<string, number>>({});
-  const [completedResources, setCompletedResources] = useState<Set<string>>(new Set());
-  const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
-  
+}: UseLearningResourcesProps = {}): UseLearningResourcesResult => {
   const { user } = useUser();
   const { currentTier } = useTier();
+  const queryClient = useQueryClient();
 
-  const { data: allResources, isLoading, error } = useQuery<Course[]>({
-    queryKey: ['learningResourcesFromApi'],
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['learning-hub-resources'],
     queryFn: async () => {
-      try {
-        const response = await fetch('https://api.publicapis.org/entries');
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        const relevantCategories = [
-          'books', 
-          'science & math', 
-          'education', 
-          'documents & productivity',
-          'text analysis',
-          'development'
-        ];
-        
-        const relevantEntries = data.entries.filter((entry: PublicApiEntry) => 
-          relevantCategories.includes(entry.Category.toLowerCase().replace(/ & /g, ' & ').replace(/ and /g, ' & '))
-        );
+      const { data: courses, error: coursesError } = await supabase.from('learning_courses').select('*');
+      if (coursesError) throw new Error(coursesError.message);
+      
+      const { data: paths, error: pathsError } = await supabase.from('learning_paths').select('*');
+      if (pathsError) throw new Error(pathsError.message);
 
-        return relevantEntries.map((entry: PublicApiEntry): Course => ({
-          id: uuidv4(),
-          title: entry.API,
-          description: entry.Description,
-          category: entry.Category,
-          difficulty: (['beginner', 'intermediate', 'advanced'] as const)[Math.floor(Math.random() * 3)],
-          duration: Math.floor(Math.random() * (180 - 30 + 1) + 30),
-          instructor: 'External Provider',
-          content: `This resource is provided by an external API. You can find more information at the following link: ${entry.Link}`,
-          exercises: [],
-          requiredTier: 'freemium',
-        }));
-      } catch (err) {
-        console.error("Failed to fetch learning resources:", err);
-        toast.error("Failed to load learning resources from API.");
-        return []; // Return empty array on error
+      const { data: certs, error: certsError } = await supabase.from('certifications').select('*');
+      if (certsError) throw new Error(certsError.message);
+
+      const { data: events, error: eventsError } = await supabase.from('live_events').select('*');
+      if (eventsError) throw new Error(eventsError.message);
+
+      let userProgress: LearningProgress[] = [];
+      if (user) {
+        const { data: progressData, error: progressError } = await supabase
+          .from('learning_progress')
+          .select('*')
+          .eq('user_id', user.id);
+        if (progressError) console.error("Error fetching user progress:", progressError);
+        else userProgress = progressData || [];
       }
+
+      const populatedPaths = paths.map(path => ({
+        ...path,
+        courses: path.courses
+          .map(courseId => courses.find(c => c.id === courseId))
+          .filter((c): c is LearningCourse => !!c)
+      }));
+
+      return { courses, learningPaths: populatedPaths, certifications: certs, liveEvents: events, userProgress };
     },
-    staleTime: 1000 * 60 * 60, // 1 hour
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  const filteredResources = useMemo(() => {
-    if (!allResources) return [];
+  const { courses: allCourses = [], learningPaths = [], certifications = [], liveEvents = [], userProgress: progressData = [] } = data || {};
 
-    let filtered = [...allResources];
+  const filteredCourses = useMemo(() => {
+    let filtered = [...allCourses];
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       filtered = filtered.filter(res =>
         res.title.toLowerCase().includes(q) ||
-        res.description.toLowerCase().includes(q)
+        (res.description && res.description.toLowerCase().includes(q))
       );
     }
     
@@ -119,75 +96,67 @@ export const useLearningResources = ({
     }
     
     if (currentTier === "freemium") {
-      filtered = filtered.filter(c => c.requiredTier === "freemium");
+      filtered = filtered.filter(c => c.required_tier === "freemium");
     } else if (currentTier === "basic") {
-      filtered = filtered.filter(c => c.requiredTier === "freemium" || c.requiredTier === "basic");
+      filtered = filtered.filter(c => c.required_tier === "freemium" || c.required_tier === "basic");
     }
 
     return filtered;
-  }, [allResources, searchQuery, categoryFilter, difficultyFilter, currentTier]);
+  }, [allCourses, searchQuery, categoryFilter, difficultyFilter, currentTier]);
   
-  // Load user progress from localStorage
-  useEffect(() => {
-    if (!user) return;
-    try {
-      const storedProgress = localStorage.getItem(`learning_progress_${user.id}`);
-      const storedCompleted = localStorage.getItem(`completed_resources_${user.id}`);
-      if (storedProgress) setUserProgress(JSON.parse(storedProgress));
-      if (storedCompleted) setCompletedResources(new Set(JSON.parse(storedCompleted)));
-    } catch (error) {
-      console.error("Error loading user progress:", error);
-    }
-  }, [user]);
+  const userProgress = useMemo(() => {
+    return (progressData || []).reduce((acc, p) => {
+      acc[p.course_id] = p.completion_percent;
+      return acc;
+    }, {} as Record<string, number>);
+  }, [progressData]);
+
+  const completedCourses = useMemo(() => {
+    return new Set((progressData || []).filter(p => p.completed).map(p => p.course_id));
+  }, [progressData]);
   
-  // Mark a resource as complete
-  const markResourceComplete = async (resourceId: string) => {
-    if (!user) {
-      toast("Please sign in to track your progress");
-      return;
-    }
-    
-    try {
-      // Update progress via API
-      await learningContentService.updateProgress(user.id, resourceId, 100);
-      
-      // Update local state
-      const newProgress = { ...userProgress, [resourceId]: 100 };
-      const newCompleted = new Set(completedResources).add(resourceId);
-      
-      setUserProgress(newProgress);
-      setCompletedResources(newCompleted);
-      
-      // Persist to localStorage
-      localStorage.setItem(`learning_progress_${user.id}`, JSON.stringify(newProgress));
-      localStorage.setItem(`completed_resources_${user.id}`, JSON.stringify(Array.from(newCompleted)));
-      
+  const markCompleteMutation = useMutation({
+    mutationFn: async (courseId: string) => {
+      if (!user) {
+        toast.error("Please sign in to track your progress");
+        throw new Error("User not signed in");
+      }
+      const { error } = await supabase.from('learning_progress').upsert(
+        {
+          user_id: user.id,
+          course_id: courseId,
+          completion_percent: 100,
+          completed: true,
+          updated_at: new Date().toISOString()
+        },
+        { onConflict: 'user_id,course_id' }
+      );
+      if (error) throw error;
+    },
+    onSuccess: () => {
       toast.success("Course marked as completed!");
-      
-    } catch (err) {
-      console.error("Error marking resource complete:", err);
-      toast.error("Failed to update progress");
+      queryClient.invalidateQueries({ queryKey: ['learning-hub-resources'] });
+    },
+    onError: (err: Error) => {
+      console.error("Error marking course complete:", err);
+      toast.error("Failed to update progress: " + err.message);
     }
-  };
-  
-  // Fetch more resources (placeholder for pagination)
-  const fetchMore = async () => {
-    // In a real implementation, this would load more data
-    console.log('Fetching more resources...');
+  });
+
+  const markCourseComplete = async (courseId: string) => {
+    await markCompleteMutation.mutateAsync(courseId);
   };
   
   return {
-    resources: filteredResources.slice(0, limit),
+    courses: filteredCourses.slice(0, limit),
     liveEvents,
     certifications,
+    learningPaths,
     isLoading,
-    error,
+    error: error as Error | null,
     userProgress,
-    completedResources,
-    markResourceComplete,
-    totalCount: filteredResources.length,
-    fetchMore,
-    hasMore: filteredResources.length > limit,
-    learningPaths
+    completedCourses,
+    markCourseComplete,
+    totalCount: filteredCourses.length,
   };
 };

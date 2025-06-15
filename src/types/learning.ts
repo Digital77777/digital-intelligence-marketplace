@@ -1,24 +1,12 @@
-export interface LearningContent {
-  id: string;
-  title: string;
-  description?: string;
-  content: string;
-  category: string;
-  difficulty: string;
-  duration: number;
-  image_url?: string;
-  required_tier: string;
-  created_at: string;
-  updated_at: string;
-}
+import { definitions } from '@/integrations/supabase/types';
 
-export interface UserProgress {
-  id: string;
-  user_id: string;
-  course_id: string;
-  completion_percent: number;
-  last_accessed: string;
-}
+export type LearningCourse = definitions['learning_courses'];
+export type LearningPath = Omit<definitions['learning_paths'], 'courses'> & {
+  courses: LearningCourse[];
+};
+export type Certification = definitions['certifications'];
+export type LiveEvent = definitions['live_events'];
+export type LearningProgress = definitions['learning_progress'];
 
 export interface UserAchievement {
   id: string;
@@ -50,46 +38,6 @@ export interface UserXP {
   total_xp: number;
   current_level: string;
   last_updated: string;
-}
-
-export interface LearningPath {
-  id: string;
-  title: string;
-  description: string;
-  courses: string[];
-  category: string;
-  difficulty: string;
-  required_tier: string;
-  total_duration: number;
-  image_url?: string;
-  badge_name?: string;
-  created_at: string;
-}
-
-export interface Certification {
-  id: string;
-  title: string;
-  description: string;
-  requirements: string[];
-  badge_image: string;
-  required_tier: string;
-  is_industry_recognized: boolean;
-  expiration_period?: number; // in months
-  created_at: string;
-}
-
-export interface LiveEvent {
-  id: string;
-  title: string;
-  description: string;
-  event_type: 'webinar' | 'workshop' | 'masterclass' | 'ama' | 'summit';
-  datetime: string;
-  duration: number; // in minutes
-  host_name: string;
-  required_tier: string;
-  max_participants?: number;
-  registration_deadline?: string;
-  image_url?: string;
 }
 
 export interface ForumMember {
