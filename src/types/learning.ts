@@ -1,12 +1,16 @@
-import { definitions } from '@/integrations/supabase/types';
 
-export type LearningCourse = definitions['learning_courses'];
-export type LearningPath = Omit<definitions['learning_paths'], 'courses'> & {
+import { Database } from '@/integrations/supabase/types';
+
+type Tables = Database['public']['Tables'];
+
+export type LearningCourse = Tables['learning_courses']['Row'];
+export type LearningPathRow = Tables['learning_paths']['Row'];
+export type LearningPath = Omit<LearningPathRow, 'courses'> & {
   courses: LearningCourse[];
 };
-export type Certification = definitions['certifications'];
-export type LiveEvent = definitions['live_events'];
-export type LearningProgress = definitions['learning_progress'];
+export type Certification = Tables['certifications']['Row'];
+export type LiveEvent = Tables['live_events']['Row'];
+export type LearningProgress = Tables['learning_progress']['Row'];
 
 export interface UserAchievement {
   id: string;

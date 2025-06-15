@@ -52,11 +52,16 @@ const LearningHub = () => {
   };
 
   const isContentLocked = (requiredTier: string) => {
-    if (requiredTier === 'freemium') return false;
-    if (currentTier === 'pro') return false;
-    if (requiredTier === 'basic' && (currentTier === 'basic' || currentTier === 'pro')) return false;
-    if (requiredTier === 'pro' && currentTier === 'pro') return false;
-    return true;
+    const tierOrder: { [key: string]: number } = {
+      freemium: 0,
+      basic: 1,
+      pro: 2,
+    };
+    
+    const requiredLevel = tierOrder[requiredTier] ?? 0;
+    const userLevel = tierOrder[currentTier] ?? 0;
+
+    return userLevel < requiredLevel;
   };
   
   const handleJoinEvent = (eventId: string, tier: string) => {

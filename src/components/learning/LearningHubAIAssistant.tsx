@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -8,7 +7,7 @@ import { Sparkles, Loader2 } from "lucide-react";
 
 interface LearningHubAIAssistantProps {
   open: boolean;
-  onClose: () => void;
+  onOpenChange: (open: boolean) => void;
   defaultPrompt?: string;
 }
 
@@ -22,7 +21,7 @@ const EXAMPLES = [
   "List use cases for AI in small businesses.",
 ];
 
-export default function LearningHubAIAssistant({ open, onClose, defaultPrompt }: LearningHubAIAssistantProps) {
+export default function LearningHubAIAssistant({ open, onOpenChange, defaultPrompt }: LearningHubAIAssistantProps) {
   const [message, setMessage] = useState(defaultPrompt ?? "");
   const [answer, setAnswer] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -59,7 +58,7 @@ export default function LearningHubAIAssistant({ open, onClose, defaultPrompt }:
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -110,7 +109,7 @@ export default function LearningHubAIAssistant({ open, onClose, defaultPrompt }:
             {loading ? <Loader2 className="animate-spin h-4 w-4" /> : <Sparkles className="h-4 w-4 mr-1" />}
             Ask AI
           </Button>
-          <Button onClick={onClose} type="button" variant="outline">
+          <Button onClick={() => onOpenChange(false)} type="button" variant="outline">
             Close
           </Button>
         </DialogFooter>
