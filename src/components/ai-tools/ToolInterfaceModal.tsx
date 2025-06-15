@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,7 @@ import InsightLiteInterface from "./interfaces/InsightLiteInterface";
 import AIPresentationMakerInterface from "../interfaces/AIPresentationMakerInterface";
 import AITranslatorInterface from "../interfaces/AITranslatorInterface";
 import AIBasicSimulatorInterface from "./interfaces/AIBasicSimulatorInterface";
+import ForumAssistantInterface from "./interfaces/ForumAssistantInterface";
 
 interface ToolInterfaceModalProps {
   open: boolean;
@@ -133,6 +135,8 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
         return <AITranslatorInterface />;
       case "AI Basic Simulator":
         return <AIBasicSimulatorInterface />;
+      case "Forum Assistant":
+        return <ForumAssistantInterface />;
       default:
         return null;
     }
@@ -148,7 +152,8 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
     "AI Image Generator",
     "AI Presentation Maker",
     "AI Language Translator",
-    "AI Basic Simulator"
+    "AI Basic Simulator",
+    "Forum Assistant"
   ].includes(tool.name);
   
   return (
