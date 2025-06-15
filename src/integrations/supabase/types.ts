@@ -2057,6 +2057,12 @@ export type Database = {
         }
         Returns: number
       }
+      get_my_teams: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          team_id: string
+        }[]
+      }
       get_workflow_runs_with_details: {
         Args: Record<PropertyKey, never>
         Returns: {

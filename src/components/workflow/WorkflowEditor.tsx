@@ -10,6 +10,7 @@ import { Plus, Play, Pause, Edit, Trash2, Save, ArrowRight, Zap, Bot } from 'luc
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useTier } from '@/context/TierContext';
+import { useUser } from '@/context/UserContext';
 import AdvancedStepEditor from './AdvancedStepEditor';
 import WorkflowTemplates from './WorkflowTemplates';
 import SchedulingPanel from './SchedulingPanel';
@@ -45,6 +46,7 @@ interface SchedulingConfig {
 
 const WorkflowEditor = () => {
   const { canAccess } = useTier();
+  const { user } = useUser();
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -100,6 +102,14 @@ const WorkflowEditor = () => {
   };
 
   const createWorkflow = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Error",
+        description: "You must be logged in to create a workflow.",
+        variant: "destructive"
+      });
+      return;
+    }
     try {
       const { data, error } = await supabase
         .from('workflows')
@@ -107,7 +117,8 @@ const WorkflowEditor = () => {
           name: newWorkflow.name,
           description: newWorkflow.description,
           steps: newWorkflow.steps,
-          status: 'draft'
+          status: 'draft',
+          created_by: user.id,
         }])
         .select()
         .single();
@@ -122,11 +133,11 @@ const WorkflowEditor = () => {
         title: "Success",
         description: "Workflow created successfully"
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating workflow:', error);
       toast({
         title: "Error",
-        description: "Failed to create workflow",
+        description: `Failed to create workflow: ${error.message}`,
         variant: "destructive"
       });
     }
