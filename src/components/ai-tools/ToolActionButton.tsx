@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { AIToolItem, AIToolTier } from '@/data/ai-tools-tiers';
@@ -34,10 +33,12 @@ const ToolActionButton: React.FC<ToolActionButtonProps> = ({
   const [showDetailView, setShowDetailView] = useState(false);
   const [showToolInterface, setShowToolInterface] = useState(false);
 
+  // Fixed tier access logic - hierarchical access
   const hasAccess = (
-    (tool.tier === 'freemium') || 
-    (tool.tier === 'basic' && (currentTier === 'basic' || currentTier === 'pro')) ||
-    (tool.tier === 'pro' && currentTier === 'pro')
+    !!tool.externalUrl || // External tools are always accessible
+    (tool.tier === 'freemium') || // Freemium tools available to all
+    (tool.tier === 'basic' && (currentTier === 'basic' || currentTier === 'pro')) || // Basic tools for basic+ users
+    (tool.tier === 'pro' && currentTier === 'pro') // Pro tools only for pro users
   );
 
   const handleAction = () => {
@@ -120,8 +121,8 @@ const ToolActionButton: React.FC<ToolActionButtonProps> = ({
     <>
       <Button
         size={size}
-        variant={variant}
-        className={className}
+        variant={hasAccess ? variant : 'outline'}
+        className={`${className} ${!hasAccess && action !== 'view' ? 'border-dashed text-gray-500' : ''}`}
         onClick={handleAction}
         disabled={!hasAccess && action !== 'view'}
       >
@@ -135,7 +136,11 @@ const ToolActionButton: React.FC<ToolActionButtonProps> = ({
             onBack={() => setShowDetailView(false)}
             onLaunch={() => {
               setShowDetailView(false);
-              setShowToolInterface(true);
+              if (hasAccess) {
+                setShowToolInterface(true);
+              } else {
+                upgradePrompt(tool.tier);
+              }
             }}
           />
         </div>

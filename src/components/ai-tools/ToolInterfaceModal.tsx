@@ -2,6 +2,7 @@
 import React from 'react';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { AIToolItem } from '@/data/ai-tools-tiers';
+import { useTier } from '@/context/TierContext';
 import { useToolConnection } from './hooks/useToolConnection';
 import CustomInterfaceRenderer, { CUSTOM_INTERFACES } from './CustomInterfaceRenderer';
 import StandardToolInterface from './StandardToolInterface';
@@ -17,7 +18,30 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
   onOpenChange,
   tool
 }) => {
+  const { currentTier, upgradePrompt } = useTier();
+
   if (!tool) {
+    return null;
+  }
+
+  // Fixed tier access logic - hierarchical access
+  const hasAccess = (
+    !!tool.externalUrl || // External tools are always accessible
+    (tool.tier === 'freemium') || // Freemium tools available to all
+    (tool.tier === 'basic' && (currentTier === 'basic' || currentTier === 'pro')) || // Basic tools for basic+ users
+    (tool.tier === 'pro' && currentTier === 'pro') // Pro tools only for pro users
+  );
+
+  // If user doesn't have access, trigger upgrade prompt and close modal
+  React.useEffect(() => {
+    if (open && !hasAccess) {
+      upgradePrompt(tool.tier);
+      onOpenChange(false);
+    }
+  }, [open, hasAccess, tool.tier, upgradePrompt, onOpenChange]);
+
+  // Don't render if user doesn't have access
+  if (!hasAccess) {
     return null;
   }
 

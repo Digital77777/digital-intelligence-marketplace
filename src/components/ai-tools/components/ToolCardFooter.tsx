@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, ArrowRight, Lock } from 'lucide-react'; // Added Lock icon
+import { ExternalLink, ArrowRight, Lock } from 'lucide-react';
 import { AIToolItem, getTierLabel } from '@/data/ai-tools-tiers';
 import { useTier } from '@/context/TierContext';
 
@@ -38,13 +38,13 @@ const ToolCardFooter: React.FC<ToolCardFooterProps> = ({ tool, hasAccess, onSele
   }
 
   return (
-    <div className="pt-3 border-t mt-auto bg-gray-50/30 dark:bg-gray-800/20 dark:border-gray-700/50"> {/* Adjusted padding and background */}
+    <div className={`pt-3 border-t mt-auto dark:border-gray-700/50 ${hasAccess ? 'bg-gray-50/30 dark:bg-gray-800/20' : 'bg-gray-100/50 dark:bg-gray-700/30'}`}>
       <div className="w-full">
-        <div className="flex items-center justify-between mb-2.5"> {/* Adjusted margin */}
+        <div className="flex items-center justify-between mb-2.5">
           <div className="flex items-center gap-1.5">
-            <div className={`h-2 w-2 rounded-full ${hasAccess ? 'bg-green-500' : 'bg-amber-500'}`}></div>
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              {hasAccess ? "Available" : `Requires ${getTierLabel(tool.tier)}`}
+            <div className={`h-2 w-2 rounded-full ${hasAccess ? 'bg-green-500' : 'bg-red-400'}`}></div>
+            <span className={`text-xs ${hasAccess ? 'text-gray-500 dark:text-gray-400' : 'text-red-500 dark:text-red-400'}`}>
+              {hasAccess ? "Available" : `Requires ${getTierLabel(tool.tier)} Tier`}
             </span>
           </div>
           {tool.demoAvailable && (
@@ -55,10 +55,9 @@ const ToolCardFooter: React.FC<ToolCardFooterProps> = ({ tool, hasAccess, onSele
         </div>
         
         <Button 
-          className={`w-full group-hover:shadow-lg transition-shadow duration-300 ${hasAccess ? 'bg-primary hover:bg-primary/90 text-primary-foreground' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200'}`}
+          className={`w-full group-hover:shadow-lg transition-shadow duration-300 ${hasAccess ? 'bg-primary hover:bg-primary/90 text-primary-foreground' : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 border-dashed border'}`}
           variant={hasAccess ? "default" : "outline"}
           onClick={() => onSelect?.(tool)}
-          // Removed disabled={!hasAccess} to allow clicking on upgrade buttons
         >
           {hasAccess ? (
             <>
