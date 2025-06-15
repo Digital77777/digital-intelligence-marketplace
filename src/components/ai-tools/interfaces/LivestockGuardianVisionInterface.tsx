@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,10 +40,7 @@ import {
   Video,
   Play,
   Pause,
-  AlertCircle,
-  Cow,
-  Sheep,
-  PigIcon as Pig
+  AlertCircle
 } from 'lucide-react';
 
 interface LivestockAlert {
@@ -111,10 +107,10 @@ const LivestockGuardianVisionInterface: React.FC = () => {
   ]);
 
   const livestockTypes = [
-    { id: 'cattle', name: 'Cattle', icon: <Cow className="h-4 w-4" /> },
-    { id: 'sheep', name: 'Sheep', icon: <Sheep className="h-4 w-4" /> },
+    { id: 'cattle', name: 'Cattle', icon: <Users className="h-4 w-4" /> },
+    { id: 'sheep', name: 'Sheep', icon: <Users className="h-4 w-4" /> },
     { id: 'goats', name: 'Goats', icon: <Users className="h-4 w-4" /> },
-    { id: 'pigs', name: 'Pigs', icon: <Pig className="h-4 w-4" /> },
+    { id: 'pigs', name: 'Pigs', icon: <Users className="h-4 w-4" /> },
     { id: 'horses', name: 'Horses', icon: <Users className="h-4 w-4" /> },
     { id: 'chickens', name: 'Chickens', icon: <Users className="h-4 w-4" /> }
   ];
@@ -427,7 +423,7 @@ const LivestockGuardianVisionInterface: React.FC = () => {
                           {analysisResult.individualAnimals.map((animal: any, index: number) => (
                             <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                               <div className="flex items-center gap-3">
-                                <Cow className="h-5 w-5 text-gray-600" />
+                                <Users className="h-5 w-5 text-gray-600" />
                                 <div>
                                   <p className="font-medium">{animal.id}</p>
                                   <p className="text-sm text-gray-600">Temp: {animal.temperature}°F • Activity: {animal.activity}</p>
