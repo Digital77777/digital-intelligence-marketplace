@@ -20,6 +20,7 @@ import AIEmailWriterInterface from "./interfaces/AIEmailWriterInterface";
 import AIMusicComposerBasicInterface from "./interfaces/AIMusicComposerBasicInterface";
 import DataFlowProInterface from "./interfaces/DataFlowProInterface";
 import AutoPilotStudioInterface from "./interfaces/AutoPilotStudioInterface";
+import ModelMakerLiteInterface from "./interfaces/ModelMakerLiteInterface";
 
 interface CustomInterfaceRendererProps {
   tool: AIToolItem;
@@ -66,6 +67,8 @@ const CustomInterfaceRenderer: React.FC<CustomInterfaceRendererProps> = ({ tool,
         return <DataFlowProInterface onBack={() => onOpenChange(false)} />;
       case "AutoPilot Studio":
         return <AutoPilotStudioInterface onBack={() => onOpenChange(false)} />;
+      case "ModelMaker Lite":
+        return <ModelMakerLiteInterface onBack={() => onOpenChange(false)} />;
       default:
         return null;
     }
@@ -90,7 +93,8 @@ export const CUSTOM_INTERFACES = [
     "AI Email Writer",
     "AI Music Composer Basic",
     "DataFlow Pro",
-    "AutoPilot Studio"
+    "AutoPilot Studio",
+    "ModelMaker Lite"
 ];
 
 export default CustomInterfaceRenderer;
