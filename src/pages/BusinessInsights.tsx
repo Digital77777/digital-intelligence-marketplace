@@ -8,6 +8,7 @@ import DashboardHeader from '@/components/business-insights/DashboardHeader';
 import KeyMetricsGrid from '@/components/business-insights/KeyMetricsGrid';
 import ChartsSection from '@/components/business-insights/ChartsSection';
 import AIInsightsSummary from '@/components/business-insights/AIInsightsSummary';
+import DashboardSkeleton from '@/components/business-insights/DashboardSkeleton';
 
 const BusinessInsightsPage = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d'>('30d');
@@ -31,7 +32,7 @@ const BusinessInsightsPage = () => {
   if (metricsLoading || snapshotsLoading) {
     return (
       <ProTierLayout pageTitle="Business Insights" requiredFeature="business-insights">
-        <div className="flex items-center justify-center h-64">Loading insights...</div>
+        <DashboardSkeleton />
       </ProTierLayout>
     );
   }
