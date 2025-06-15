@@ -20,6 +20,7 @@ import AIPresentationMakerInterface from "../interfaces/AIPresentationMakerInter
 import AITranslatorInterface from "../interfaces/AITranslatorInterface";
 import AIBasicSimulatorInterface from "./interfaces/AIBasicSimulatorInterface";
 import ForumAssistantInterface from "./interfaces/ForumAssistantInterface";
+import CropMindInterface from "./interfaces/CropMindInterface";
 
 interface ToolInterfaceModalProps {
   open: boolean;
@@ -137,6 +138,8 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
         return <AIBasicSimulatorInterface />;
       case "Forum Assistant":
         return <ForumAssistantInterface />;
+      case "CropMind AI":
+        return <CropMindInterface tool={tool} onBack={() => onOpenChange(false)} />;
       default:
         return null;
     }
@@ -153,7 +156,8 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
     "AI Presentation Maker",
     "AI Language Translator",
     "AI Basic Simulator",
-    "Forum Assistant"
+    "Forum Assistant",
+    "CropMind AI"
   ].includes(tool.name);
   
   return (
