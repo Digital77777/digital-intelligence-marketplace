@@ -13,12 +13,14 @@ interface BasicTierLayoutProps {
   children: React.ReactNode;
   pageTitle: string;
   requiredFeature: string;
+  headerActions?: React.ReactNode;
 }
 
 const BasicTierLayout: React.FC<BasicTierLayoutProps> = ({ 
   children, 
   pageTitle, 
-  requiredFeature 
+  requiredFeature,
+  headerActions
 }) => {
   const { currentTier, canAccess } = useTier();
   const navigate = useNavigate();
@@ -53,6 +55,7 @@ const BasicTierLayout: React.FC<BasicTierLayoutProps> = ({
                 <span>BASIC</span>
               </Badge>
             </div>
+            <div>{headerActions}</div>
           </div>
           
           <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-blue-100/80 p-6 shadow-md">
