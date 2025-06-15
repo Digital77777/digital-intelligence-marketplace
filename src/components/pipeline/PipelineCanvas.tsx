@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, DollarSign, Calendar, User, MoreHorizontal } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useUser } from '@/context/UserContext';
+import AddDealDialog from './AddDealDialog';
 
 interface Deal {
   id: string;
@@ -42,14 +44,19 @@ const PipelineCanvas = () => {
     stages: ['Lead', 'Qualified', 'Proposal', 'Negotiation', 'Closed Won']
   });
   const { toast } = useToast();
+  const { user } = useUser();
 
   useEffect(() => {
-    fetchPipelines();
-  }, []);
+    if (user) {
+      fetchPipelines();
+    }
+  }, [user]);
 
   useEffect(() => {
     if (selectedPipeline) {
       fetchDeals(selectedPipeline.id);
+    } else {
+      setDeals([]);
     }
   }, [selectedPipeline]);
 
@@ -102,6 +109,14 @@ const PipelineCanvas = () => {
   };
 
   const createPipeline = async () => {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You need to be logged in to create a pipeline.",
+        variant: "destructive"
+      });
+      return;
+    }
     try {
       const { data, error } = await supabase
         .from('pipelines')
@@ -109,7 +124,8 @@ const PipelineCanvas = () => {
           name: newPipeline.name,
           description: newPipeline.description,
           stages: newPipeline.stages,
-          status: 'active'
+          status: 'active',
+          owner_id: user.id
         }])
         .select()
         .single();
@@ -117,6 +133,7 @@ const PipelineCanvas = () => {
       if (error) throw error;
 
       setPipelines([data, ...pipelines]);
+      setSelectedPipeline(data);
       setIsCreateDialogOpen(false);
       setNewPipeline({
         name: '',
@@ -128,11 +145,11 @@ const PipelineCanvas = () => {
         title: "Success",
         description: "Pipeline created successfully"
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating pipeline:', error);
       toast({
         title: "Error",
-        description: "Failed to create pipeline",
+        description: "Failed to create pipeline: " + error.message,
         variant: "destructive"
       });
     }
@@ -220,7 +237,7 @@ const PipelineCanvas = () => {
       </div>
 
       {/* Pipeline Kanban Board */}
-      {selectedPipeline && (
+      {selectedPipeline ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {selectedPipeline.stages.map((stage) => {
             const stageDeals = getDealsForStage(stage);
@@ -273,19 +290,24 @@ const PipelineCanvas = () => {
                     </div>
                   ))}
                   
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full text-xs"
-                  >
-                    <Plus className="w-3 h-3 mr-1" />
-                    Add Deal
-                  </Button>
+                  <AddDealDialog
+                    pipelineId={selectedPipeline.id}
+                    stage={stage}
+                    onDealAdded={() => fetchDeals(selectedPipeline.id)}
+                  />
                 </CardContent>
               </Card>
             );
           })}
         </div>
+      ) : (
+         <Card>
+            <CardContent className="flex items-center justify-center h-96">
+              <div className="text-center text-gray-500">
+                {user ? "Select a pipeline or create a new one to get started." : "Please log in to view and manage pipelines."}
+              </div>
+            </CardContent>
+          </Card>
       )}
 
       {/* Pipeline Stats */}
