@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
@@ -23,6 +22,7 @@ import ForumAssistantInterface from "./interfaces/ForumAssistantInterface";
 import CropMindInterface from "./interfaces/CropMindInterface";
 import SmartPestSentinelInterface from "./interfaces/SmartPestSentinelInterface";
 import LivestockGuardianVisionInterface from "./interfaces/LivestockGuardianVisionInterface";
+import AgriMeshNetworkInterface from "./interfaces/AgriMeshNetworkInterface";
 
 interface ToolInterfaceModalProps {
   open: boolean;
@@ -146,6 +146,8 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
         return <SmartPestSentinelInterface />;
       case "Livestock Guardian Vision":
         return <LivestockGuardianVisionInterface />;
+      case "AgriMesh Network":
+        return <AgriMeshNetworkInterface />;
       default:
         return null;
     }
@@ -165,7 +167,8 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
     "Forum Assistant",
     "CropMind AI",
     "SmartPest Sentinel",
-    "Livestock Guardian Vision"
+    "Livestock Guardian Vision",
+    "AgriMesh Network"
   ].includes(tool.name);
   
   return (
