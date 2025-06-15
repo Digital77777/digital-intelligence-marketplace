@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -22,6 +21,26 @@ import CollaborationHub from "./pages/CollaborationHub";
 import AIAssistant from "./pages/AIAssistant";
 import WorkflowDesignerPage from "./pages/WorkflowDesigner";
 import PipelineDesignerPage from "./pages/PipelineDesigner";
+import AIStudio from "./pages/AIStudio";
+import BusinessInsights from "./pages/BusinessInsights";
+import ComplianceCenter from "./pages/ComplianceCenter";
+import ModelMarketplace from "./pages/ModelMarketplace";
+import WorkflowHistoryPage from "./pages/WorkflowHistoryPage";
+import DiscoveryPage from "./pages/DiscoveryPage";
+import Profile from "./pages/Profile";
+import SubmitTool from "./pages/SubmitTool";
+import PostProject from "./pages/PostProject";
+import AIStreamDetail from "./pages/AIStreamDetail";
+import AIStreamsUpload from "./pages/AIStreamsUpload";
+import ToolDetail from "./pages/ToolDetail";
+import CourseDetails from "./pages/CourseDetails";
+import ForumTopic from "./pages/ForumTopic";
+import TopicDetails from "./pages/TopicDetails";
+import NewForumTopic from "./pages/NewForumTopic";
+import NewGroup from "./pages/NewGroup";
+import NewTopic from "./pages/NewTopic";
+import CreateFreelancerProfile from "./pages/CreateFreelancerProfile";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -118,6 +137,34 @@ function App() {
                       <PipelineDesignerPage />
                     </AuthGuard>
                   } />
+
+                  {/* Newly Added Routes */}
+                  <Route path="/ai-studio" element={<AuthGuard><AIStudio /></AuthGuard>} />
+                  <Route path="/business-insights" element={<AuthGuard><BusinessInsights /></AuthGuard>} />
+                  <Route path="/compliance-center" element={<AuthGuard><ComplianceCenter /></AuthGuard>} />
+                  <Route path="/model-marketplace" element={<AuthGuard><ModelMarketplace /></AuthGuard>} />
+                  <Route path="/workflow-history" element={<AuthGuard><WorkflowHistoryPage /></AuthGuard>} />
+                  <Route path="/discovery" element={<AuthGuard><DiscoveryPage /></AuthGuard>} />
+                  <Route path="/profile" element={<AuthGuard><Profile /></AuthGuard>} />
+                  <Route path="/submit-tool" element={<AuthGuard><SubmitTool /></AuthGuard>} />
+                  <Route path="/post-project" element={<AuthGuard><PostProject /></AuthGuard>} />
+
+                  {/* Dynamic routes */}
+                  <Route path="/ai-streams/upload" element={<AuthGuard><AIStreamsUpload /></AuthGuard>} />
+                  <Route path="/ai-stream/:id" element={<AuthGuard><AIStreamDetail /></AuthGuard>} />
+                  <Route path="/tool/:id" element={<AuthGuard><ToolDetail /></AuthGuard>} />
+                  <Route path="/course/:id" element={<AuthGuard><CourseDetails /></AuthGuard>} />
+                  <Route path="/forum/:id" element={<AuthGuard><ForumTopic /></AuthGuard>} />
+                  <Route path="/topic/:id" element={<AuthGuard><TopicDetails /></AuthGuard>} />
+
+                  {/* Forum management routes */}
+                  <Route path="/new-forum-topic" element={<AuthGuard><NewForumTopic /></AuthGuard>} />
+                  <Route path="/new-group" element={<AuthGuard><NewGroup /></AuthGuard>} />
+                  <Route path="/new-topic/:categoryId?" element={<AuthGuard><NewTopic /></AuthGuard>} />
+                  <Route path="/create-freelancer-profile" element={<AuthGuard><CreateFreelancerProfile /></AuthGuard>} />
+
+                  {/* Fallback route */}
+                  <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
             </TooltipProvider>
