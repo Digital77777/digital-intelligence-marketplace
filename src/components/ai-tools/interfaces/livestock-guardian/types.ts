@@ -25,7 +25,7 @@ export interface AnimalHealth {
 export interface LivestockType {
   id: string;
   name: string;
-  icon: React.ReactNode;
+  icon: string;
 }
 
 export interface Camera {

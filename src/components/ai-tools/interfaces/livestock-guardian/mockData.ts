@@ -1,5 +1,4 @@
 
-import { Users } from 'lucide-react';
 import { LivestockAlert, LivestockType, Camera } from './types';
 
 export const mockAlerts: LivestockAlert[] = [
@@ -36,12 +35,12 @@ export const mockAlerts: LivestockAlert[] = [
 ];
 
 export const livestockTypes: LivestockType[] = [
-  { id: 'cattle', name: 'Cattle', icon: <Users className="h-4 w-4" /> },
-  { id: 'sheep', name: 'Sheep', icon: <Users className="h-4 w-4" /> },
-  { id: 'goats', name: 'Goats', icon: <Users className="h-4 w-4" /> },
-  { id: 'pigs', name: 'Pigs', icon: <Users className="h-4 w-4" /> },
-  { id: 'horses', name: 'Horses', icon: <Users className="h-4 w-4" /> },
-  { id: 'chickens', name: 'Chickens', icon: <Users className="h-4 w-4" /> }
+  { id: 'cattle', name: 'Cattle', icon: 'Users' },
+  { id: 'sheep', name: 'Sheep', icon: 'Users' },
+  { id: 'goats', name: 'Goats', icon: 'Users' },
+  { id: 'pigs', name: 'Pigs', icon: 'Users' },
+  { id: 'horses', name: 'Horses', icon: 'Users' },
+  { id: 'chickens', name: 'Chickens', icon: 'Users' }
 ];
 
 export const cameras: Camera[] = [
