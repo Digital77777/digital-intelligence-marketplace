@@ -34,6 +34,7 @@ import NeuroForgeProInterface from "./interfaces/NeuroForgeProInterface";
 import OmniFlowAIInterface from "./interfaces/OmniFlowAIInterface";
 import AIMarketplacePublisherInterface from "./interfaces/AIMarketplacePublisherInterface";
 import EthicsGuardAIInterface from "./interfaces/EthicsGuardAIInterface";
+import CloudBridgeAIInterface from "./interfaces/CloudBridgeAIInterface";
 
 interface CustomInterfaceRendererProps {
   tool: AIToolItem;
@@ -114,6 +115,8 @@ const CustomInterfaceRenderer: React.FC<CustomInterfaceRendererProps> = ({ tool,
         return <AIMarketplacePublisherInterface onBack={() => onOpenChange(false)} />;
       case "EthicsGuard AI":
         return <EthicsGuardAIInterface onBack={() => onOpenChange(false)} />;
+      case "CloudBridge AI":
+        return <CloudBridgeAIInterface onBack={() => onOpenChange(false)} />;
       default:
         console.log('CustomInterfaceRenderer: No custom interface found for:', tool.name);
         return null;
@@ -154,7 +157,8 @@ export const CUSTOM_INTERFACES = [
     "NeuroForge Pro",
     "OmniFlow AI",
     "AI Marketplace Publisher",
-    "EthicsGuard AI"
+    "EthicsGuard AI",
+    "CloudBridge AI"
 ];
 
 export default CustomInterfaceRenderer;
