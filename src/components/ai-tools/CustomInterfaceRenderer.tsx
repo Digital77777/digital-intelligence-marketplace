@@ -29,6 +29,7 @@ import AgroRiskNavigatorInterface from "./interfaces/AgroRiskNavigatorInterface"
 import AISocialMediaManagerInterface from "./interfaces/AISocialMediaManagerInterface";
 import AIVideoEditerInterface from "./interfaces/AIVideoEditerInterface";
 import AIVoiceGeneratorInterface from "./interfaces/AIVoiceGeneratorInterface";
+import PredictirixEnterpriseInterface from "./interfaces/PredictirixEnterpriseInterface";
 
 interface CustomInterfaceRendererProps {
   tool: AIToolItem;
@@ -99,6 +100,8 @@ const CustomInterfaceRenderer: React.FC<CustomInterfaceRendererProps> = ({ tool,
         return <AIVideoEditerInterface onBack={() => onOpenChange(false)} />;
       case "AI Voice Generator":
         return <AIVoiceGeneratorInterface onBack={() => onOpenChange(false)} />;
+      case "Predictirix Enterprise":
+        return <PredictirixEnterpriseInterface onBack={() => onOpenChange(false)} />;
       default:
         console.log('CustomInterfaceRenderer: No custom interface found for:', tool.name);
         return null;
@@ -134,7 +137,8 @@ export const CUSTOM_INTERFACES = [
     "AgroRisk Navigator",
     "AI Social Media Manager",
     "AI Video Editer",
-    "AI Voice Generator"
+    "AI Voice Generator",
+    "Predictirix Enterprise"
 ];
 
 export default CustomInterfaceRenderer;
