@@ -1816,27 +1816,68 @@ export type Database = {
           },
         ]
       }
+      team_invites: {
+        Row: {
+          accepted_at: string | null
+          created_at: string | null
+          declined_at: string | null
+          email: string
+          id: string
+          invited_by: string | null
+          status: string
+          team_id: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string | null
+          declined_at?: string | null
+          email: string
+          id?: string
+          invited_by?: string | null
+          status?: string
+          team_id?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string | null
+          declined_at?: string | null
+          email?: string
+          id?: string
+          invited_by?: string | null
+          status?: string
+          team_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_invites_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_memberships: {
         Row: {
           id: string
           joined_at: string
           role: string
-          team_id: string | null
-          user_id: string | null
+          team_id: string
+          user_id: string
         }
         Insert: {
           id?: string
           joined_at?: string
           role?: string
-          team_id?: string | null
-          user_id?: string | null
+          team_id: string
+          user_id: string
         }
         Update: {
           id?: string
           joined_at?: string
           role?: string
-          team_id?: string | null
-          user_id?: string | null
+          team_id?: string
+          user_id?: string
         }
         Relationships: [
           {
@@ -2376,6 +2417,16 @@ export type Database = {
       get_my_team_ids: {
         Args: Record<PropertyKey, never>
         Returns: string[]
+      }
+      get_my_team_invites: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          team_id: string
+          email: string
+          status: string
+          created_at: string
+        }[]
       }
       get_my_teams: {
         Args: Record<PropertyKey, never>

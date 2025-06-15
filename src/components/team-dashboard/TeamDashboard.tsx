@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,6 +16,9 @@ import ProgressCard from './ProgressCard';
 import RecentTasksCard from './RecentTasksCard';
 import TeamsCard from './TeamsCard';
 import { toast } from 'sonner';
+import CreateTeamDialog from './CreateTeamDialog';
+import PendingInvitesCard from './PendingInvitesCard';
+import TeamsManagerCard from './TeamsManagerCard';
 
 const fetchTeamDashboardData = async () => {
   const { data, error } = await supabase.functions.invoke<TeamDashboardData>('team-dashboard-data', {
@@ -35,6 +37,7 @@ const TeamDashboard = () => {
   const [isCreateTaskOpen, setCreateTaskOpen] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
+  const [isCreateTeamOpen, setCreateTeamOpen] = useState(false);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['team-dashboard', user?.id],
@@ -102,6 +105,12 @@ const TeamDashboard = () => {
 
   return (
     <div className="space-y-6">
+      {/* Create dialogs */}
+      <CreateTeamDialog
+        open={isCreateTeamOpen}
+        onOpenChange={setCreateTeamOpen}
+        onTeamCreated={() => queryClient.invalidateQueries({ queryKey: ['team-dashboard', user?.id] })}
+      />
       <CreateTaskDialog
         open={isCreateTaskOpen}
         onOpenChange={setCreateTaskOpen}
@@ -129,19 +138,18 @@ const TeamDashboard = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
+      {/* New pending invites card */}
+      <PendingInvitesCard />
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Team Dashboard</h1>
           <p className="text-gray-600">Overview of your team's tasks and progress</p>
         </div>
-        <Button onClick={() => setCreateTaskOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          New Task
+        <Button onClick={() => setCreateTeamOpen(true)}>
+          Create Team
         </Button>
       </div>
-
       {teams.length === 0 ? (
         <Card>
           <CardContent className="pt-6">
@@ -154,6 +162,8 @@ const TeamDashboard = () => {
         </Card>
       ) : (
         <>
+          {/* Team management */}
+          <TeamsManagerCard teams={teams} onTeamUpdated={() => queryClient.invalidateQueries({ queryKey: ['team-dashboard', user?.id] })} />
           <StatsCards stats={stats} />
           <ProgressCard completionRate={completionRate} />
           <RecentTasksCard
