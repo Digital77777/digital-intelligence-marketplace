@@ -5,7 +5,7 @@ import AIToolsDirectory from "@/pages/AIToolsDirectory";
 import Marketplace from "@/pages/Marketplace";
 import PostProject from "@/pages/PostProject";
 import LearningHub from "@/pages/LearningHub";
-import CourseInterface from "@/components/learning/CourseInterface";
+import CourseDetails from "@/pages/CourseDetails";
 import CommunityForums from "@/pages/CommunityForums";
 import BusinessInsights from "@/pages/BusinessInsights";
 import AIStreams from "@/pages/AIStreams";
@@ -30,7 +30,7 @@ export const navItems = [
   { to: "/marketplace", page: <Marketplace /> },
   { to: "/marketplace/post-project", page: <PostProject /> },
   { to: "/learning-hub", page: <LearningHub /> },
-  { to: "/learning-hub/courses/:courseId", page: <CourseInterface /> },
+  { to: "/learning-hub/courses/:courseId", page: <CourseDetails /> },
   { to: "/community-forums", page: <CommunityForums /> },
   { to: "/business-insights", page: <BusinessInsights /> },
   { to: "/ai-streams", page: <AIStreams /> },
