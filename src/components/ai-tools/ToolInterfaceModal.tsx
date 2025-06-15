@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
@@ -21,6 +20,7 @@ import AITranslatorInterface from "../interfaces/AITranslatorInterface";
 import AIBasicSimulatorInterface from "./interfaces/AIBasicSimulatorInterface";
 import ForumAssistantInterface from "./interfaces/ForumAssistantInterface";
 import CropMindInterface from "./interfaces/CropMindInterface";
+import SmartPestSentinelInterface from "./interfaces/SmartPestSentinelInterface";
 
 interface ToolInterfaceModalProps {
   open: boolean;
@@ -140,6 +140,8 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
         return <ForumAssistantInterface />;
       case "CropMind AI":
         return <CropMindInterface tool={tool} onBack={() => onOpenChange(false)} />;
+      case "SmartPest Sentinel":
+        return <SmartPestSentinelInterface />;
       default:
         return null;
     }
@@ -157,7 +159,8 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
     "AI Language Translator",
     "AI Basic Simulator",
     "Forum Assistant",
-    "CropMind AI"
+    "CropMind AI",
+    "SmartPest Sentinel"
   ].includes(tool.name);
   
   return (
