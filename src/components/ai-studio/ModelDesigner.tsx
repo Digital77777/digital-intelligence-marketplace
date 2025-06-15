@@ -1,9 +1,9 @@
 
 import React from 'react';
-import PipelineDesignerView from './PipelineDesignerView';
+import EnhancedModelDesigner from './EnhancedModelDesigner';
 
 const ModelDesigner: React.FC = () => {
-  return <PipelineDesignerView />;
+  return <EnhancedModelDesigner />;
 };
 
 export default ModelDesigner;

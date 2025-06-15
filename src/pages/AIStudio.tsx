@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import ProTierLayout from '@/components/layouts/ProTierLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,27 +14,29 @@ import {
   useStartTraining,
   useDeployModel,
 } from '@/hooks/useModelState';
-import ComponentsSidebar from '@/components/ai-studio/ComponentsSidebar';
-import ModelDesigner from '@/components/ai-studio/ModelDesigner';
+import PipelineDesignerView from '@/components/ai-studio/PipelineDesignerView';
 
 const AIStudio = () => {
-  const [view, setView] = useState<'list' | 'designer'>('list');
+  const [view, setView] = useState<'overview' | 'designer'>('overview');
 
   const handleCreateNew = () => {
-    // In a real app, you might want to reset the model state here
     setView('designer');
   };
 
   return (
     <ProTierLayout pageTitle="AI Studio" requiredFeature="ai-studio">
       <div className="space-y-6">
-        {view === 'list' ? (
+        {view === 'overview' ? (
           <>
             <div className="flex justify-between items-center">
               <div>
                 <h2 className="text-2xl font-bold">AI Studio</h2>
                 <p className="text-muted-foreground">Design, train, and deploy custom AI models</p>
               </div>
+              <Button onClick={handleCreateNew}>
+                <Brain className="h-4 w-4 mr-2" />
+                New Model
+              </Button>
             </div>
 
             <Tabs defaultValue="models" className="w-full">
@@ -139,20 +142,17 @@ const AIStudio = () => {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-4">
-                <Button variant="outline" size="icon" onClick={() => setView('list')}>
+                <Button variant="outline" size="icon" onClick={() => setView('overview')}>
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
                 <div>
                   <h2 className="text-2xl font-bold">Model Designer</h2>
-                  <p className="text-muted-foreground">Design your custom AI model pipeline</p>
+                  <p className="text-muted-foreground">Design your custom AI model with templates and configurations</p>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6">
-              <ComponentsSidebar onAddComponent={() => {}} />
-              <ModelDesigner />
-            </div>
+            <PipelineDesignerView />
           </div>
         )}
       </div>
