@@ -16,6 +16,7 @@ import CopyCraftFreeInterface from "./interfaces/CopyCraftFreeInterface";
 import FieldSimXRInterface from "./interfaces/FieldSimXRInterface";
 import AITextSummarizerInterface from "./interfaces/AITextSummarizerInterface";
 import InsightLiteInterface from "./interfaces/InsightLiteInterface";
+import AIPresentationMakerInterface from "../interfaces/AIPresentationMakerInterface";
 
 interface ToolInterfaceModalProps {
   open: boolean;
@@ -125,6 +126,8 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
         return <InsightLiteInterface />;
       case "AI Image Generator":
         return <ImageGeneratorInterface />;
+      case "AI Presentation Maker":
+        return <AIPresentationMakerInterface />;
       default:
         return null;
     }
@@ -137,7 +140,8 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
     "FieldSim XR",
     "AI Text Summarizer",
     "InsightLite",
-    "AI Image Generator"
+    "AI Image Generator",
+    "AI Presentation Maker"
   ].includes(tool.name);
   
   return (
