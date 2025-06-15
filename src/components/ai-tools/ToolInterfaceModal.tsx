@@ -17,6 +17,7 @@ import FieldSimXRInterface from "./interfaces/FieldSimXRInterface";
 import AITextSummarizerInterface from "./interfaces/AITextSummarizerInterface";
 import InsightLiteInterface from "./interfaces/InsightLiteInterface";
 import AIPresentationMakerInterface from "../interfaces/AIPresentationMakerInterface";
+import AITranslatorInterface from "../interfaces/AITranslatorInterface";
 
 interface ToolInterfaceModalProps {
   open: boolean;
@@ -128,6 +129,8 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
         return <ImageGeneratorInterface />;
       case "AI Presentation Maker":
         return <AIPresentationMakerInterface />;
+      case "AI Language Translator":
+        return <AITranslatorInterface />;
       default:
         return null;
     }
@@ -141,7 +144,8 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
     "AI Text Summarizer",
     "InsightLite",
     "AI Image Generator",
-    "AI Presentation Maker"
+    "AI Presentation Maker",
+    "AI Language Translator"
   ].includes(tool.name);
   
   return (
