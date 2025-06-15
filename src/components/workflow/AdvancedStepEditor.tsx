@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,9 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { X, Plus, Settings } from 'lucide-react';
 
-interface AdvancedStep {
+// Import the WorkflowStep type from WorkflowEditor, or redeclare it here if not exported
+// Exported to avoid circular deps; let's redeclare the minimal shared definition to prevent import loops
+
+export interface WorkflowStep {
   id: string;
   name: string;
+  description: string;
   type: 'action' | 'condition' | 'ai-model' | 'api-call' | 'timer' | 'notification';
   config: {
     modelId?: string;
@@ -20,30 +23,31 @@ interface AdvancedStep {
     message?: string;
     recipients?: string[];
   };
+  order: number;
   triggers?: string[];
   dependencies?: string[];
 }
 
 interface AdvancedStepEditorProps {
-  step: AdvancedStep;
-  onUpdate: (step: AdvancedStep) => void;
+  step: WorkflowStep;
+  onUpdate: (step: WorkflowStep) => void;
   onDelete: () => void;
   availableModels: Array<{ id: string; name: string }>;
 }
 
-const AdvancedStepEditor: React.FC<AdvancedStepEditorProps> = ({ 
-  step, 
-  onUpdate, 
-  onDelete, 
-  availableModels 
+const AdvancedStepEditor: React.FC<AdvancedStepEditorProps> = ({
+  step,
+  onUpdate,
+  onDelete,
+  availableModels
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const updateStep = (updates: Partial<AdvancedStep>) => {
+  const updateStep = (updates: Partial<WorkflowStep>) => {
     onUpdate({ ...step, ...updates });
   };
 
-  const updateConfig = (configUpdates: Partial<AdvancedStep['config']>) => {
+  const updateConfig = (configUpdates: Partial<WorkflowStep['config']>) => {
     onUpdate({
       ...step,
       config: { ...step.config, ...configUpdates }
@@ -88,7 +92,7 @@ const AdvancedStepEditor: React.FC<AdvancedStepEditorProps> = ({
           </div>
         </div>
       </CardHeader>
-      
+
       {isExpanded && (
         <CardContent className="space-y-4">
           <Input
@@ -96,10 +100,14 @@ const AdvancedStepEditor: React.FC<AdvancedStepEditorProps> = ({
             value={step.name}
             onChange={(e) => updateStep({ name: e.target.value })}
           />
-          
+          <Textarea
+            placeholder="Step description"
+            value={step.description}
+            onChange={e => updateStep({ description: e.target.value })}
+          />
           <Select
             value={step.type}
-            onValueChange={(value) => updateStep({ type: value as AdvancedStep['type'] })}
+            onValueChange={(value) => updateStep({ type: value as WorkflowStep['type'] })}
           >
             <SelectTrigger>
               <SelectValue />
@@ -169,8 +177,8 @@ const AdvancedStepEditor: React.FC<AdvancedStepEditorProps> = ({
               <Input
                 placeholder="Recipients (comma separated emails)"
                 value={step.config.recipients?.join(', ') || ''}
-                onChange={(e) => updateConfig({ 
-                  recipients: e.target.value.split(',').map(email => email.trim()) 
+                onChange={(e) => updateConfig({
+                  recipients: e.target.value.split(',').map(email => email.trim())
                 })}
               />
             </div>
