@@ -23,6 +23,7 @@ import CropMindInterface from "./interfaces/CropMindInterface";
 import SmartPestSentinelInterface from "./interfaces/SmartPestSentinelInterface";
 import LivestockGuardianVisionInterface from "./interfaces/LivestockGuardianVisionInterface";
 import AgriMeshNetworkInterface from "./interfaces/AgriMeshNetworkInterface";
+import AICodeAssistantInterface from "./interfaces/AICodeAssistantInterface";
 
 interface ToolInterfaceModalProps {
   open: boolean;
@@ -148,6 +149,8 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
         return <LivestockGuardianVisionInterface />;
       case "AgriMesh Network":
         return <AgriMeshNetworkInterface />;
+      case "AI Code Assistant":
+        return <AICodeAssistantInterface />;
       default:
         return null;
     }
@@ -168,7 +171,8 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
     "CropMind AI",
     "SmartPest Sentinel",
     "Livestock Guardian Vision",
-    "AgriMesh Network"
+    "AgriMesh Network",
+    "AI Code Assistant"
   ].includes(tool.name);
   
   return (
