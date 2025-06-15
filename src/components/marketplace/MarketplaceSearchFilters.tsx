@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +35,7 @@ interface MarketplaceSearchFiltersProps {
   ratingFilter: number;
   setRatingFilter: (rating: number) => void;
   categoriesFilter: string[];
-  setCategoriesFilter: (categories: string[]) => void;
+  setCategoriesFilter: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const MarketplaceSearchFilters: React.FC<MarketplaceSearchFiltersProps> = ({
