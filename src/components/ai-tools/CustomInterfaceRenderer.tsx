@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { AIToolItem } from '@/data/ai-tools-tiers';
 import ImageGeneratorInterface from "./interfaces/ImageGeneratorInterface";
@@ -31,6 +32,8 @@ interface CustomInterfaceRendererProps {
 }
 
 const CustomInterfaceRenderer: React.FC<CustomInterfaceRendererProps> = ({ tool, onOpenChange }) => {
+    console.log('CustomInterfaceRenderer: Rendering tool:', tool.name);
+    
     switch (tool.name) {
       case "TaskBot Mini":
         return <TaskBotMiniInterface />;
@@ -79,8 +82,10 @@ const CustomInterfaceRenderer: React.FC<CustomInterfaceRendererProps> = ({ tool,
       case "AgroBot Commander":
         return <AgroBotCommanderInterface onBack={() => onOpenChange(false)} />;
       case "AquaYield OS":
+        console.log('CustomInterfaceRenderer: Rendering AquaYield OS interface');
         return <AquaYieldOSInterface onBack={() => onOpenChange(false)} />;
       default:
+        console.log('CustomInterfaceRenderer: No custom interface found for:', tool.name);
         return null;
     }
 };
