@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowRight, Translate } from 'lucide-react';
+import { ArrowRight, Languages } from 'lucide-react'; // Changed Translate → Languages
 
 const languages = [
   { code: 'en', name: 'English', flag: '🇺🇸' },
@@ -104,7 +104,7 @@ const AITranslatorInterface: React.FC = () => {
       />
       <div className="flex gap-2">
         <Button onClick={handleTranslate} disabled={loading || !input} className="w-full bg-gradient-to-r from-[#7c3aed] to-[#818cf8] text-white">
-          <Translate className="mr-2" /> {loading ? "Translating..." : "Translate"}
+          <Languages className="mr-2" /> {loading ? "Translating..." : "Translate"}
         </Button>
         <Button onClick={handleClear} variant="outline" className="w-32 border-gray-200 text-gray-600">
           <span role="img" aria-label="Clear">🗑️</span> Clear
@@ -115,3 +115,4 @@ const AITranslatorInterface: React.FC = () => {
 };
 
 export default AITranslatorInterface;
+

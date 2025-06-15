@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LightningFast } from "lucide-react";
+import { Zap } from "lucide-react"; // Changed LightningFast → Zap
 
 const stats = [
   { value: "25K+", label: "Active Developers" },
@@ -34,7 +34,7 @@ const apis = [
 
 const features = [
   { icon: "🔒", title: "Reliable & Secure", desc: "99.9% uptime SLA, plus enterprise grade security" },
-  { icon: "⚡", title: "Lightning Fast", desc: "Global CDN ensures low-latency everywhere." },
+  { icon: <Zap className="inline mr-1 text-yellow-400" />, title: "Lightning Fast", desc: "Global CDN ensures low-latency everywhere." }, // Changed here
   { icon: "💻", title: "Developer Friendly", desc: "Comprehensive docs and SDKs for all platforms." }
 ];
 
@@ -100,3 +100,4 @@ const AgroAPIInterface: React.FC = () => {
 };
 
 export default AgroAPIInterface;
+
