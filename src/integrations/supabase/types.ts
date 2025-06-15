@@ -104,6 +104,60 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_models: {
+        Row: {
+          artifact_url: string | null
+          config: Json | null
+          created_at: string
+          description: string | null
+          hyperparameters: Json | null
+          id: string
+          metrics: Json | null
+          model_type: Database["public"]["Enums"]["dataset_type"]
+          name: string
+          status: Database["public"]["Enums"]["model_status"]
+          template_id: string | null
+          trained_at: string | null
+          updated_at: string
+          user_id: string
+          version: string
+        }
+        Insert: {
+          artifact_url?: string | null
+          config?: Json | null
+          created_at?: string
+          description?: string | null
+          hyperparameters?: Json | null
+          id?: string
+          metrics?: Json | null
+          model_type: Database["public"]["Enums"]["dataset_type"]
+          name: string
+          status?: Database["public"]["Enums"]["model_status"]
+          template_id?: string | null
+          trained_at?: string | null
+          updated_at?: string
+          user_id: string
+          version?: string
+        }
+        Update: {
+          artifact_url?: string | null
+          config?: Json | null
+          created_at?: string
+          description?: string | null
+          hyperparameters?: Json | null
+          id?: string
+          metrics?: Json | null
+          model_type?: Database["public"]["Enums"]["dataset_type"]
+          name?: string
+          status?: Database["public"]["Enums"]["model_status"]
+          template_id?: string | null
+          trained_at?: string | null
+          updated_at?: string
+          user_id?: string
+          version?: string
+        }
+        Relationships: []
+      }
       ai_streams: {
         Row: {
           id: string
@@ -347,6 +401,104 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      datasets: {
+        Row: {
+          created_at: string
+          dataset_type: Database["public"]["Enums"]["dataset_type"]
+          description: string | null
+          file_format: string | null
+          file_size: number | null
+          file_url: string
+          id: string
+          metadata: Json | null
+          name: string
+          updated_at: string
+          user_id: string
+          validation_results: Json | null
+        }
+        Insert: {
+          created_at?: string
+          dataset_type: Database["public"]["Enums"]["dataset_type"]
+          description?: string | null
+          file_format?: string | null
+          file_size?: number | null
+          file_url: string
+          id?: string
+          metadata?: Json | null
+          name: string
+          updated_at?: string
+          user_id: string
+          validation_results?: Json | null
+        }
+        Update: {
+          created_at?: string
+          dataset_type?: Database["public"]["Enums"]["dataset_type"]
+          description?: string | null
+          file_format?: string | null
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          metadata?: Json | null
+          name?: string
+          updated_at?: string
+          user_id?: string
+          validation_results?: Json | null
+        }
+        Relationships: []
+      }
+      deployments: {
+        Row: {
+          api_key: string | null
+          created_at: string
+          deployed_at: string | null
+          endpoint_url: string | null
+          health_status: Json | null
+          id: string
+          model_id: string
+          resource_config: Json | null
+          status: Database["public"]["Enums"]["deployment_status"]
+          updated_at: string
+          usage_stats: Json | null
+          user_id: string
+        }
+        Insert: {
+          api_key?: string | null
+          created_at?: string
+          deployed_at?: string | null
+          endpoint_url?: string | null
+          health_status?: Json | null
+          id?: string
+          model_id: string
+          resource_config?: Json | null
+          status?: Database["public"]["Enums"]["deployment_status"]
+          updated_at?: string
+          usage_stats?: Json | null
+          user_id: string
+        }
+        Update: {
+          api_key?: string | null
+          created_at?: string
+          deployed_at?: string | null
+          endpoint_url?: string | null
+          health_status?: Json | null
+          id?: string
+          model_id?: string
+          resource_config?: Json | null
+          status?: Database["public"]["Enums"]["deployment_status"]
+          updated_at?: string
+          usage_stats?: Json | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deployments_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "ai_models"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       escrow_transactions: {
         Row: {
@@ -967,6 +1119,84 @@ export type Database = {
         }
         Relationships: []
       }
+      model_metrics: {
+        Row: {
+          epoch: number | null
+          id: string
+          metadata: Json | null
+          metric_type: string
+          metric_value: number
+          model_id: string
+          timestamp: string
+          training_job_id: string | null
+        }
+        Insert: {
+          epoch?: number | null
+          id?: string
+          metadata?: Json | null
+          metric_type: string
+          metric_value: number
+          model_id: string
+          timestamp?: string
+          training_job_id?: string | null
+        }
+        Update: {
+          epoch?: number | null
+          id?: string
+          metadata?: Json | null
+          metric_type?: string
+          metric_value?: number
+          model_id?: string
+          timestamp?: string
+          training_job_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "model_metrics_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "ai_models"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "model_metrics_training_job_id_fkey"
+            columns: ["training_job_id"]
+            isOneToOne: false
+            referencedRelation: "training_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      model_templates: {
+        Row: {
+          created_at: string
+          default_config: Json
+          description: string | null
+          id: string
+          is_active: boolean | null
+          model_type: Database["public"]["Enums"]["dataset_type"]
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          default_config: Json
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          model_type: Database["public"]["Enums"]["dataset_type"]
+          name: string
+        }
+        Update: {
+          created_at?: string
+          default_config?: Json
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          model_type?: Database["public"]["Enums"]["dataset_type"]
+          name?: string
+        }
+        Relationships: []
+      }
       pipeline_deals: {
         Row: {
           assigned_to: string | null
@@ -1418,6 +1648,75 @@ export type Database = {
           },
         ]
       }
+      training_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          current_epoch: number | null
+          dataset_id: string | null
+          error_message: string | null
+          id: string
+          logs: Json | null
+          metrics: Json | null
+          model_id: string
+          progress_percentage: number | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["training_status"]
+          total_epochs: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          current_epoch?: number | null
+          dataset_id?: string | null
+          error_message?: string | null
+          id?: string
+          logs?: Json | null
+          metrics?: Json | null
+          model_id: string
+          progress_percentage?: number | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["training_status"]
+          total_epochs?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          current_epoch?: number | null
+          dataset_id?: string | null
+          error_message?: string | null
+          id?: string
+          logs?: Json | null
+          metrics?: Json | null
+          model_id?: string
+          progress_percentage?: number | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["training_status"]
+          total_epochs?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_jobs_dataset_id_fkey"
+            columns: ["dataset_id"]
+            isOneToOne: false
+            referencedRelation: "datasets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_jobs_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "ai_models"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
           amount: number
@@ -1676,8 +1975,22 @@ export type Database = {
     }
     Enums: {
       app_role: "super_admin" | "user"
+      dataset_type:
+        | "text_classification"
+        | "image_classification"
+        | "regression"
+        | "object_detection"
+        | "nlp"
+      deployment_status: "deploying" | "deployed" | "failed" | "stopped"
       freelancer_badge: "bronze" | "silver" | "gold"
       issue_status: "Open" | "In Progress" | "Resolved"
+      model_status:
+        | "draft"
+        | "training"
+        | "trained"
+        | "deployed"
+        | "failed"
+        | "archived"
       project_status:
         | "open"
         | "in_progress"
@@ -1688,6 +2001,12 @@ export type Database = {
       regulation_type: "GDPR" | "HIPAA" | "SOC2"
       risk_level: "Critical" | "High" | "Medium" | "Low"
       skill_level: "beginner" | "intermediate" | "advanced" | "expert"
+      training_status:
+        | "pending"
+        | "running"
+        | "completed"
+        | "failed"
+        | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1804,8 +2123,24 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["super_admin", "user"],
+      dataset_type: [
+        "text_classification",
+        "image_classification",
+        "regression",
+        "object_detection",
+        "nlp",
+      ],
+      deployment_status: ["deploying", "deployed", "failed", "stopped"],
       freelancer_badge: ["bronze", "silver", "gold"],
       issue_status: ["Open", "In Progress", "Resolved"],
+      model_status: [
+        "draft",
+        "training",
+        "trained",
+        "deployed",
+        "failed",
+        "archived",
+      ],
       project_status: [
         "open",
         "in_progress",
@@ -1817,6 +2152,13 @@ export const Constants = {
       regulation_type: ["GDPR", "HIPAA", "SOC2"],
       risk_level: ["Critical", "High", "Medium", "Low"],
       skill_level: ["beginner", "intermediate", "advanced", "expert"],
+      training_status: [
+        "pending",
+        "running",
+        "completed",
+        "failed",
+        "cancelled",
+      ],
     },
   },
 } as const
