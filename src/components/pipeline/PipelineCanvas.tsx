@@ -11,28 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useUser } from '@/context/UserContext';
 import AddDealDialog from './AddDealDialog';
 import PipelineSelectionGrid from './PipelineSelectionGrid';
-
-export interface Deal {
-  id: string;
-  title: string;
-  value: number;
-  stage: string;
-  probability: number;
-  expected_close_date: string;
-  assigned_to: string;
-  contact_info: any;
-  notes: string;
-  pipeline_id: string;
-}
-
-interface Pipeline {
-  id: string;
-  name: string;
-  description: string;
-  stages: string[];
-  status: string;
-  deals?: Deal[];
-}
+import { Deal, Pipeline } from './types';
 
 const PipelineCanvas = () => {
   const [pipelines, setPipelines] = useState<Pipeline[]>([]);

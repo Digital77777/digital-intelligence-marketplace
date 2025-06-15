@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Pipeline, Deal } from './PipelineCanvas';
+import { Pipeline, Deal } from './types';
 import { Plus, Folder } from 'lucide-react';
 
 interface PipelineSelectionGridProps {
