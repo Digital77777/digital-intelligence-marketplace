@@ -28,6 +28,7 @@ import FarmPLAIInterface from "./interfaces/FarmPLAIInterface";
 import AgroRiskNavigatorInterface from "./interfaces/AgroRiskNavigatorInterface";
 import AISocialMediaManagerInterface from "./interfaces/AISocialMediaManagerInterface";
 import AIVideoEditerInterface from "./interfaces/AIVideoEditerInterface";
+import AIVoiceGeneratorInterface from "./interfaces/AIVoiceGeneratorInterface";
 
 interface CustomInterfaceRendererProps {
   tool: AIToolItem;
@@ -96,6 +97,8 @@ const CustomInterfaceRenderer: React.FC<CustomInterfaceRendererProps> = ({ tool,
         return <AISocialMediaManagerInterface onBack={() => onOpenChange(false)} />;
       case "AI Video Editer":
         return <AIVideoEditerInterface onBack={() => onOpenChange(false)} />;
+      case "AI Voice Generator":
+        return <AIVoiceGeneratorInterface onBack={() => onOpenChange(false)} />;
       default:
         console.log('CustomInterfaceRenderer: No custom interface found for:', tool.name);
         return null;
@@ -130,7 +133,8 @@ export const CUSTOM_INTERFACES = [
     "Farm P&L AI",
     "AgroRisk Navigator",
     "AI Social Media Manager",
-    "AI Video Editer"
+    "AI Video Editer",
+    "AI Voice Generator"
 ];
 
 export default CustomInterfaceRenderer;
