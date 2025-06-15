@@ -1,18 +1,18 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, DollarSign, Calendar, User, MoreHorizontal } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useUser } from '@/context/UserContext';
 import AddDealDialog from './AddDealDialog';
+import PipelineSelectionGrid from './PipelineSelectionGrid';
 
-interface Deal {
+export interface Deal {
   id: string;
   title: string;
   value: number;
@@ -22,6 +22,7 @@ interface Deal {
   assigned_to: string;
   contact_info: any;
   notes: string;
+  pipeline_id: string;
 }
 
 interface Pipeline {
@@ -37,6 +38,7 @@ const PipelineCanvas = () => {
   const [pipelines, setPipelines] = useState<Pipeline[]>([]);
   const [selectedPipeline, setSelectedPipeline] = useState<Pipeline | null>(null);
   const [deals, setDeals] = useState<Deal[]>([]);
+  const [allDeals, setAllDeals] = useState<Record<string, Deal[]>>({});
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newPipeline, setNewPipeline] = useState({
     name: '',
@@ -49,16 +51,17 @@ const PipelineCanvas = () => {
   useEffect(() => {
     if (user) {
       fetchPipelines();
+      fetchAllDeals();
     }
   }, [user]);
 
   useEffect(() => {
     if (selectedPipeline) {
-      fetchDeals(selectedPipeline.id);
+      setDeals(allDeals[selectedPipeline.id] || []);
     } else {
       setDeals([]);
     }
-  }, [selectedPipeline]);
+  }, [selectedPipeline, allDeals]);
 
   const fetchPipelines = async () => {
     try {
@@ -75,9 +78,6 @@ const PipelineCanvas = () => {
       })) || [];
 
       setPipelines(formattedPipelines);
-      if (formattedPipelines.length > 0 && !selectedPipeline) {
-        setSelectedPipeline(formattedPipelines[0]);
-      }
     } catch (error) {
       console.error('Error fetching pipelines:', error);
       toast({
@@ -88,21 +88,29 @@ const PipelineCanvas = () => {
     }
   };
 
-  const fetchDeals = async (pipelineId: string) => {
+  const fetchAllDeals = async () => {
     try {
       const { data, error } = await supabase
         .from('pipeline_deals')
-        .select('*')
-        .eq('pipeline_id', pipelineId)
-        .order('created_at', { ascending: false });
+        .select('*');
 
       if (error) throw error;
-      setDeals(data || []);
+
+      const dealsByPipeline = (data || []).reduce((acc, deal) => {
+        if (!deal.pipeline_id) return acc;
+        if (!acc[deal.pipeline_id]) {
+          acc[deal.pipeline_id] = [];
+        }
+        acc[deal.pipeline_id].push(deal);
+        return acc;
+      }, {} as Record<string, Deal[]>);
+      
+      setAllDeals(dealsByPipeline);
     } catch (error) {
-      console.error('Error fetching deals:', error);
+      console.error('Error fetching all deals:', error);
       toast({
         title: "Error",
-        description: "Failed to load deals",
+        description: "Failed to load deals data",
         variant: "destructive"
       });
     }
@@ -177,68 +185,56 @@ const PipelineCanvas = () => {
     return 'text-red-600 bg-red-100';
   };
 
+  if (!selectedPipeline) {
+    return (
+      <>
+        <PipelineSelectionGrid 
+          pipelines={pipelines} 
+          dealsByPipeline={allDeals} 
+          onSelectPipeline={(pipeline) => setSelectedPipeline(pipeline)}
+          onCreatePipeline={() => setIsCreateDialogOpen(true)}
+        />
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Pipeline</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Input
+                placeholder="Pipeline name"
+                value={newPipeline.name}
+                onChange={(e) => setNewPipeline({ ...newPipeline, name: e.target.value })}
+              />
+              <Input
+                placeholder="Pipeline description"
+                value={newPipeline.description}
+                onChange={(e) => setNewPipeline({ ...newPipeline, description: e.target.value })}
+              />
+              <Button onClick={createPipeline} className="w-full">
+                Create Pipeline
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold">Pipeline Designer</h1>
-          <p className="text-gray-600">Manage your sales pipelines and deals</p>
-        </div>
-        <div className="flex space-x-2">
-          <Select
-            value={selectedPipeline?.id || ''}
-            onValueChange={(value) => {
-              const pipeline = pipelines.find(p => p.id === value);
-              setSelectedPipeline(pipeline || null);
-            }}
-          >
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Select pipeline" />
-            </SelectTrigger>
-            <SelectContent>
-              {pipelines.map((pipeline) => (
-                <SelectItem key={pipeline.id} value={pipeline.id}>
-                  {pipeline.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                New Pipeline
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New Pipeline</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <Input
-                  placeholder="Pipeline name"
-                  value={newPipeline.name}
-                  onChange={(e) => setNewPipeline({ ...newPipeline, name: e.target.value })}
-                />
-                <Input
-                  placeholder="Pipeline description"
-                  value={newPipeline.description}
-                  onChange={(e) => setNewPipeline({ ...newPipeline, description: e.target.value })}
-                />
-                <Button onClick={createPipeline} className="w-full">
-                  Create Pipeline
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+           <Button variant="outline" size="sm" onClick={() => setSelectedPipeline(null)} className="mb-4">
+            Back to Pipelines
+          </Button>
+          <h1 className="text-3xl font-bold">{selectedPipeline.name}</h1>
+          <p className="text-gray-600">{selectedPipeline.description}</p>
         </div>
       </div>
 
       {/* Pipeline Kanban Board */}
-      {selectedPipeline ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {selectedPipeline.stages.map((stage) => {
             const stageDeals = getDealsForStage(stage);
             const stageValue = getTotalValue(stage);
@@ -293,22 +289,13 @@ const PipelineCanvas = () => {
                   <AddDealDialog
                     pipelineId={selectedPipeline.id}
                     stage={stage}
-                    onDealAdded={() => fetchDeals(selectedPipeline.id)}
+                    onDealAdded={() => fetchAllDeals()}
                   />
                 </CardContent>
               </Card>
             );
           })}
         </div>
-      ) : (
-         <Card>
-            <CardContent className="flex items-center justify-center h-96">
-              <div className="text-center text-gray-500">
-                {user ? "Select a pipeline or create a new one to get started." : "Please log in to view and manage pipelines."}
-              </div>
-            </CardContent>
-          </Card>
-      )}
 
       {/* Pipeline Stats */}
       {selectedPipeline && (
