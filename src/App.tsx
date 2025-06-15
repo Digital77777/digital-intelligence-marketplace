@@ -12,6 +12,9 @@ import { LoadingIndicator } from "./components/ui/loading-indicator";
 
 // Lazy load components for better performance
 const ProjectDetail = lazy(() => import("./pages/ProjectDetail"));
+const NewTopic = lazy(() => import("./pages/NewTopic"));
+const TopicDetails = lazy(() => import("./pages/TopicDetails"));
+import CommunityForums from "./pages/CommunityForums";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,6 +38,26 @@ const App = () => {
                   {navItems.map(({ to, page }) => (
                     <Route key={to} path={to} element={page} />
                   ))}
+                  <Route
+                    path="/community-forums/category/:categoryId"
+                    element={<CommunityForums />}
+                  />
+                  <Route
+                    path="/community-forums/new-topic/:categoryId"
+                    element={
+                      <Suspense fallback={<LoadingIndicator />}>
+                        <NewTopic />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="/community-forums/topic/:topicId"
+                    element={
+                      <Suspense fallback={<LoadingIndicator />}>
+                        <TopicDetails />
+                      </Suspense>
+                    }
+                  />
                   {/* Add the new project detail route */}
                   <Route 
                     path="/marketplace/project/:id" 

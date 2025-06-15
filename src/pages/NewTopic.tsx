@@ -13,7 +13,7 @@ const NewTopic = () => {
   const navigate = useNavigate();
   
   const handleCancel = () => {
-    navigate('/community');
+    navigate('/community-forums');
   };
 
   return (
@@ -26,7 +26,7 @@ const NewTopic = () => {
               <BreadcrumbLink href="/" className="text-[#00FFFF]">Home</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/community" className="text-[#00FFFF]">
+              <BreadcrumbLink href="/community-forums" className="text-[#00FFFF]">
                 Cyber Forum
               </BreadcrumbLink>
             </BreadcrumbItem>

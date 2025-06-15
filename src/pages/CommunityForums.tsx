@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useUser } from '@/context/UserContext';
@@ -13,6 +12,7 @@ import ForumCategorySidebar from "@/components/forums/ForumCategorySidebar";
 import SimpleForumCard from "@/components/forums/SimpleForumCard";
 
 const CommunityForums = () => {
+  const { categoryId } = useParams<{ categoryId?: string }>();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const { user } = useUser();
@@ -26,10 +26,12 @@ const CommunityForums = () => {
   } = useForumData();
 
   useEffect(() => {
-    if (!selectedCategory && categories.length > 0) {
+    if (categoryId) {
+      setSelectedCategory(categoryId);
+    } else if (!selectedCategory && categories.length > 0) {
       setSelectedCategory(categories[0].id);
     }
-  }, [categories, selectedCategory]);
+  }, [categoryId, categories, selectedCategory]);
 
   const filteredCategories =
     searchQuery.trim() !== ""
@@ -105,7 +107,7 @@ const CommunityForums = () => {
                       navigate("/auth");
                       return;
                     }
-                    navigate(`/community/new-topic/${category.id}`);
+                    navigate(`/community-forums/new-topic/${category.id}`);
                   }}
                   formatDate={formatDate}
                 />
@@ -121,7 +123,7 @@ const CommunityForums = () => {
                   return;
                 }
                 if (selectedCategory) {
-                  navigate(`/community/new-topic/${selectedCategory}`);
+                  navigate(`/community-forums/new-topic/${selectedCategory}`);
                 }
               }}
               className="bg-blue-600 hover:bg-blue-700 text-white shadow-xl px-6 py-3 rounded-full text-base font-bold"

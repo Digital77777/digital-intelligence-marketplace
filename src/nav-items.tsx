@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Index from "@/pages/Index";
 import AITools from "@/pages/AITools";
@@ -25,7 +24,7 @@ export const navItems = [
   { to: "/marketplace", page: <Marketplace /> },
   { to: "/marketplace/post-project", page: <PostProject /> },
   { to: "/learning", page: <LearningHub /> },
-  { to: "/community", page: <CommunityForums /> },
+  { to: "/community-forums", page: <CommunityForums /> },
   { to: "/insights", page: <BusinessInsights /> },
   { to: "/streams", page: <AIStreams /> },
   { to: "/team", page: <TeamDashboard /> },

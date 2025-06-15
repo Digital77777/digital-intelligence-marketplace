@@ -18,7 +18,7 @@ const TopicDetails = () => {
               <BreadcrumbLink href="/" className="text-[#00FFFF]">Home</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/community" className="text-[#00FFFF]">
+              <BreadcrumbLink href="/community-forums" className="text-[#00FFFF]">
                 Cyber Forum
               </BreadcrumbLink>
             </BreadcrumbItem>

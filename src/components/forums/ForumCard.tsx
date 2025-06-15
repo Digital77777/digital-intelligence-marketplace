@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -129,7 +128,7 @@ export const ForumCard: React.FC<ForumCardProps> = ({
         ) : (
           <div className="divide-y divide-[#00FFFF]/10">
             {topics.map((topic) => (
-              <div key={topic.id} className="p-4 hover:bg-[#00FFFF]/5 transition-colors cursor-pointer" onClick={() => navigate(`/community/topic/${topic.id}`)}>
+              <div key={topic.id} className="p-4 hover:bg-[#00FFFF]/5 transition-colors cursor-pointer" onClick={() => navigate(`/community-forums/topic/${topic.id}`)}>
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
@@ -169,7 +168,7 @@ export const ForumCard: React.FC<ForumCardProps> = ({
       {canAccessCategory && topics.length > 0 && (
         <CardFooter className="bg-gradient-to-r from-black to-[#00FFFF]/5 p-4 flex justify-between">
           <span className="text-sm text-gray-400">Displaying {topics.length} threads</span>
-          <Button variant="ghost" size="sm" onClick={() => navigate(`/community/category/${category.id}`)} className="text-[#00FFFF] hover:text-[#4DFFFF] hover:bg-[#00FFFF]/10">
+          <Button variant="ghost" size="sm" onClick={() => navigate(`/community-forums/category/${category.id}`)} className="text-[#00FFFF] hover:text-[#4DFFFF] hover:bg-[#00FFFF]/10">
             VIEW ALL
           </Button>
         </CardFooter>
