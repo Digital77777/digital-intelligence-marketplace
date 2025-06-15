@@ -36,6 +36,7 @@ import AIMarketplacePublisherInterface from "./interfaces/AIMarketplacePublisher
 import EthicsGuardAIInterface from "./interfaces/EthicsGuardAIInterface";
 import CloudBridgeAIInterface from "./interfaces/CloudBridgeAIInterface";
 import AgriTrialAIInterface from "./interfaces/AgriTrialAIInterface";
+import RegenCertHubInterface from "./interfaces/RegenCertHubInterface";
 
 interface CustomInterfaceRendererProps {
   tool: AIToolItem;
@@ -120,6 +121,8 @@ const CustomInterfaceRenderer: React.FC<CustomInterfaceRendererProps> = ({ tool,
         return <CloudBridgeAIInterface onBack={() => onOpenChange(false)} />;
       case "AgriTrial AI":
         return <AgriTrialAIInterface onBack={() => onOpenChange(false)} />;
+      case "RegenCert Hub":
+        return <RegenCertHubInterface onBack={() => onOpenChange(false)} />;
       default:
         console.log('CustomInterfaceRenderer: No custom interface found for:', tool.name);
         return null;
@@ -162,7 +165,8 @@ export const CUSTOM_INTERFACES = [
     "AI Marketplace Publisher",
     "EthicsGuard AI",
     "CloudBridge AI",
-    "AgriTrial AI"
+    "AgriTrial AI",
+    "RegenCert Hub"
 ];
 
 export default CustomInterfaceRenderer;
