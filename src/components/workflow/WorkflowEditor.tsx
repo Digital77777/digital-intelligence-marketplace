@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -73,7 +72,7 @@ const WorkflowEditor = () => {
     }
 
     try {
-      const newWorkflow = await createWorkflow.mutateAsync({ ...workflowData, created_by: user.id });
+      const newWorkflow = await createWorkflow.mutateAsync(workflowData);
       if (newWorkflow && newWorkflowFromTemplate?.template?.steps) {
         const workflowWithSteps = {
             ...newWorkflow,
