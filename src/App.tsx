@@ -14,6 +14,8 @@ import { LoadingIndicator } from "./components/ui/loading-indicator";
 const ProjectDetail = lazy(() => import("./pages/ProjectDetail"));
 const NewTopic = lazy(() => import("./pages/NewTopic"));
 const TopicDetails = lazy(() => import("./pages/TopicDetails"));
+const AIStreamDetail = lazy(() => import("./pages/AIStreamDetail"));
+const AIStreamsUpload = lazy(() => import("./pages/AIStreamsUpload"));
 import CommunityForums from "./pages/CommunityForums";
 
 const queryClient = new QueryClient({
@@ -64,6 +66,23 @@ const App = () => {
                     element={
                       <Suspense fallback={<LoadingIndicator />}>
                         <ProjectDetail />
+                      </Suspense>
+                    } 
+                  />
+                  {/* Add new stream routes */}
+                  <Route 
+                    path="/ai-streams/upload" 
+                    element={
+                      <Suspense fallback={<LoadingIndicator />}>
+                        <AIStreamsUpload />
+                      </Suspense>
+                    } 
+                  />
+                  <Route 
+                    path="/ai-stream/:id" 
+                    element={
+                      <Suspense fallback={<LoadingIndicator />}>
+                        <AIStreamDetail />
                       </Suspense>
                     } 
                   />

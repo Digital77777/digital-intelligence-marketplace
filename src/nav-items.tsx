@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Index from "@/pages/Index";
 import AITools from "@/pages/AITools";
@@ -20,19 +21,19 @@ import About from "@/pages/About";
 
 export const navItems = [
   { to: "/", page: <Index /> },
-  { to: "/ai-tools", page: <AITools /> },
+  { to: "/ai-tools-directory", page: <AITools /> },
   { to: "/marketplace", page: <Marketplace /> },
   { to: "/marketplace/post-project", page: <PostProject /> },
-  { to: "/learning", page: <LearningHub /> },
+  { to: "/learning-hub", page: <LearningHub /> },
   { to: "/community-forums", page: <CommunityForums /> },
-  { to: "/insights", page: <BusinessInsights /> },
-  { to: "/streams", page: <AIStreams /> },
-  { to: "/team", page: <TeamDashboard /> },
-  { to: "/collaboration", page: <CollaborationHub /> },
-  { to: "/compliance", page: <ComplianceCenter /> },
-  { to: "/workflows", page: <WorkflowDesigner /> },
-  { to: "/pipelines", page: <PipelineDesigner /> },
-  { to: "/studio", page: <AIStudio /> },
+  { to: "/business-insights", page: <BusinessInsights /> },
+  { to: "/ai-streams", page: <AIStreams /> },
+  { to: "/team-dashboard", page: <TeamDashboard /> },
+  { to: "/collaboration-hub", page: <CollaborationHub /> },
+  { to: "/compliance-center", page: <ComplianceCenter /> },
+  { to: "/workflow-designer", page: <WorkflowDesigner /> },
+  { to: "/pipeline-designer", page: <PipelineDesigner /> },
+  { to: "/ai-studio", page: <AIStudio /> },
   { to: "/auth", page: <Auth /> },
   { to: "/profile", page: <Profile /> },
   { to: "/pricing", page: <Pricing /> },
