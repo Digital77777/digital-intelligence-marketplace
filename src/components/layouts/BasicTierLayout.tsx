@@ -3,65 +3,36 @@ import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import MobileStickyFooter from '@/components/MobileStickyFooter';
-import { useNavigate } from 'react-router-dom';
-import { useTier } from '@/context/TierContext';
-import { Badge } from "@/components/ui/badge";
-import { toast } from 'sonner';
-import { Shield, Sparkles } from 'lucide-react';
+import TierGuard from '@/components/auth/TierGuard';
+import { Helmet } from 'react-helmet-async';
 
 interface BasicTierLayoutProps {
   children: React.ReactNode;
   pageTitle: string;
-  requiredFeature: string;
-  headerActions?: React.ReactNode;
+  requiredFeature?: string;
+  requiredTier?: 'basic' | 'pro';
 }
 
-const BasicTierLayout: React.FC<BasicTierLayoutProps> = ({ 
-  children, 
-  pageTitle, 
+const BasicTierLayout: React.FC<BasicTierLayoutProps> = ({
+  children,
+  pageTitle,
   requiredFeature,
-  headerActions
+  requiredTier = 'basic'
 }) => {
-  const { currentTier, canAccess } = useTier();
-  const navigate = useNavigate();
-
-  React.useEffect(() => {
-    if (!canAccess(requiredFeature)) {
-      toast.error("This feature requires a Basic or Pro subscription", {
-        description: "Please upgrade to access this feature.",
-        action: {
-          label: "Upgrade",
-          onClick: () => navigate('/pricing')
-        }
-      });
-      navigate('/');
-    }
-  }, [currentTier, requiredFeature, navigate, canAccess]);
-
-  if (!canAccess(requiredFeature)) {
-    return null; // Will redirect in the useEffect
-  }
-
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50/50 to-indigo-50/30">
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <Helmet>
+        <title>{pageTitle} - DIM</title>
+      </Helmet>
       <Navbar />
-      <main className="flex-1 pt-24 px-6 pb-12 md:pb-12 pb-20">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold">{pageTitle}</h1>
-              <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200 px-3 py-1 flex items-center gap-1.5">
-                <Shield className="h-3.5 w-3.5" />
-                <span>BASIC</span>
-              </Badge>
-            </div>
-            <div>{headerActions}</div>
-          </div>
-          
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-blue-100/80 p-6 shadow-md">
+      <main className="flex-grow container mx-auto px-4 py-8 pb-20 md:pb-8">
+        {requiredTier ? (
+          <TierGuard requiredTier={requiredTier} feature={requiredFeature}>
             {children}
-          </div>
-        </div>
+          </TierGuard>
+        ) : (
+          children
+        )}
       </main>
       <Footer />
       <MobileStickyFooter />

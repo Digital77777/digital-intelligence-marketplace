@@ -51,6 +51,22 @@ const Index = () => {
     return () => clearInterval(id);
   }, []);
 
+  const handleGetStarted = () => {
+    if (user) {
+      navigate("/learning-hub");
+    } else {
+      navigate("/auth");
+    }
+  };
+
+  const handleExploreMarketplace = () => {
+    if (user) {
+      navigate("/marketplace");
+    } else {
+      navigate("/auth");
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-tl from-[#f9fbfd] via-white to-[#eaf3fb] text-foreground font-inter">
       <Navbar />
@@ -72,19 +88,24 @@ const Index = () => {
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-2">
               <button
                 className="bg-primary bg-gradient-to-r from-[#137cfc] to-[#21c7c9] text-white font-semibold px-8 py-4 rounded-xl text-lg shadow-md hover:scale-105 transition-all"
-                onClick={() => navigate("/learning-hub")}
+                onClick={handleGetStarted}
               >
-                Start Your AI Journey
+                {user ? 'Continue Learning' : 'Start Your AI Journey'}
                 <ArrowRight className="inline ml-2 mb-1" />
               </button>
               <button
                 className="bg-white text-primary border border-primary font-semibold px-8 py-4 rounded-xl text-lg shadow hover:bg-blue-50 transition"
-                onClick={() => navigate("/marketplace")}
+                onClick={handleExploreMarketplace}
               >
                 Explore the Marketplace
                 <ArrowDownRight className="inline ml-2 mb-1" />
               </button>
             </div>
+            {!user && (
+              <p className="text-sm text-muted-foreground mt-3">
+                No credit card required • Join 10K+ innovators
+              </p>
+            )}
           </div>
         </section>
 
@@ -167,9 +188,9 @@ const Index = () => {
             <div className="mt-8">
               <button
                 className="bg-gradient-to-r from-[#137cfc] to-[#21c7c9] text-white font-semibold px-8 py-4 rounded-xl text-lg shadow-md hover:scale-105 transition-all"
-                onClick={() => navigate("/learning-hub")}
+                onClick={handleGetStarted}
               >
-                Claim Your AI Future
+                {user ? 'Continue Your Journey' : 'Claim Your AI Future'}
               </button>
             </div>
             <div className="text-sm text-muted-foreground mt-3">No credit card. No sales pitch. Your AI journey starts now.</div>
@@ -190,17 +211,6 @@ const Index = () => {
                   <p className="italic text-md mb-2">&ldquo;{t.quote}&rdquo;</p>
                 </blockquote>
               ))}
-            </div>
-            <div className="mt-10 flex flex-wrap gap-6 justify-center items-center opacity-70">
-              <span className="inline-flex items-center gap-2 text-xs px-3 py-2 bg-white rounded-full border border-blue-100">
-                <Shield className="h-4 w-4 text-primary" /> Backed by AWS
-              </span>
-              <span className="inline-flex items-center gap-2 text-xs px-3 py-2 bg-white rounded-full border border-blue-100">
-                <Star className="h-4 w-4 text-yellow-400" /> Featured in TechCrunch
-              </span>
-              <span className="inline-flex items-center gap-2 text-xs px-3 py-2 bg-white rounded-full border border-blue-100">
-                <Users className="h-4 w-4 text-emerald-500" /> 10K+ innovators & creators
-              </span>
             </div>
           </div>
         </section>
@@ -260,7 +270,7 @@ const Index = () => {
           font-family: 'Inter', sans-serif;
         }
         .mb-safe {
-          margin-bottom: env(safe-area-inset-bottom, 0);
+          margin-bottom: env(safe-area-inset-bottom, 0.5rem);
         }
         .animate-fade-in {
           animation: fade-in 0.7s ease-out;
