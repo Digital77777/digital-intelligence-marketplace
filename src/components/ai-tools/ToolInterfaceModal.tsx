@@ -26,6 +26,7 @@ import AgriMeshNetworkInterface from "./interfaces/AgriMeshNetworkInterface";
 import AICodeAssistantInterface from "./interfaces/AICodeAssistantInterface";
 import AIEmailWriterInterface from "./interfaces/AIEmailWriterInterface";
 import AIMusicComposerBasicInterface from "./interfaces/AIMusicComposerBasicInterface";
+import DataFlowProInterface from "./interfaces/DataFlowProInterface";
 
 interface ToolInterfaceModalProps {
   open: boolean;
@@ -157,6 +158,8 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
         return <AIEmailWriterInterface />;
       case "AI Music Composer Basic":
         return <AIMusicComposerBasicInterface />;
+      case "DataFlow Pro":
+        return <DataFlowProInterface />;
       default:
         return null;
     }
@@ -180,7 +183,8 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
     "AgriMesh Network",
     "AI Code Assistant",
     "AI Email Writer",
-    "AI Music Composer Basic"
+    "AI Music Composer Basic",
+    "DataFlow Pro"
   ].includes(tool.name);
   
   return (
