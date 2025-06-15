@@ -13,6 +13,8 @@ import {
   useStartTraining,
   useDeployModel,
 } from '@/hooks/useModelState';
+import ComponentsSidebar from '@/components/ai-studio/ComponentsSidebar';
+import ModelDesigner from '@/components/ai-studio/ModelDesigner';
 
 const AIStudio = () => {
   const [view, setView] = useState<'list' | 'designer'>('list');
