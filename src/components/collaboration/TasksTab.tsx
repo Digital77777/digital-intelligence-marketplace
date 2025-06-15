@@ -63,7 +63,7 @@ const TasksTab: React.FC<TasksTabProps> = ({ tasks }) => {
                 <div className="flex items-start justify-between mb-2">
                   <h4 className="font-medium text-sm">{task.title}</h4>
                   {task.priority && (
-                    <Badge className={getPriorityColor(task.priority)} size="sm">
+                    <Badge className={getPriorityColor(task.priority)}>
                       {task.priority}
                     </Badge>
                   )}
@@ -116,7 +116,7 @@ const TasksTab: React.FC<TasksTabProps> = ({ tasks }) => {
                 <div className="flex items-start justify-between mb-2">
                   <h4 className="font-medium text-sm">{task.title}</h4>
                   {task.priority && (
-                    <Badge className={getPriorityColor(task.priority)} size="sm">
+                    <Badge className={getPriorityColor(task.priority)}>
                       {task.priority}
                     </Badge>
                   )}
@@ -169,7 +169,7 @@ const TasksTab: React.FC<TasksTabProps> = ({ tasks }) => {
                 <div className="flex items-start justify-between mb-2">
                   <h4 className="font-medium text-sm line-through text-gray-600">{task.title}</h4>
                   {task.priority && (
-                    <Badge className={getPriorityColor(task.priority)} size="sm">
+                    <Badge className={getPriorityColor(task.priority)}>
                       {task.priority}
                     </Badge>
                   )}
