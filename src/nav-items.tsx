@@ -1,13 +1,13 @@
 
 import { Home, Briefcase, Users, Settings, BookOpen, MessageSquare, BarChart3, Building, Zap } from "lucide-react";
-import { Home as HomePage } from "./pages/Home";
-import { Marketplace } from "./pages/Marketplace";
-import { AITools } from "./pages/AITools";
-import { LearningHub } from "./pages/LearningHub";
-import { CommunityForums } from "./pages/CommunityForums";
-import { BusinessInsights } from "./pages/BusinessInsights";
-import { TeamDashboard } from "./pages/TeamDashboard";
-import { AIStreams } from "./pages/AIStreams";
+import HomePage from "./pages/Home";
+import Marketplace from "./pages/Marketplace";
+import AITools from "./pages/AITools";
+import LearningHub from "./pages/LearningHub";
+import CommunityForums from "./pages/CommunityForums";
+import BusinessInsights from "./pages/BusinessInsights";
+import TeamDashboard from "./pages/TeamDashboard";
+import AIStreams from "./pages/AIStreams";
 
 export const navItems = [
   {
