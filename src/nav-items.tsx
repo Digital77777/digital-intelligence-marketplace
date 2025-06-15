@@ -18,6 +18,7 @@ import Auth from "@/pages/Auth";
 import Profile from "@/pages/Profile";
 import Pricing from "@/pages/Pricing";
 import About from "@/pages/About";
+import AIAssistant from "@/pages/AIAssistant";
 
 export const navItems = [
   { to: "/", page: <Index /> },
@@ -34,6 +35,7 @@ export const navItems = [
   { to: "/workflow-designer", page: <WorkflowDesigner /> },
   { to: "/pipeline-designer", page: <PipelineDesigner /> },
   { to: "/ai-studio", page: <AIStudio /> },
+  { to: "/ai-assistant", page: <AIAssistant /> },
   { to: "/auth", page: <Auth /> },
   { to: "/profile", page: <Profile /> },
   { to: "/pricing", page: <Pricing /> },

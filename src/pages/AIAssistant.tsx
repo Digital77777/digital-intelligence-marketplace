@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, AlertCircle, Wifi, WifiOff } from 'lucide-react';
 import { Avatar } from '@/components/ui/avatar';
 import { useUser } from '@/context/UserContext';
 import { useTier } from '@/context/TierContext';
@@ -20,23 +21,49 @@ const AIAssistant: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
+  const [retryCount, setRetryCount] = useState(0);
   const { user } = useUser();
-  const { currentTier, upgradePrompt } = useTier();
+  const { currentTier } = useTier();
   const navigate = useNavigate();
 
+  // Check connection status
   useEffect(() => {
-    if (messages.length === 0) {
+    const checkConnection = async () => {
+      try {
+        setConnectionStatus('checking');
+        // Simple ping to check if the edge function is available
+        const { error } = await supabase.functions.invoke('ai-assistant-chat', {
+          body: { messages: [{ role: 'user', content: 'ping' }] }
+        });
+        
+        if (error) {
+          console.error('Connection check failed:', error);
+          setConnectionStatus('disconnected');
+        } else {
+          setConnectionStatus('connected');
+        }
+      } catch (error) {
+        console.error('Connection error:', error);
+        setConnectionStatus('disconnected');
+      }
+    };
+
+    checkConnection();
+  }, [retryCount]);
+
+  useEffect(() => {
+    if (messages.length === 0 && connectionStatus === 'connected') {
       setMessages([
         {
           id: 'welcome-message',
           role: 'assistant',
-          content:
-            "Hello! I'm your Pro AI Assistant for the Digital Intelligence Marketplace. I can help you navigate the platform, answer questions about AI tools, and provide personalized recommendations. What would you like to know?",
+          content: `Hello${user ? ` ${user.email?.split('@')[0]}` : ''}! I'm your Pro AI Assistant for the Digital Intelligence Marketplace. I can help you navigate the platform, answer questions about AI tools, and provide personalized recommendations based on your ${currentTier} tier. What would you like to know?`,
           timestamp: new Date()
         }
       ]);
     }
-  }, [messages.length]);
+  }, [messages.length, connectionStatus, user, currentTier]);
 
   const handleInputChange = (value: string) => {
     setInputValue(value);
@@ -46,7 +73,13 @@ const AIAssistant: React.FC = () => {
     if (!inputValue.trim() || isLoading) return;
 
     if (!user) {
-      toast("You need to be logged in to use the Pro AI Assistant");
+      toast.error("You need to be logged in to use the Pro AI Assistant");
+      navigate('/auth');
+      return;
+    }
+
+    if (connectionStatus === 'disconnected') {
+      toast.error("Unable to connect to AI Assistant. Please try again.");
       return;
     }
 
@@ -62,14 +95,12 @@ const AIAssistant: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Call Edge Function for AI response
+      // Create context with user tier information
       const contextMessages = [
-        // Initial system prompt for the OpenAI model
         {
           role: "system",
-          content: "You are a helpful AI assistant specialized in digital intelligence and AI tools. Your answers should be concise, friendly, and helpful."
+          content: `You are a helpful AI assistant specialized in digital intelligence and AI tools for the Digital Intelligence Marketplace. The user has a ${currentTier} tier subscription. Provide concise, friendly, and helpful responses. If asked about navigation, provide specific guidance about platform features available to their tier.`
         },
-        // All previous user/assistant messages (for full chat context)
         ...messages.map(m => ({
           role: m.role === "assistant" ? "assistant" : "user",
           content: m.content
@@ -84,8 +115,12 @@ const AIAssistant: React.FC = () => {
         body: { messages: contextMessages }
       });
 
-      if (error || !data?.content) {
-        throw new Error(error?.message || data?.error || "No response from assistant.");
+      if (error) {
+        throw new Error(error.message || "Failed to get response from AI Assistant");
+      }
+
+      if (!data?.content) {
+        throw new Error("No response received from AI Assistant");
       }
 
       const assistantMessage: ChatMessage = {
@@ -99,11 +134,48 @@ const AIAssistant: React.FC = () => {
 
     } catch (error) {
       console.error("Error sending message:", error);
-      toast("Error communicating with AI Assistant");
+      
+      const errorMessage: ChatMessage = {
+        id: `error-${Date.now()}`,
+        role: 'assistant',
+        content: "I apologize, but I'm experiencing technical difficulties right now. Please try again in a moment or contact support if the issue persists.",
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+      toast.error("Failed to send message. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleRetryConnection = () => {
+    setRetryCount(prev => prev + 1);
+    toast.info("Reconnecting to AI Assistant...");
+  };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 pt-24 px-4 md:px-6 pb-12 bg-gray-100 dark:bg-gray-900">
+          <div className="max-w-7xl mx-auto">
+            <Card className="p-8 text-center">
+              <AlertCircle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
+              <h2 className="text-2xl font-semibold mb-2">Authentication Required</h2>
+              <p className="text-muted-foreground mb-4">
+                Please sign in to access the Pro AI Assistant
+              </p>
+              <Button onClick={() => navigate('/auth')}>
+                Sign In
+              </Button>
+            </Card>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -115,14 +187,32 @@ const AIAssistant: React.FC = () => {
               <Avatar className="h-10 w-10">
                 <Sparkles className="h-5 w-5" />
               </Avatar>
-              <div>
-                <h2 className="text-2xl font-semibold">Pro AI Assistant</h2>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-2xl font-semibold">Pro AI Assistant</h2>
+                  {connectionStatus === 'connected' && (
+                    <Wifi className="h-4 w-4 text-green-500" />
+                  )}
+                  {connectionStatus === 'disconnected' && (
+                    <WifiOff className="h-4 w-4 text-red-500" />
+                  )}
+                  {connectionStatus === 'checking' && (
+                    <div className="h-4 w-4 bg-yellow-500 rounded-full animate-pulse" />
+                  )}
+                </div>
                 <p className="text-muted-foreground">
                   Get personalized AI assistance to navigate the platform and discover AI tools.
+                  {currentTier !== 'freemium' && ` You have ${currentTier} tier access.`}
                 </p>
               </div>
+              {connectionStatus === 'disconnected' && (
+                <Button variant="outline" onClick={handleRetryConnection}>
+                  Reconnect
+                </Button>
+              )}
             </div>
           </div>
+          
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
             <div className="hidden xl:block bg-card border rounded-md p-6 xl:basis-1/3">
               <div className="mb-6">
@@ -148,6 +238,10 @@ const AIAssistant: React.FC = () => {
                   <Sparkles className="h-4 w-4 text-primary" />
                   <span className="font-medium">Workflow Optimization</span>
                 </li>
+                <li className="flex items-center gap-3">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <span className="font-medium">Tier-Specific Guidance</span>
+                </li>
               </ul>
             </div>
 
@@ -170,9 +264,21 @@ const AIAssistant: React.FC = () => {
                 value={inputValue}
                 onChange={handleInputChange}
                 onSubmit={handleSendMessage}
-                isLoading={isLoading}
-                placeholder="Ask a question about AI tools, models, or workflows..."
+                isLoading={isLoading || connectionStatus !== 'connected'}
+                placeholder={
+                  connectionStatus === 'connected' 
+                    ? "Ask a question about AI tools, models, or workflows..."
+                    : connectionStatus === 'checking'
+                    ? "Connecting to AI Assistant..."
+                    : "Reconnecting to AI Assistant..."
+                }
               />
+              
+              {connectionStatus === 'disconnected' && (
+                <div className="mt-2 text-sm text-red-600 dark:text-red-400">
+                  Connection lost. Click Reconnect to try again.
+                </div>
+              )}
             </div>
           </div>
         </div>
