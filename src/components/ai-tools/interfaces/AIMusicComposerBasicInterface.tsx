@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Music, Sparkles, MixerHorizontal, Play, StopCircle, Download, BookOpen } from "lucide-react";
+import { Music, Sparkles, MoreHorizontal, Play, StopCircle, Download, BookOpen } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -117,7 +117,7 @@ const AIMusicComposerBasicInterface: React.FC = () => {
                 ))}
               </ul>
               <div className="mt-4 flex items-center gap-2 text-xs text-gray-400">
-                <MixerHorizontal className="h-4 w-4" />
+                <MoreHorizontal className="h-4 w-4" />
                 Experiment with short or long prompts to get different genres!
               </div>
             </CardContent>
