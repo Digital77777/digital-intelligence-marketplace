@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import HeroSection from '@/components/HeroSection';
@@ -83,11 +84,6 @@ const Index = () => {
                 Explore the Marketplace
                 <ArrowDownRight className="inline ml-2 mb-1" />
               </button>
-            </div>
-            <div className="flex flex-wrap gap-3 mt-4 justify-center items-center">
-              <img src="/aws-badge.svg" alt="Backed by AWS" className="h-8" />
-              <img src="/techcrunch-badge.svg" alt="Featured in TechCrunch" className="h-6" />
-              {/* Placeholders, real badges/logos in production */}
             </div>
           </div>
         </section>
