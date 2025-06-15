@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -350,7 +349,7 @@ const Marketplace = () => {
               </TabsList>
               
               <TabsContent value="projects" className="mt-8">
-                <ProjectsTab searchQuery={searchQuery} />
+                <ProjectsTab />
               </TabsContent>
               
               <TabsContent value="freelancers" className="mt-8">

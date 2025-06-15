@@ -5,7 +5,7 @@ import { useMarketplaceProjects } from '@/hooks/useMarketplaceProjects';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { DollarSign, Clock, Calendar, MapPin, ArrowRight } from 'lucide-react';
+import { DollarSign, Clock, Calendar, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 
 const ProjectsTab: React.FC = () => {
@@ -59,7 +59,7 @@ const ProjectsTab: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Available Projects</h2>
-        <Link to="/post-project">
+        <Link to="/marketplace/post-project">
           <Button>Post a Project</Button>
         </Link>
       </div>

@@ -38,9 +38,13 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ projectId }) => {
   });
 
   const onSubmit = (data: ProposalFormData) => {
+    if (!user) return;
+    
     createProposal.mutate({
       project_id: projectId,
-      ...data,
+      cover_letter: data.cover_letter,
+      proposed_amount: data.proposed_amount,
+      proposed_timeline: data.proposed_timeline,
     });
     form.reset();
   };
