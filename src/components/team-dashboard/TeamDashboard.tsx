@@ -1,16 +1,20 @@
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/context/UserContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Calendar, Clock, Users, CheckCircle, AlertCircle, Plus, FileText, Folder, Inbox } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Calendar, Clock, Users, CheckCircle, Plus, FileText, Inbox, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import { Task, Team, TeamDashboardData } from './types';
 import TeamDashboardSkeleton from './TeamDashboardSkeleton';
 import EmptyState from './EmptyState';
 import CreateTaskDialog from './CreateTaskDialog';
+import UpdateTaskDialog from './UpdateTaskDialog';
+import { toast } from 'sonner';
 
 const fetchTeamDashboardData = async () => {
   const { data, error } = await supabase.functions.invoke<TeamDashboardData>('team-dashboard-data', {
@@ -25,12 +29,50 @@ const fetchTeamDashboardData = async () => {
 
 const TeamDashboard = () => {
   const { user } = useUser();
+  const queryClient = useQueryClient();
   const [isCreateTaskOpen, setCreateTaskOpen] = useState(false);
+  const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['team-dashboard', user?.id],
     queryFn: fetchTeamDashboardData,
     enabled: !!user,
+  });
+
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('realtime-tasks')
+      .on<Task>(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'tasks' },
+        (payload) => {
+          queryClient.invalidateQueries({ queryKey: ['team-dashboard', user.id] });
+          // More granular updates can be done with setQueryData for performance
+          // but invalidation is simpler and effective for this use case.
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, queryClient]);
+  
+  const deleteTaskMutation = useMutation({
+    mutationFn: async (taskId: string) => {
+      const { error } = await supabase.from('tasks').delete().eq('id', taskId);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      toast.success('Task deleted successfully!');
+      setTaskToDelete(null);
+    },
+    onError: (error) => {
+      toast.error(`Failed to delete task: ${error.message}`);
+    },
   });
 
   const tasks = data?.tasks || [];
@@ -81,6 +123,29 @@ const TeamDashboard = () => {
         onOpenChange={setCreateTaskOpen}
         teams={teams}
       />
+      <UpdateTaskDialog
+        open={!!taskToEdit}
+        onOpenChange={(open) => !open && setTaskToEdit(null)}
+        task={taskToEdit}
+        teams={teams}
+      />
+      <AlertDialog open={!!taskToDelete} onOpenChange={(open) => !open && setTaskToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the task.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => taskToDelete && deleteTaskMutation.mutate(taskToDelete.id)}>
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -193,6 +258,24 @@ const TeamDashboard = () => {
                             {new Date(task.due_date).toLocaleDateString()}
                           </div>
                         )}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setTaskToEdit(task)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              <span>Edit</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setTaskToDelete(task)} className="text-red-600">
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              <span>Delete</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                   ))}

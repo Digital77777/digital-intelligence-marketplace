@@ -8,6 +8,7 @@ export interface Task {
   due_date: string | null;
   team_id: string;
   created_at: string;
+  updated_at: string;
 }
 
 export interface Team {
