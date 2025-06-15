@@ -2,7 +2,7 @@
 import React from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { aiTools, toolCategories } from '@/data/ai-tools-tiers';
-import { allCourses } from '@/data/courses'; // <-- FIX: Added import for allCourses
+import { allCourses } from '@/data/courses';
 import { forumData } from '@/data/forum';
 
 interface SearchItem {
@@ -21,6 +21,22 @@ export const useSearchCommands = () => {
   const [query, setQuery] = React.useState('');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  // Add keyboard event listener for Ctrl+K
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setOpen(true);
+      }
+      if (e.key === 'Escape') {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const searchItems = React.useMemo(() => {
     if (!query) return [];

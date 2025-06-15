@@ -11,12 +11,14 @@ import { useTier } from '@/context/TierContext';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import NotificationPanel from './NotificationPanel';
 import { supabase } from '@/integrations/supabase/client';
+import { useSearchCommands } from '@/components/search/useSearchCommands';
 
 const NavbarActions = () => {
   const navigate = useNavigate();
   const { profile, user } = useUser();
   const { currentTier } = useTier();
   const [notificationCount, setNotificationCount] = useState(3);
+  const { setOpen } = useSearchCommands();
 
   const handleClearNotifications = () => {
     toast.success("Notifications cleared");
@@ -45,12 +47,7 @@ const NavbarActions = () => {
   };
 
   const openSearch = () => {
-    // Trigger keyboard shortcut to open search
-    document.dispatchEvent(new KeyboardEvent('keydown', {
-      key: 'k',
-      ctrlKey: true,
-      bubbles: true
-    }));
+    setOpen(true);
   };
 
   return (
