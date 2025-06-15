@@ -15,9 +15,11 @@ import WorkflowList from './WorkflowList';
 import WorkflowDetail from './WorkflowDetail';
 import CreateWorkflowForm from './CreateWorkflowForm';
 import { Button } from '../ui/button';
+import { useUser } from '@/context/UserContext';
 
 const WorkflowEditor = () => {
   const { canAccess } = useTier();
+  const { user } = useUser();
   const { workflows, isLoading, createWorkflow, updateWorkflow } = useWorkflows();
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -61,8 +63,17 @@ const WorkflowEditor = () => {
   };
 
   const handleCreateWorkflow = async (workflowData: { name: string; description: string; }) => {
+    if (!user) {
+      toast({
+        title: "Authentication Error",
+        description: "You must be logged in to create a workflow.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
-      const newWorkflow = await createWorkflow.mutateAsync(workflowData);
+      const newWorkflow = await createWorkflow.mutateAsync({ ...workflowData, created_by: user.id });
       if (newWorkflow && newWorkflowFromTemplate?.template?.steps) {
         const workflowWithSteps = {
             ...newWorkflow,
@@ -74,6 +85,8 @@ const WorkflowEditor = () => {
         };
         await handleUpdateWorkflow(workflowWithSteps);
         setSelectedWorkflow(workflowWithSteps);
+      } else if (newWorkflow) {
+        setSelectedWorkflow(newWorkflow);
       }
       setIsCreateDialogOpen(false);
       setNewWorkflowFromTemplate(undefined);
@@ -122,7 +135,7 @@ const WorkflowEditor = () => {
             </DialogHeader>
             <CreateWorkflowForm 
               onSubmit={handleCreateWorkflow} 
-              isSubmitting={createWorkflow.isLoading || updateWorkflow.isLoading}
+              isSubmitting={createWorkflow.isPending || updateWorkflow.isPending}
               initialData={newWorkflowFromTemplate ? { name: newWorkflowFromTemplate.name, description: newWorkflowFromTemplate.description } : undefined}
             />
           </DialogContent>

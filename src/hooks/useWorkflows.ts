@@ -1,9 +1,9 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Workflow } from '@/components/workflow/types';
 import { useUser } from '@/context/UserContext';
+import { useEffect } from 'react';
 
 const fetchWorkflows = async (): Promise<Workflow[]> => {
     const { data, error } = await supabase
@@ -24,18 +24,21 @@ export const useWorkflows = () => {
     const { toast } = useToast();
     const { user } = useUser();
 
-    const { data: workflows = [], isLoading } = useQuery<Workflow[]>({
+    const { data: workflows = [], isLoading, isError, error } = useQuery<Workflow[], Error>({
         queryKey: ['workflows'],
         queryFn: fetchWorkflows,
-        onError: (error: any) => {
+    });
+    
+    useEffect(() => {
+        if (isError) {
             console.error('Error fetching workflows:', error);
             toast({
                 title: "Error",
-                description: "Failed to load workflows",
+                description: error?.message || "Failed to load workflows",
                 variant: "destructive"
             });
         }
-    });
+    }, [isError, error, toast]);
 
     const createWorkflowMutation = useMutation({
         mutationFn: async (newWorkflow: { name: string, description: string }) => {
