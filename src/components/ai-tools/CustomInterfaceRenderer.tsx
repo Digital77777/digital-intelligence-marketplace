@@ -25,6 +25,7 @@ import SEOBoostAIInterface from "./interfaces/SEOBoostAIInterface";
 import TeamSyncAIInterface from "./interfaces/TeamSyncAIInterface";
 import AgroBotCommanderInterface from "./interfaces/AgroBotCommanderInterface";
 import AquaYieldOSInterface from "./interfaces/AquaYieldOSInterface";
+import FarmPLAIInterface from "./interfaces/FarmPLAIInterface";
 
 interface CustomInterfaceRendererProps {
   tool: AIToolItem;
@@ -84,6 +85,9 @@ const CustomInterfaceRenderer: React.FC<CustomInterfaceRendererProps> = ({ tool,
       case "AquaYield OS":
         console.log('CustomInterfaceRenderer: Rendering AquaYield OS interface');
         return <AquaYieldOSInterface onBack={() => onOpenChange(false)} />;
+      case "Farm P&L AI":
+        console.log('CustomInterfaceRenderer: Rendering Farm P&L AI interface');
+        return <FarmPLAIInterface onBack={() => onOpenChange(false)} />;
       default:
         console.log('CustomInterfaceRenderer: No custom interface found for:', tool.name);
         return null;
@@ -114,7 +118,8 @@ export const CUSTOM_INTERFACES = [
     "SEO Boost AI",
     "TeamSync AI",
     "AgroBot Commander",
-    "AquaYield OS"
+    "AquaYield OS",
+    "Farm P&L AI"
 ];
 
 export default CustomInterfaceRenderer;
