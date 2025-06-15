@@ -20,6 +20,8 @@ import Pricing from "./pages/Pricing";
 import TeamDashboard from "./pages/TeamDashboard";
 import CollaborationHub from "./pages/CollaborationHub";
 import AIAssistant from "./pages/AIAssistant";
+import WorkflowDesignerPage from "./pages/WorkflowDesigner";
+import PipelineDesignerPage from "./pages/PipelineDesigner";
 
 const queryClient = new QueryClient();
 
@@ -102,6 +104,18 @@ function App() {
                   <Route path="/ai-assistant" element={
                     <AuthGuard>
                       <AIAssistant />
+                    </AuthGuard>
+                  } />
+                  
+                  <Route path="/workflow-designer" element={
+                    <AuthGuard>
+                      <WorkflowDesignerPage />
+                    </AuthGuard>
+                  } />
+
+                  <Route path="/pipeline-designer" element={
+                    <AuthGuard>
+                      <PipelineDesignerPage />
                     </AuthGuard>
                   } />
                 </Routes>
