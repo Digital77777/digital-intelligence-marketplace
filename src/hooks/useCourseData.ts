@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { LearningCourse, LearningProgress } from '@/types/learning';
+import { Course, LearningProgress } from '@/types/learning';
 
 export interface CourseResource {
   id: string;
@@ -23,7 +24,7 @@ export const useCourseData = (courseId: string | undefined) => {
     data: course,
     isLoading: courseLoading,
     error: courseError
-  } = useQuery<LearningCourse | null>({
+  } = useQuery<Course | null>({
     queryKey: ['course', courseId],
     queryFn: async () => {
       if (!courseId) return null;

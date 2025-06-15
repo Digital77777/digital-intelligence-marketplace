@@ -3,10 +3,10 @@ import { Database } from '@/integrations/supabase/types';
 
 type Tables = Database['public']['Tables'];
 
-export type LearningCourse = Tables['learning_courses']['Row'];
+export type Course = Tables['learning_courses']['Row'];
 export type LearningPathRow = Tables['learning_paths']['Row'];
 export type LearningPath = Omit<LearningPathRow, 'courses'> & {
-  courses: LearningCourse[];
+  courses: Course[];
 };
 export type Certification = Tables['certifications']['Row'];
 export type LiveEvent = Tables['live_events']['Row'];

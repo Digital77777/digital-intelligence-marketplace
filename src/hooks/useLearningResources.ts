@@ -1,11 +1,12 @@
 
+
 import { useMemo } from 'react';
 import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
 import { useTier } from '@/context/TierContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { LearningCourse, LearningPath, Certification, LiveEvent, LearningProgress } from '@/types/learning';
+import { Course, LearningPath, Certification, LiveEvent, LearningProgress } from '@/types/learning';
 
 interface UseLearningResourcesProps {
   categoryFilter?: string;
@@ -15,7 +16,7 @@ interface UseLearningResourcesProps {
 }
 
 interface UseLearningResourcesResult {
-  courses: LearningCourse[];
+  courses: Course[];
   liveEvents: LiveEvent[];
   certifications: Certification[];
   learningPaths: LearningPath[];
@@ -66,7 +67,7 @@ export const useLearningResources = ({
         ...path,
         courses: path.courses
           .map(courseId => courses.find(c => c.id === courseId))
-          .filter((c): c is LearningCourse => !!c)
+          .filter((c): c is Course => !!c)
       }));
 
       return { courses, learningPaths: populatedPaths, certifications: certs, liveEvents: events, userProgress };
