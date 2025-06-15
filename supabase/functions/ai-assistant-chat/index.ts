@@ -2,8 +2,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -22,9 +20,24 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    
     if (!openAIApiKey) {
       logStep("ERROR: OpenAI API key not configured");
-      return new Response(JSON.stringify({ error: "OpenAI API key not configured" }), {
+      return new Response(JSON.stringify({ 
+        error: "OpenAI API key not configured. Please set the OPENAI_API_KEY secret in Supabase." 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      });
+    }
+
+    // Validate API key format
+    if (!openAIApiKey.startsWith('sk-') || openAIApiKey.length < 20) {
+      logStep("ERROR: Invalid OpenAI API key format", { keyPrefix: openAIApiKey.substring(0, 10) });
+      return new Response(JSON.stringify({ 
+        error: "Invalid OpenAI API key format. Please check your OPENAI_API_KEY secret." 
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,
       });
@@ -59,7 +72,20 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       logStep("OpenAI API error", { status: response.status, error: errorText });
-      return new Response(JSON.stringify({ error: "OpenAI API error" }), {
+      
+      if (response.status === 401) {
+        return new Response(JSON.stringify({ 
+          error: "OpenAI API authentication failed. Please check your API key." 
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 401,
+        });
+      }
+      
+      return new Response(JSON.stringify({ 
+        error: "OpenAI API error",
+        details: errorText 
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: response.status,
       });
@@ -77,7 +103,10 @@ serve(async (req) => {
   } catch (error) {
     logStep("ERROR in ai-assistant-chat", { message: error instanceof Error ? error.message : String(error) });
     return new Response(
-      JSON.stringify({ error: "Internal server error" }),
+      JSON.stringify({ 
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : String(error)
+      }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
