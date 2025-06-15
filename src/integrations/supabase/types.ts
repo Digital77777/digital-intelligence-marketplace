@@ -266,6 +266,7 @@ export type Database = {
           title: string
           trend_direction: string | null
           trend_percentage: number | null
+          user_id: string
         }
         Insert: {
           category: string
@@ -279,6 +280,7 @@ export type Database = {
           title: string
           trend_direction?: string | null
           trend_percentage?: number | null
+          user_id: string
         }
         Update: {
           category?: string
@@ -292,6 +294,7 @@ export type Database = {
           title?: string
           trend_direction?: string | null
           trend_percentage?: number | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -1128,6 +1131,7 @@ export type Database = {
           id: string
           snapshot_date: string
           total_revenue: number | null
+          user_id: string
         }
         Insert: {
           active_users?: number | null
@@ -1137,6 +1141,7 @@ export type Database = {
           id?: string
           snapshot_date: string
           total_revenue?: number | null
+          user_id: string
         }
         Update: {
           active_users?: number | null
@@ -1146,6 +1151,7 @@ export type Database = {
           id?: string
           snapshot_date?: string
           total_revenue?: number | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -1234,6 +1240,7 @@ export type Database = {
           id: string
           metric_name: string
           updated_at: string
+          user_id: string
           value: number
         }
         Insert: {
@@ -1242,6 +1249,7 @@ export type Database = {
           id?: string
           metric_name: string
           updated_at?: string
+          user_id: string
           value: number
         }
         Update: {
@@ -1250,6 +1258,7 @@ export type Database = {
           id?: string
           metric_name?: string
           updated_at?: string
+          user_id?: string
           value?: number
         }
         Relationships: []

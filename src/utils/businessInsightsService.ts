@@ -5,6 +5,7 @@ import { useUser } from "@/context/UserContext";
 
 export interface BusinessInsight {
   id: string;
+  user_id: string;
   title: string;
   summary: string;
   category: string;

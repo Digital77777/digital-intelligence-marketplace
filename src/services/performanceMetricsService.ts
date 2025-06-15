@@ -5,6 +5,7 @@ import { subDays } from 'date-fns';
 
 export interface PerformanceMetric {
   id: string;
+  user_id: string;
   metric_name: string;
   value: number;
   change_value: number | null;
@@ -14,6 +15,7 @@ export interface PerformanceMetric {
 
 export interface MetricSnapshot {
   id: string;
+  user_id: string;
   snapshot_date: string;
   total_revenue: number | null;
   active_users: number | null;
