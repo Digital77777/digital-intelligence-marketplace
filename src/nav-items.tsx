@@ -1,7 +1,7 @@
 
 import React from 'react';
 import Index from "@/pages/Index";
-import AITools from "@/pages/AITools";
+import AIToolsDirectory from "@/pages/AIToolsDirectory";
 import Marketplace from "@/pages/Marketplace";
 import PostProject from "@/pages/PostProject";
 import LearningHub from "@/pages/LearningHub";
@@ -21,7 +21,7 @@ import About from "@/pages/About";
 
 export const navItems = [
   { to: "/", page: <Index /> },
-  { to: "/ai-tools-directory", page: <AITools /> },
+  { to: "/ai-tools-directory", page: <AIToolsDirectory /> },
   { to: "/marketplace", page: <Marketplace /> },
   { to: "/marketplace/post-project", page: <PostProject /> },
   { to: "/learning-hub", page: <LearningHub /> },
