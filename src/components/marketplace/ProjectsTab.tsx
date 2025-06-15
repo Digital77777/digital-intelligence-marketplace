@@ -1,17 +1,15 @@
+
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useMarketplaceProjects } from '@/hooks/useMarketplaceProjects';
-import { useTier } from '@/context/TierContext';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { DollarSign, Clock, Calendar, ArrowRight, Lock } from 'lucide-react';
+import { DollarSign, Clock, Calendar, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 
 const ProjectsTab: React.FC = () => {
   const { data: projects, isLoading } = useMarketplaceProjects();
-  const { canAccess, currentTier } = useTier();
-  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -57,53 +55,17 @@ const ProjectsTab: React.FC = () => {
     }
   };
 
-  const handlePostProject = () => {
-    if (canAccess('team-dashboard')) { // Basic tier check
-      navigate('/post-project');
-    } else {
-      navigate('/pricing');
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Available Projects</h2>
-        <div className="flex items-center gap-2">
-          {!canAccess('team-dashboard') && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Lock className="w-4 h-4" />
-              <span>Upgrade to post projects</span>
-            </div>
-          )}
-          <Button onClick={handlePostProject}>
-            {canAccess('team-dashboard') ? 'Post a Project' : 'Upgrade to Post'}
-          </Button>
-        </div>
+        <Link to="/post-project">
+          <Button>Post a Project</Button>
+        </Link>
       </div>
 
-      {/* Tier messaging for freemium users */}
-      {currentTier === 'freemium' && (
-        <Card className="border-amber-200 bg-amber-50">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <Lock className="w-5 h-5 text-amber-600" />
-              <div>
-                <h3 className="font-medium text-amber-900">Upgrade to Post Projects</h3>
-                <p className="text-sm text-amber-700">
-                  Basic and Pro users can post projects to connect with AI experts. 
-                  <Link to="/pricing" className="font-medium underline ml-1">
-                    Upgrade now
-                  </Link>
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {projects?.map((project) => (
+        {projects.map((project) => (
           <Card key={project.id} className="hover:shadow-lg transition-shadow">
             <CardHeader>
               <div className="flex justify-between items-start">
