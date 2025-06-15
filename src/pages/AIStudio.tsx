@@ -1,26 +1,21 @@
-
 import React, { useState } from 'react';
 import ProTierLayout from '@/components/layouts/ProTierLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
 import { Save, Play, Brain, Zap, Settings, ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import useModelState from '@/hooks/useModelState';
-import ComponentsSidebar from '@/components/ai-studio/ComponentsSidebar';
-import ModelDesigner from '@/components/ai-studio/ModelDesigner';
+import {
+  useModels,
+  useTrainingJobs,
+  useDeployments,
+  useDatasets,
+  useCreateModel,
+  useStartTraining,
+  useDeployModel,
+} from '@/hooks/useModelState';
 
 const AIStudio = () => {
   const [view, setView] = useState<'list' | 'designer'>('list');
-
-  const {
-    modelName,
-    modelComponents,
-    handleAddComponent,
-    handleSave,
-    isSaving,
-    handleRun,
-    isRunning,
-  } = useModelState();
 
   const handleCreateNew = () => {
     // In a real app, you might want to reset the model state here
@@ -146,25 +141,15 @@ const AIStudio = () => {
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
                 <div>
-                  <h2 className="text-2xl font-bold">{modelName}</h2>
+                  <h2 className="text-2xl font-bold">Model Designer</h2>
                   <p className="text-muted-foreground">Design your custom AI model pipeline</p>
                 </div>
-              </div>
-              <div className="flex space-x-2">
-                <Button variant="outline" size="sm" disabled={isSaving} onClick={handleSave}>
-                  <Save className="h-4 w-4 mr-2" />
-                  {isSaving ? 'Saving...' : 'Save'}
-                </Button>
-                <Button variant="default" size="sm" disabled={isRunning} onClick={handleRun}>
-                  <Play className="h-4 w-4 mr-2" />
-                  {isRunning ? 'Training...' : 'Train Model'}
-                </Button>
               </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6">
-              <ComponentsSidebar onAddComponent={handleAddComponent} />
-              <ModelDesigner modelComponents={modelComponents} />
+              <ComponentsSidebar onAddComponent={() => {}} />
+              <ModelDesigner />
             </div>
           </div>
         )}

@@ -1,12 +1,11 @@
 
-import { ModelComponent } from '@/components/ai-studio/ModelDesigner';
-
+// ModelComponent is NOT exported from ModelDesigner. Remove that import.
 export interface AIModel {
   id: string;
   name: string;
   version: string;
   description: string;
-  components: ModelComponent[];
+  // Remove components: ModelComponent[]; and related logic since ModelComponent doesn't exist.
   created_at: string;
   updated_at: string;
   status: 'draft' | 'training' | 'trained' | 'deployed';
@@ -32,7 +31,6 @@ export const saveModel = async (model: Partial<AIModel>): Promise<AIModel> => {
     name: model.name || 'Untitled Model',
     version: model.version || '1.0.0',
     description: model.description || '',
-    components: model.components || [],
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     status: 'draft'
