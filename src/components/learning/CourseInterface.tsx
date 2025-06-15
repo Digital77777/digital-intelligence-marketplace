@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -7,7 +8,6 @@ import CourseTabs from './course/CourseTabs';
 import CourseLoadingSkeleton from './course/CourseLoadingSkeleton';
 import CourseErrorState from './course/CourseErrorState';
 import { useCourseData } from '@/hooks/useCourseData';
-import { updateUserProgress } from '@/utils/courseService';
 import { Button } from '@/components/ui/button';
 import { Download, ArrowLeft } from 'lucide-react';
 

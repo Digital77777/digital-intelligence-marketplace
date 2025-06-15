@@ -1,8 +1,10 @@
 
 import React from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { type Course } from '@/types/learning';
 import { aiTools, toolCategories } from '@/data/ai-tools-tiers';
-import { allCourses } from '@/data/courses';
 import { forumData } from '@/data/forum';
 
 interface SearchItem {
@@ -21,6 +23,19 @@ export const useSearchCommands = () => {
   const [query, setQuery] = React.useState('');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  const { data: allCourses = [] } = useQuery<Course[]>({
+    queryKey: ['all-courses-for-search'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('learning_courses').select('*');
+      if (error) {
+        console.error('Error fetching courses for search:', error);
+        return [];
+      }
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
   // Add keyboard event listener for Ctrl+K
   React.useEffect(() => {
@@ -89,16 +104,16 @@ export const useSearchCommands = () => {
     allCourses.forEach(course => {
       if (
         course.title.toLowerCase().includes(lowerQuery) ||
-        course.description.toLowerCase().includes(lowerQuery) ||
-        (course as any).tags?.some?.((tag: string) => tag.toLowerCase().includes(lowerQuery))
+        (course.description && course.description.toLowerCase().includes(lowerQuery)) ||
+        course.tags?.some((tag: string) => tag.toLowerCase().includes(lowerQuery))
       ) {
         results.push({
           id: course.id,
           title: course.title,
-          description: course.description,
+          description: course.description || '',
           type: 'course',
-          url: `/courses/${course.id}`,
-          route: `/courses/${course.id}`,
+          url: `/learning-hub/courses/${course.id}`,
+          route: `/learning-hub/courses/${course.id}`,
         });
       }
     });
@@ -122,7 +137,7 @@ export const useSearchCommands = () => {
     });
     
     return results.slice(0, 20);
-  }, [query]);
+  }, [query, allCourses]);
 
   const groupedItems = React.useMemo(() => {
     const grouped: { [key: string]: SearchItem[] } = {};
