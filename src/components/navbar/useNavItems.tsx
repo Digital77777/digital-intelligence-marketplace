@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { useTier } from '@/context/TierContext';
 import { Search } from 'lucide-react';
@@ -34,7 +35,7 @@ export function useNavItems() {
     },
     {
       title: "Forums",
-      path: "/forums",
+      path: "/community-forums",
       icon: <span className="mr-1.5">💬</span>,
       visible: canAccess('forums')
     },
