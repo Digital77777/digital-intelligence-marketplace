@@ -2057,6 +2057,20 @@ export type Database = {
         }
         Returns: number
       }
+      get_workflow_runs_with_details: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          workflow_id: string
+          workflow_name: string
+          status: string
+          duration: string
+          start_time: string
+          steps_count: number
+          triggered_by: string
+          error_message: string
+        }[]
+      }
       gtrgm_compress: {
         Args: { "": unknown }
         Returns: unknown

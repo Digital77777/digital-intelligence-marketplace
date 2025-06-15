@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +17,7 @@ import BusinessInsights from "./pages/BusinessInsights";
 import ComplianceCenter from "./pages/ComplianceCenter";
 import TeamDashboard from "./pages/TeamDashboard";
 import WorkflowDesigner from "./pages/WorkflowDesigner";
+import WorkflowHistoryPage from "./pages/WorkflowHistoryPage";
 import PipelineDesigner from "./pages/PipelineDesigner";
 import AIStudio from "./pages/AIStudio";
 import LearningAcademy from "./pages/LearningAcademy";
@@ -66,9 +66,9 @@ const App = () => (
                 {/* New Feature Routes */}
                 <Route path="/team-dashboard" element={<TeamDashboard />} />
                 <Route path="/workflow-designer" element={<WorkflowDesigner />} />
+                <Route path="/workflow-history" element={<WorkflowHistoryPage />} />
                 <Route path="/pipeline-designer" element={<PipelineDesigner />} />
                 <Route path="/business-insights" element={<BusinessInsights />} />
-                <Route path="/compliance-center" element={<ComplianceCenter />} />
                 
                 {/* Pro Tier Routes */}
                 <Route path="/ai-studio" element={<AIStudio />} />
@@ -87,4 +87,3 @@ const App = () => (
 );
 
 export default App;
-
