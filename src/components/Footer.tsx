@@ -4,42 +4,33 @@ import { Link } from 'react-router-dom';
 import { Brain, Github, Twitter, Linkedin, Mail } from 'lucide-react';
 
 const Footer = () => {
-  const currentYear = new Date().getFullYear();
-
   return (
-    <footer className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
-      <div className="max-w-7xl mx-auto px-6 py-12">
+    <footer className="bg-gradient-to-r from-[#005ea8] to-[#0071c2] text-white py-12">
+      <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand Section */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center mb-4">
-              <div className="bg-blue-600 p-2 rounded-lg mr-3">
-                <Brain className="h-6 w-6 text-white" />
-              </div>
+              <Brain className="h-8 w-8 mr-3" />
               <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                  Digital Intelligence
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Marketplace for AI Solutions
-                </p>
+                <h3 className="text-xl font-bold">Digital Intelligence Hub</h3>
+                <p className="text-sm text-blue-100">Marketplace for AI Solutions</p>
               </div>
             </div>
-            <p className="text-gray-600 dark:text-gray-400 mb-4 max-w-md">
-              Empowering individuals and businesses with cutting-edge AI tools and technologies. 
-              Access the future of artificial intelligence today.
+            <p className="text-blue-100 mb-4 max-w-md">
+              Join 10K+ innovators learning AI, building projects, and growing their skills with our comprehensive platform of tools, courses, and community.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-blue-600 transition-colors">
-                <Twitter className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-blue-600 transition-colors">
-                <Linkedin className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-blue-600 transition-colors">
+              <a href="#" className="text-blue-100 hover:text-white transition-colors">
                 <Github className="h-5 w-5" />
               </a>
-              <a href="mailto:contact@digitalintelligence.ai" className="text-gray-400 hover:text-blue-600 transition-colors">
+              <a href="#" className="text-blue-100 hover:text-white transition-colors">
+                <Twitter className="h-5 w-5" />
+              </a>
+              <a href="#" className="text-blue-100 hover:text-white transition-colors">
+                <Linkedin className="h-5 w-5" />
+              </a>
+              <a href="mailto:contact@digitalintelligencehub.com" className="text-blue-100 hover:text-white transition-colors">
                 <Mail className="h-5 w-5" />
               </a>
             </div>
@@ -47,75 +38,76 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Platform</h4>
+            <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/ai-tools-directory" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors">
+                <Link to="/ai-tools-directory" className="text-blue-100 hover:text-white transition-colors">
                   AI Tools
                 </Link>
               </li>
               <li>
-                <Link to="/learning-hub" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors">
+                <Link to="/learning-hub" className="text-blue-100 hover:text-white transition-colors">
                   Learning Hub
                 </Link>
               </li>
               <li>
-                <Link to="/marketplace" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors">
+                <Link to="/marketplace" className="text-blue-100 hover:text-white transition-colors">
                   Marketplace
                 </Link>
               </li>
               <li>
-                <Link to="/community" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors">
+                <Link to="/community-forums" className="text-blue-100 hover:text-white transition-colors">
                   Community
+                </Link>
+              </li>
+              <li>
+                <Link to="/pricing" className="text-blue-100 hover:text-white transition-colors">
+                  Pricing
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Support */}
+          {/* Legal & Support */}
           <div>
-            <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Support</h4>
+            <h4 className="text-lg font-semibold mb-4">Legal & Support</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/pricing" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors">
-                  Pricing
+                <Link to="/about" className="text-blue-100 hover:text-white transition-colors">
+                  About Us
                 </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors">
-                  Documentation
+                <Link to="/privacy-policy" className="text-blue-100 hover:text-white transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms-of-service" className="text-blue-100 hover:text-white transition-colors">
+                  Terms of Service
+                </Link>
+              </li>
+              <li>
+                <a href="mailto:support@digitalintelligencehub.com" className="text-blue-100 hover:text-white transition-colors">
+                  Contact Support
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors">
-                  Help Center
-                </a>
-              </li>
-              <li>
-                <a href="mailto:support@digitalintelligence.ai" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors">
-                  Contact Us
+                <a href="mailto:feedback@digitalintelligencehub.com" className="text-blue-100 hover:text-white transition-colors">
+                  Send Feedback
                 </a>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom Section */}
-        <div className="border-t border-gray-200 dark:border-gray-700 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-600 dark:text-gray-400 text-sm">
-            © {currentYear} Digital Intelligence Marketplace. All rights reserved.
+        <div className="border-t border-blue-400/30 mt-8 pt-8 text-center">
+          <p className="text-blue-100">
+            © {new Date().getFullYear()} Digital Intelligence Hub. All rights reserved.
           </p>
-          <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 text-sm transition-colors">
-              Privacy Policy
-            </a>
-            <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 text-sm transition-colors">
-              Terms of Service
-            </a>
-            <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 text-sm transition-colors">
-              Cookie Policy
-            </a>
-          </div>
+          <p className="text-sm text-blue-200 mt-2">
+            Empowering innovation through artificial intelligence
+          </p>
         </div>
       </div>
     </footer>

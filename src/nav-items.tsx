@@ -19,6 +19,9 @@ import Profile from "@/pages/Profile";
 import Pricing from "@/pages/Pricing";
 import About from "@/pages/About";
 import AIAssistant from "@/pages/AIAssistant";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import TermsOfService from "@/pages/TermsOfService";
+import LaunchStatus from "@/pages/LaunchStatus";
 
 export const navItems = [
   { to: "/", page: <Index /> },
@@ -40,4 +43,7 @@ export const navItems = [
   { to: "/profile", page: <Profile /> },
   { to: "/pricing", page: <Pricing /> },
   { to: "/about", page: <About /> },
+  { to: "/privacy-policy", page: <PrivacyPolicy /> },
+  { to: "/terms-of-service", page: <TermsOfService /> },
+  { to: "/launch-status", page: <LaunchStatus /> },
 ];
