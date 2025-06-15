@@ -1,63 +1,60 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, CalendarPlus, FileUp, Settings, Users } from 'lucide-react';
+import { Plus, Users, MessageSquare, Calendar, Settings } from 'lucide-react';
 
-export const QuickActions: React.FC = () => {
-  const navigate = useNavigate();
-  
+const QuickActions: React.FC = () => {
   const actions = [
-    { 
-      title: "New Discussion", 
-      icon: <MessageCircle className="h-4 w-4 mr-2" />,
-      path: "/forums/new-topic/general"
+    {
+      icon: <Plus className="w-4 h-4" />,
+      label: 'New Task',
+      description: 'Create a new task for the team',
+      variant: 'default' as const,
     },
-    { 
-      title: "Schedule Meeting", 
-      icon: <CalendarPlus className="h-4 w-4 mr-2" />,
-      path: "/team-dashboard/calendar"
+    {
+      icon: <MessageSquare className="w-4 h-4" />,
+      label: 'Start Discussion',
+      description: 'Begin a new team discussion',
+      variant: 'outline' as const,
     },
-    { 
-      title: "Share Document", 
-      icon: <FileUp className="h-4 w-4 mr-2" />,
-      path: "/collaboration-hub/files"
+    {
+      icon: <Calendar className="w-4 h-4" />,
+      label: 'Schedule Meeting',
+      description: 'Plan a team meeting',
+      variant: 'outline' as const,
     },
-    { 
-      title: "Manage Team", 
-      icon: <Users className="h-4 w-4 mr-2" />,
-      path: "/team-dashboard"
+    {
+      icon: <Users className="w-4 h-4" />,
+      label: 'Invite Members',
+      description: 'Add new team members',
+      variant: 'outline' as const,
     },
-    { 
-      title: "Project Settings", 
-      icon: <Settings className="h-4 w-4 mr-2" />,
-      path: "/collaboration-hub/settings"
-    }
   ];
-
-  const handleButtonClick = (path: string) => {
-    // Make sure we scroll to top before navigating
-    window.scrollTo(0, 0);
-    navigate(path);
-  };
 
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg">Quick Actions</CardTitle>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Settings className="w-5 h-5" />
+          Quick Actions
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
+        <div className="space-y-3">
           {actions.map((action, index) => (
-            <Button 
-              key={index} 
-              variant="outline" 
-              className="w-full justify-start booking-btn-secondary"
-              onClick={() => handleButtonClick(action.path)}
+            <Button
+              key={index}
+              variant={action.variant}
+              className="w-full justify-start h-auto p-3"
             >
-              {action.icon}
-              {action.title}
+              <div className="flex items-center space-x-3">
+                {action.icon}
+                <div className="text-left">
+                  <div className="font-medium">{action.label}</div>
+                  <div className="text-xs text-gray-500">{action.description}</div>
+                </div>
+              </div>
             </Button>
           ))}
         </div>

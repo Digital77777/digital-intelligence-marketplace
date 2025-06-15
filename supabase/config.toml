@@ -1,3 +1,4 @@
+
 project_id = "vnoxdbvpheowgugeyyfk"
 
 [api]
@@ -84,3 +85,12 @@ verify_jwt = true
 
 [functions.ai-assistant-chat]
 verify_jwt = false
+
+[functions.team-dashboard-data]
+verify_jwt = true
+
+[functions.collaboration-hub-data]
+verify_jwt = true
+
+[functions.file-upload]
+verify_jwt = true

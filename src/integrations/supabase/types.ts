@@ -503,6 +503,66 @@ export type Database = {
           },
         ]
       }
+      discussions: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          discussion_type: Database["public"]["Enums"]["discussion_type"]
+          id: string
+          is_pinned: boolean
+          mentions: Json | null
+          parent_id: string | null
+          reply_count: number
+          team_id: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          discussion_type?: Database["public"]["Enums"]["discussion_type"]
+          id?: string
+          is_pinned?: boolean
+          mentions?: Json | null
+          parent_id?: string | null
+          reply_count?: number
+          team_id?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          discussion_type?: Database["public"]["Enums"]["discussion_type"]
+          id?: string
+          is_pinned?: boolean
+          mentions?: Json | null
+          parent_id?: string | null
+          reply_count?: number
+          team_id?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discussions_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "discussions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discussions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       escrow_transactions: {
         Row: {
           amount: number
@@ -575,6 +635,101 @@ export type Database = {
             columns: ["tool_id"]
             isOneToOne: false
             referencedRelation: "ai_tools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      file_attachments: {
+        Row: {
+          attached_at: string
+          discussion_id: string
+          file_id: string
+          id: string
+        }
+        Insert: {
+          attached_at?: string
+          discussion_id: string
+          file_id: string
+          id?: string
+        }
+        Update: {
+          attached_at?: string
+          discussion_id?: string
+          file_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "file_attachments_discussion_id_fkey"
+            columns: ["discussion_id"]
+            isOneToOne: false
+            referencedRelation: "discussions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "file_attachments_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      files: {
+        Row: {
+          created_at: string
+          download_count: number
+          file_type: Database["public"]["Enums"]["file_type"]
+          id: string
+          is_public: boolean
+          mime_type: string
+          name: string
+          original_name: string
+          size_bytes: number
+          storage_path: string
+          team_id: string | null
+          thumbnail_path: string | null
+          updated_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          download_count?: number
+          file_type?: Database["public"]["Enums"]["file_type"]
+          id?: string
+          is_public?: boolean
+          mime_type: string
+          name: string
+          original_name: string
+          size_bytes: number
+          storage_path: string
+          team_id?: string | null
+          thumbnail_path?: string | null
+          updated_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string
+          download_count?: number
+          file_type?: Database["public"]["Enums"]["file_type"]
+          id?: string
+          is_public?: boolean
+          mime_type?: string
+          name?: string
+          original_name?: string
+          size_bytes?: number
+          storage_path?: string
+          team_id?: string | null
+          thumbnail_path?: string | null
+          updated_at?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "files_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
         ]
@@ -1620,6 +1775,47 @@ export type Database = {
           },
         ]
       }
+      team_activity: {
+        Row: {
+          activity_data: Json | null
+          activity_type: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          activity_data?: Json | null
+          activity_type: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          activity_data?: Json | null
+          activity_type?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_activity_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_memberships: {
         Row: {
           id: string
@@ -2196,6 +2392,8 @@ export type Database = {
         | "object_detection"
         | "nlp"
       deployment_status: "deploying" | "deployed" | "failed" | "stopped"
+      discussion_type: "general" | "announcement" | "question" | "feedback"
+      file_type: "document" | "image" | "video" | "archive" | "other"
       freelancer_badge: "bronze" | "silver" | "gold"
       issue_status: "Open" | "In Progress" | "Resolved"
       model_status:
@@ -2346,6 +2544,8 @@ export const Constants = {
         "nlp",
       ],
       deployment_status: ["deploying", "deployed", "failed", "stopped"],
+      discussion_type: ["general", "announcement", "question", "feedback"],
+      file_type: ["document", "image", "video", "archive", "other"],
       freelancer_badge: ["bronze", "silver", "gold"],
       issue_status: ["Open", "In Progress", "Resolved"],
       model_status: [

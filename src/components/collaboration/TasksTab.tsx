@@ -1,91 +1,213 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Plus, Check, Clock, AlertCircle } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-type TaskStatus = 'Not Started' | 'In Progress' | 'Done';
-
-interface Task {
-  id: number;
-  title: string;
-  assignee: string;
-  status: TaskStatus;
-  due: string;
-}
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CheckCircle, Clock, Calendar, Plus } from 'lucide-react';
+import { CollaborationTask } from './types';
+import { formatDistanceToNow } from 'date-fns';
 
 interface TasksTabProps {
-  tasks: Task[];
+  tasks: CollaborationTask[];
 }
 
-export const TasksTab: React.FC<TasksTabProps> = ({ tasks }) => {
-  const getStatusColor = (status: TaskStatus) => {
+const TasksTab: React.FC<TasksTabProps> = ({ tasks }) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Not Started':
-        return 'bg-gray-100 text-gray-600 border-gray-200';
-      case 'In Progress':
-        return 'bg-blue-100 text-blue-600 border-blue-200';
-      case 'Done':
-        return 'bg-green-100 text-green-600 border-green-200';
-      default:
-        return '';
+      case 'completed': return 'bg-green-100 text-green-800';
+      case 'in_progress': return 'bg-blue-100 text-blue-800';
+      case 'todo': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getStatusIcon = (status: TaskStatus) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'Not Started':
-        return <AlertCircle className="h-3.5 w-3.5" />;
-      case 'In Progress':
-        return <Clock className="h-3.5 w-3.5" />;
-      case 'Done':
-        return <Check className="h-3.5 w-3.5" />;
-      default:
-        return null;
+      case 'completed': return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case 'in_progress': return <Clock className="w-4 h-4 text-blue-500" />;
+      default: return <Clock className="w-4 h-4 text-yellow-500" />;
     }
+  };
+
+  const getPriorityColor = (priority?: string) => {
+    switch (priority?.toLowerCase()) {
+      case 'high': return 'bg-red-100 text-red-800';
+      case 'medium': return 'bg-yellow-100 text-yellow-800';
+      case 'low': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const groupedTasks = {
+    todo: tasks.filter(task => task.status === 'todo'),
+    in_progress: tasks.filter(task => task.status === 'in_progress'),
+    completed: tasks.filter(task => task.status === 'completed')
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div>
-          <CardTitle>Team Tasks</CardTitle>
-          <CardDescription>Track and manage team tasks and progress</CardDescription>
-        </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Task
-        </Button>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {tasks.map((task) => (
-            <div key={task.id} className="border rounded-lg p-4">
-              <div className="flex justify-between items-start mb-2">
-                <h4 className="font-medium">{task.title}</h4>
-                <Badge variant="outline" className={`flex items-center gap-1 ${getStatusColor(task.status)}`}>
-                  {getStatusIcon(task.status)}
-                  {task.status}
-                </Badge>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Assigned to: <span className="text-foreground">{task.assignee}</span></span>
-                <span className="text-muted-foreground">Due: <span className="text-foreground">{task.due}</span></span>
-              </div>
-              <div className="mt-3 flex gap-2 justify-end">
-                <Button variant="outline" size="sm">Edit</Button>
-                {task.status !== 'Done' && (
-                  <Button variant="outline" size="sm" className="text-green-600 border-green-200 hover:bg-green-50">
-                    <Check className="h-3.5 w-3.5 mr-1" />
-                    Mark Complete
-                  </Button>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* To Do Column */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between text-sm">
+              <span className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-yellow-500" />
+                To Do ({groupedTasks.todo.length})
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {groupedTasks.todo.map((task) => (
+              <div key={task.id} className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex items-start justify-between mb-2">
+                  <h4 className="font-medium text-sm">{task.title}</h4>
+                  {task.priority && (
+                    <Badge className={getPriorityColor(task.priority)} size="sm">
+                      {task.priority}
+                    </Badge>
+                  )}
+                </div>
+                {task.description && (
+                  <p className="text-xs text-gray-600 mb-2">{task.description}</p>
                 )}
+                <div className="flex items-center justify-between">
+                  {task.assignee_profile && (
+                    <div className="flex items-center space-x-2">
+                      <Avatar className="w-6 h-6">
+                        <AvatarFallback className="text-xs">
+                          {(task.assignee_profile.full_name || task.assignee_profile.username)
+                            .split(' ')
+                            .map(n => n[0])
+                            .join('')
+                            .toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-xs text-gray-600">
+                        {task.assignee_profile.full_name || task.assignee_profile.username}
+                      </span>
+                    </div>
+                  )}
+                  {task.due_date && (
+                    <div className="flex items-center space-x-1 text-xs text-gray-500">
+                      <Calendar className="w-3 h-3" />
+                      <span>{formatDistanceToNow(new Date(task.due_date), { addSuffix: true })}</span>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* In Progress Column */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between text-sm">
+              <span className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-blue-500" />
+                In Progress ({groupedTasks.in_progress.length})
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {groupedTasks.in_progress.map((task) => (
+              <div key={task.id} className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start justify-between mb-2">
+                  <h4 className="font-medium text-sm">{task.title}</h4>
+                  {task.priority && (
+                    <Badge className={getPriorityColor(task.priority)} size="sm">
+                      {task.priority}
+                    </Badge>
+                  )}
+                </div>
+                {task.description && (
+                  <p className="text-xs text-gray-600 mb-2">{task.description}</p>
+                )}
+                <div className="flex items-center justify-between">
+                  {task.assignee_profile && (
+                    <div className="flex items-center space-x-2">
+                      <Avatar className="w-6 h-6">
+                        <AvatarFallback className="text-xs">
+                          {(task.assignee_profile.full_name || task.assignee_profile.username)
+                            .split(' ')
+                            .map(n => n[0])
+                            .join('')
+                            .toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-xs text-gray-600">
+                        {task.assignee_profile.full_name || task.assignee_profile.username}
+                      </span>
+                    </div>
+                  )}
+                  {task.due_date && (
+                    <div className="flex items-center space-x-1 text-xs text-gray-500">
+                      <Calendar className="w-3 h-3" />
+                      <span>{formatDistanceToNow(new Date(task.due_date), { addSuffix: true })}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Completed Column */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between text-sm">
+              <span className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                Completed ({groupedTasks.completed.length})
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {groupedTasks.completed.map((task) => (
+              <div key={task.id} className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-start justify-between mb-2">
+                  <h4 className="font-medium text-sm line-through text-gray-600">{task.title}</h4>
+                  {task.priority && (
+                    <Badge className={getPriorityColor(task.priority)} size="sm">
+                      {task.priority}
+                    </Badge>
+                  )}
+                </div>
+                {task.description && (
+                  <p className="text-xs text-gray-500 mb-2">{task.description}</p>
+                )}
+                <div className="flex items-center justify-between">
+                  {task.assignee_profile && (
+                    <div className="flex items-center space-x-2">
+                      <Avatar className="w-6 h-6">
+                        <AvatarFallback className="text-xs">
+                          {(task.assignee_profile.full_name || task.assignee_profile.username)
+                            .split(' ')
+                            .map(n => n[0])
+                            .join('')
+                            .toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-xs text-gray-500">
+                        {task.assignee_profile.full_name || task.assignee_profile.username}
+                      </span>
+                    </div>
+                  )}
+                  {task.completed_at && (
+                    <div className="flex items-center space-x-1 text-xs text-gray-500">
+                      <CheckCircle className="w-3 h-3" />
+                      <span>Completed {formatDistanceToNow(new Date(task.completed_at), { addSuffix: true })}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
+
+export default TasksTab;
