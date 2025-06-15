@@ -23,6 +23,7 @@ import ModelMakerLiteInterface from "./interfaces/ModelMakerLiteInterface";
 import SEOBoostAIInterface from "./interfaces/SEOBoostAIInterface";
 import TeamSyncAIInterface from "./interfaces/TeamSyncAIInterface";
 import AgroBotCommanderInterface from "./interfaces/AgroBotCommanderInterface";
+import AquaYieldOSInterface from "./interfaces/AquaYieldOSInterface";
 
 interface CustomInterfaceRendererProps {
   tool: AIToolItem;
@@ -77,6 +78,8 @@ const CustomInterfaceRenderer: React.FC<CustomInterfaceRendererProps> = ({ tool,
         return <TeamSyncAIInterface onBack={() => onOpenChange(false)} />;
       case "AgroBot Commander":
         return <AgroBotCommanderInterface onBack={() => onOpenChange(false)} />;
+      case "AquaYield OS":
+        return <AquaYieldOSInterface onBack={() => onOpenChange(false)} />;
       default:
         return null;
     }
@@ -105,7 +108,8 @@ export const CUSTOM_INTERFACES = [
     "ModelMaker Lite",
     "SEO Boost AI",
     "TeamSync AI",
-    "AgroBot Commander"
+    "AgroBot Commander",
+    "AquaYield OS"
 ];
 
 export default CustomInterfaceRenderer;
