@@ -27,6 +27,7 @@ import AquaYieldOSInterface from "./interfaces/AquaYieldOSInterface";
 import FarmPLAIInterface from "./interfaces/FarmPLAIInterface";
 import AgroRiskNavigatorInterface from "./interfaces/AgroRiskNavigatorInterface";
 import AISocialMediaManagerInterface from "./interfaces/AISocialMediaManagerInterface";
+import AIVideoEditerInterface from "./interfaces/AIVideoEditerInterface";
 
 interface CustomInterfaceRendererProps {
   tool: AIToolItem;
@@ -93,6 +94,8 @@ const CustomInterfaceRenderer: React.FC<CustomInterfaceRendererProps> = ({ tool,
         return <AgroRiskNavigatorInterface onBack={() => onOpenChange(false)} />;
       case "AI Social Media Manager":
         return <AISocialMediaManagerInterface onBack={() => onOpenChange(false)} />;
+      case "AI Video Editer":
+        return <AIVideoEditerInterface onBack={() => onOpenChange(false)} />;
       default:
         console.log('CustomInterfaceRenderer: No custom interface found for:', tool.name);
         return null;
@@ -126,7 +129,8 @@ export const CUSTOM_INTERFACES = [
     "AquaYield OS",
     "Farm P&L AI",
     "AgroRisk Navigator",
-    "AI Social Media Manager"
+    "AI Social Media Manager",
+    "AI Video Editer"
 ];
 
 export default CustomInterfaceRenderer;
