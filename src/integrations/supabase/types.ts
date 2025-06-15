@@ -1877,6 +1877,130 @@ export type Database = {
         }
         Relationships: []
       }
+      workflow_execution_logs: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          started_at: string | null
+          status: string
+          step_outputs: Json | null
+          updated_at: string | null
+          user_id: string
+          workflow_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          started_at?: string | null
+          status: string
+          step_outputs?: Json | null
+          updated_at?: string | null
+          user_id: string
+          workflow_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          started_at?: string | null
+          status?: string
+          step_outputs?: Json | null
+          updated_at?: string | null
+          user_id?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_execution_logs_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_execution_metrics: {
+        Row: {
+          created_at: string | null
+          execution_time_ms: number | null
+          id: string
+          log_id: string | null
+          step_metrics: Json | null
+          success: boolean | null
+          workflow_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          log_id?: string | null
+          step_metrics?: Json | null
+          success?: boolean | null
+          workflow_id: string
+        }
+        Update: {
+          created_at?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          log_id?: string | null
+          step_metrics?: Json | null
+          success?: boolean | null
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_execution_metrics_log_id_fkey"
+            columns: ["log_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_execution_logs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_execution_metrics_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_permissions: {
+        Row: {
+          granted_at: string | null
+          id: string
+          role: string
+          user_id: string
+          workflow_id: string
+        }
+        Insert: {
+          granted_at?: string | null
+          id?: string
+          role?: string
+          user_id: string
+          workflow_id: string
+        }
+        Update: {
+          granted_at?: string | null
+          id?: string
+          role?: string
+          user_id?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_permissions_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workflows: {
         Row: {
           created_at: string
