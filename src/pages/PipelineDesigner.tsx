@@ -1,13 +1,13 @@
 
 import React from 'react';
-import BasicTierLayout from '@/components/layouts/BasicTierLayout';
+import ProTierLayout from '@/components/layouts/ProTierLayout';
 import PipelineCanvas from '@/components/pipeline/PipelineCanvas';
 
 const PipelineDesignerPage = () => {
   return (
-    <BasicTierLayout pageTitle="Pipeline Designer" requiredFeature="pipeline-designer">
+    <ProTierLayout pageTitle="Pipeline Designer" requiredFeature="pipeline-designer">
       <PipelineCanvas />
-    </BasicTierLayout>
+    </ProTierLayout>
   );
 };
 
