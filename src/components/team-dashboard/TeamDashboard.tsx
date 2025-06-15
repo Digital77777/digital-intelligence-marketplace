@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/context/UserContext';
@@ -7,8 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Calendar, Clock, Users, CheckCircle, AlertCircle, Plus } from 'lucide-react';
+import { Calendar, Clock, Users, CheckCircle, AlertCircle, Plus, FileText, Folder, Inbox } from 'lucide-react';
 import { Task, Team, TeamDashboardData } from './types';
+import TeamDashboardSkeleton from './TeamDashboardSkeleton';
+import EmptyState from './EmptyState';
+import CreateTaskDialog from './CreateTaskDialog';
 
 const fetchTeamDashboardData = async () => {
   const { data, error } = await supabase.functions.invoke<TeamDashboardData>('team-dashboard-data', {
@@ -23,6 +25,8 @@ const fetchTeamDashboardData = async () => {
 
 const TeamDashboard = () => {
   const { user } = useUser();
+  const [isCreateTaskOpen, setCreateTaskOpen] = useState(false);
+
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['team-dashboard', user?.id],
     queryFn: fetchTeamDashboardData,
@@ -59,150 +63,178 @@ const TeamDashboard = () => {
     }
   };
 
-  const stats = getTaskStats();
-  const completionRate = stats.total > 0 ? (stats.completed / stats.total) * 100 : 0;
-
   if (isLoading) {
-    return <div className="flex items-center justify-center h-64">Loading dashboard...</div>;
+    return <TeamDashboardSkeleton />;
   }
 
   if (isError) {
     return <div className="flex items-center justify-center h-64 text-red-500">Error: {error.message}</div>;
   }
 
+  const stats = getTaskStats();
+  const completionRate = stats.total > 0 ? (stats.completed / stats.total) * 100 : 0;
+
   return (
     <div className="space-y-6">
+      <CreateTaskDialog
+        open={isCreateTaskOpen}
+        onOpenChange={setCreateTaskOpen}
+        teams={teams}
+      />
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Team Dashboard</h1>
           <p className="text-gray-600">Overview of your team's tasks and progress</p>
         </div>
-        <Button>
+        <Button onClick={() => setCreateTaskOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
           New Task
         </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      {teams.length === 0 ? (
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
+          <CardContent className="pt-6">
+            <EmptyState
+              title="No teams found"
+              description="You are not part of any team yet. Create or join a team to see dashboard data."
+              icon={<Users className="w-12 h-12" />}
+            />
           </CardContent>
         </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
-            <Clock className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.inProgress}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending</CardTitle>
-            <AlertCircle className="h-4 w-4 text-yellow-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Progress Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Team Progress</CardTitle>
-          <CardDescription>Overall completion rate across all tasks</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Completion Rate</span>
-              <span>{completionRate.toFixed(1)}%</span>
-            </div>
-            <Progress value={completionRate} className="h-3" />
+      ) : (
+        <>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
+                <FileText className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.total}</div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Completed</CardTitle>
+                <CheckCircle className="h-4 w-4 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+                <Clock className="h-4 w-4 text-blue-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600">{stats.inProgress}</div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Pending</CardTitle>
+                <Inbox className="h-4 w-4 text-yellow-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Recent Tasks */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Tasks</CardTitle>
-          <CardDescription>Latest tasks assigned to your team</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {tasks.slice(0, 5).map((task: Task) => (
-              <div key={task.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center space-x-4">
-                  <div className={`w-3 h-3 rounded-full ${getStatusColor(task.status)}`} />
-                  <div>
-                    <h4 className="font-medium">{task.title}</h4>
-                    <p className="text-sm text-gray-600">{task.description}</p>
-                  </div>
+          {/* Progress Overview */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Team Progress</CardTitle>
+              <CardDescription>Overall completion rate across all tasks</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Completion Rate</span>
+                  <span>{completionRate.toFixed(1)}%</span>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Badge className={getPriorityColor(task.priority)}>
-                    {task.priority}
-                  </Badge>
-                  {task.due_date && (
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Calendar className="w-4 h-4 mr-1" />
-                      {new Date(task.due_date).toLocaleDateString()}
+                <Progress value={completionRate} className="h-3" />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Recent Tasks */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Tasks</CardTitle>
+              <CardDescription>Latest tasks assigned to your team</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {tasks.length > 0 ? (
+                <div className="space-y-4">
+                  {tasks.slice(0, 5).map((task: Task) => (
+                    <div key={task.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center space-x-4">
+                        <div className={`w-3 h-3 rounded-full ${getStatusColor(task.status)}`} />
+                        <div>
+                          <h4 className="font-medium">{task.title}</h4>
+                          <p className="text-sm text-gray-600">{task.description}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge className={getPriorityColor(task.priority)}>
+                          {task.priority || 'medium'}
+                        </Badge>
+                        {task.due_date && (
+                          <div className="flex items-center text-sm text-gray-500">
+                            <Calendar className="w-4 h-4 mr-1" />
+                            {new Date(task.due_date).toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
+                  ))}
                 </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              ) : (
+                <EmptyState 
+                  title="No tasks yet"
+                  description="Your team has no tasks. Create one to get started."
+                  icon={<FileText className="w-12 h-12" />}
+                  buttonText="Create Task"
+                  onButtonClick={() => setCreateTaskOpen(true)}
+                />
+              )}
+            </CardContent>
+          </Card>
 
-      {/* Teams Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Your Teams</CardTitle>
-          <CardDescription>Teams you're a member of</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {teams.map((team: Team) => (
-              <div key={team.id} className="p-4 border rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium">{team.name}</h4>
-                    <p className="text-sm text-gray-600">{team.description}</p>
+          {/* Teams Overview */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Your Teams</CardTitle>
+              <CardDescription>Teams you're a member of</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {teams.map((team: Team) => (
+                  <div key={team.id} className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">{team.name}</h4>
+                        <p className="text-sm text-gray-600">{team.description}</p>
+                      </div>
+                      <Users className="w-5 h-5 text-gray-400" />
+                    </div>
                   </div>
-                  <Users className="w-5 h-5 text-gray-400" />
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 };
 
 export default TeamDashboard;
-

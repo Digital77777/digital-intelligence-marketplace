@@ -2123,6 +2123,10 @@ export type Database = {
         }
         Returns: number
       }
+      get_my_team_ids: {
+        Args: Record<PropertyKey, never>
+        Returns: string[]
+      }
       get_my_teams: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -2162,10 +2166,6 @@ export type Database = {
       gtrgm_out: {
         Args: { "": unknown }
         Returns: unknown
-      }
-      is_team_member: {
-        Args: { p_team_id: string; p_user_id: string }
-        Returns: boolean
       }
       run_compliance_scan: {
         Args: {
