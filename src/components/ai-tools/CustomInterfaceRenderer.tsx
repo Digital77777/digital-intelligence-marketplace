@@ -19,6 +19,7 @@ import AICodeAssistantInterface from "./interfaces/AICodeAssistantInterface";
 import AIEmailWriterInterface from "./interfaces/AIEmailWriterInterface";
 import AIMusicComposerBasicInterface from "./interfaces/AIMusicComposerBasicInterface";
 import DataFlowProInterface from "./interfaces/DataFlowProInterface";
+import AutoPilotStudioInterface from "./interfaces/AutoPilotStudioInterface";
 
 interface CustomInterfaceRendererProps {
   tool: AIToolItem;
@@ -62,7 +63,9 @@ const CustomInterfaceRenderer: React.FC<CustomInterfaceRendererProps> = ({ tool,
       case "AI Music Composer Basic":
         return <AIMusicComposerBasicInterface />;
       case "DataFlow Pro":
-        return <DataFlowProInterface />;
+        return <DataFlowProInterface onBack={() => onOpenChange(false)} />;
+      case "AutoPilot Studio":
+        return <AutoPilotStudioInterface onBack={() => onOpenChange(false)} />;
       default:
         return null;
     }
@@ -86,7 +89,8 @@ export const CUSTOM_INTERFACES = [
     "AI Code Assistant",
     "AI Email Writer",
     "AI Music Composer Basic",
-    "DataFlow Pro"
+    "DataFlow Pro",
+    "AutoPilot Studio"
 ];
 
 export default CustomInterfaceRenderer;
