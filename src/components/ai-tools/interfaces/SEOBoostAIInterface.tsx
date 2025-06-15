@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Play, Share2, Settings, ChevronLeft, Search, TrendingUp, FileText, BarChart3, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';

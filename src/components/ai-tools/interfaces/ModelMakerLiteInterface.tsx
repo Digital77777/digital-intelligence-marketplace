@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Play, Share2, Settings, ChevronLeft, Layers, Database, Cpu, TestTube2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';

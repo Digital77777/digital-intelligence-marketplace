@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Play, Share2, Settings, ChevronLeft, Users, MessageCircle, BarChart3, CalendarDays, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
