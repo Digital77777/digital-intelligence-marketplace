@@ -2,7 +2,7 @@
 import React from 'react';
 import MetricCard from './MetricCard';
 import { PerformanceMetric } from '@/services/performanceMetricsService';
-import { DollarSign, Users, BarChart3, PieChart } from 'lucide-react';
+import { DollarSign, Activity, Smile, Lightbulb } from 'lucide-react';
 
 interface KeyMetricsGridProps {
   metrics: PerformanceMetric[];
@@ -10,13 +10,13 @@ interface KeyMetricsGridProps {
 
 const KeyMetricsGrid: React.FC<KeyMetricsGridProps> = ({ metrics }) => {
   const getMetric = (name: string) => {
-    return metrics.find(m => m.metric_name === name) || { value: 0, change_value: 0, metric_name: name, id: '', change_period: null, updated_at: '' };
+    return metrics.find(m => m.metric_name === name) || { value: 0, change_value: 0, metric_name: name, id: '', user_id: '', change_period: null, updated_at: '' };
   };
 
   const totalRevenueMetric = getMetric('Total Revenue');
-  const activeUsersMetric = getMetric('Active Users');
-  const conversionRateMetric = getMetric('Conversion Rate');
+  const engagementScoreMetric = getMetric('Engagement Score');
   const customerSatisfactionMetric = getMetric('Customer Satisfaction');
+  const projectsCreatedMetric = getMetric('Projects Created');
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -26,29 +26,25 @@ const KeyMetricsGrid: React.FC<KeyMetricsGridProps> = ({ metrics }) => {
         value={totalRevenueMetric.value}
         changeValue={totalRevenueMetric.change_value}
         prefix="$"
-        changeIsPercentage={true}
       />
       <MetricCard
-        title="Active Users"
-        icon={<Users className="h-4 w-4 text-muted-foreground" />}
-        value={activeUsersMetric.value}
-        changeValue={activeUsersMetric.change_value}
-        changeIsPercentage={true}
+        title="Engagement Score"
+        icon={<Activity className="h-4 w-4 text-muted-foreground" />}
+        value={engagementScoreMetric.value}
+        changeValue={engagementScoreMetric.change_value}
       />
        <MetricCard
-        title="Conversion Rate"
-        icon={<BarChart3 className="h-4 w-4 text-muted-foreground" />}
-        value={conversionRateMetric.value}
-        changeValue={conversionRateMetric.change_value}
-        suffix="%"
-        changeIsPercentage={true}
-      />
-      <MetricCard
         title="Customer Satisfaction"
-        icon={<PieChart className="h-4 w-4 text-muted-foreground" />}
+        icon={<Smile className="h-4 w-4 text-muted-foreground" />}
         value={customerSatisfactionMetric.value}
         changeValue={customerSatisfactionMetric.change_value}
-        changeIsPercentage={false}
+        suffix="/100"
+      />
+      <MetricCard
+        title="Projects Created"
+        icon={<Lightbulb className="h-4 w-4 text-muted-foreground" />}
+        value={projectsCreatedMetric.value}
+        changeValue={projectsCreatedMetric.change_value}
       />
     </div>
   );
