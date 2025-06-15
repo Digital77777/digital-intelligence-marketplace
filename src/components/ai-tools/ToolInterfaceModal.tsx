@@ -25,6 +25,7 @@ import LivestockGuardianVisionInterface from "./interfaces/LivestockGuardianVisi
 import AgriMeshNetworkInterface from "./interfaces/AgriMeshNetworkInterface";
 import AICodeAssistantInterface from "./interfaces/AICodeAssistantInterface";
 import AIEmailWriterInterface from "./interfaces/AIEmailWriterInterface";
+import AIMusicComposerBasicInterface from "./interfaces/AIMusicComposerBasicInterface";
 
 interface ToolInterfaceModalProps {
   open: boolean;
@@ -154,6 +155,8 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
         return <AICodeAssistantInterface />;
       case "AI Email Writer":
         return <AIEmailWriterInterface />;
+      case "AI Music Composer Basic":
+        return <AIMusicComposerBasicInterface />;
       default:
         return null;
     }
@@ -176,7 +179,8 @@ const ToolInterfaceModal: React.FC<ToolInterfaceModalProps> = ({
     "Livestock Guardian Vision",
     "AgriMesh Network",
     "AI Code Assistant",
-    "AI Email Writer"
+    "AI Email Writer",
+    "AI Music Composer Basic"
   ].includes(tool.name);
   
   return (
