@@ -1,11 +1,8 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Brain, Github, Twitter, Linkedin, Mail } from 'lucide-react';
-
 const Footer = () => {
-  return (
-    <footer className="bg-gradient-to-r from-[#005ea8] to-[#0071c2] text-white py-12">
+  return <footer className="bg-gradient-to-r from-[#005ea8] to-[#0071c2] text-white py-12">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand Section */}
@@ -13,7 +10,7 @@ const Footer = () => {
             <div className="flex items-center mb-4">
               <Brain className="h-8 w-8 mr-3" />
               <div>
-                <h3 className="text-xl font-bold">Digital Intelligence Hub</h3>
+                <h3 className="text-xl font-bold">Digital Intelligence Marketplace</h3>
                 <p className="text-sm text-blue-100">Marketplace for AI Solutions</p>
               </div>
             </div>
@@ -110,8 +107,6 @@ const Footer = () => {
           </p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;

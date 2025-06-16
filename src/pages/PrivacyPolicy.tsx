@@ -1,12 +1,9 @@
-
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-
 const PrivacyPolicy = () => {
-  return (
-    <div className="min-h-screen flex flex-col">
+  return <div className="min-h-screen flex flex-col">
       <Helmet>
         <title>Privacy Policy - Digital Intelligence Hub</title>
         <meta name="description" content="Privacy Policy for Digital Intelligence Hub. Learn how we protect your data and privacy." />
@@ -72,16 +69,11 @@ const PrivacyPolicy = () => {
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">Contact Us</h2>
-            <p className="mb-4">
-              If you have any questions about this Privacy Policy, please contact us at 
-              privacy@digitalintelligencehub.com
-            </p>
+            <p className="mb-4">If you have any questions about this Privacy Policy, please contact us at privacy@digitalintelligencemarketplace.com</p>
           </section>
         </div>
       </main>
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default PrivacyPolicy;
