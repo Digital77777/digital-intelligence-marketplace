@@ -28,7 +28,7 @@ const DirectoryHeader: React.FC<DirectoryHeaderProps> = ({
       </div>
       
       <div className="flex gap-2">
-        <Button variant="outline" onClick={() => navigate('/pricing')} className="text-sm">
+        <Button variant="outline" onClick={() => navigate('/pricing')} className="text-sm bg-blue-600 hover:bg-blue-500 text-slate-50">
           <Info className="h-4 w-4 mr-1.5" />
           Compare Plans
         </Button>
