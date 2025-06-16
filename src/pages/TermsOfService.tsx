@@ -1,12 +1,9 @@
-
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-
 const TermsOfService = () => {
-  return (
-    <div className="min-h-screen flex flex-col">
+  return <div className="min-h-screen flex flex-col">
       <Helmet>
         <title>Terms of Service - Digital Intelligence Hub</title>
         <meta name="description" content="Terms of Service for Digital Intelligence Hub. Read our terms and conditions." />
@@ -19,10 +16,7 @@ const TermsOfService = () => {
           
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">Acceptance of Terms</h2>
-            <p className="mb-4">
-              By accessing and using Digital Intelligence Hub, you accept and agree to be bound 
-              by the terms and provision of this agreement.
-            </p>
+            <p className="mb-4">By accessing and using Digital Intelligence Marketplace, you accept and agree to be bound by the terms and provision of this agreement.</p>
           </section>
 
           <section className="mb-8">
@@ -88,8 +82,6 @@ const TermsOfService = () => {
         </div>
       </main>
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default TermsOfService;
