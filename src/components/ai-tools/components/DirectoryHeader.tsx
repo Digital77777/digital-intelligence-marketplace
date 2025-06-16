@@ -1,25 +1,18 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ChevronLeft, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
 interface DirectoryHeaderProps {
   totalTools: number;
 }
-
-const DirectoryHeader: React.FC<DirectoryHeaderProps> = ({ totalTools }) => {
+const DirectoryHeader: React.FC<DirectoryHeaderProps> = ({
+  totalTools
+}) => {
   const navigate = useNavigate();
-
-  return (
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-3">
+  return <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-3">
       <div>
-        <Button 
-          variant="ghost" 
-          className="mb-2 -ml-3 text-gray-600" 
-          onClick={() => navigate('/ai-tools')}
-        >
+        <Button variant="ghost" onClick={() => navigate('/ai-tools')} className="mb-2 -ml-3 bg-blue-700 hover:bg-blue-600 text-slate-50">
           <ChevronLeft className="mr-1 h-4 w-4" />
           Back to Tools Home
         </Button>
@@ -35,17 +28,11 @@ const DirectoryHeader: React.FC<DirectoryHeaderProps> = ({ totalTools }) => {
       </div>
       
       <div className="flex gap-2">
-        <Button 
-          variant="outline" 
-          onClick={() => navigate('/pricing')}
-          className="text-sm"
-        >
+        <Button variant="outline" onClick={() => navigate('/pricing')} className="text-sm">
           <Info className="h-4 w-4 mr-1.5" />
           Compare Plans
         </Button>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default DirectoryHeader;
