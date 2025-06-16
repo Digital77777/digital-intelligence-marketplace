@@ -70,7 +70,7 @@ const TermsOfService = () => {
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">Contact Information</h2>
-            <p className="mb-4">Questions about the Terms of Service should be sent to us at legal@digitalintelligencemarketpl.com</p>
+            <p className="mb-4">Questions about the Terms of Service should be sent to us at legal@digitalintelligencemarketple.com</p>
           </section>
         </div>
       </main>
