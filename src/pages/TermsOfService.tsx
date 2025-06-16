@@ -21,11 +21,7 @@ const TermsOfService = () => {
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">Use License</h2>
-            <p className="mb-4">
-              Permission is granted to temporarily use Digital Intelligence Hub for personal, 
-              non-commercial transitory viewing only. This is the grant of a license, not a 
-              transfer of title, and under this license you may not:
-            </p>
+            <p className="mb-4">Permission is granted to temporarily use Digital Intelligence Marketplace for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:</p>
             <ul className="list-disc pl-6 mb-4">
               <li>Modify or copy the materials</li>
               <li>Use the materials for any commercial purpose or for any public display</li>
@@ -74,10 +70,7 @@ const TermsOfService = () => {
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">Contact Information</h2>
-            <p className="mb-4">
-              Questions about the Terms of Service should be sent to us at 
-              legal@digitalintelligencehub.com
-            </p>
+            <p className="mb-4">Questions about the Terms of Service should be sent to us at legal@digitalintelligencemarketpl.com</p>
           </section>
         </div>
       </main>
