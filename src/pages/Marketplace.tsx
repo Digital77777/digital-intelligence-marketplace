@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -6,12 +5,7 @@ import Footer from '@/components/Footer';
 import { useTier } from '@/context/TierContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useScrollToTop from '@/hooks/useScrollToTop';
-import {
-  Briefcase,
-  Users,
-  Settings,
-  DollarSign
-} from 'lucide-react';
+import { Briefcase, Users, Settings, DollarSign } from 'lucide-react';
 import { marketplaceTools } from '@/data/marketplace-tools';
 import ProjectsTab from '@/components/marketplace/ProjectsTab';
 import FreelancersTab from '@/components/marketplace/FreelancersTab';
@@ -20,91 +14,70 @@ import ServicesTab from '@/components/marketplace/ServicesTab';
 import MarketplaceHero from '@/components/marketplace/MarketplaceHero';
 import MarketplaceSearchFilters from '@/components/marketplace/MarketplaceSearchFilters';
 import MarketplaceSuccessStories from '@/components/marketplace/MarketplaceSuccessStories';
-
 const Marketplace = () => {
   useScrollToTop();
-  
-  const { currentTier } = useTier();
+  const {
+    currentTier
+  } = useTier();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [filteredTools, setFilteredTools] = useState(marketplaceTools);
   const navigate = useNavigate();
-  
+
   // Filter states
   const [ratingFilter, setRatingFilter] = useState(0);
   const [isPremiumFilter, setIsPremiumFilter] = useState(false);
   const [categoriesFilter, setCategoriesFilter] = useState<string[]>([]);
-  
+
   // Scroll to top on page load or navigation
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
   useEffect(() => {
     let filtered = marketplaceTools;
-    
+
     // Filter by search query
     if (searchQuery) {
-      filtered = filtered.filter(tool => 
-        tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        tool.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        tool.category.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      filtered = filtered.filter(tool => tool.name.toLowerCase().includes(searchQuery.toLowerCase()) || tool.description.toLowerCase().includes(searchQuery.toLowerCase()) || tool.category.toLowerCase().includes(searchQuery.toLowerCase()));
     }
-    
+
     // Filter by category
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(tool => tool.category === selectedCategory);
     }
-    
+
     // Filter by rating
     if (ratingFilter > 0) {
       filtered = filtered.filter(tool => tool.rating >= ratingFilter);
     }
-    
+
     // Filter by premium status
     if (isPremiumFilter) {
       filtered = filtered.filter(tool => tool.isPremium);
     }
-    
+
     // Filter by selected categories
     if (categoriesFilter.length > 0) {
       filtered = filtered.filter(tool => categoriesFilter.includes(tool.category));
     }
-    
     setFilteredTools(filtered);
   }, [searchQuery, selectedCategory, ratingFilter, isPremiumFilter, categoriesFilter]);
-
   const viewToolDetails = (toolId: string) => {
     navigate(`/tool/${toolId}`);
   };
-
   const handlePostProject = () => {
     navigate('/marketplace/post-project');
   };
-
   const handleCreateFreelancerProfile = () => {
     navigate('/marketplace/create-profile');
   };
-
-  return (
-    <div className="min-h-screen flex flex-col">
+  return <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 pt-24 px-6 pb-12">
+      <main className="flex-1 pt-24 pb-12 px-[12px] py-[12px]">
         <div className="max-w-7xl mx-auto">
-          <MarketplaceHero 
-            onPostProject={handlePostProject}
-            onCreateFreelancerProfile={handleCreateFreelancerProfile}
-          />
+          <MarketplaceHero onPostProject={handlePostProject} onCreateFreelancerProfile={handleCreateFreelancerProfile} />
 
-          <MarketplaceSearchFilters
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            ratingFilter={ratingFilter}
-            setRatingFilter={setRatingFilter}
-            categoriesFilter={categoriesFilter}
-            setCategoriesFilter={setCategoriesFilter}
-          />
+          <MarketplaceSearchFilters searchQuery={searchQuery} setSearchQuery={setSearchQuery} ratingFilter={ratingFilter} setRatingFilter={setRatingFilter} categoriesFilter={categoriesFilter} setCategoriesFilter={setCategoriesFilter} />
 
           {/* Main Marketplace Tabs */}
           <div className="mb-8">
@@ -150,8 +123,6 @@ const Marketplace = () => {
         </div>
       </main>
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default Marketplace;
