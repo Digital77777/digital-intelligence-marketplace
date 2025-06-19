@@ -1,12 +1,8 @@
-
-import React, { useState } from "react";
-import { Music, Sparkles, Play, StopCircle, Download, Wand2 } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Music, Wand2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { Label } from "@/components/ui/label";
+import MusicControls from "@/components/ai-tools/MusicControls";
+import CompositionArea from "@/components/ai-tools/CompositionArea";
 
 const AIMusicComposerBasicInterface: React.FC = () => {
   const [prompt, setPrompt] = useState("");
@@ -20,11 +16,29 @@ const AIMusicComposerBasicInterface: React.FC = () => {
     if (!prompt.trim()) return;
     setIsComposing(true);
     setMusicUrl(null);
-    // Placeholder: simulate music creation delay and "music url"
-    setTimeout(() => {
-      setMusicUrl("/placeholder-music.mp3");
+
+    try {
+      // Use Google MusicLM or OpenAI Jukebox for music composition
+      const response = await composeMusicWithAI(prompt, genre, mood, tempo[0]);
+      setMusicUrl(response);
+    } catch (error) {
+      console.error('Composition failed:', error);
+      setMusicUrl(null);
+    } finally {
       setIsComposing(false);
-    }, 2500);
+    }
+  };
+
+ const composeMusicWithAI = async (prompt: string, genre: string, mood: string, tempo: number) => {
+    // Placeholder function for AI music composition
+    console.log('Composing music with Google MusicLM or OpenAI Jukebox...');
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2500));
+      return "/placeholder-music.mp3";
+    } catch (error) {
+      console.error('Composition failed:', error);
+      return null;
+    }
   };
 
   const handleStop = () => {
@@ -55,119 +69,23 @@ const AIMusicComposerBasicInterface: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-6 pt-2">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="prompt" className="font-medium">Prompt</Label>
-              <Textarea
-                id="prompt"
-                placeholder="E.g. 'A soundtrack for a cyberpunk city at night, with neon lights reflecting on wet streets.'"
-                value={prompt}
-                onChange={e => setPrompt(e.target.value)}
-                className="min-h-[80px]"
-              />
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="genre">Genre</Label>
-                <Select value={genre} onValueChange={setGenre}>
-                  <SelectTrigger id="genre" className="w-full">
-                    <SelectValue placeholder="Select Genre" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="lo-fi">Lo-fi</SelectItem>
-                    <SelectItem value="electronic">Electronic</SelectItem>
-                    <SelectItem value="orchestral">Orchestral</SelectItem>
-                    <SelectItem value="acoustic">Acoustic</SelectItem>
-                    <SelectItem value="ambient">Ambient</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="mood">Mood</Label>
-                 <Select value={mood} onValueChange={setMood}>
-                  <SelectTrigger id="mood" className="w-full">
-                    <SelectValue placeholder="Select Mood" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="relaxing">Relaxing</SelectItem>
-                    <SelectItem value="uplifting">Uplifting</SelectItem>
-                    <SelectItem value="melancholic">Melancholic</SelectItem>
-                    <SelectItem value="epic">Epic</SelectItem>
-                    <SelectItem value="experimental">Experimental</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-3">
-               <Label htmlFor="tempo" className="flex justify-between">
-                <span>Tempo (BPM)</span>
-                <span className="text-purple-700 dark:text-purple-300 font-bold">{tempo[0]}</span>
-              </Label>
-              <Slider
-                id="tempo"
-                min={60}
-                max={180}
-                step={1}
-                value={tempo}
-                onValueChange={setTempo}
-              />
-            </div>
-
-            <div className="flex gap-2 items-center flex-wrap">
-              <Button 
-                type="button"
-                variant="default"
-                disabled={isComposing || !prompt.trim()}
-                className="flex items-center flex-grow sm:flex-grow-0"
-                onClick={handleCompose}
-              >
-                <Sparkles className="h-4 w-4 mr-2" />
-                {isComposing ? "Composing..." : "Compose"}
-              </Button>
-              {isComposing &&
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  className="flex items-center" 
-                  onClick={handleStop}
-                >
-                  <StopCircle className="h-4 w-4 mr-2" /> Stop
-                </Button>
-              }
-            </div>
-
-            {isComposing && (
-              <div className="mt-4 p-4 bg-purple-50 dark:bg-slate-800/50 rounded-lg flex items-center justify-center h-24 border border-purple-100 dark:border-slate-800">
-                 <div className="flex space-x-1.5">
-                    <div className="w-2.5 h-10 bg-pink-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                    <div className="w-2.5 h-10 bg-pink-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                    <div className="w-2.5 h-10 bg-pink-600 rounded-full animate-bounce"></div>
-                  </div>
-              </div>
-            )}
-
-            {musicUrl && !isComposing && (
-              <div className="mt-4 animate-fade-in">
-                <Label className="font-semibold text-lg text-purple-800 dark:text-purple-300">Your Composition</Label>
-                <div className="mt-2 p-3 bg-purple-50 dark:bg-slate-800/50 rounded-lg flex flex-col sm:flex-row items-center gap-4 border border-purple-100 dark:border-slate-800">
-                  <audio controls className="w-full">
-                    <source src={musicUrl} type="audio/mpeg" />
-                    Your browser does not support the audio element.
-                  </audio>
-                  <Button 
-                    type="button" 
-                    variant="outline"
-                    className="w-full sm:w-auto flex-shrink-0"
-                    asChild
-                  >
-                    <a href={musicUrl} download>
-                      <Download className="h-4 w-4 mr-2" /> Download
-                    </a>
-                  </Button>
-                </div>
-              </div>
-            )}
+            <MusicControls
+              prompt={prompt}
+              setPrompt={setPrompt}
+              genre={genre}
+              setGenre={setGenre}
+              mood={mood}
+              setMood={setMood}
+              tempo={tempo}
+              setTempo={setTempo}
+              isComposing={isComposing}
+              handleCompose={handleCompose}
+            />
+            <CompositionArea
+              isComposing={isComposing}
+              musicUrl={musicUrl}
+              handleStop={handleStop}
+            />
           </CardContent>
         </Card>
       </div>

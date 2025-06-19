@@ -143,11 +143,11 @@ const CourseCard: React.FC<CourseCardProps> = ({
               Mark Complete
             </Button>
           )}
-          <Button 
-            className="flex-1" 
+          <Button
+            className="flex-1"
             asChild
           >
-            <Link to={`/learning/${course.id}`}>
+            <Link to={`/courses/${course.id}`}>
               {progress > 0 && !isCompleted ? 'Continue' : 'Start'}
             </Link>
           </Button>

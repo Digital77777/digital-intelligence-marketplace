@@ -8,46 +8,12 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info, Shield, Sparkles, Zap, Loader2, CreditCard } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { pricingTiers } from '@/data/pricingTiers';
 
 const PricingTiers = () => {
   const { currentTier, isSubscribed, subscriptionEnd, refreshSubscription, isLoading } = useTier();
   const { user } = useUser();
   const [isPortalLoading, setIsPortalLoading] = useState(false);
-
-  const freemiumFeatures = [
-    'Access to 10 core AI tools',
-    'Basic learning content',
-    'Community forums access',
-    'Single user account',
-    'Limited API access (100 calls/month)',
-    'Community support'
-  ];
-
-  const basicFeatures = [
-    'Everything in Freemium',
-    'Access to 100+ AI tools',
-    'Team dashboard & collaboration',
-    'Workflow automation tools',
-    'Up to 10 team members',
-    '5,000 API calls per month',
-    'Usage analytics and reporting',
-    'Priority email support',
-    'Advanced security features',
-    '10GB storage'
-  ];
-
-  const proFeatures = [
-    'Everything in Basic',
-    'Access to 250+ AI tools',
-    'Custom model development',
-    'Advanced API integration',
-    'White-labeling options',
-    'Unlimited team members',
-    '50,000 API calls per month',
-    'Dedicated account manager',
-    '24/7 priority support',
-    '100GB storage'
-  ];
 
   const getTierIcon = (tier: string) => {
     switch(tier) {
@@ -130,33 +96,18 @@ const PricingTiers = () => {
         )}
 
         <div className="flex flex-col md:flex-row gap-8 justify-center flex-wrap">
-          <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            <TierCard
-              type="freemium"
-              name="Freemium"
-              price="Free"
-              features={freemiumFeatures}
-            />
-          </div>
-          
-          <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
-            <TierCard
-              type="basic"
-              name="Basic"
-              price="$21"
-              features={basicFeatures}
-              popular={true}
-            />
-          </div>
-          
-          <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
-            <TierCard
-              type="pro"
-              name="Pro"
-              price="$46"
-              features={proFeatures}
-            />
-          </div>
+          {pricingTiers.map((tier) => (
+            <div className="animate-slide-up" style={{ animationDelay: `0.${pricingTiers.indexOf(tier) + 1}s` }}>
+              <TierCard
+                key={tier.type}
+                type={tier.type}
+                name={tier.name}
+                price={tier.price}
+                features={tier.features}
+                popular={tier.popular}
+              />
+            </div>
+          ))}
         </div>
 
         <div className="mt-16 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/10 rounded-2xl p-8 max-w-3xl mx-auto border border-blue-100/50 dark:border-blue-800/30 shadow-md">

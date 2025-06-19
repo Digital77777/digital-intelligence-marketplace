@@ -45,7 +45,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
           </TabsList>
           
           <TabsContent value="signin">
-            <SignInForm onSuccess={() => onOpenChange(false)} />
+            <SignInForm />
           </TabsContent>
           
           <TabsContent value="signup">

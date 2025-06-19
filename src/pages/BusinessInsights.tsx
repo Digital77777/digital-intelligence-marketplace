@@ -19,9 +19,15 @@ const BusinessInsightsPage = () => {
   const { user } = useUser();
   const queryClient = useQueryClient();
 
-  const { data: performanceMetrics = [], isLoading: metricsLoading, isError: metricsError } = usePerformanceMetrics();
+  const { data: performanceMetrics = [], isLoading: metricsLoading, isError: metricsError } = usePerformanceMetrics(1, 10);
   const { data: metricSnapshots = [], isLoading: snapshotsLoading, isError: snapshotsError } = useMetricSnapshots(selectedPeriod);
-  
+
+  if (metricsError) {
+    return <div>Error fetching performance metrics. Please try again later.</div>;
+  }
+  if (snapshotsError) {
+    return <div>Error fetching metric snapshots. Please try again later.</div>;
+  }
   const { data: aiInsights, isLoading: aiInsightsLoading } = useBusinessInsights();
 
   useEffect(() => {

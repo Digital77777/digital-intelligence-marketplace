@@ -51,30 +51,48 @@ const CropMindInterface: React.FC<CropMindInterfaceProps> = ({ tool, onBack }) =
   const [inputMessage, setInputMessage] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [recommendations, setRecommendations] = useState<CropRecommendation[]>([]);
-  
-  // Mock data - in real implementation, this would come from APIs
-  const [satelliteData] = useState<SatelliteData>({
-    ndvi: 0.65,
-    growthStage: 'vegetative',
-    healthIndex: 78,
-    lastUpdate: new Date().toISOString()
-  });
+  const [satelliteData, setSatelliteData] = useState<SatelliteData | null>(null);
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [soilData, setSoilData] = useState<any>(null);
 
-  const [weatherData] = useState<WeatherData>({
-    temperature: 28,
-    humidity: 65,
-    rainfall: 12,
-    windSpeed: 8,
-    forecast: [
-      { date: '2024-01-15', temperature: { min: 18, max: 29 }, condition: 'Sunny', rainfall: 0 },
-      { date: '2024-01-16', temperature: { min: 19, max: 31 }, condition: 'Partly Cloudy', rainfall: 2 },
-      { date: '2024-01-17', temperature: { min: 20, max: 28 }, condition: 'Rainy', rainfall: 15 },
-      { date: '2024-01-18', temperature: { min: 17, max: 26 }, condition: 'Cloudy', rainfall: 8 },
-      { date: '2024-01-19', temperature: { min: 18, max: 27 }, condition: 'Sunny', rainfall: 0 },
-      { date: '2024-01-20', temperature: { min: 19, max: 30 }, condition: 'Sunny', rainfall: 0 },
-      { date: '2024-01-21', temperature: { min: 20, max: 32 }, condition: 'Hot', rainfall: 0 }
-    ]
-  });
+  useEffect(() => {
+    const fetchSatelliteData = async () => {
+      try {
+        // Replace with actual API endpoint
+        const response = await fetch('/api/satellite-data');
+        const data = await response.json();
+        setSatelliteData(data);
+      } catch (error) {
+        console.error('Failed to fetch satellite data:', error);
+      }
+    };
+
+    const fetchWeatherData = async () => {
+      try {
+        // Replace with actual API endpoint
+        const response = await fetch('/api/weather-data');
+        const data = await response.json();
+        setWeatherData(data);
+      } catch (error) {
+        console.error('Failed to fetch weather data:', error);
+      }
+    };
+
+    const fetchSoilData = async () => {
+      try {
+        // Replace with actual API endpoint
+        const response = await fetch('/api/soil-data');
+        const data = await response.json();
+        setSoilData(data);
+      } catch (error) {
+        console.error('Failed to fetch soil data:', error);
+      }
+    };
+
+    fetchSatelliteData();
+    fetchWeatherData();
+    fetchSoilData();
+  }, []);
 
   useEffect(() => {
     if (farmProfile && satelliteData && weatherData) {
@@ -89,7 +107,7 @@ const CropMindInterface: React.FC<CropMindInterfaceProps> = ({ tool, onBack }) =
           sender: 'ai',
           timestamp: new Date(),
           type: 'text',
-          language: farmProfile.language
+          language: farmProfile?.language
         };
         setMessages([welcomeMessage]);
       }

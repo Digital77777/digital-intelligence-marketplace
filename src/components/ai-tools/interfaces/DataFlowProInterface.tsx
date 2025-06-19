@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Play, Code, Database, Share2, Settings, ChevronLeft } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
 interface DataFlowProInterfaceProps {
@@ -16,6 +16,28 @@ const SidebarNode = ({ icon: Icon, label }: { icon: React.ElementType, label: st
 );
 
 const DataFlowProInterface: React.FC<DataFlowProInterfaceProps> = ({ onBack }) => {
+  const [flowData, setFlowData] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchFlowData = async () => {
+      try {
+        // Replace with actual API endpoint for FastAPI
+        const response = await fetch('/api/data-flow-pro');
+        const data = await response.json();
+        setFlowData(data);
+      } catch (error) {
+        console.error('Failed to fetch flow data:', error);
+      }
+    };
+
+    fetchFlowData();
+  }, []);
+
+  const runFlow = async () => {
+    // Placeholder function for running the data flow
+    console.log('Running data flow with FastAPI...');
+  };
+
   return (
     <div className="flex flex-col h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans">
       {/* Header */}
@@ -33,7 +55,7 @@ const DataFlowProInterface: React.FC<DataFlowProInterfaceProps> = ({ onBack }) =
           <Button variant="outline" size="sm">
             <Share2 className="mr-2 h-4 w-4" /> Share
           </Button>
-          <Button variant="default" size="sm">
+          <Button variant="default" size="sm" onClick={runFlow}>
             <Play className="mr-2 h-4 w-4" /> Run Flow
           </Button>
           <Button variant="ghost" size="icon">
@@ -85,3 +107,6 @@ const DataFlowProInterface: React.FC<DataFlowProInterfaceProps> = ({ onBack }) =
 };
 
 export default DataFlowProInterface;
+
+
+```
