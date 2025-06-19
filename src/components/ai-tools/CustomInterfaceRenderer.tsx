@@ -13,7 +13,7 @@ import ForumAssistantInterface from "./interfaces/ForumAssistantInterface";
 import CropMindInterface from "./interfaces/CropMindInterface";
 import SmartPestSentinelInterface from "./interfaces/SmartPestSentinelInterface";
 import LivestockGuardianVisionInterface from "./interfaces/LivestockGuardianVisionInterface";
-import AgriMeshNetworkInterface from "./interfaces/AgriMeshNetworkInterface";
+import AgriMeshNetworkInterface from "./interfaces/AgriMeshNetworkInterface.tsx";
 import AICodeAssistantInterface from "./interfaces/AICodeAssistantInterface";
 import AIEmailWriterInterface from "./interfaces/AIEmailWriterInterface";
 import AIMusicComposerBasicInterface from "./interfaces/AIMusicComposerBasicInterface";

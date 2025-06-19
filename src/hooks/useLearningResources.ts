@@ -7,6 +7,7 @@ import { useTier } from '@/context/TierContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Course, LearningPath, Certification, LiveEvent, LearningProgress } from '@/types/learning';
+import apiKeys from '@/config/apiKeys';
 
 interface UseLearningResourcesProps {
   categoryFilter?: string;
@@ -27,6 +28,22 @@ interface UseLearningResourcesResult {
   markCourseComplete: (courseId: string) => Promise<void>;
   totalCount: number;
 }
+
+const fetchCourseSummary = async (title: string): Promise<string> => {
+  const endpoint = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&titles=${encodeURIComponent(title)}&exintro=1&explaintext=1&origin=*`;
+  try {
+    const response = await fetch(endpoint);
+    const data = await response.json();
+    const pageId = Object.keys(data.query.pages)[0];
+    if (pageId === '-1') {
+      return 'Summary not found.';
+    }
+    return data.query.pages[pageId].extract || 'Summary not available.';
+  } catch (error) {
+    console.error("Error fetching Wikipedia summary:", error);
+    return 'Failed to load summary.';
+  }
+};
 
 export const useLearningResources = ({
   categoryFilter,
@@ -52,6 +69,14 @@ export const useLearningResources = ({
 
       const { data: events, error: eventsError } = await supabase.from('live_events').select('*');
       if (eventsError) throw new Error(eventsError.message);
+
+      // Fetch course summaries from Wikipedia API
+      const coursesWithSummaries = await Promise.all(
+        courses.map(async (course) => {
+          const summary = await fetchCourseSummary(course.title);
+          return { ...course, summary };
+        })
+      );
 
       let userProgress: LearningProgress[] = [];
       if (user) {
@@ -105,14 +130,22 @@ export const useLearningResources = ({
       const populatedPaths = paths.map(path => ({
         ...path,
         courses: path.courses
-          .map(courseId => courses.find(c => c.id === courseId))
-          .filter((c): c is Course => !!c)
-      }));
+        .map(courseId => courses.find(c => c.id === courseId))
+        .filter((c): c is Course => !!c)
+    }));
 
-      return { courses: [...courses, ...newCourses], learningPaths: [...populatedPaths, ...newLearningPaths], certifications: certs, liveEvents: events, userProgress };
-    },
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
+      // Fetch course summaries for new courses
+      const newCoursesWithSummaries = await Promise.all(
+        newCourses.map(async (course) => {
+          const summary = await fetchCourseSummary(course.title);
+          return { ...course, summary };
+        })
+      );
+
+    return { courses: [...coursesWithSummaries, ...newCoursesWithSummaries], learningPaths: [...populatedPaths, ...newLearningPaths], certifications: certs, liveEvents: events, userProgress };
+  },
+  staleTime: 1000 * 60 * 5, // 5 minutes
+});
 
   const { courses: allCourses = [], learningPaths = [], certifications = [], liveEvents = [], userProgress: progressData = [] } = data || {};
 

@@ -8,7 +8,7 @@ const dbPromise = openDB('api-connections', 1, {
 
 /**
  * API Connection Manager
- * 
+ *
  * This utility helps manage API connections for different tools
  * and integrates with open-source alternatives where available
  */
@@ -39,7 +39,36 @@ const OPEN_SOURCE_MODELS = {
   '5': 'facebook/musicgen-small', // For tool with ID 5
 };
 
-import apiKeys from '../config/apiKeys';
+import {
+  tool1ApiKey,
+  tool2ApiKey,
+  tool3ApiKey,
+  tool4ApiKey,
+  tool5ApiKey,
+  wikipediaApiKey,
+} from '../config/apiKeys';
+
+/**
+ * Get the platform API key for a tool
+ */
+export const getPlatformAPIKey = (toolId: string): string => {
+  switch (toolId) {
+    case '1':
+      return tool1ApiKey || `platform-tool-${toolId}-demo-key`;
+    case '2':
+      return tool2ApiKey || `platform-tool-${toolId}-demo-key`;
+    case '3':
+      return tool3ApiKey || `platform-tool-${toolId}-demo-key`;
+    case '4':
+      return tool4ApiKey || `platform-tool-${toolId}-demo-key`;
+    case '5':
+      return tool5ApiKey || `platform-tool-${toolId}-demo-key`;
+    case 'wikipedia':
+      return wikipediaApiKey || `platform-tool-${toolId}-demo-key`;
+    default:
+      return `platform-tool-${toolId}-demo-key`;
+  }
+};
 
 export const apiConnectionManager = {
   /**
@@ -49,7 +78,7 @@ export const apiConnectionManager = {
     // Always return false for now
     return false;
   },
-  
+
   /**
    * Get API connection details for a tool
    */
@@ -75,14 +104,14 @@ export const apiConnectionManager = {
       useLocalModels: false,
     };
   },
-  
+
   /**
    * Store API connection for a tool
    */
   storeConnection: async (
-    toolId: string, 
-    apiKey: string, 
-    apiSecret?: string, 
+    toolId: string,
+    apiKey: string,
+    apiSecret?: string,
     modelProvider: 'open-source' | 'api' | 'hybrid' | 'platform' = 'platform',
     useLocalModels: boolean = false
   ): Promise<void> => {
@@ -100,7 +129,7 @@ export const apiConnectionManager = {
       console.error('Error storing API connection:', error);
     }
   },
-  
+
   /**
    * Remove API connection for a tool
    */
@@ -112,7 +141,7 @@ export const apiConnectionManager = {
       console.error('Error removing API connection:', error);
     }
   },
-  
+
   /**
    * List all connected tools
    */
@@ -125,8 +154,8 @@ export const apiConnectionManager = {
    * Get the open source model ID for a tool
    */
   getOpenSourceModel: (toolId: string): string => {
-    return OPEN_SOURCE_MODELS[toolId as keyof typeof OPEN_SOURCE_MODELS] || 
-           `open-source-model-for-tool-${toolId}`;
+    return OPEN_SOURCE_MODELS[toolId as keyof typeof OPEN_SOURCE_MODELS] ||
+      `open-source-model-for-tool-${toolId}`;
   },
 
   /**
@@ -147,10 +176,23 @@ export const apiConnectionManager = {
 };
 
 /**
- * Get the platform API key for a tool
+ * Send performance metrics to the backend
  */
-export const getPlatformAPIKey = (toolId: string): string => {
-  return apiKeys[toolId] || `platform-tool-${toolId}-demo-key`;
+const sendPerformanceMetrics = async (metrics: any[]): Promise<void> => {
+  try {
+    const response = await fetch('/api/metrics', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(metrics)
+    });
+
+    if (!response.ok) {
+      console.error('Error sending performance metrics:', response.status);
+    }
+  } catch (error) {
+    console.error('Error sending performance metrics:', error);
+  }
 };
 
+export { sendPerformanceMetrics };
 export default apiConnectionManager;

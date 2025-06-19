@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import TierCard from './TierCard';
+import React, { useState, memo } from 'react';
+import TierCardComponent from './TierCard';
 import { useTier } from '@/context/TierContext';
 import { useUser } from '@/context/UserContext';
 import { Button } from '@/components/ui/button';
@@ -10,32 +10,32 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { pricingTiers } from '@/data/pricingTiers';
 
+const getTierIcon = (tier: string) => {
+  switch(tier) {
+    case 'basic':
+      return <Shield className="h-4 w-4 text-blue-500" />;
+    case 'pro':
+      return <Zap className="h-4 w-4 text-purple-500" />;
+    default:
+      return <Sparkles className="h-4 w-4 text-amber-500" />;
+  }
+};
+
+const getTierAlertColor = (tier: string) => {
+  switch(tier) {
+    case 'basic':
+      return "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800";
+    case 'pro':
+      return "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800";
+    default:
+      return "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800";
+  }
+};
+
 const PricingTiers = () => {
   const { currentTier, isSubscribed, subscriptionEnd, refreshSubscription, isLoading } = useTier();
   const { user } = useUser();
   const [isPortalLoading, setIsPortalLoading] = useState(false);
-
-  const getTierIcon = (tier: string) => {
-    switch(tier) {
-      case 'basic':
-        return <Shield className="h-4 w-4 text-blue-500" />;
-      case 'pro':
-        return <Zap className="h-4 w-4 text-purple-500" />;
-      default:
-        return <Sparkles className="h-4 w-4 text-amber-500" />;
-    }
-  };
-
-  const getTierAlertColor = (tier: string) => {
-    switch(tier) {
-      case 'basic':
-        return "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800";
-      case 'pro':
-        return "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800";
-      default:
-        return "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800";
-    }
-  };
 
   const handleManageSubscription = async () => {
     if (!user) {
@@ -98,7 +98,7 @@ const PricingTiers = () => {
         <div className="flex flex-col md:flex-row gap-8 justify-center flex-wrap">
           {pricingTiers.map((tier) => (
             <div className="animate-slide-up" style={{ animationDelay: `0.${pricingTiers.indexOf(tier) + 1}s` }}>
-              <TierCard
+              <TierCardComponent
                 key={tier.type}
                 type={tier.type}
                 name={tier.name}
@@ -164,5 +164,7 @@ const PricingTiers = () => {
     </section>
   );
 };
+
+const TierCard = memo(TierCardComponent);
 
 export default PricingTiers;

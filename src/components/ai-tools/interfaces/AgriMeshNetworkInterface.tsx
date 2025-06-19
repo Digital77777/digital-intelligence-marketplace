@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Server, Wifi, Globe, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -93,6 +92,3 @@ const AgriMeshNetworkInterface: React.FC = () => {
 };
 
 export default AgriMeshNetworkInterface;
-
-
-```

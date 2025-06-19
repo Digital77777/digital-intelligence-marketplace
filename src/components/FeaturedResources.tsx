@@ -12,7 +12,7 @@ interface ResourceCardProps {
   linkTo: string;
 }
 
-const ResourceCard: React.FC<ResourceCardProps> = ({ icon, title, description, buttonText, linkTo }) => {
+const ResourceCardComponent: React.FC<ResourceCardProps> = ({ icon, title, description, buttonText, linkTo }) => {
   return (
     <div className="relative group">
       <div className="absolute -inset-0.5 bg-gradient-to-r from-[#2A5C8D] to-[#00FF88] rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-1000"></div>
@@ -39,6 +39,8 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ icon, title, description, b
     </div>
   );
 };
+
+const ResourceCard = React.memo(ResourceCardComponent);
 
 const FeaturedResources: React.FC = () => {
   return (

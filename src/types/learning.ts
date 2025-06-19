@@ -4,6 +4,7 @@ type Tables = Database['public']['Tables'];
 
 export type Course = Tables['learning_courses']['Row'] & {
   modules?: { title: string; content: string; }[];
+  summary?: string;
 };
 export type LearningPathRow = Tables['learning_paths']['Row'];
 export type LearningPath = Omit<LearningPathRow, 'courses'> & {
