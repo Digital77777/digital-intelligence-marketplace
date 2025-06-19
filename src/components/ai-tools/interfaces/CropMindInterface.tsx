@@ -57,36 +57,39 @@ const CropMindInterface: React.FC<CropMindInterfaceProps> = ({ tool, onBack }) =
 
   useEffect(() => {
     const fetchSatelliteData = async () => {
-      try {
-        // Replace with actual API endpoint
-        const response = await fetch('/api/satellite-data');
-        const data = await response.json();
-        setSatelliteData(data);
-      } catch (error) {
-        console.error('Failed to fetch satellite data:', error);
-      }
+      // Placeholder data
+      const data: SatelliteData = {
+        ndvi: 0.7,
+        evi: 0.6,
+        growthStage: 'vegetative',
+        healthIndex: 0.8,
+        lastUpdate: new Date().toISOString()
+      };
+      setSatelliteData(data);
     };
 
     const fetchWeatherData = async () => {
-      try {
-        // Replace with actual API endpoint
-        const response = await fetch('/api/weather-data');
-        const data = await response.json();
-        setWeatherData(data);
-      } catch (error) {
-        console.error('Failed to fetch weather data:', error);
-      }
+      // Placeholder data
+      const data: WeatherData = {
+        temperature: 25,
+        humidity: 70,
+        rainfall: 5,
+        windSpeed: 10,
+        sunshineHours: 8,
+        forecast: []
+      };
+      setWeatherData(data);
     };
 
     const fetchSoilData = async () => {
-      try {
-        // Replace with actual API endpoint
-        const response = await fetch('/api/soil-data');
-        const data = await response.json();
-        setSoilData(data);
-      } catch (error) {
-        console.error('Failed to fetch soil data:', error);
-      }
+      // Placeholder data
+      const data = {
+        nitrogen: 50,
+        phosphorus: 30,
+        potassium: 40,
+        ph: 6.5
+      };
+      setSoilData(data);
     };
 
     fetchSatelliteData();
@@ -166,24 +169,38 @@ const CropMindInterface: React.FC<CropMindInterfaceProps> = ({ tool, onBack }) =
 
   const generateAIResponse = (userInput: string): string => {
     const input = userInput.toLowerCase();
-    
+  
+    let response = "I understand your concern. Based on your farm's current conditions, I can provide the following advice:\n\n";
+  
     if (input.includes('water') || input.includes('irrigat')) {
-      return "Based on current weather data, your soil moisture levels are adequate. However, with the upcoming dry spell forecasted, I recommend increasing irrigation frequency to every 2 days starting tomorrow. Apply 15-20mm of water per session.";
+      if (weatherData && weatherData.rainfall < 5) {
+        response += "Rainfall is low this week. I recommend increasing irrigation frequency.\n";
+      } else {
+        response += "Rainfall is adequate. Monitor soil moisture levels.\n";
+      }
     }
-    
+  
     if (input.includes('fertilizer') || input.includes('nutrient')) {
-      return "Your satellite data shows NDVI of 0.65, which is good but can be improved. I recommend applying 50kg/acre of NPK 20-10-10 fertilizer during the vegetative stage. Split the application into two doses for better absorption.";
+      if (satelliteData && satelliteData.ndvi < 0.5) {
+        response += "NDVI is low. Consider applying nitrogen-rich fertilizer.\n";
+      } else {
+        response += "NDVI is good. Maintain current fertilization levels.\n";
+      }
     }
-    
+  
     if (input.includes('pest') || input.includes('disease')) {
-      return "No significant pest activity detected from satellite imagery. However, as you're in the vegetative stage, monitor for aphids and caterpillars. Apply neem oil spray preventively twice a week during early morning hours.";
+      response += "No significant pest activity detected. Continue regular monitoring.\n";
     }
-    
+  
     if (input.includes('harvest') || input.includes('when')) {
-      return "Based on your planting date and current growth stage, your maize should be ready for harvest in approximately 8-10 weeks. I'll send you weekly updates as we approach maturity stage.";
+      response += "Based on current growth stage, harvest should be in approximately 8-10 weeks.\n";
     }
-    
-    return "I understand your concern. Based on your farm's current conditions - NDVI of 0.65, adequate rainfall, and vegetative growth stage - your crops are developing well. Is there a specific aspect of farming you'd like advice on? I can help with irrigation, fertilization, pest control, or harvest timing.";
+  
+    if (response === "I understand your concern. Based on your farm's current conditions, I can provide the following advice:\n\n") {
+      response = "I'm sorry, I don't have enough information to answer your question. Please provide more details.";
+    }
+  
+    return response;
   };
 
   const toggleRecording = () => {

@@ -119,10 +119,10 @@ const NewForumTopic = () => {
       } else {
         navigate(`/community/category/${categoryId}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating topic:', error);
       toast.error("Error", {
-        description: "Failed to create topic. Please try again."
+        description: error.message || "Failed to create topic. Please try again."
       });
     } finally {
       setIsSubmitting(false);

@@ -87,12 +87,19 @@ export const useLearningResources = ({
           console.log(\`Sentiment analysis for text: \${text} is \${sentiment}\`);
         ` }] },
         { id: '15', title: 'Designing AI Chatbots without Coding', description: 'Design and build AI chatbots without coding.', category: 'No-Code AI', difficulty: 'intermediate', required_tier: 'basic' },
+        { id: '16', title: 'Advanced AI Ethics', description: 'Explore advanced ethical considerations in AI development and deployment.', category: 'AI Ethics', difficulty: 'advanced', required_tier: 'pro' },
+        { id: '17', title: 'AI and the Future of Work', description: 'Discuss the impact of AI on the future of work and employment.', category: 'AI and Society', difficulty: 'intermediate', required_tier: 'basic' },
+        { id: '18', title: 'Building Custom AI Models with Python', description: 'Learn how to build custom AI models using Python and popular libraries.', category: 'Machine Learning', difficulty: 'intermediate', required_tier: 'basic' },
+        { id: '19', title: 'Deploying AI Models to the Cloud', description: 'Learn how to deploy AI models to cloud platforms like AWS, Azure, and GCP.', category: 'Cloud Computing', difficulty: 'advanced', required_tier: 'pro' },
       ];
 
       const newLearningPaths = [
         { id: '1', title: 'AI Awareness for Everyone', description: 'A path to understand the basics of AI.', required_tier: 'freemium', courses: ['1', '2', '3'] },
         { id: '2', title: 'Get Productive with AI Tools', description: 'A path to get productive with AI tools.', required_tier: 'freemium', courses: ['9', '4', '6'] },
         { id: '3', title: 'First Steps in Building with AI', description: 'A path to take the first steps in building with AI.', required_tier: 'freemium', courses: ['7', '8', '5'] },
+        { id: '4', title: 'Becoming an AI Ethicist', description: 'A path to becoming an AI ethicist.', required_tier: 'basic', courses: ['2', '16', '17'] },
+        { id: '5', title: 'Python for AI Development', description: 'A path to learn Python for AI development.', required_tier: 'basic', courses: ['18', '11', '12'] },
+        { id: '6', title: 'Cloud Deployment for AI Engineers', description: 'A path to learn cloud deployment for AI engineers.', required_tier: 'pro', courses: ['19', '22', '23'] },
       ];
 
       const populatedPaths = paths.map(path => ({
