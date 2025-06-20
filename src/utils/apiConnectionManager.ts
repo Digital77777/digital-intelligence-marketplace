@@ -22,7 +22,7 @@ interface StoredConnection {
 }
 
 // List of open source models mapped to their respective tools
-const OPEN_SOURCE_MODELS = {
+const OPEN_SOURCE_MODELS: { [toolId: string]: string } = {
   'ai-image-generator': 'stabilityai/stable-diffusion-xl-base-1.0',
   'ai-text-summarizer': 'facebook/bart-large-cnn',
   'ai-code-assistant': 'bigcode/starcoder2-15b',
@@ -32,41 +32,24 @@ const OPEN_SOURCE_MODELS = {
   'image-generation': 'CompVis/stable-diffusion-v1-4',
   'summarizer': 'facebook/bart-large-cnn',
   'code-generator': 'bigcode/starcoder',
-  '1': 'stabilityai/stable-diffusion-xl-base-1.0', // For tool with ID 1
-  '2': 'facebook/bart-large-cnn', // For tool with ID 2
-  '3': 'bigcode/starcoder', // For tool with ID 3
-  '4': 'facebook/mbart-large-50', // For tool with ID 4
-  '5': 'facebook/musicgen-small', // For tool with ID 5
 };
-
-import {
-  tool1ApiKey,
-  tool2ApiKey,
-  tool3ApiKey,
-  tool4ApiKey,
-  tool5ApiKey,
-  wikipediaApiKey,
-} from '../config/apiKeys';
 
 /**
  * Get the platform API key for a tool
  */
-export const getPlatformAPIKey = (toolId: string): string => {
-  switch (toolId) {
-    case '1':
-      return tool1ApiKey || `platform-tool-${toolId}-demo-key`;
-    case '2':
-      return tool2ApiKey || `platform-tool-${toolId}-demo-key`;
-    case '3':
-      return tool3ApiKey || `platform-tool-${toolId}-demo-key`;
-    case '4':
-      return tool4ApiKey || `platform-tool-${toolId}-demo-key`;
-    case '5':
-      return tool5ApiKey || `platform-tool-${toolId}-demo-key`;
-    case 'wikipedia':
-      return wikipediaApiKey || `platform-tool-${toolId}-demo-key`;
-    default:
-      return `platform-tool-${toolId}-demo-key`;
+export const getPlatformAPIKey = async (toolId: string): Promise<string> => {
+  try {
+    const url = '/api/get-api-key?toolId=' + toolId;
+    const response = await fetch(url);
+    if (!response.ok) {
+      console.error('HTTP error! status: ' + response.status);
+      return 'platform-tool-' + toolId + '-demo-key';
+    }
+    const data = await response.json();
+    return data.apiKey || 'platform-tool-' + toolId + '-demo-key';
+  } catch (error) {
+    console.error('Error getting API key:', error);
+    return 'platform-tool-' + toolId + '-demo-key';
   }
 };
 
@@ -74,9 +57,15 @@ export const apiConnectionManager = {
   /**
    * Check if a tool has an API connection
    */
-  hasConnection: (toolId: string): boolean => {
-    // Always return false for now
-    return false;
+  hasConnection: async (toolId: string): Promise<boolean> => {
+    try {
+      const db = await dbPromise;
+      const connection = await db.get('connections', toolId);
+      return !!connection;
+    } catch (error) {
+      console.error('Error checking API connection:', error);
+      return false;
+    }
   },
 
   /**
@@ -94,7 +83,7 @@ export const apiConnectionManager = {
       console.error('Error getting API connection:', error);
     }
 
-    const platformKey = getPlatformAPIKey(toolId);
+    const platformKey = await getPlatformAPIKey(toolId);
 
     return {
       apiKey: platformKey,
@@ -115,6 +104,22 @@ export const apiConnectionManager = {
     modelProvider: 'open-source' | 'api' | 'hybrid' | 'platform' = 'platform',
     useLocalModels: boolean = false
   ): Promise<void> => {
+    if (!toolId || typeof toolId !== 'string') {
+      throw new Error('Tool ID must be a non-empty string');
+    }
+    if (!apiKey || typeof apiKey !== 'string') {
+      throw new Error('API Key must be a non-empty string');
+    }
+    if (apiSecret && typeof apiSecret !== 'string') {
+      throw new Error('API Secret must be a string');
+    }
+    if (modelProvider && !['open-source', 'api', 'hybrid', 'platform'].includes(modelProvider)) {
+      throw new Error('Invalid model provider');
+    }
+    if (typeof useLocalModels !== 'boolean') {
+      throw new Error('useLocalModels must be a boolean');
+    }
+
     try {
       const db = await dbPromise;
       await db.put('connections', {
@@ -145,9 +150,15 @@ export const apiConnectionManager = {
   /**
    * List all connected tools
    */
-  listConnections: (): string[] => {
-    // Always return a list of tool IDs 1-10 to simulate connections
-    return Array.from({ length: 10 }, (_, i) => (i + 1).toString());
+  listConnections: async (): Promise<string[]> => {
+    try {
+      const db = await dbPromise;
+      const keys = await db.getAllKeys('connections');
+      return keys.map(String);
+    } catch (error) {
+      console.error('Error listing API connections:', error);
+      return [];
+    }
   },
 
   /**
@@ -162,16 +173,15 @@ export const apiConnectionManager = {
    * Check if a tool has an open source alternative
    */
   hasOpenSourceAlternative: (toolId: string): boolean => {
-    // Always return false for now
-    return false;
+    return OPEN_SOURCE_MODELS[toolId as keyof typeof OPEN_SOURCE_MODELS] !== undefined;
   },
 
   /**
    * Check if a tool has a platform API available
    */
   hasPlatformAPI: (toolId: string): boolean => {
-    // Always return false for now
-    return false;
+    // For now, assume all tools have a platform API
+    return true;
   }
 };
 
