@@ -10,6 +10,7 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  base: '/digital-intelligence-marketplace/',
   plugins: [
     react(),
     mode === 'development' &&
