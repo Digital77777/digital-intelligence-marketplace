@@ -35,7 +35,7 @@ const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
       <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-800 h-96 md:h-[450px] flex items-center relative">
         <div className="container mx-auto px-8 relative z-10">
           <div className="max-w-4xl my-0 py-0">
-            <div className="mb-6 my-[3px]">
+            <div className="mb-6 my-[12px] py-px">
               <Badge variant="secondary" className="mb-4 px-4 py-2 bg-white/20 backdrop-blur-sm border-white/30 text-white">
                 <Zap className="w-4 h-4 mr-2" />
                 World's Premier AI Marketplace
@@ -54,7 +54,7 @@ const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
             
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-              {stats.map((stat, index) => <div key={index} className="text-center my-0 py-0">
+              {stats.map((stat, index) => <div key={index} className="text-center my-px py-0 px-0">
                   <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm mb-2 ${stat.color}`}>
                     {stat.icon}
                   </div>
