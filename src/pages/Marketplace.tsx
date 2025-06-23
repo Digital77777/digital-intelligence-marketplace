@@ -73,7 +73,7 @@ const Marketplace = () => {
   };
   return <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 pt-24 pb-12 px-[12px] py-[9px]">
+      <main className="flex-1 pt-24 pb-12 px-[12px] my-0 py-px">
         <div className="max-w-7xl mx-auto">
           <MarketplaceHero onPostProject={handlePostProject} onCreateFreelancerProfile={handleCreateFreelancerProfile} />
 
