@@ -24,12 +24,8 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-interface SignInFormProps {
-  onSuccess: () => void;
-}
-
-const SignInForm: React.FC<SignInFormProps> = ({ onSuccess }) => {
-  const { login, isLoading } = useUser();
+const SignInForm: React.FC = () => {
+  const { login, isLoading, onOpenChange } = useUser();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -42,7 +38,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSuccess }) => {
   const onSubmit = async (data: FormValues) => {
     try {
       await login(data.email, data.password);
-      onSuccess();
+      onOpenChange(false);
     } catch (error) {
       // Error is handled in the UserContext and displayed via toast
       console.error("Error during sign in:", error);

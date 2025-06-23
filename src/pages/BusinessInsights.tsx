@@ -12,6 +12,7 @@ import DashboardSkeleton from '@/components/business-insights/DashboardSkeleton'
 import { useUser } from '@/context/UserContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
+import { useDebounce } from '@/hooks/use-debounce';
 
 const BusinessInsightsPage = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d'>('30d');
@@ -19,9 +20,15 @@ const BusinessInsightsPage = () => {
   const { user } = useUser();
   const queryClient = useQueryClient();
 
-  const { data: performanceMetrics = [], isLoading: metricsLoading, isError: metricsError } = usePerformanceMetrics();
+  const { data: performanceMetrics = [], isLoading: metricsLoading, isError: metricsError } = usePerformanceMetrics(1, 50);
   const { data: metricSnapshots = [], isLoading: snapshotsLoading, isError: snapshotsError } = useMetricSnapshots(selectedPeriod);
-  
+
+  if (metricsError) {
+    return <div>Error fetching performance metrics. Please try again later.</div>;
+  }
+  if (snapshotsError) {
+    return <div>Error fetching metric snapshots. Please try again later.</div>;
+  }
   const { data: aiInsights, isLoading: aiInsightsLoading } = useBusinessInsights();
 
   useEffect(() => {
@@ -45,7 +52,8 @@ const BusinessInsightsPage = () => {
           });
         }
       };
-      calculateMetrics();
+      const debouncedCalculateMetrics = useDebounce(calculateMetrics, 500);
+      debouncedCalculateMetrics();
     }
   }, [user, queryClient, toast, selectedPeriod]);
   

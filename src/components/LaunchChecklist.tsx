@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense, ComponentType, LazyExoticComponent } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, Circle, AlertCircle } from 'lucide-react';
@@ -13,7 +12,11 @@ interface ChecklistItem {
   message?: string;
 }
 
-const LaunchChecklist = () => {
+const AIToolTiersComponent = lazy<ComponentType<any>>(() => import('@/data/ai-tools-tiers'));
+
+interface LaunchChecklistProps {}
+
+const LaunchChecklist: React.FC<LaunchChecklistProps> = () => {
   const { user } = useUser();
   const [items, setItems] = useState<ChecklistItem[]>([
     { id: 'auth', title: 'Authentication System', status: 'pending' },
@@ -25,9 +28,9 @@ const LaunchChecklist = () => {
   ]);
 
   const updateItemStatus = (id: string, status: ChecklistItem['status'], message?: string) => {
-    setItems(prev => prev.map(item => 
-      item.id === id ? { ...item, status, message } : item
-    ));
+    setItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, status, message } : item))
+    );
   };
 
   const runChecks = async () => {
@@ -79,7 +82,8 @@ const LaunchChecklist = () => {
     updateItemStatus('ai-tools', 'checking');
     try {
       // Import and check tools count
-      const { aiTools } = await import('@/data/ai-tools-tiers');
+      const AIToolTiers = (await AIToolTiersComponent) as any;
+      const aiTools = AIToolTiers.default.aiTools;
       if (aiTools.length === 38) {
         updateItemStatus('ai-tools', 'success', `${aiTools.length} AI tools available`);
       } else {

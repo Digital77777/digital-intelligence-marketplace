@@ -108,40 +108,18 @@ export const useForumData = () => {
         for (const category of categories) {
           const { data, error } = await supabase
             .from('forum_topics')
-            .select(`
-              *,
-              profiles:user_id (username, avatar_url),
-              replies:forum_replies (count)
-            `)
+            .select(`*`)
             .eq('category_id', category.id)
             .order('created_at', { ascending: false })
             .limit(5);
           
           if (error) {
-            throw error;
+            console.error('Error fetching topics for category ' + category.id + ':', error);
+            toast.error('Failed to load forum topics for category ' + category.name);
           }
           
           if (data) {
-            // Transform data to include reply count and user info
-            const transformedTopics = data.map(topic => {
-              // TypeScript fix: Check if profiles exists and has the expected properties
-              const username = topic.profiles && 'username' in topic.profiles 
-                ? topic.profiles.username as string 
-                : 'Anonymous';
-                
-              const avatarUrl = topic.profiles && 'avatar_url' in topic.profiles 
-                ? topic.profiles.avatar_url as string | null 
-                : null;
-                
-              return {
-                ...topic,
-                replies: topic.replies?.[0]?.count || 0,
-                username: username,
-                avatar_url: avatarUrl
-              };
-            });
-            
-            result[category.id] = transformedTopics;
+            result[category.id] = data;
           }
         }
         
@@ -156,7 +134,7 @@ export const useForumData = () => {
     
     fetchTopics();
   }, [categories]);
-  
+
   // Fetch Forum Groups
   useEffect(() => {
     const fetchForumGroups = async () => {

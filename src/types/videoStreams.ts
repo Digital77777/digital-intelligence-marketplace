@@ -3,6 +3,9 @@ import { Database } from "@/integrations/supabase/types";
 
 // This represents a single row from our new video_streams table
 export type VideoStream = Database['public']['Tables']['video_streams']['Row'] & {
+  url: string;
+  thumbnail_url: string;
+  likes: number;
   // We'll join user_profiles data to get author details
   author: {
     id: string;

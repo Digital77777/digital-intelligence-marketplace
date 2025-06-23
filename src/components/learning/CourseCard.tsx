@@ -25,9 +25,10 @@ interface CourseCardProps {
   progress?: number;
   isCompleted?: boolean;
   onMarkComplete?: (id: string | number) => void;
+  summary?: string;
 }
 
-const CourseCard: React.FC<CourseCardProps> = ({ 
+const CourseCard: React.FC<CourseCardProps> = ({
   course, 
   progress = 0, 
   isCompleted = false,
@@ -90,6 +91,12 @@ const CourseCard: React.FC<CourseCardProps> = ({
         <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
           {course.description}
         </p>
+
+        {course.summary && (
+          <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+            {course.summary}
+          </p>
+        )}
         
         <div className="flex items-center text-sm text-muted-foreground mb-3">
           {course.instructor && (
@@ -143,11 +150,11 @@ const CourseCard: React.FC<CourseCardProps> = ({
               Mark Complete
             </Button>
           )}
-          <Button 
-            className="flex-1" 
+          <Button
+            className="flex-1"
             asChild
           >
-            <Link to={`/learning/${course.id}`}>
+            <Link to={`/courses/${course.id}`}>
               {progress > 0 && !isCompleted ? 'Continue' : 'Start'}
             </Link>
           </Button>
