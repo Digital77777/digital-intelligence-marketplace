@@ -55,9 +55,7 @@ const NavbarActions = () => {
         {/* Pro Feature Button - Only visible for non-Pro users */}
         {currentTier !== 'pro' && <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-white hover:bg-white/20" onClick={handleProClick}>
-                <Zap className="h-4 w-4" />
-              </Button>
+              
             </TooltipTrigger>
             <TooltipContent>
               <p>Upgrade to Pro for more features</p>
@@ -77,12 +75,7 @@ const NavbarActions = () => {
         {/* Notification Button */}
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-white hover:bg-white/20 relative" title="Notifications">
-              <Bell className="h-4 w-4" />
-              {notificationCount > 0 && <span className="absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-r from-[#00AAFF] to-[#0066cc] text-[10px] font-medium text-white">
-                  {notificationCount}
-                </span>}
-            </Button>
+            
           </PopoverTrigger>
           <PopoverContent className="w-80 p-0" align="end">
             <NotificationPanel onClear={handleClearNotifications} notificationCount={notificationCount} />
