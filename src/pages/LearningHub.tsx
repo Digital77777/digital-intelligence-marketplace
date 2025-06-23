@@ -4,10 +4,9 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import MobileStickyFooter from '@/components/MobileStickyFooter';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Clock, Lock, BookOpen, CheckCircle, Sparkles, Shield, Zap, ArrowRight, Play, Users, Award, Video, FileText, Download } from 'lucide-react';
+import { Lock, BookOpen, Sparkles, Shield, Zap, ArrowRight, Award, Video } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import { useTier } from '@/context/TierContext';
 import { useLearningResources } from '@/hooks/useLearningResources';
@@ -17,11 +16,10 @@ import LearningHubHero from "@/components/learning/learning-hub/LearningHubHero"
 import LearningHubFilters from "@/components/learning/learning-hub/LearningHubFilters";
 import CourseCard from '@/components/learning/CourseCard';
 import CourseDetails from '@/components/learning/CourseDetails';
-import { Route, Routes, useParams, Link } from 'react-router-dom';
+import { Route, Routes, useParams } from 'react-router-dom';
 
 interface CoursesTabProps {
   searchQuery: string;
-  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
   setCategoryFilter: React.Dispatch<React.SetStateAction<string>>;
   setDifficultyFilter: React.Dispatch<React.SetStateAction<string>>;
   setShowAIAssistant: React.Dispatch<React.SetStateAction<boolean>>;
@@ -29,27 +27,21 @@ interface CoursesTabProps {
 
 const CoursesTab: React.FC<CoursesTabProps> = ({
   searchQuery,
-  setSearchQuery,
   setCategoryFilter,
   setDifficultyFilter,
   setShowAIAssistant,
 }) => {
-  const { user } = useUser();
   const { currentTier } = useTier();
-
   const {
     courses,
-    liveEvents,
-    certifications,
-    learningPaths,
     isLoading,
     userProgress,
     completedCourses,
     markCourseComplete,
     totalCount
   } = useLearningResources({
-    categoryFilter,
-    difficultyFilter,
+    categoryFilter: '',
+    difficultyFilter: '',
     searchQuery
   });
 
@@ -93,9 +85,7 @@ const CoursesTab: React.FC<CoursesTabProps> = ({
   );
 };
 
-interface CourseDetailsPageProps {}
-
-const CourseDetailsPage: React.FC<CourseDetailsPageProps> = () => {
+const CourseDetailsPage: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const { courses } = useLearningResources();
   const course = courses.find((c) => c.id === courseId);
@@ -117,6 +107,17 @@ const LearningHub: React.FC = () => {
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   const { user } = useUser();
   const { currentTier, upgradePrompt } = useTier();
+  
+  const {
+    liveEvents,
+    certifications,
+    learningPaths,
+    isLoading,
+  } = useLearningResources({
+    categoryFilter,
+    difficultyFilter,
+    searchQuery
+  });
 
   const getTierIcon = (tier: string) => {
     switch (tier) {
@@ -130,9 +131,7 @@ const LearningHub: React.FC = () => {
   };
 
   const isContentLocked = (requiredTier: string) => {
-    const tierOrder: {
-      [key: string]: number;
-    } = {
+    const tierOrder: { [key: string]: number } = {
       freemium: 0,
       basic: 1,
       pro: 2
@@ -173,7 +172,7 @@ const LearningHub: React.FC = () => {
                   setCategoryFilter={setCategoryFilter}
                   setDifficultyFilter={setDifficultyFilter}
                 />
-                <Tabs value={activeTab} onValueChange={activeTab} className="mb-8">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
                   <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="courses" className="flex items-center gap-2">
                       <BookOpen className="h-4 w-4" /> Courses
@@ -195,9 +194,8 @@ const LearningHub: React.FC = () => {
                   <TabsContent value="courses" className="mt-6">
                     <CoursesTab
                       searchQuery={searchQuery}
-                      setSearchQuery={setSearchQuery}
                       setCategoryFilter={setCategoryFilter}
-                      setDifficultyFilter={difficultyFilter}
+                      setDifficultyFilter={setDifficultyFilter}
                       setShowAIAssistant={setShowAIAssistant}
                     />
                   </TabsContent>
@@ -270,12 +268,12 @@ const LearningHub: React.FC = () => {
                               disabled={isContentLocked(event.required_tier)}
                             >
                                {isContentLocked(event.required_tier) ? 'Upgrade Required' : 'Register Now'}
-                          </Button>
-                        </CardFooter>
-                      </Card>
-                    ))}
-                  </div>
-                </TabsContent>
+                            </Button>
+                          </CardFooter>
+                        </Card>
+                      ))}
+                    </div>
+                  </TabsContent>
                   
                   <TabsContent value="certifications" className="mt-6">
                      <div className="mb-6">
@@ -305,27 +303,52 @@ const LearningHub: React.FC = () => {
                               disabled={isContentLocked(cert.required_tier)}
                             >
                                {isContentLocked(cert.required_tier) ? 'Upgrade Required' : 'Start Certification'}
-                          </Button>
-                        </CardFooter>
-                      </Card>
-                    ))}
-                  </div>
-                </TabsContent>
+                            </Button>
+                          </CardFooter>
+                        </Card>
+                      ))}
+                    </div>
+                  </TabsContent>
 
-                <TabsContent value="youtube" className="mt-6">
-                  <YouTubeCourses 
-                    searchQuery={searchQuery}
-                    category={categoryFilter}
-                    difficulty={difficultyFilter}
-                  />
-                </TabsContent>
-              </Tabs>
-</>
-)}
+                  <TabsContent value="youtube" className="mt-6">
+                    <YouTubeCourses 
+                      searchQuery={searchQuery}
+                      category={categoryFilter}
+                      difficulty={difficultyFilter}
+                    />
+                  </TabsContent>
+                </Tabs>
+
+                {/* Tier upgrade banner */}
+                {currentTier !== 'pro' && <Card className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20 border-purple-100 dark:border-purple-900/30 p-6 mt-8">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                      <h3 className="text-xl font-semibold text-purple-900 dark:text-purple-400 mb-2">
+                        {currentTier === 'freemium' 
+                          ? 'Upgrade to Unlock Advanced Learning Features' 
+                          : 'Upgrade to Pro for Premium Learning Experience'}
+                      </h3>
+                      <p className="text-purple-800/80 dark:text-purple-300/80 max-w-2xl">
+                        {currentTier === 'freemium' 
+                          ? 'Get access to intermediate courses, live events, and professional certifications.' 
+                          : 'Unlock industry-recognized credentials, exclusive events, and 1:1 mentorship.'}
+                      </p>
+                    </div>
+                    <Button 
+                      className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white min-w-[150px]" 
+                      onClick={() => upgradePrompt(currentTier === 'basic' ? 'pro' : 'basic')}
+                    >
+                      Upgrade Now <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
+                </Card>}
+              </>
+            }/>
+            <Route path="/course/:courseId" element={<CourseDetailsPage />} />
           </Routes>
         </div>
       </main>
-{showAIAssistant && (<LearningHubAIAssistant open={showAIAssistant} onOpenChange={setShowAIAssistant} />)}
+      {showAIAssistant && <LearningHubAIAssistant open={showAIAssistant} onOpenChange={setShowAIAssistant} />}
       <Footer />
       <MobileStickyFooter />
     </div>
@@ -333,3 +356,4 @@ const LearningHub: React.FC = () => {
 };
 
 export default LearningHub;
+            
