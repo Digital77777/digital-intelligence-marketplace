@@ -29,7 +29,6 @@ export interface CropRecommendation {
 
 export interface SatelliteData {
   ndvi: number;
-  evi: number;
   growthStage: string;
   healthIndex: number;
   lastUpdate: string;
@@ -40,7 +39,6 @@ export interface WeatherData {
   humidity: number;
   rainfall: number;
   windSpeed: number;
-  sunshineHours: number;
   forecast: Array<{
     date: string;
     temperature: { min: number; max: number };

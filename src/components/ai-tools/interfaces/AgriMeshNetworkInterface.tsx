@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+
+import React from "react";
 import { Server, Wifi, Globe, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,33 +12,6 @@ const networkStats = [
 ];
 
 const AgriMeshNetworkInterface: React.FC = () => {
-  const [networkData, setNetworkData] = useState<any>(null);
-
-  useEffect(() => {
-    const fetchNetworkData = async () => {
-      try {
-        // Replace with actual API endpoint for Hyperledger Fabric
-        const response = await fetch('/api/agri-mesh-network-data');
-        const data = await response.json();
-        setNetworkData(data);
-      } catch (error) {
-        console.error('Failed to fetch network data:', error);
-      }
-    };
-
-    fetchNetworkData();
-  }, []);
-
-  const configureMeshNode = async () => {
-    // Placeholder function for configuring mesh node
-    console.log('Configuring mesh node with Hyperledger Fabric...');
-  };
-
-  const viewNetworkMap = async () => {
-    // Placeholder function for viewing network map
-    console.log('Viewing network map with GeoPandas...');
-  };
-
   return (
     <div className="min-h-[70vh] bg-gradient-to-br from-blue-50 via-violet-50 to-white dark:from-blue-950 dark:to-gray-900 p-8">
       <div className="max-w-4xl mx-auto">
@@ -65,10 +39,10 @@ const AgriMeshNetworkInterface: React.FC = () => {
         </div>
         {/* Actions */}
         <div className="flex flex-wrap gap-4 mb-6">
-          <Button variant="default" className="bg-blue-700 text-white" onClick={configureMeshNode}>
+          <Button variant="default" className="bg-blue-700 text-white">
             Configure Mesh Node
           </Button>
-          <Button variant="outline" className="border-blue-600 text-blue-700 dark:border-blue-300 dark:text-blue-200" onClick={viewNetworkMap}>
+          <Button variant="outline" className="border-blue-600 text-blue-700 dark:border-blue-300 dark:text-blue-200">
             Network Map
           </Button>
           <Button variant="ghost">Support</Button>

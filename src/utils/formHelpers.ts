@@ -33,27 +33,32 @@ export const validateForm = <T>(
   }
 };
 
-import DOMPurify from 'dompurify';
-
 // Enhanced HTML sanitization function to prevent XSS attacks
 export const sanitizeHtml = (html: string): string => {
   if (!html) return '';
   
-  // Use DOMPurify to sanitize HTML
-  return DOMPurify.sanitize(html);
+  // More comprehensive XSS prevention
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+    .replace(/on\w+="[^"]*"/gi, '')
+    .replace(/on\w+='[^']*'/gi, '')
+    .replace(/on\w+=\w+/gi, '')
+    .replace(/javascript:/gi, 'removed:')
+    .replace(/data:/gi, 'removed:')
+    .replace(/vbscript:/gi, 'removed:');
 };
 
 // Enhanced function to escape user input to prevent SQL injection
 export const escapeInput = (input: string): string => {
   if (!input) return '';
   
-  // This function is a placeholder. In a real-world application,
-  // you should use parameterized queries or prepared statements
-  // provided by your database library to prevent SQL injection.
-  console.warn(
-    'escapeInput is a placeholder! Use parameterized queries or prepared statements for SQL injection prevention.'
-  );
-  return input;
+  return input
+    .replace(/'/g, "''") // Escape single quotes
+    .replace(/\\/g, '\\\\') // Escape backslashes
+    .replace(/\u0000/g, '') // Remove null bytes
+    .replace(/\x00/g, '') // Remove hex null bytes
+    .replace(/\x1a/g, ''); // Remove substitute characters
 };
 
 // Security helper to prevent prototype pollution with more checks

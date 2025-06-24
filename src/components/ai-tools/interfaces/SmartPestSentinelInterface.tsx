@@ -120,57 +120,47 @@ const SmartPestSentinelInterface: React.FC = () => {
     setIsAnalyzing(true);
     
     try {
-      // Use TensorFlow/YOLO and OpenCV for pest detection
-      const analysis = await analyzeImageWithAI(selectedImage, cropType);
-
+      // Simulate AI pest detection
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      const analysis = {
+        detectedPests: [
+          {
+            name: 'Colorado Potato Beetle',
+            confidence: 96,
+            severity: 'high',
+            description: 'Adult beetles and larvae detected on potato leaves'
+          },
+          {
+            name: 'Aphids',
+            confidence: 78,
+            severity: 'medium',
+            description: 'Small green aphids clustered on stem'
+          }
+        ],
+        cropHealth: {
+          overall: 72,
+          leafDamage: 25,
+          growthStage: 'Vegetative',
+          stressLevel: 'Moderate'
+        },
+        recommendations: [
+          'Apply targeted insecticide for Colorado Potato Beetle',
+          'Monitor aphid population growth',
+          'Consider introducing beneficial insects',
+          'Increase field monitoring frequency'
+        ],
+        treatmentUrgency: 'high',
+        estimatedYieldImpact: 15,
+        weatherConsiderations: 'Apply treatment before expected rain in 2 days'
+      };
+      
       setAnalysisResult(analysis);
     } catch (error) {
       console.error('Analysis failed:', error);
     } finally {
       setIsAnalyzing(false);
     }
-  };
-
-  const analyzeImageWithAI = async (image: File, cropType: string) => {
-    // Placeholder function for AI pest detection
-    console.log('Analyzing image with TensorFlow/YOLO and OpenCV...');
-
-    // Simulate AI pest detection
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
-    const analysis = {
-      detectedPests: [
-        {
-          name: 'Colorado Potato Beetle',
-          confidence: 96,
-          severity: 'high',
-          description: 'Adult beetles and larvae detected on potato leaves'
-        },
-        {
-          name: 'Aphids',
-          confidence: 78,
-          severity: 'medium',
-          description: 'Small green aphids clustered on stem'
-        }
-      ],
-      cropHealth: {
-        overall: 72,
-        leafDamage: 25,
-        growthStage: 'Vegetative',
-        stressLevel: 'Moderate'
-      },
-      recommendations: [
-        'Apply targeted insecticide for Colorado Potato Beetle',
-        'Monitor aphid population growth',
-        'Consider introducing beneficial insects',
-        'Increase field monitoring frequency'
-      ],
-      treatmentUrgency: 'high',
-      estimatedYieldImpact: 15,
-      weatherConsiderations: 'Apply treatment before expected rain in 2 days'
-    };
-
-    return analysis;
   };
 
   const getSeverityColor = (severity: string) => {
@@ -436,7 +426,7 @@ const SmartPestSentinelInterface: React.FC = () => {
 
           {/* Field Monitoring Tab */}
           <TabsContent value="monitoring" className="flex-1 p-6 overflow-auto">
-            <div className="max-w-6xl mx-auto space-y-6">
+            <div className="max-w-6xl mx-auto">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-semibold">Field Monitoring Dashboard</h2>
                 <div className="flex gap-2">
@@ -451,13 +441,7 @@ const SmartPestSentinelInterface: React.FC = () => {
                 </div>
               </div>
 
-              {/* Placeholder Leaflet Map */}
-              <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
-                <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-500">Leaflet map would display here</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <Card>
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3">
@@ -521,40 +505,42 @@ const SmartPestSentinelInterface: React.FC = () => {
                 </Card>
               </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Detections</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {mockDetections.map((detection) => (
-                      <div key={detection.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-4">
-                          <div className="p-2 bg-gray-100 rounded-lg">
-                            <Bug className="h-6 w-6 text-gray-600" />
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Detections</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {mockDetections.map((detection) => (
+                        <div key={detection.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 bg-gray-100 rounded-lg">
+                              <Bug className="h-6 w-6 text-gray-600" />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold">{detection.pestName}</h4>
+                              <p className="text-sm text-gray-600">{detection.location} • {detection.cropType}</p>
+                              <p className="text-xs text-gray-500">{detection.detectedAt.toLocaleString()}</p>
+                            </div>
                           </div>
-                          <div>
-                            <h4 className="font-semibold">{detection.pestName}</h4>
-                            <p className="text-sm text-gray-600">{detection.location} • {detection.cropType}</p>
-                            <p className="text-xs text-gray-500">{detection.detectedAt.toLocaleString()}</p>
+                          <div className="flex items-center gap-3">
+                            <Badge className={getSeverityColor(detection.severity)}>
+                              {detection.severity}
+                            </Badge>
+                            <span className="text-sm font-medium">{detection.confidence}%</span>
+                            {detection.treatmentRecommended && (
+                              <Button variant="outline" size="sm">
+                                View Treatment
+                              </Button>
+                            )}
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <Badge className={getSeverityColor(detection.severity)}>
-                            {detection.severity}
-                          </Badge>
-                          <span className="text-sm font-medium">{detection.confidence}%</span>
-                          {detection.treatmentRecommended && (
-                            <Button variant="outline" size="sm">
-                              View Treatment
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </TabsContent>
 
