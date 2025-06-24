@@ -7,7 +7,6 @@ import { useTier } from '@/context/TierContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Course, LearningPath, Certification, LiveEvent, LearningProgress } from '@/types/learning';
-import apiKeys from '@/config/apiKeys';
 
 interface UseLearningResourcesProps {
   categoryFilter?: string;
@@ -28,22 +27,6 @@ interface UseLearningResourcesResult {
   markCourseComplete: (courseId: string) => Promise<void>;
   totalCount: number;
 }
-
-const fetchCourseSummary = async (title: string): Promise<string> => {
-  const endpoint = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&titles=${encodeURIComponent(title)}&exintro=1&explaintext=1&origin=*`;
-  try {
-    const response = await fetch(endpoint);
-    const data = await response.json();
-    const pageId = Object.keys(data.query.pages)[0];
-    if (pageId === '-1') {
-      return 'Summary not found.';
-    }
-    return data.query.pages[pageId].extract || 'Summary not available.';
-  } catch (error) {
-    console.error("Error fetching Wikipedia summary:", error);
-    return 'Failed to load summary.';
-  }
-};
 
 export const useLearningResources = ({
   categoryFilter,
@@ -70,14 +53,6 @@ export const useLearningResources = ({
       const { data: events, error: eventsError } = await supabase.from('live_events').select('*');
       if (eventsError) throw new Error(eventsError.message);
 
-      // Fetch course summaries from Wikipedia API
-      const coursesWithSummaries = await Promise.all(
-        courses.map(async (course) => {
-          const summary = await fetchCourseSummary(course.title);
-          return { ...course, summary };
-        })
-      );
-
       let userProgress: LearningProgress[] = [];
       if (user) {
         const { data: progressData, error: progressError } = await supabase
@@ -88,64 +63,17 @@ export const useLearningResources = ({
         else userProgress = progressData || [];
       }
 
-      // New courses and learning paths data
-      const newCourses = [
-        { id: '1', title: 'Introduction to Artificial Intelligence', description: 'A comprehensive introduction to the field of AI.', category: 'AI Fundamentals', difficulty: 'beginner', required_tier: 'freemium' },
-        { id: '2', title: 'History & Ethics of AI', description: 'Explore the historical development and ethical considerations of AI.', category: 'AI Fundamentals', difficulty: 'beginner', required_tier: 'freemium' },
-        { id: '3', title: 'How AI Impacts Our Daily Lives', description: 'Understand the impact of AI on various aspects of daily life.', category: 'AI Fundamentals', difficulty: 'beginner', required_tier: 'freemium' },
-        { id: '4', title: 'Understanding Chatbots & Virtual Assistants', description: 'Learn about the technology and applications of chatbots and virtual assistants.', category: 'AI Applications', difficulty: 'beginner', required_tier: 'freemium' },
-        { id: '5', title: 'Basic Prompt Writing for AI Tools', description: 'Master the basics of writing effective prompts for AI tools.', category: 'AI Applications', difficulty: 'beginner', required_tier: 'freemium' },
-        { id: '6', title: 'Exploring AI in Social Media', description: 'Discover how AI is used in social media platforms.', category: 'AI Applications', difficulty: 'beginner', required_tier: 'freemium' },
-        { id: '7', title: 'What is Machine Learning? (non-technical overview)', description: 'A non-technical overview of machine learning concepts.', category: 'Machine Learning', difficulty: 'beginner', required_tier: 'freemium' },
-        { id: '8', title: 'Intro to No-Code AI Platforms', description: 'Get introduced to no-code AI platforms and their capabilities.', category: 'No-Code AI', difficulty: 'beginner', required_tier: 'freemium' },
-        { id: '9', title: 'Using AI for Research & Writing', description: 'Learn how to use AI tools for research and writing tasks.', category: 'AI Applications', difficulty: 'beginner', required_tier: 'freemium' },
-        { id: '10', title: 'AI for Students & Everyday Users', description: 'Explore AI applications for students and everyday users.', category: 'AI Applications', difficulty: 'beginner', required_tier: 'freemium' },
-        { id: '11', title: 'Intermediate Prompt Engineering', description: 'Learn intermediate prompt engineering techniques.', category: 'AI Applications', difficulty: 'intermediate', required_tier: 'basic' },
-        { id: '12', title: 'Creating with AI Art & Image Generators', description: 'Create stunning visuals with AI art and image generators.', category: 'AI Applications', difficulty: 'intermediate', required_tier: 'basic' },
-        { id: '13', title: 'Using AI for Content Creation & Marketing', description: 'Leverage AI for content creation and marketing strategies.', category: 'AI Applications', difficulty: 'intermediate', required_tier: 'basic' },
-        { id: '14', title: 'Intro to Natural Language Processing (NLP)', description: 'An introduction to the concepts and applications of NLP.', category: 'Natural Language Processing', difficulty: 'intermediate', required_tier: 'basic', modules: [{ title: 'Sentiment Analysis with Hugging Face Transformers', content: `
-          // Placeholder code for sentiment analysis using Hugging Face Transformers API
-          // In a real-world scenario, this code would fetch data from the Hugging Face API
-          // and perform sentiment analysis on the given text.
-          const text = "This is a great movie!";
-          const sentiment = "Positive";
-          console.log(\`Sentiment analysis for text: \${text} is \${sentiment}\`);
-        ` }] },
-        { id: '15', title: 'Designing AI Chatbots without Coding', description: 'Design and build AI chatbots without coding.', category: 'No-Code AI', difficulty: 'intermediate', required_tier: 'basic' },
-        { id: '16', title: 'Advanced AI Ethics', description: 'Explore advanced ethical considerations in AI development and deployment.', category: 'AI Ethics', difficulty: 'advanced', required_tier: 'pro' },
-        { id: '17', title: 'AI and the Future of Work', description: 'Discuss the impact of AI on the future of work and employment.', category: 'AI and Society', difficulty: 'intermediate', required_tier: 'basic' },
-        { id: '18', title: 'Building Custom AI Models with Python', description: 'Learn how to build custom AI models using Python and popular libraries.', category: 'Machine Learning', difficulty: 'intermediate', required_tier: 'basic' },
-        { id: '19', title: 'Deploying AI Models to the Cloud', description: 'Learn how to deploy AI models to cloud platforms like AWS, Azure, and GCP.', category: 'Cloud Computing', difficulty: 'advanced', required_tier: 'pro' },
-      ];
-
-      const newLearningPaths = [
-        { id: '1', title: 'AI Awareness for Everyone', description: 'A path to understand the basics of AI.', required_tier: 'freemium', courses: ['1', '2', '3'] },
-        { id: '2', title: 'Get Productive with AI Tools', description: 'A path to get productive with AI tools.', required_tier: 'freemium', courses: ['9', '4', '6'] },
-        { id: '3', title: 'First Steps in Building with AI', description: 'A path to take the first steps in building with AI.', required_tier: 'freemium', courses: ['7', '8', '5'] },
-        { id: '4', title: 'Becoming an AI Ethicist', description: 'A path to becoming an AI ethicist.', required_tier: 'basic', courses: ['2', '16', '17'] },
-        { id: '5', title: 'Python for AI Development', description: 'A path to learn Python for AI development.', required_tier: 'basic', courses: ['18', '11', '12'] },
-        { id: '6', title: 'Cloud Deployment for AI Engineers', description: 'A path to learn cloud deployment for AI engineers.', required_tier: 'pro', courses: ['19', '22', '23'] },
-      ];
-
       const populatedPaths = paths.map(path => ({
         ...path,
         courses: path.courses
-        .map(courseId => courses.find(c => c.id === courseId))
-        .filter((c): c is Course => !!c)
-    }));
+          .map(courseId => courses.find(c => c.id === courseId))
+          .filter((c): c is Course => !!c)
+      }));
 
-      // Fetch course summaries for new courses
-      const newCoursesWithSummaries = await Promise.all(
-        newCourses.map(async (course) => {
-          const summary = await fetchCourseSummary(course.title);
-          return { ...course, summary };
-        })
-      );
-
-    return { courses: [...coursesWithSummaries, ...newCoursesWithSummaries], learningPaths: [...populatedPaths, ...newLearningPaths], certifications: certs, liveEvents: events, userProgress };
-  },
-  staleTime: 1000 * 60 * 5, // 5 minutes
-});
+      return { courses, learningPaths: populatedPaths, certifications: certs, liveEvents: events, userProgress };
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
 
   const { courses: allCourses = [], learningPaths = [], certifications = [], liveEvents = [], userProgress: progressData = [] } = data || {};
 

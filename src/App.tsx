@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from "react";
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -9,9 +9,6 @@ import { TierProvider } from "./context/TierContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { LoadingIndicator } from "./components/ui/loading-indicator";
 import { HelmetProvider } from "react-helmet-async";
-import LearningHub from "./pages/LearningHub";
-import ToolDetail from "./pages/ToolDetail";
-import { initializePerformanceMonitoring } from "./utils/performanceMonitoring";
 
 // Lazy load components for better performance
 const ProjectDetail = lazy(() => import("./pages/ProjectDetail"));
@@ -31,8 +28,6 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  initializePerformanceMonitoring();
-
   return (
     <ErrorBoundary>
       <HelmetProvider>
@@ -89,15 +84,6 @@ const App = () => {
                       element={
                         <Suspense fallback={<LoadingIndicator />}>
                           <AIStreamDetail />
-                        </Suspense>
-                      } 
-                    />
-                    <Route path="/LearningHub" element={<LearningHub />} />
-                     <Route 
-                      path="/tool/:id" 
-                      element={
-                        <Suspense fallback={<LoadingIndicator />}>
-                          <ToolDetail />
                         </Suspense>
                       } 
                     />

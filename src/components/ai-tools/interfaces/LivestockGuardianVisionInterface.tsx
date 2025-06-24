@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,104 +30,54 @@ const LivestockGuardianVisionInterface: React.FC = () => {
   const [selectedCamera, setSelectedCamera] = useState('camera-1');
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
 
-  const analyzeVideoWithAI = async (camera: string): Promise<AnalysisResult> => {
-    // Placeholder function for AI animal analysis
-    console.log('Analyzing video with MediaPipe...');
-
-    await new Promise(resolve => setTimeout(resolve, 4000));
-      
-    let analysis: AnalysisResult = {
-      animalCount: 24,
-      healthAlerts: 2,
-      behaviorChanges: 1,
-      predatorDetections: 0,
-      averageHealthScore: 87,
-      environmentalConditions: {
-        temperature: 72,
-        humidity: 65,
-        windSpeed: 8,
-        weatherCondition: 'Partly Cloudy'
-      },
-      individualAnimals: [
-        {
-          id: 'COW-001',
-          healthScore: 65,
-          temperature: 103.2,
-          activity: 'Low',
-          alert: 'Elevated temperature'
-        },
-        {
-          id: 'COW-002',
-          healthScore: 92,
-          temperature: 100.8,
-          activity: 'Normal',
-          alert: null
-        },
-        {
-          id: 'COW-003',
-          healthScore: 88,
-          temperature: 101.1,
-          activity: 'High',
-          alert: null
-        }
-      ],
-      recommendations: [
-        'Isolate COW-001 for veterinary examination',
-        'Monitor feeding patterns in Barn 2',
-        'Increase water station surveillance',
-        'Schedule routine health checks for herd'
-      ]
-    };
-
-    // Use Scikit-learn for anomaly detection
-    analysis = await detectAnomalies(analysis);
-
-    return analysis;
-  };
-
-  const detectAnomalies = async (analysis: AnalysisResult): Promise<AnalysisResult> => {
-    // Placeholder function for anomaly detection
-    console.log('Analyzing data with Scikit-learn for anomaly detection...');
-
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Simulate anomaly detection
-    const updatedAnimals = analysis.individualAnimals.map(animal => {
-      if (animal.id === 'COW-004') {
-        return {
-          ...animal,
-          healthScore: 55,
-          temperature: 104.5,
-          activity: 'Very Low',
-          alert: 'Potential illness detected'
-        };
-      }
-      return animal;
-    });
-
-    const updatedAnalysis: AnalysisResult = {
-      animalCount: analysis.animalCount,
-      healthAlerts: analysis.healthAlerts + 1,
-      behaviorChanges: analysis.behaviorChanges,
-      predatorDetections: analysis.predatorDetections,
-      averageHealthScore: analysis.averageHealthScore,
-      environmentalConditions: analysis.environmentalConditions,
-      individualAnimals: updatedAnimals,
-      recommendations: [
-        ...analysis.recommendations,
-        'Investigate potential illness in COW-004'
-      ]
-    };
-
-    return updatedAnalysis;
-  };
-
   const analyzeVideo = async () => {
     setIsAnalyzing(true);
     
     try {
-      // Use MediaPipe for animal pose estimation and behavior analysis
-      const analysis = await analyzeVideoWithAI(selectedCamera);
+      await new Promise(resolve => setTimeout(resolve, 4000));
+      
+      const analysis: AnalysisResult = {
+        animalCount: 24,
+        healthAlerts: 2,
+        behaviorChanges: 1,
+        predatorDetections: 0,
+        averageHealthScore: 87,
+        environmentalConditions: {
+          temperature: 72,
+          humidity: 65,
+          windSpeed: 8,
+          weatherCondition: 'Partly Cloudy'
+        },
+        individualAnimals: [
+          {
+            id: 'COW-001',
+            healthScore: 65,
+            temperature: 103.2,
+            activity: 'Low',
+            alert: 'Elevated temperature'
+          },
+          {
+            id: 'COW-002',
+            healthScore: 92,
+            temperature: 100.8,
+            activity: 'Normal',
+            alert: null
+          },
+          {
+            id: 'COW-003',
+            healthScore: 88,
+            temperature: 101.1,
+            activity: 'High',
+            alert: null
+          }
+        ],
+        recommendations: [
+          'Isolate COW-001 for veterinary examination',
+          'Monitor feeding patterns in Barn 2',
+          'Increase water station surveillance',
+          'Schedule routine health checks for herd'
+        ]
+      };
       
       setAnalysisResult(analysis);
     } catch (error) {

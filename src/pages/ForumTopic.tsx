@@ -7,8 +7,6 @@ import { useTier } from '@/context/TierContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Suspense } from 'react';
-import { LoadingIndicator } from '@/components/ui/loading-indicator';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -309,9 +307,7 @@ const ForumTopic = () => {
             <div className="flex space-x-4">
               <div className="flex-shrink-0">
                 <Avatar className="h-10 w-10">
-                  <Suspense fallback={<LoadingIndicator />}>
-                    <AvatarImage src={topicAuthor?.avatar_url || undefined} />
-                  </Suspense>
+                  <AvatarImage src={topicAuthor?.avatar_url || undefined} />
                   <AvatarFallback>
                     {getInitials(topicAuthor?.username || 'User')}
                   </AvatarFallback>
@@ -348,9 +344,7 @@ const ForumTopic = () => {
                   <div className="flex justify-between">
                     <div className="flex items-center space-x-2">
                       <Avatar className="h-8 w-8">
-                        <Suspense fallback={<LoadingIndicator />}>
-                          <AvatarImage src={reply.author?.avatar_url || undefined} />
-                        </Suspense>
+                        <AvatarImage src={reply.author?.avatar_url || undefined} />
                         <AvatarFallback>
                           {getInitials(reply.author?.username || 'User')}
                         </AvatarFallback>

@@ -1,10 +1,9 @@
 
-import React, { lazy, Suspense, useRef } from 'react';
+import React from 'react';
+import { useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTier } from '@/context/TierContext';
 import { Link } from 'react-router-dom';
-
-const AIToolTiers = lazy(() => import('@/data/ai-tools-tiers'));
 
 interface ToolCardProps {
   name: string;

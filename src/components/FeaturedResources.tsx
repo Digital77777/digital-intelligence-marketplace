@@ -2,24 +2,23 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Bot, BookOpen, Users } from 'lucide-react';
-import { featuredResources } from '@/data/featuredResources';
 
 interface ResourceCardProps {
-  icon: () => React.ReactNode;
+  icon: React.ReactNode;
   title: string;
   description: string;
   buttonText: string;
   linkTo: string;
 }
 
-const ResourceCardComponent: React.FC<ResourceCardProps> = ({ icon, title, description, buttonText, linkTo }) => {
+const ResourceCard: React.FC<ResourceCardProps> = ({ icon, title, description, buttonText, linkTo }) => {
   return (
     <div className="relative group">
       <div className="absolute -inset-0.5 bg-gradient-to-r from-[#2A5C8D] to-[#00FF88] rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-1000"></div>
       <div className="relative bg-[#1A1A1A] dark:bg-gray-800 rounded-xl p-8 shadow-xl border border-gray-700 hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
         <div className="flex justify-center mb-4">
           <div className="h-14 w-14 bg-[#2A5C8D]/20 rounded-full flex items-center justify-center text-[#00FF88]">
-            {icon()}
+            {icon}
           </div>
         </div>
         <h3 className="text-xl font-semibold mb-3 text-white text-center">{title}</h3>
@@ -40,8 +39,6 @@ const ResourceCardComponent: React.FC<ResourceCardProps> = ({ icon, title, descr
   );
 };
 
-const ResourceCard = React.memo(ResourceCardComponent);
-
 const FeaturedResources: React.FC = () => {
   return (
     <section id="featured-resources" className="py-16 bg-[#1A1A1A] text-white px-4">
@@ -53,16 +50,29 @@ const FeaturedResources: React.FC = () => {
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {featuredResources.map((resource, index) => (
-            <ResourceCard
-              key={index}
-              icon={resource.icon}
-              title={resource.title}
-              description={resource.description}
-              buttonText={resource.buttonText}
-              linkTo={resource.linkTo}
-            />
-          ))}
+          <ResourceCard 
+            icon={<Bot className="h-8 w-8" />} 
+            title="Explore 50+ AI Tools" 
+            description="From NLP to Computer Vision—test, learn, and build with our comprehensive collection of AI tools."
+            buttonText="Browse Tools"
+            linkTo="/ai-tools-directory"
+          />
+          
+          <ResourceCard 
+            icon={<BookOpen className="h-8 w-8" />} 
+            title="Master AI Basics" 
+            description="Free courses, hands-on projects, and certifications to help you build practical AI skills."
+            buttonText="Start Learning"
+            linkTo="/learning-hub"
+          />
+          
+          <ResourceCard 
+            icon={<Users className="h-8 w-8" />} 
+            title="Join 10K+ Innovators" 
+            description="Collaborate, share projects, and get feedback from our global community of AI enthusiasts."
+            buttonText="Introduce Yourself"
+            linkTo="/forums"
+          />
         </div>
       </div>
     </section>

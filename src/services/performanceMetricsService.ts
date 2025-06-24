@@ -24,31 +24,19 @@ export interface MetricSnapshot {
   created_at: string;
 }
 
-const fetchPerformanceMetrics = async (page: number, pageSize: number): Promise<PerformanceMetric[]> => {
-  try {
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = page * pageSize - 1;
-
-    const { data, error } = await supabase
-      .from('performance_metrics')
-      .select('*')
-      .range(startIndex, endIndex);
-    
-    if (error) {
-      console.error('Error fetching performance metrics:', error);
-      throw error;
-    }
-    return data || [];
-  } catch (error) {
-    console.error('Error fetching performance metrics:', error);
-    return [];
-  }
+const fetchPerformanceMetrics = async (): Promise<PerformanceMetric[]> => {
+  const { data, error } = await supabase
+    .from('performance_metrics')
+    .select('*');
+  
+  if (error) throw error;
+  return data || [];
 };
 
-export const usePerformanceMetrics = (page: number, pageSize: number) => {
+export const usePerformanceMetrics = () => {
   return useQuery<PerformanceMetric[], Error>({
-    queryKey: ['performance_metrics', page, pageSize],
-    queryFn: () => fetchPerformanceMetrics(page, pageSize),
+    queryKey: ['performance_metrics'],
+    queryFn: fetchPerformanceMetrics,
   });
 };
 
@@ -56,22 +44,14 @@ const fetchMetricSnapshots = async (period: '7d' | '30d' | '90d'): Promise<Metri
     const daysBack = period === '7d' ? 7 : period === '30d' ? 30 : 90;
     const startDate = subDays(new Date(), daysBack);
 
-    try {
-        const { data, error } = await supabase
-            .from('metric_snapshots')
-            .select('*')
-            .gte('snapshot_date', startDate.toISOString().split('T')[0])
-            .order('snapshot_date', { ascending: true });
+    const { data, error } = await supabase
+        .from('metric_snapshots')
+        .select('*')
+        .gte('snapshot_date', startDate.toISOString().split('T')[0])
+        .order('snapshot_date', { ascending: true });
 
-        if (error) {
-            console.error('Error fetching metric snapshots:', error);
-            throw error;
-        }
-        return data || [];
-    } catch (error) {
-        console.error('Error fetching metric snapshots:', error);
-        return [];
-    }
+    if (error) throw error;
+    return data || [];
 };
 
 export const useMetricSnapshots = (period: '7d' | '30d' | '90d') => {

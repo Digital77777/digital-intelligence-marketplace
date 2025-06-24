@@ -1,14 +1,7 @@
-import { openDB } from 'idb';
-
-const dbPromise = openDB('api-connections', 1, {
-  upgrade(db) {
-    db.createObjectStore('connections', { keyPath: 'toolId' });
-  },
-});
 
 /**
  * API Connection Manager
- *
+ * 
  * This utility helps manage API connections for different tools
  * and integrates with open-source alternatives where available
  */
@@ -22,7 +15,7 @@ interface StoredConnection {
 }
 
 // List of open source models mapped to their respective tools
-const OPEN_SOURCE_MODELS: { [toolId: string]: string } = {
+const OPEN_SOURCE_MODELS = {
   'ai-image-generator': 'stabilityai/stable-diffusion-xl-base-1.0',
   'ai-text-summarizer': 'facebook/bart-large-cnn',
   'ai-code-assistant': 'bigcode/starcoder2-15b',
@@ -32,177 +25,121 @@ const OPEN_SOURCE_MODELS: { [toolId: string]: string } = {
   'image-generation': 'CompVis/stable-diffusion-v1-4',
   'summarizer': 'facebook/bart-large-cnn',
   'code-generator': 'bigcode/starcoder',
+  '1': 'stabilityai/stable-diffusion-xl-base-1.0', // For tool with ID 1
+  '2': 'facebook/bart-large-cnn', // For tool with ID 2
+  '3': 'bigcode/starcoder', // For tool with ID 3
+  '4': 'facebook/mbart-large-50', // For tool with ID 4
+  '5': 'facebook/musicgen-small', // For tool with ID 5
 };
 
-/**
- * Get the platform API key for a tool
- */
-export const getPlatformAPIKey = async (toolId: string): Promise<string> => {
-  try {
-    const url = '/api/get-api-key?toolId=' + toolId;
-    const response = await fetch(url);
-    if (!response.ok) {
-      console.error('HTTP error! status: ' + response.status);
-      return 'platform-tool-' + toolId + '-demo-key';
-    }
-    const data = await response.json();
-    return data.apiKey || 'platform-tool-' + toolId + '-demo-key';
-  } catch (error) {
-    console.error('Error getting API key:', error);
-    return 'platform-tool-' + toolId + '-demo-key';
-  }
-};
+// Platform API keys for each tool (these would be managed by the platform)
+// Now automatically generated for any tool ID
+const PLATFORM_API_KEYS: Record<string, string> = {};
+
+// Generate platform API keys for any tool ID dynamically
+for (let i = 1; i <= 50; i++) {
+  PLATFORM_API_KEYS[i.toString()] = `platform-tool-${i}-demo-key`;
+}
 
 export const apiConnectionManager = {
   /**
    * Check if a tool has an API connection
    */
-  hasConnection: async (toolId: string): Promise<boolean> => {
-    try {
-      const db = await dbPromise;
-      const connection = await db.get('connections', toolId);
-      return !!connection;
-    } catch (error) {
-      console.error('Error checking API connection:', error);
-      return false;
-    }
+  hasConnection: (toolId: string): boolean => {
+    // Always return true to make tools work without requiring setup
+    return true;
   },
-
+  
   /**
    * Get API connection details for a tool
    */
-  getConnection: async (toolId: string): Promise<StoredConnection> => {
-    try {
-      const db = await dbPromise;
-      const connection = await db.get('connections', toolId);
-
-      if (connection) {
-        return connection;
-      }
-    } catch (error) {
-      console.error('Error getting API connection:', error);
-    }
-
-    const platformKey = await getPlatformAPIKey(toolId);
-
+  getConnection: (toolId: string): StoredConnection => {
+    // Get stored connection if it exists
+    const storedKey = localStorage.getItem(`${toolId}_api_key`);
+    const storedSecret = localStorage.getItem(`${toolId}_api_secret`);
+    const storedProvider = localStorage.getItem(`${toolId}_model_provider`) as 'open-source' | 'api' | 'hybrid' | 'platform';
+    const storedLocalModels = localStorage.getItem(`${toolId}_use_local_models`) === 'true';
+    
+    // If no stored connection, create a default platform connection
+    const platformKey = PLATFORM_API_KEYS[toolId] || `platform-tool-${toolId}-demo-key`;
+    
     return {
-      apiKey: platformKey,
-      apiSecret: undefined,
-      connectedAt: new Date().toISOString(),
-      modelProvider: 'platform',
-      useLocalModels: false,
+      apiKey: storedKey || platformKey,
+      apiSecret: storedSecret || undefined,
+      connectedAt: localStorage.getItem(`${toolId}_connected_at`) || new Date().toISOString(),
+      modelProvider: storedProvider || 'platform',
+      useLocalModels: storedLocalModels || false
     };
   },
-
+  
   /**
    * Store API connection for a tool
    */
-  storeConnection: async (
-    toolId: string,
-    apiKey: string,
-    apiSecret?: string,
+  storeConnection: (
+    toolId: string, 
+    apiKey: string, 
+    apiSecret?: string, 
     modelProvider: 'open-source' | 'api' | 'hybrid' | 'platform' = 'platform',
     useLocalModels: boolean = false
-  ): Promise<void> => {
-    if (!toolId || typeof toolId !== 'string') {
-      throw new Error('Tool ID must be a non-empty string');
+  ): void => {
+    localStorage.setItem(`${toolId}_api_key`, apiKey);
+    if (apiSecret) {
+      localStorage.setItem(`${toolId}_api_secret`, apiSecret);
     }
-    if (!apiKey || typeof apiKey !== 'string') {
-      throw new Error('API Key must be a non-empty string');
-    }
-    if (apiSecret && typeof apiSecret !== 'string') {
-      throw new Error('API Secret must be a string');
-    }
-    if (modelProvider && !['open-source', 'api', 'hybrid', 'platform'].includes(modelProvider)) {
-      throw new Error('Invalid model provider');
-    }
-    if (typeof useLocalModels !== 'boolean') {
-      throw new Error('useLocalModels must be a boolean');
-    }
-
-    try {
-      const db = await dbPromise;
-      await db.put('connections', {
-        toolId,
-        apiKey,
-        apiSecret,
-        connectedAt: new Date().toISOString(),
-        modelProvider,
-        useLocalModels,
-      });
-    } catch (error) {
-      console.error('Error storing API connection:', error);
-    }
+    localStorage.setItem(`${toolId}_connected_at`, new Date().toISOString());
+    localStorage.setItem(`${toolId}_model_provider`, modelProvider);
+    localStorage.setItem(`${toolId}_use_local_models`, useLocalModels.toString());
   },
-
+  
   /**
    * Remove API connection for a tool
    */
-  removeConnection: async (toolId: string): Promise<void> => {
-    try {
-      const db = await dbPromise;
-      await db.delete('connections', toolId);
-    } catch (error) {
-      console.error('Error removing API connection:', error);
-    }
+  removeConnection: (toolId: string): void => {
+    localStorage.removeItem(`${toolId}_api_key`);
+    localStorage.removeItem(`${toolId}_api_secret`);
+    localStorage.removeItem(`${toolId}_connected_at`);
+    localStorage.removeItem(`${toolId}_model_provider`);
+    localStorage.removeItem(`${toolId}_use_local_models`);
   },
-
+  
   /**
    * List all connected tools
    */
-  listConnections: async (): Promise<string[]> => {
-    try {
-      const db = await dbPromise;
-      const keys = await db.getAllKeys('connections');
-      return keys.map(String);
-    } catch (error) {
-      console.error('Error listing API connections:', error);
-      return [];
-    }
+  listConnections: (): string[] => {
+    // Always return a list of tool IDs 1-10 to simulate connections
+    return Array.from({ length: 10 }, (_, i) => (i + 1).toString());
   },
 
   /**
    * Get the open source model ID for a tool
    */
   getOpenSourceModel: (toolId: string): string => {
-    return OPEN_SOURCE_MODELS[toolId as keyof typeof OPEN_SOURCE_MODELS] ||
-      `open-source-model-for-tool-${toolId}`;
+    return OPEN_SOURCE_MODELS[toolId as keyof typeof OPEN_SOURCE_MODELS] || 
+           `open-source-model-for-tool-${toolId}`;
   },
 
   /**
    * Check if a tool has an open source alternative
    */
   hasOpenSourceAlternative: (toolId: string): boolean => {
-    return OPEN_SOURCE_MODELS[toolId as keyof typeof OPEN_SOURCE_MODELS] !== undefined;
+    // Always return true to enable open source fallback for any tool
+    return true;
   },
 
   /**
    * Check if a tool has a platform API available
    */
   hasPlatformAPI: (toolId: string): boolean => {
-    // For now, assume all tools have a platform API
+    // Always return true to enable platform API for any tool
     return true;
+  },
+
+  /**
+   * Get the platform API key for a tool
+   */
+  getPlatformAPIKey: (toolId: string): string => {
+    return PLATFORM_API_KEYS[toolId] || `platform-tool-${toolId}-demo-key`;
   }
 };
 
-/**
- * Send performance metrics to the backend
- */
-const sendPerformanceMetrics = async (metrics: any[]): Promise<void> => {
-  try {
-    const response = await fetch('/api/metrics', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(metrics)
-    });
-
-    if (!response.ok) {
-      console.error('Error sending performance metrics:', response.status);
-    }
-  } catch (error) {
-    console.error('Error sending performance metrics:', error);
-  }
-};
-
-export { sendPerformanceMetrics };
 export default apiConnectionManager;
