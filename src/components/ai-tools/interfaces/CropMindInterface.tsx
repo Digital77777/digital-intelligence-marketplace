@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,6 +51,7 @@ const CropMindInterface: React.FC<CropMindInterfaceProps> = ({ tool, onBack }) =
   const [inputMessage, setInputMessage] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [recommendations, setRecommendations] = useState<CropRecommendation[]>([]);
+  const recordingTimeout = useRef<NodeJS.Timeout | null>(null);
   
   // Mock data - in real implementation, this would come from APIs
   const [satelliteData] = useState<SatelliteData>({
@@ -95,6 +96,15 @@ const CropMindInterface: React.FC<CropMindInterfaceProps> = ({ tool, onBack }) =
       }
     }
   }, [farmProfile, satelliteData, weatherData]);
+
+  useEffect(() => {
+    // Cleanup timeout on unmount
+    return () => {
+      if (recordingTimeout.current) {
+        clearTimeout(recordingTimeout.current);
+      }
+    };
+  }, []);
 
   const handleOnboardingComplete = (profile: FarmProfile) => {
     setFarmProfile(profile);
@@ -169,10 +179,17 @@ const CropMindInterface: React.FC<CropMindInterfaceProps> = ({ tool, onBack }) =
   };
 
   const toggleRecording = () => {
-    setIsRecording(!isRecording);
-    // In real implementation, this would start/stop voice recording
-    if (!isRecording) {
-      setTimeout(() => {
+    if (isRecording) {
+      // Stop recording
+      setIsRecording(false);
+      if (recordingTimeout.current) {
+        clearTimeout(recordingTimeout.current);
+        recordingTimeout.current = null;
+      }
+    } else {
+      // Start recording
+      setIsRecording(true);
+      recordingTimeout.current = setTimeout(() => {
         setIsRecording(false);
         // Simulate voice-to-text conversion
         setInputMessage("What's the best time to apply fertilizer?");
@@ -302,13 +319,21 @@ const CropMindInterface: React.FC<CropMindInterfaceProps> = ({ tool, onBack }) =
                     className="flex-1"
                   />
                   <Button
-                    variant={isRecording ? 'destructive' : 'outline'}
+                    variant={isRecording ? "destructive" : "outline"}
                     size="icon"
                     onClick={toggleRecording}
                   >
-                    <Mic className="h-4 w-4" />
+                    {isRecording ? (
+                      <div className="h-4 w-4 bg-white rounded-full animate-pulse" />
+                    ) : (
+                      <Mic className="h-4 w-4" />
+                    )}
                   </Button>
-                  <Button onClick={handleSendMessage} className="bg-green-600 hover:bg-green-700">
+                  <Button 
+                    onClick={handleSendMessage} 
+                    className="bg-green-600 hover:bg-green-700"
+                    disabled={!inputMessage.trim()}
+                  >
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
