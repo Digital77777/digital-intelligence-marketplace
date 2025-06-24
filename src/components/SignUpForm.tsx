@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -18,16 +17,22 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from 'lucide-react';
 
+// Schema with confirmPassword and allowSignup toggle
 const formSchema = z.object({
   username: z.string().min(2, { message: "Username must be at least 2 characters" }).optional(),
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z.string().min(8, { message: "Password must be at least 8 characters" }),
+  confirmPassword: z.string().min(8, { message: "Please confirm your password" }),
   acceptTerms: z.boolean().refine(val => val === true, {
     message: "You must accept the terms and conditions",
   }),
+  allowSignup: z.boolean().optional(), // Optional: use as admin control
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
 
-type FormValues = z.infer<typeof formSchema>;
+type SignUpFormData = z.infer<typeof formSchema>;
 
 interface SignUpFormProps {
   onSuccess: () => void;
@@ -35,24 +40,32 @@ interface SignUpFormProps {
 
 const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess }) => {
   const { register, isLoading } = useUser();
-  
-  const form = useForm<FormValues>({
+
+  const form = useForm<SignUpFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
       email: "",
       password: "",
+      confirmPassword: "",
       acceptTerms: false,
+      allowSignup: true, // default can be false if needed
     },
   });
 
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async (data: SignUpFormData) => {
+    if (!data.allowSignup) {
+      toast.error("New user signups are currently disabled.");
+      return;
+    }
+
     try {
       await register(data.email, data.password, data.username || undefined);
+      toast.success("Account created successfully!");
       onSuccess();
-    } catch (error) {
-      // Error is handled in the UserContext and displayed via toast
+    } catch (error: any) {
       console.error("Error during sign up:", error);
+      toast.error(error?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -72,7 +85,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess }) => {
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="email"
@@ -86,7 +99,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess }) => {
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="password"
@@ -100,7 +113,21 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess }) => {
             </FormItem>
           )}
         />
-        
+
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Confirm Password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="••••••••" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="acceptTerms"
@@ -108,12 +135,13 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess }) => {
             <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md">
               <FormControl>
                 <Checkbox
+                  id="acceptTerms"
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />
               </FormControl>
               <div className="space-y-1 leading-none">
-                <FormLabel>
+                <FormLabel htmlFor="acceptTerms">
                   I accept the <a href="#" className="text-blue-600 hover:underline">terms and conditions</a>
                 </FormLabel>
                 <FormMessage />
@@ -121,9 +149,29 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess }) => {
             </FormItem>
           )}
         />
-        
-        <Button 
-          type="submit" 
+
+        {/* Optional: toggle to allow signups (admin-only use case) */}
+        <FormField
+          control={form.control}
+          name="allowSignup"
+          render={({ field }) => (
+            <FormItem className="flex items-center space-x-3">
+              <FormControl>
+                <Checkbox
+                  id="allowSignup"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <FormLabel htmlFor="allowSignup">
+                Allow new user signups
+              </FormLabel>
+            </FormItem>
+          )}
+        />
+
+        <Button
+          type="submit"
           className="w-full"
           disabled={isLoading}
         >
@@ -140,3 +188,6 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess }) => {
 };
 
 export default SignUpForm;
+
+
+
