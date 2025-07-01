@@ -1541,6 +1541,63 @@ export type Database = {
         }
         Relationships: []
       }
+      marketplace_tool_submissions: {
+        Row: {
+          admin_notes: string | null
+          category: string
+          contact_info: string
+          created_at: string
+          detailed_description: string
+          external_link: string
+          id: string
+          images: string[]
+          pricing_model: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          short_description: string
+          status: string
+          submitter_id: string
+          tool_name: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          category: string
+          contact_info: string
+          created_at?: string
+          detailed_description: string
+          external_link: string
+          id?: string
+          images: string[]
+          pricing_model: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          short_description: string
+          status?: string
+          submitter_id: string
+          tool_name: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          category?: string
+          contact_info?: string
+          created_at?: string
+          detailed_description?: string
+          external_link?: string
+          id?: string
+          images?: string[]
+          pricing_model?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          short_description?: string
+          status?: string
+          submitter_id?: string
+          tool_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       marketplace_tools: {
         Row: {
           api_documentation: string | null

@@ -140,6 +140,26 @@ type CourseFeedback = {
   created_at: string;
 };
 
+// Add marketplace tool submissions type
+type MarketplaceToolSubmission = {
+  id: string; // uuid
+  created_at: string;
+  updated_at: string;
+  submitter_id: string; // uuid
+  tool_name: string;
+  short_description: string;
+  detailed_description: string;
+  external_link: string;
+  images: string[];
+  category: string;
+  pricing_model: string;
+  contact_info: string;
+  status: string;
+  admin_notes: string | null;
+  reviewed_at: string | null;
+  reviewed_by: string | null; // uuid
+};
+
 // Add the missing Course and UserProgress types
 type Course = {
   id: number;
@@ -163,6 +183,11 @@ type UserProgress = {
 export type ExtendedDatabase = Database & {
   public: {
     Tables: {
+      marketplace_tool_submissions: {
+        Row: MarketplaceToolSubmission;
+        Insert: Omit<MarketplaceToolSubmission, 'id' | 'created_at' | 'updated_at' | 'status' | 'admin_notes' | 'reviewed_at' | 'reviewed_by'>;
+        Update: Partial<MarketplaceToolSubmission>;
+      };
       learning_courses: {
         Row: LearningCourse;
         Insert: Omit<LearningCourse, 'id' | 'created_at' | 'updated_at'>;
