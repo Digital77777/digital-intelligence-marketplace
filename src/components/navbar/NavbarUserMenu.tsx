@@ -50,18 +50,18 @@ const NavbarUserMenu = () => {
             {profile?.avatar_url ? (
               <AvatarImage src={profile.avatar_url} alt={profile.username || "User Avatar"} />
             ) : (
-              <AvatarFallback className="bg-[#0066cc] text-white">{profile?.username?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
+              <AvatarFallback className="bg-[#0066cc] text-white">{profile?.username?.charAt(0).toUpperCase() || profile?.full_name?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
             )}
           </Avatar>
-          <span className="text-sm hidden sm:inline font-medium">{profile?.username || "Account"}</span>
+          <span className="text-sm hidden sm:inline font-medium">{profile?.username || profile?.full_name || "Account"}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{profile?.username || user.email}</p>
+            <p className="text-sm font-medium leading-none">{profile?.username || profile?.full_name || user.email}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {user.email}
+              {profile?.email || user.email}
             </p>
           </div>
         </DropdownMenuLabel>

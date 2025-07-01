@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 
 interface UserProfile {
   id: string;
+  email: string;
   username: string;
   full_name?: string;
   avatar_url?: string;
@@ -21,7 +22,7 @@ interface UserContextType {
   loading: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, username?: string) => Promise<void>;
+  register: (email: string, password: string, fullName?: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -79,7 +80,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (email: string, password: string, username?: string) => {
+  const register = async (email: string, password: string, fullName?: string) => {
     setIsLoading(true);
     try {
       const redirectUrl = `${window.location.origin}/`;
@@ -90,8 +91,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            username: username,
-            full_name: username
+            full_name: fullName
           }
         }
       });

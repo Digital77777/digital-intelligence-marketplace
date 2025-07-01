@@ -6,15 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/context/UserContext';
 import { Loader2, Mail, Lock, User } from 'lucide-react';
-import { toast } from 'sonner';
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { user } = useUser();
-  const [loading, setLoading] = useState(false);
+  const { user, login, register, isLoading } = useUser();
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     email: '',
@@ -39,66 +36,24 @@ const Auth = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      });
-
-      if (error) {
-        if (error.message.includes('Invalid login credentials')) {
-          setError('Invalid email or password. Please check your credentials.');
-        } else {
-          setError(error.message);
-        }
-        return;
-      }
-
-      toast.success('Successfully signed in!');
+      await login(formData.email, formData.password);
       navigate('/');
-    } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
-    } finally {
-      setLoading(false);
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred. Please try again.');
     }
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
 
     try {
-      const redirectUrl = `${window.location.origin}/`;
-      
-      const { error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            full_name: formData.fullName
-          }
-        }
-      });
-
-      if (error) {
-        if (error.message.includes('User already registered')) {
-          setError('An account with this email already exists. Please sign in instead.');
-        } else {
-          setError(error.message);
-        }
-        return;
-      }
-
-      toast.success('Check your email to confirm your account!');
-    } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
-    } finally {
-      setLoading(false);
+      await register(formData.email, formData.password, formData.fullName);
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred. Please try again.');
     }
   };
 
@@ -159,8 +114,8 @@ const Auth = () => {
                   </Alert>
                 )}
 
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? (
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       Signing in...
@@ -220,8 +175,8 @@ const Auth = () => {
                   </Alert>
                 )}
 
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? (
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       Creating account...
