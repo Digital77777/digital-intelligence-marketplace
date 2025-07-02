@@ -1,12 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/context/UserContext';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Plus, Users } from 'lucide-react';
-import { Task, Team, TeamDashboardData } from './types';
+import { Users } from 'lucide-react';
+import { Task } from './types';
 import TeamDashboardSkeleton from './TeamDashboardSkeleton';
 import EmptyState from './EmptyState';
 import CreateTaskDialog from './CreateTaskDialog';
@@ -15,21 +16,11 @@ import StatsCards from './StatsCards';
 import ProgressCard from './ProgressCard';
 import RecentTasksCard from './RecentTasksCard';
 import TeamsCard from './TeamsCard';
-import { toast } from 'sonner';
 import CreateTeamDialog from './CreateTeamDialog';
 import PendingInvitesCard from './PendingInvitesCard';
 import TeamsManagerCard from './TeamsManagerCard';
-
-const fetchTeamDashboardData = async () => {
-  const { data, error } = await supabase.functions.invoke<TeamDashboardData>('team-dashboard-data', {
-    method: 'GET',
-  });
-
-  if (error) {
-    throw new Error(`Failed to fetch team dashboard data: ${error.message}`);
-  }
-  return data;
-};
+import { useTeamDashboard } from './hooks/useTeamDashboard';
+import { useTaskMutations } from './hooks/useTaskMutations';
 
 const TeamDashboard = () => {
   const { user } = useUser();
@@ -39,10 +30,10 @@ const TeamDashboard = () => {
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
   const [isCreateTeamOpen, setCreateTeamOpen] = useState(false);
 
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['team-dashboard', user?.id],
-    queryFn: fetchTeamDashboardData,
-    enabled: !!user,
+  const { data, isLoading, isError, error, invalidateQueries } = useTeamDashboard();
+  const { deleteTask, isDeleting } = useTaskMutations(() => {
+    setTaskToDelete(null);
+    invalidateQueries();
   });
 
   useEffect(() => {
@@ -53,32 +44,20 @@ const TeamDashboard = () => {
       .on<Task>(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'tasks' },
-        (payload) => {
-          queryClient.invalidateQueries({ queryKey: ['team-dashboard', user.id] });
-          // More granular updates can be done with setQueryData for performance
-          // but invalidation is simpler and effective for this use case.
-        }
+        () => invalidateQueries()
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, queryClient]);
-  
-  const deleteTaskMutation = useMutation({
-    mutationFn: async (taskId: string) => {
-      const { error } = await supabase.from('tasks').delete().eq('id', taskId);
-      if (error) throw new Error(error.message);
-    },
-    onSuccess: () => {
-      toast.success('Task deleted successfully!');
-      setTaskToDelete(null);
-    },
-    onError: (error) => {
-      toast.error(`Failed to delete task: ${error.message}`);
-    },
-  });
+  }, [user, invalidateQueries]);
+
+  const handleDeleteTask = () => {
+    if (taskToDelete) {
+      deleteTask(taskToDelete.id);
+    }
+  };
 
   const tasks = data?.tasks || [];
   const teams = data?.teams || [];
@@ -97,7 +76,11 @@ const TeamDashboard = () => {
   }
 
   if (isError) {
-    return <div className="flex items-center justify-center h-64 text-red-500">Error: {error.message}</div>;
+    return (
+      <div className="flex items-center justify-center h-64 text-red-500">
+        Error: {error?.message || 'Failed to load dashboard'}
+      </div>
+    );
   }
 
   const stats = getTaskStats();
@@ -105,11 +88,10 @@ const TeamDashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Create dialogs */}
       <CreateTeamDialog
         open={isCreateTeamOpen}
         onOpenChange={setCreateTeamOpen}
-        onTeamCreated={() => queryClient.invalidateQueries({ queryKey: ['team-dashboard', user?.id] })}
+        onTeamCreated={invalidateQueries}
       />
       <CreateTaskDialog
         open={isCreateTaskOpen}
@@ -132,15 +114,15 @@ const TeamDashboard = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => taskToDelete && deleteTaskMutation.mutate(taskToDelete.id)}>
-              Continue
+            <AlertDialogAction onClick={handleDeleteTask} disabled={isDeleting}>
+              {isDeleting ? 'Deleting...' : 'Continue'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      {/* New pending invites card */}
+
       <PendingInvitesCard />
-      {/* Header */}
+
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Team Dashboard</h1>
@@ -150,6 +132,7 @@ const TeamDashboard = () => {
           Create Team
         </Button>
       </div>
+
       {teams.length === 0 ? (
         <Card>
           <CardContent className="pt-6">
@@ -162,8 +145,7 @@ const TeamDashboard = () => {
         </Card>
       ) : (
         <>
-          {/* Team management */}
-          <TeamsManagerCard teams={teams} onTeamUpdated={() => queryClient.invalidateQueries({ queryKey: ['team-dashboard', user?.id] })} />
+          <TeamsManagerCard teams={teams} onTeamUpdated={invalidateQueries} />
           <StatsCards stats={stats} />
           <ProgressCard completionRate={completionRate} />
           <RecentTasksCard
