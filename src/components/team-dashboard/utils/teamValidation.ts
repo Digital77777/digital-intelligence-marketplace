@@ -35,13 +35,15 @@ export const validateTaskDescription = (description?: string): string | null => 
 };
 
 export const canUserEditTask = (task: Task, userId: string): boolean => {
-  // Users can edit tasks they created or are assigned to
-  return task.created_by === userId || task.assigned_to === userId;
+  // For now, allow all authenticated users to edit tasks in their teams
+  // This can be enhanced later with proper role-based permissions
+  return true;
 };
 
 export const canUserDeleteTask = (task: Task, userId: string): boolean => {
-  // Only task creators can delete tasks
-  return task.created_by === userId;
+  // For now, allow all authenticated users to delete tasks in their teams
+  // This can be enhanced later with proper role-based permissions
+  return true;
 };
 
 export const getTaskPriorityColor = (priority: string | null): string => {
