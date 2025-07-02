@@ -9,6 +9,7 @@ import { TierProvider } from "@/context/TierContext";
 import { HelmetProvider } from 'react-helmet-async';
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
+import Auth from "./pages/Auth";
 import AIToolsDirectory from "./pages/AIToolsDirectory";
 import LearningHub from "./pages/LearningHub";
 import Marketplace from "./pages/Marketplace";
@@ -22,6 +23,7 @@ import Profile from "./pages/Profile";
 import PostProject from "./pages/PostProject";
 import CreateFreelancerProfile from "./pages/CreateFreelancerProfile";
 import CreateService from "./pages/CreateService";
+import TeamDashboard from "./pages/TeamDashboard";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +38,7 @@ const App = () => (
               <ErrorBoundary>
                 <Routes>
                   <Route path="/" element={<Index />} />
+                  <Route path="/auth" element={<Auth />} />
                   <Route path="/ai-tools" element={<AIToolsDirectory />} />
                   <Route path="/learning-hub" element={<LearningHub />} />
                   <Route path="/marketplace" element={<Marketplace />} />
@@ -46,6 +49,7 @@ const App = () => (
                   <Route path="/terms-of-service" element={<TermsOfService />} />
                   <Route path="/community-forums" element={<CommunityForums />} />
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/team-dashboard" element={<TeamDashboard />} />
                   <Route path="/marketplace/post-project" element={<PostProject />} />
                   <Route path="/marketplace/create-freelancer-profile" element={<CreateFreelancerProfile />} />
                   <Route path="/marketplace/create-service" element={<CreateService />} />
