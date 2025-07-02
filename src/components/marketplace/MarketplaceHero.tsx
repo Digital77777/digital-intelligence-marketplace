@@ -23,6 +23,10 @@ const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
     navigate('/submit-tool');
   };
 
+  const handleCreateService = () => {
+    navigate('/marketplace/create-service');
+  };
+
   return (
     <div className="mb-12">
       <div className="text-center mb-8">
@@ -51,11 +55,11 @@ const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={handleCreateService}>
           <CardContent className="p-6 text-center">
-            <Settings className="h-12 w-12 mx-auto mb-4 text-purple-600" />
-            <h3 className="font-semibold mb-2">Browse Tools</h3>
-            <p className="text-sm text-muted-foreground">Discover AI tools and solutions</p>
+            <DollarSign className="h-12 w-12 mx-auto mb-4 text-purple-600" />
+            <h3 className="font-semibold mb-2">Create Service</h3>
+            <p className="text-sm text-muted-foreground">Offer your skills as a service</p>
           </CardContent>
         </Card>
 
@@ -94,7 +98,7 @@ const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
         <p className="text-muted-foreground mb-4">
           Whether you're looking to hire, get hired, or discover tools - we've got you covered.
         </p>
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center gap-4 flex-wrap">
           <Button onClick={onPostProject}>
             <Briefcase className="h-4 w-4 mr-2" />
             Post Project
@@ -102,6 +106,10 @@ const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
           <Button variant="outline" onClick={handleSubmitTool}>
             <Plus className="h-4 w-4 mr-2" />
             Submit Tool
+          </Button>
+          <Button variant="outline" onClick={handleCreateService}>
+            <DollarSign className="h-4 w-4 mr-2" />
+            Create Service
           </Button>
         </div>
       </div>

@@ -1,140 +1,262 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useMarketplaceProjects } from '@/hooks/useMarketplaceProjects';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { DollarSign, Clock, Calendar, ArrowRight } from 'lucide-react';
-import { format } from 'date-fns';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { 
+  Clock, 
+  DollarSign, 
+  MapPin,
+  Briefcase,
+  Users,
+  Calendar,
+  Filter,
+  Plus,
+  AlertCircle
+} from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
-const ProjectsTab: React.FC = () => {
-  const { data: projects, isLoading } = useMarketplaceProjects();
+const ProjectsTab = () => {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState('newest');
+  const [filterBy, setFilterBy] = useState('all');
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-  if (isLoading) {
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
+    try {
+      setError(null);
+      const { data, error: fetchError } = await supabase
+        .from('marketplace_projects')
+        .select(`
+          *,
+          client:user_profiles!marketplace_projects_client_id_fkey(username, avatar_url)
+        `)
+        .eq('status', 'open')
+        .order('created_at', { ascending: false });
+
+      if (fetchError) {
+        throw fetchError;
+      }
+      
+      setProjects(data || []);
+    } catch (error: any) {
+      console.error('Error fetching projects:', error);
+      setError('Unable to load projects at the moment. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredAndSortedProjects = projects
+    .filter(project => {
+      if (filterBy === 'all') return true;
+      if (filterBy === 'remote') return project.is_remote;
+      if (filterBy === 'onsite') return !project.is_remote;
+      return project.experience_level === filterBy;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'newest':
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case 'budget-high':
+          return (b.budget_max || 0) - (a.budget_max || 0);
+        case 'budget-low':
+          return (a.budget_min || 0) - (b.budget_min || 0);
+        case 'proposals':
+          return (b.proposal_count || 0) - (a.proposal_count || 0);
+        default:
+          return 0;
+      }
+    });
+
+  const formatBudget = (project: any) => {
+    if (!project.budget_min && !project.budget_max) return 'Budget not specified';
+    
+    const type = project.budget_type === 'hourly' ? '/hr' : '';
+    if (project.budget_min && project.budget_max) {
+      return `$${project.budget_min} - $${project.budget_max}${type}`;
+    }
+    return project.budget_min 
+      ? `From $${project.budget_min}${type}` 
+      : `Up to $${project.budget_max}${type}`;
+  };
+
+  if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {[...Array(4)].map((_, i) => (
           <Card key={i} className="animate-pulse">
             <CardHeader>
-              <div className="h-6 bg-muted rounded w-3/4" />
-              <div className="h-4 bg-muted rounded w-1/2" />
+              <div className="h-6 bg-gray-200 rounded mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                <div className="h-4 bg-muted rounded" />
-                <div className="h-4 bg-muted rounded w-4/5" />
-                <div className="h-4 bg-muted rounded w-3/5" />
-              </div>
+              <div className="h-16 bg-gray-200 rounded mb-4"></div>
             </CardContent>
-            <CardFooter>
-              <div className="h-8 bg-muted rounded w-full" />
-            </CardFooter>
           </Card>
         ))}
       </div>
     );
   }
 
-  if (!projects || projects.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <h3 className="text-lg font-medium mb-2">No projects available</h3>
-        <p className="text-muted-foreground">Check back later for new opportunities.</p>
-      </div>
-    );
-  }
-
-  const getBudgetDisplay = (project: any) => {
-    if (project.is_hourly) {
-      return `$${project.budget_min}-$${project.budget_max}/hr`;
-    } else if (project.fixed_price) {
-      return `$${project.fixed_price} fixed`;
-    } else {
-      return `$${project.budget_min}-$${project.budget_max}`;
-    }
-  };
-
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Available Projects</h2>
-        <Link to="/marketplace/post-project">
-          <Button>Post a Project</Button>
-        </Link>
+      {error && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+          <div>
+            <h4 className="font-medium text-yellow-800">Service Notice</h4>
+            <p className="text-sm text-yellow-700">{error}</p>
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div className="flex gap-4 flex-wrap">
+          <Select value={filterBy} onValueChange={setFilterBy}>
+            <SelectTrigger className="w-[180px]">
+              <Filter className="w-4 h-4 mr-2" />
+              <SelectValue placeholder="Filter projects" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Projects</SelectItem>
+              <SelectItem value="remote">Remote Only</SelectItem>
+              <SelectItem value="onsite">On-site Only</SelectItem>
+              <SelectItem value="beginner">Beginner Level</SelectItem>
+              <SelectItem value="intermediate">Intermediate Level</SelectItem>
+              <SelectItem value="expert">Expert Level</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest First</SelectItem>
+              <SelectItem value="budget-high">Highest Budget</SelectItem>
+              <SelectItem value="budget-low">Lowest Budget</SelectItem>
+              <SelectItem value="proposals">Most Proposals</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <Button onClick={() => navigate('/marketplace/post-project')}>
+          <Plus className="w-4 h-4 mr-2" />
+          Post Project
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {projects.map((project) => (
-          <Card key={project.id} className="hover:shadow-lg transition-shadow">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {filteredAndSortedProjects.map((project) => (
+          <Card key={project.id} className="hover:shadow-md transition-shadow">
             <CardHeader>
               <div className="flex justify-between items-start">
-                <CardTitle className="line-clamp-2 text-lg">{project.title}</CardTitle>
-                <Badge variant="secondary" className="capitalize">
-                  {project.project_type}
+                <CardTitle className="text-lg line-clamp-2">{project.title}</CardTitle>
+                <Badge variant={project.is_remote ? "default" : "secondary"}>
+                  {project.is_remote ? "Remote" : "On-site"}
                 </Badge>
               </div>
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Calendar className="h-4 w-4 mr-1" />
-                Posted {format(new Date(project.created_at), 'MMM d')}
-              </div>
-            </CardHeader>
-            
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground line-clamp-3">
-                {project.description}
-              </p>
-
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center">
-                  <DollarSign className="h-4 w-4 mr-1 text-green-600" />
-                  <span className="font-medium">{getBudgetDisplay(project)}</span>
+              
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <DollarSign className="w-4 h-4" />
+                  <span>{formatBudget(project)}</span>
                 </div>
                 
-                {project.estimated_hours && (
-                  <div className="flex items-center">
-                    <Clock className="h-4 w-4 mr-1 text-blue-600" />
-                    <span>{project.estimated_hours}h</span>
+                {project.timeline && (
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-4 h-4" />
+                    <span>{project.timeline}</span>
                   </div>
                 )}
               </div>
+            </CardHeader>
 
-              {project.required_skills && project.required_skills.length > 0 && (
+            <CardContent className="space-y-4">
+              <p className="text-sm line-clamp-3">{project.description}</p>
+
+              {project.skills_required && project.skills_required.length > 0 && (
                 <div className="flex flex-wrap gap-1">
-                  {project.required_skills.slice(0, 3).map((skill, index) => (
+                  {project.skills_required.slice(0, 4).map((skill, index) => (
                     <Badge key={index} variant="outline" className="text-xs">
                       {skill}
                     </Badge>
                   ))}
-                  {project.required_skills.length > 3 && (
+                  {project.skills_required.length > 4 && (
                     <Badge variant="outline" className="text-xs">
-                      +{project.required_skills.length - 3}
+                      +{project.skills_required.length - 4} more
                     </Badge>
                   )}
                 </div>
               )}
 
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <Badge variant="outline" className="capitalize">
-                  {project.experience_level}
-                </Badge>
-                {project.deadline && (
-                  <span>Due: {format(new Date(project.deadline), 'MMM d')}</span>
-                )}
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <Avatar className="w-6 h-6">
+                    <AvatarImage src={project.client?.avatar_url} />
+                    <AvatarFallback className="text-xs">
+                      {project.client?.username?.[0]?.toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span>{project.client?.username}</span>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                  {project.proposal_count > 0 && (
+                    <div className="flex items-center gap-1">
+                      <Users className="w-3 h-3" />
+                      <span>{project.proposal_count} proposals</span>
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    <span>{formatDistanceToNow(new Date(project.created_at), { addSuffix: true })}</span>
+                  </div>
+                </div>
               </div>
+
+              {project.location && !project.is_remote && (
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <MapPin className="w-3 h-3" />
+                  <span>{project.location}</span>
+                </div>
+              )}
             </CardContent>
 
             <CardFooter>
-              <Link to={`/marketplace/project/${project.id}`} className="w-full">
-                <Button className="w-full">
-                  View Details
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </Link>
+              <Button className="w-full">
+                View Project Details
+              </Button>
             </CardFooter>
           </Card>
         ))}
       </div>
+
+      {filteredAndSortedProjects.length === 0 && (
+        <div className="text-center py-16">
+          <Briefcase className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+          <h3 className="text-xl font-medium mb-2">No projects found</h3>
+          <p className="text-muted-foreground max-w-md mx-auto mb-6">
+            No projects match your current filters. Try adjusting your search criteria or be the first to post a project!
+          </p>
+          <Button onClick={() => navigate('/marketplace/post-project')}>
+            <Plus className="w-4 h-4 mr-2" />
+            Post the First Project
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

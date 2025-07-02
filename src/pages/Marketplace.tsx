@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -14,11 +15,10 @@ import ServicesTab from '@/components/marketplace/ServicesTab';
 import MarketplaceHero from '@/components/marketplace/MarketplaceHero';
 import MarketplaceSearchFilters from '@/components/marketplace/MarketplaceSearchFilters';
 import MarketplaceSuccessStories from '@/components/marketplace/MarketplaceSuccessStories';
+
 const Marketplace = () => {
   useScrollToTop();
-  const {
-    currentTier
-  } = useTier();
+  const { currentTier } = useTier();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [filteredTools, setFilteredTools] = useState(marketplaceTools);
@@ -33,12 +33,17 @@ const Marketplace = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
   useEffect(() => {
     let filtered = marketplaceTools;
 
     // Filter by search query
     if (searchQuery) {
-      filtered = filtered.filter(tool => tool.name.toLowerCase().includes(searchQuery.toLowerCase()) || tool.description.toLowerCase().includes(searchQuery.toLowerCase()) || tool.category.toLowerCase().includes(searchQuery.toLowerCase()));
+      filtered = filtered.filter(tool => 
+        tool.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        tool.description.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        tool.category.toLowerCase().includes(searchQuery.toLowerCase())
+      );
     }
 
     // Filter by category
@@ -60,24 +65,40 @@ const Marketplace = () => {
     if (categoriesFilter.length > 0) {
       filtered = filtered.filter(tool => categoriesFilter.includes(tool.category));
     }
+
     setFilteredTools(filtered);
   }, [searchQuery, selectedCategory, ratingFilter, isPremiumFilter, categoriesFilter]);
+
   const viewToolDetails = (toolId: string) => {
     navigate(`/tool/${toolId}`);
   };
+
   const handlePostProject = () => {
     navigate('/marketplace/post-project');
   };
+
   const handleCreateFreelancerProfile = () => {
-    navigate('/marketplace/create-profile');
+    navigate('/marketplace/create-freelancer-profile');
   };
-  return <div className="min-h-screen flex flex-col">
+
+  return (
+    <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 pt-24 pb-12 px-[12px] my-0 py-px">
         <div className="max-w-7xl mx-auto">
-          <MarketplaceHero onPostProject={handlePostProject} onCreateFreelancerProfile={handleCreateFreelancerProfile} />
+          <MarketplaceHero 
+            onPostProject={handlePostProject} 
+            onCreateFreelancerProfile={handleCreateFreelancerProfile} 
+          />
 
-          <MarketplaceSearchFilters searchQuery={searchQuery} setSearchQuery={setSearchQuery} ratingFilter={ratingFilter} setRatingFilter={setRatingFilter} categoriesFilter={categoriesFilter} setCategoriesFilter={setCategoriesFilter} />
+          <MarketplaceSearchFilters 
+            searchQuery={searchQuery} 
+            setSearchQuery={setSearchQuery} 
+            ratingFilter={ratingFilter} 
+            setRatingFilter={setRatingFilter} 
+            categoriesFilter={categoriesFilter} 
+            setCategoriesFilter={setCategoriesFilter} 
+          />
 
           {/* Main Marketplace Tabs */}
           <div className="mb-8">
@@ -110,7 +131,11 @@ const Marketplace = () => {
               </TabsContent>
               
               <TabsContent value="tools" className="mt-8">
-                <ToolsTab searchQuery={searchQuery} filteredTools={filteredTools} viewToolDetails={viewToolDetails} />
+                <ToolsTab 
+                  searchQuery={searchQuery} 
+                  filteredTools={filteredTools} 
+                  viewToolDetails={viewToolDetails} 
+                />
               </TabsContent>
               
               <TabsContent value="services" className="mt-8">
@@ -123,6 +148,8 @@ const Marketplace = () => {
         </div>
       </main>
       <Footer />
-    </div>;
+    </div>
+  );
 };
+
 export default Marketplace;

@@ -140,24 +140,70 @@ type CourseFeedback = {
   created_at: string;
 };
 
-// Add marketplace tool submissions type
-type MarketplaceToolSubmission = {
-  id: string; // uuid
+// Add marketplace types
+type MarketplaceTool = {
+  id: string;
   created_at: string;
   updated_at: string;
-  submitter_id: string; // uuid
-  tool_name: string;
-  short_description: string;
-  detailed_description: string;
-  external_link: string;
-  images: string[];
+  seller_id: string;
+  name: string;
+  description: string;
   category: string;
   pricing_model: string;
+  price: number;
+  external_link: string;
+  images: string[];
   contact_info: string;
+  tags: string[];
+  is_featured: boolean;
+  is_subscription: boolean;
+  subscription_period: string | null;
+  rating: number;
+  downloads_count: number;
+  demo_url: string | null;
   status: string;
-  admin_notes: string | null;
-  reviewed_at: string | null;
-  reviewed_by: string | null; // uuid
+};
+
+type MarketplaceProject = {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  client_id: string;
+  title: string;
+  description: string;
+  category: string;
+  budget_min: number | null;
+  budget_max: number | null;
+  budget_type: string | null;
+  timeline: string | null;
+  skills_required: string[];
+  experience_level: string | null;
+  status: string;
+  deadline: string | null;
+  location: string | null;
+  is_remote: boolean;
+  proposal_count: number;
+};
+
+type MarketplaceService = {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  provider_id: string;
+  title: string;
+  description: string;
+  category: string;
+  price: number;
+  pricing_type: string;
+  delivery_time: number | null;
+  features: string[];
+  images: string[];
+  tags: string[];
+  rating: number;
+  reviews_count: number;
+  orders_count: number;
+  is_featured: boolean;
+  status: string;
 };
 
 // Add the missing Course and UserProgress types
@@ -183,6 +229,21 @@ type UserProgress = {
 export type ExtendedDatabase = Database & {
   public: {
     Tables: {
+      marketplace_tools: {
+        Row: MarketplaceTool;
+        Insert: Omit<MarketplaceTool, 'id' | 'created_at' | 'updated_at' | 'rating' | 'downloads_count' | 'status'>;
+        Update: Partial<MarketplaceTool>;
+      };
+      marketplace_projects: {
+        Row: MarketplaceProject;
+        Insert: Omit<MarketplaceProject, 'id' | 'created_at' | 'updated_at' | 'proposal_count' | 'status'>;
+        Update: Partial<MarketplaceProject>;
+      };
+      marketplace_services: {
+        Row: MarketplaceService;
+        Insert: Omit<MarketplaceService, 'id' | 'created_at' | 'updated_at' | 'rating' | 'reviews_count' | 'orders_count' | 'status'>;
+        Update: Partial<MarketplaceService>;
+      };
       marketplace_tool_submissions: {
         Row: MarketplaceToolSubmission;
         Insert: Omit<MarketplaceToolSubmission, 'id' | 'created_at' | 'updated_at' | 'status' | 'admin_notes' | 'reviewed_at' | 'reviewed_by'>;
