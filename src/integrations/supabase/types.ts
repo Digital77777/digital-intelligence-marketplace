@@ -2887,6 +2887,16 @@ export type Database = {
         Args: { user_id: string; username: string; display_name: string }
         Returns: undefined
       }
+      get_course_feedback: {
+        Args: { p_course_id: string }
+        Returns: {
+          id: string
+          user_id: string
+          comment: string
+          rating: number
+          created_at: string
+        }[]
+      }
       get_my_team_ids: {
         Args: Record<PropertyKey, never>
         Returns: string[]
@@ -2905,6 +2915,18 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: {
           team_id: string
+        }[]
+      }
+      get_user_profile: {
+        Args: { p_user_id: string }
+        Returns: {
+          id: string
+          username: string
+          display_name: string
+          avatar_url: string
+          bio: string
+          created_at: string
+          updated_at: string
         }[]
       }
       get_user_tier: {
