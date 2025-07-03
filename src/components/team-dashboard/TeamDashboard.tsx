@@ -1,57 +1,36 @@
 
-import React, { useState, useEffect } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useUser } from '@/context/UserContext';
-import { Card, CardContent } from "@/components/ui/card";
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Users } from 'lucide-react';
+import { Users, Plus } from 'lucide-react';
 import { Task } from './types';
-import TeamDashboardSkeleton from './TeamDashboardSkeleton';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+import ErrorMessage from '@/components/common/ErrorMessage';
 import EmptyState from './EmptyState';
 import CreateTaskDialog from './CreateTaskDialog';
 import UpdateTaskDialog from './UpdateTaskDialog';
 import StatsCards from './StatsCards';
 import ProgressCard from './ProgressCard';
 import RecentTasksCard from './RecentTasksCard';
-import TeamsCard from './TeamsCard';
 import CreateTeamDialog from './CreateTeamDialog';
 import PendingInvitesCard from './PendingInvitesCard';
 import TeamsManagerCard from './TeamsManagerCard';
+import TeamsGrid from './TeamsGrid';
 import { useTeamDashboard } from './hooks/useTeamDashboard';
 import { useTaskMutations } from './hooks/useTaskMutations';
 
 const TeamDashboard = () => {
-  const { user } = useUser();
-  const queryClient = useQueryClient();
   const [isCreateTaskOpen, setCreateTaskOpen] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
   const [isCreateTeamOpen, setCreateTeamOpen] = useState(false);
 
-  const { data, isLoading, isError, error, invalidateQueries } = useTeamDashboard();
+  const { data, isLoading, isError, error, refetch, invalidateQueries } = useTeamDashboard();
   const { deleteTask, isDeleting } = useTaskMutations(() => {
     setTaskToDelete(null);
     invalidateQueries();
   });
-
-  useEffect(() => {
-    if (!user) return;
-
-    const channel = supabase
-      .channel('realtime-tasks')
-      .on<Task>(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'tasks' },
-        () => invalidateQueries()
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user, invalidateQueries]);
 
   const handleDeleteTask = () => {
     if (taskToDelete) {
@@ -72,14 +51,17 @@ const TeamDashboard = () => {
   };
 
   if (isLoading) {
-    return <TeamDashboardSkeleton />;
+    return <LoadingSpinner text="Loading dashboard..." className="py-12" />;
   }
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center h-64 text-red-500">
-        Error: {error?.message || 'Failed to load dashboard'}
-      </div>
+      <ErrorMessage
+        title="Failed to load dashboard"
+        message={error?.message || 'Unable to load dashboard data'}
+        onRetry={refetch}
+        className="my-8"
+      />
     );
   }
 
@@ -88,6 +70,7 @@ const TeamDashboard = () => {
 
   return (
     <div className="space-y-6">
+      {/* Dialogs */}
       <CreateTeamDialog
         open={isCreateTeamOpen}
         onOpenChange={setCreateTeamOpen}
@@ -123,12 +106,14 @@ const TeamDashboard = () => {
 
       <PendingInvitesCard />
 
+      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Team Dashboard</h1>
           <p className="text-gray-600">Overview of your team's tasks and progress</p>
         </div>
-        <Button onClick={() => setCreateTeamOpen(true)}>
+        <Button onClick={() => setCreateTeamOpen(true)} className="flex items-center gap-2">
+          <Plus className="w-4 h-4" />
           Create Team
         </Button>
       </div>
@@ -154,7 +139,12 @@ const TeamDashboard = () => {
             onDeleteTask={setTaskToDelete}
             onCreateTask={() => setCreateTaskOpen(true)}
           />
-          <TeamsCard teams={teams} />
+          
+          {/* Teams Section */}
+          <div className="space-y-4">
+            <h2 className="text-2xl font-semibold">Your Teams</h2>
+            <TeamsGrid teams={teams} />
+          </div>
         </>
       )}
     </div>
