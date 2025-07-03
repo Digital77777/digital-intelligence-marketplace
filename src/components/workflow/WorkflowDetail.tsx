@@ -2,10 +2,9 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Play, Pause, Edit, Trash2, ArrowRight } from 'lucide-react';
+import { Plus, Play, Pause, ArrowRight } from 'lucide-react';
 import { Workflow, WorkflowStep } from './types';
-import AdvancedStepEditor from './AdvancedStepEditor';
+import WorkflowStepEditor from './WorkflowStepEditor';
 import { useTier } from '@/context/TierContext';
 
 interface WorkflowDetailProps {
@@ -82,38 +81,13 @@ const WorkflowDetail: React.FC<WorkflowDetailProps> = ({ workflow, onUpdateWorkf
         <div className="space-y-4">
           {workflow.steps.map((step, index) => (
             <div key={step.id} className="flex items-center space-x-4">
-              {canAccess('ai-studio') ? (
-                <AdvancedStepEditor
-                  step={step}
-                  onUpdate={(updatedStep) => updateStep(step.id, updatedStep)}
-                  onDelete={() => removeStep(step.id)}
-                  availableModels={availableModels}
-                />
-              ) : (
-                <div className="flex-1 p-4 border rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h4 className="font-medium">{step.name}</h4>
-                      <p className="text-sm text-gray-600">{step.description}</p>
-                      <Badge variant="outline" className="mt-2">
-                        {step.type}
-                      </Badge>
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button variant="ghost" size="sm">
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeStep(step.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
+              <WorkflowStepEditor
+                step={step}
+                onUpdate={(updatedStep) => updateStep(step.id, updatedStep)}
+                onDelete={() => removeStep(step.id)}
+                availableModels={availableModels}
+                isAdvanced={canAccess('ai-studio')}
+              />
               {index < workflow.steps.length - 1 && (
                 <ArrowRight className="w-4 h-4 text-gray-400" />
               )}
