@@ -3,14 +3,7 @@ import React from 'react';
 import TeamCard from './TeamCard';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ErrorMessage from '@/components/common/ErrorMessage';
-
-interface Team {
-  id: string;
-  name: string;
-  description?: string;
-  created_at: string;
-  created_by: string;
-}
+import { Team } from './types';
 
 interface TeamsGridProps {
   teams: Team[];

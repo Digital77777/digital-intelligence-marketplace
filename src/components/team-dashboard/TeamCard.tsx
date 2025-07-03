@@ -3,14 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Users, Calendar } from 'lucide-react';
-
-interface Team {
-  id: string;
-  name: string;
-  description?: string;
-  created_at: string;
-  created_by: string;
-}
+import { Team } from './types';
 
 interface TeamCardProps {
   team: Team;
