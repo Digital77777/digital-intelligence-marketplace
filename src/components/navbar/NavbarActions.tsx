@@ -86,9 +86,7 @@ const NavbarActions = () => {
                 </span>}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-80 p-0" align="end">
-            <NotificationPanel onClear={handleClearNotifications} notificationCount={notificationCount} />
-          </PopoverContent>
+          
         </Popover>
 
         {/* User Menu */}
