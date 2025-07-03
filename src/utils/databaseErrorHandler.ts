@@ -1,5 +1,5 @@
 
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export interface DatabaseError {
   code?: string;
@@ -29,6 +29,12 @@ export const handleDatabaseError = (error: DatabaseError, context: string) => {
         description: "You don't have permission to access this resource.",
         fallbackData: false
       };
+    case 'PGRST116':
+      return {
+        title: "Connection Error",
+        description: "Unable to connect to the database. Please check your connection.",
+        fallbackData: true
+      };
     default:
       return {
         title: "Something went wrong",
@@ -39,16 +45,12 @@ export const handleDatabaseError = (error: DatabaseError, context: string) => {
 };
 
 export const useDatabaseErrorHandler = () => {
-  const { toast } = useToast();
-
   const handleError = (error: any, context: string, showToast: boolean = true) => {
     const errorInfo = handleDatabaseError(error, context);
     
     if (showToast) {
-      toast({
-        title: errorInfo.title,
+      toast.error(errorInfo.title, {
         description: errorInfo.description,
-        variant: "destructive"
       });
     }
     

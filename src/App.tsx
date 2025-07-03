@@ -24,8 +24,24 @@ import PostProject from "./pages/PostProject";
 import CreateFreelancerProfile from "./pages/CreateFreelancerProfile";
 import CreateService from "./pages/CreateService";
 import TeamDashboard from "./pages/TeamDashboard";
+import CollaborationHub from "./pages/CollaborationHub";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error) => {
+        // Don't retry on authentication errors
+        if (error?.message?.includes('Authentication') || error?.message?.includes('401')) {
+          return false;
+        }
+        return failureCount < 3;
+      },
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -50,6 +66,7 @@ const App = () => (
                   <Route path="/community-forums" element={<CommunityForums />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/team-dashboard" element={<TeamDashboard />} />
+                  <Route path="/collaboration-hub" element={<CollaborationHub />} />
                   <Route path="/marketplace/post-project" element={<PostProject />} />
                   <Route path="/marketplace/create-freelancer-profile" element={<CreateFreelancerProfile />} />
                   <Route path="/marketplace/create-service" element={<CreateService />} />

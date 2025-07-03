@@ -11,9 +11,10 @@ const fetchTeamDashboardData = async (): Promise<TeamDashboardData> => {
   });
 
   if (error) {
+    console.error('Team dashboard fetch error:', error);
     throw new Error(`Failed to fetch team dashboard data: ${error.message}`);
   }
-  return data;
+  return data || { tasks: [], teams: [] };
 };
 
 export const useTeamDashboard = () => {
@@ -25,12 +26,16 @@ export const useTeamDashboard = () => {
     queryFn: fetchTeamDashboardData,
     enabled: !!user,
     retry: (failureCount, error) => {
-      if (error.message.includes('Authentication required')) {
-        return false;
-      }
-      return failureCount < 2;
+      console.log(`Retry attempt ${failureCount} for team dashboard:`, error);
+      return failureCount < 3;
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    meta: {
+      onError: (error) => {
+        console.error('Team dashboard query error:', error);
+        toast.error('Failed to load team dashboard data');
+      }
+    }
   });
 
   const invalidateQueries = () => {
