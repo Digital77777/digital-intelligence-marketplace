@@ -98,19 +98,7 @@ const NavbarActions = () => {
                 
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-64 p-0" align="end">
-              <div className="p-4 border-b">
-                <p className="font-medium">{profile?.full_name || profile?.username || 'User'}</p>
-                <p className="text-sm text-muted-foreground">{user.email}</p>
-                <p className="text-xs text-muted-foreground capitalize">{currentTier} tier</p>
-              </div>
-              <div className="p-2">
-                <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50" onClick={handleSignOut}>
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
-                </Button>
-              </div>
-            </PopoverContent>
+            
           </Popover>}
       </div>
       
