@@ -1,7 +1,6 @@
 
 import React from 'react';
 import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import MobileStickyFooter from '@/components/MobileStickyFooter';
 import CreateFreelancerProfileForm from '@/components/marketplace/CreateFreelancerProfileForm';
 import useScrollToTop from '@/hooks/useScrollToTop';
@@ -17,7 +16,6 @@ const CreateFreelancerProfile = () => {
           <CreateFreelancerProfileForm />
         </div>
       </main>
-      <Footer />
       <MobileStickyFooter />
     </div>
   );
