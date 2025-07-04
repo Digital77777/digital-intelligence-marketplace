@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Mail, Lock, User } from 'lucide-react';
+import { Mail, Lock, User } from 'lucide-react';
+import FormField from './FormField';
+import AuthSubmitButton from './AuthSubmitButton';
+import AuthErrorHandler from './AuthErrorHandler';
 
 interface AuthFormProps {
   isSignUp: boolean;
@@ -33,64 +33,42 @@ const AuthForm: React.FC<AuthFormProps> = ({ isSignUp, onSubmit, isLoading, erro
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
+      <div className="space-y-3">
         {isSignUp && (
-          <div className="relative">
-            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              name="fullName"
-              type="text"
-              placeholder="Full Name"
-              value={formData.fullName}
-              onChange={handleInputChange}
-              className="pl-10"
-              required
-            />
-          </div>
+          <FormField
+            name="fullName"
+            type="text"
+            placeholder="Full Name"
+            value={formData.fullName}
+            onChange={handleInputChange}
+            icon={User}
+            required
+          />
         )}
-        <div className="relative">
-          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <Input
-            name="email"
-            type="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleInputChange}
-            className="pl-10"
-            required
-          />
-        </div>
-        <div className="relative">
-          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <Input
-            name="password"
-            type="password"
-            placeholder={isSignUp ? "Password (min 6 characters)" : "Password"}
-            value={formData.password}
-            onChange={handleInputChange}
-            className="pl-10"
-            minLength={6}
-            required
-          />
-        </div>
+        <FormField
+          name="email"
+          type="email"
+          placeholder="Email address"
+          value={formData.email}
+          onChange={handleInputChange}
+          icon={Mail}
+          required
+        />
+        <FormField
+          name="password"
+          type="password"
+          placeholder={isSignUp ? "Password (min 6 characters)" : "Password"}
+          value={formData.password}
+          onChange={handleInputChange}
+          icon={Lock}
+          required
+          minLength={6}
+        />
       </div>
 
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? (
-          <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            {isSignUp ? 'Creating account...' : 'Signing in...'}
-          </>
-        ) : (
-          isSignUp ? 'Create Account' : 'Sign In'
-        )}
-      </Button>
+      <AuthErrorHandler error={error} />
+      
+      <AuthSubmitButton isSignUp={isSignUp} isLoading={isLoading} />
     </form>
   );
 };
