@@ -50,7 +50,7 @@ export const useAIToolsSearch = () => {
   // Filter tools based on search, category, and tier
   const { data: allPlatformTools, isLoading: isLoadingTools } = useQuery({
     queryKey: ['allPlatformTools'],
-    queryFn: async () => {
+    queryFn: async (): Promise<AIToolItem[]> => {
       let externalTools: AIToolItem[] = [];
       try {
         const response = await fetch('https://api.publicapis.org/entries');
@@ -90,7 +90,7 @@ export const useAIToolsSearch = () => {
 
   const { data: filteredTools, isLoading: isLoadingFiltered } = useQuery({
     queryKey: ['aiTools', allPlatformTools, debouncedSearchQuery, selectedCategory, selectedTier, activeTab],
-    queryFn: () => {
+    queryFn: (): AIToolItem[] => {
       if (!allPlatformTools) return [];
 
       let filtered: AIToolItem[] = [...allPlatformTools];
