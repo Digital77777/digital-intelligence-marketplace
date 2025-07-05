@@ -157,7 +157,7 @@ main {
   margin-top: 11.25rem !important;
 }
 
-/* Ensure footer is always visible */
+/* Ensure footer is always visible on desktop */
 footer {
   position: relative !important;
   z-index: 10 !important;
@@ -171,11 +171,9 @@ footer {
     min-height: calc(100vh - 13rem - 7rem) !important;
   }
   
-  /* Ensure footer has proper spacing from mobile sticky footer */
+  /* Hide footer permanently on mobile devices */
   footer {
-    margin-bottom: 7rem !important;
-    position: relative !important;
-    z-index: 10 !important;
+    display: none !important;
   }
   
   /* Mobile sticky footer - ALWAYS VISIBLE */
