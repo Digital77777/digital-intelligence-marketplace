@@ -53,8 +53,8 @@ const curatedCourses: CuratedCourse[] = [
     institution: 'DeepLearning.AI',
     channelName: 'DeepLearningAI',
     channelUrl: 'https://www.youtube.com/c/DeepLearningAI',
-    videoUrl: 'https://www.youtube.com/playlist?list=PLkDaE6sCZn6Ec-XTbcX1uRg2_u4xOEky0',
-    embedId: 'PLkDaE6sCZn6Ec-XTbcX1uRg2_u4xOEky0',
+    videoUrl: 'https://www.youtube.com/watch?v=CS4cs9xVecg',
+    embedId: 'CS4cs9xVecg',
     description: 'Comprehensive course covering neural networks, CNNs, RNNs, and sequence models',
     skillLevel: 'Advanced',
     category: 'Deep Learning',
@@ -70,8 +70,8 @@ const curatedCourses: CuratedCourse[] = [
     institution: 'Harvard University',
     channelName: 'CS50',
     channelUrl: 'https://www.youtube.com/@cs50',
-    videoUrl: 'https://www.youtube.com/playlist?list=PLhQjrBD2T382_R182iC2gNZI9HzWFMC_8',
-    embedId: 'PLhQjrBD2T382_R182iC2gNZI9HzWFMC_8',
+    videoUrl: 'https://www.youtube.com/watch?v=5NgNicANyqM',
+    embedId: '5NgNicANyqM',
     description: 'Introduction to AI concepts including search algorithms, machine learning, neural networks, and NLP',
     skillLevel: 'Intermediate',
     category: 'AI Fundamentals',
@@ -87,8 +87,8 @@ const curatedCourses: CuratedCourse[] = [
     institution: 'MIT',
     channelName: 'MIT OpenCourseWare',
     channelUrl: 'https://www.youtube.com/@MITOCW',
-    videoUrl: 'https://www.youtube.com/playlist?list=PLkDaE6sCZn6F6wUI9tvS_Gw1vaFAx6rd6',
-    embedId: 'PLkDaE6sCZn6F6wUI9tvS_Gw1vaFAx6rd6',
+    videoUrl: 'https://www.youtube.com/watch?v=njKP3FqW3Sk',
+    embedId: 'njKP3FqW3Sk',
     description: 'Deep learning theory and practical applications using TensorFlow',
     skillLevel: 'Intermediate',
     category: 'Deep Learning',
@@ -103,8 +103,8 @@ const curatedCourses: CuratedCourse[] = [
     instructor: 'Simplilearn',
     channelName: 'Simplilearn',
     channelUrl: 'https://www.youtube.com/@simplilearn',
-    videoUrl: 'https://www.youtube.com/watch?v=GwIo3gDZCVQ',
-    embedId: 'GwIo3gDZCVQ',
+    videoUrl: 'https://www.youtube.com/watch?v=ukzFI9rgwfU',
+    embedId: 'ukzFI9rgwfU',
     description: 'Complete machine learning course covering supervised and unsupervised learning with practical projects',
     skillLevel: 'Beginner',
     category: 'Machine Learning',
@@ -120,8 +120,8 @@ const curatedCourses: CuratedCourse[] = [
     institution: 'DeepLearning.AI',
     channelName: 'DeepLearningAI',
     channelUrl: 'https://www.youtube.com/c/DeepLearningAI',
-    videoUrl: 'https://www.youtube.com/playlist?list=PLkDaE6sCZn6F6wUI9tvS_Gw1vaFAx6rd6',
-    embedId: 'PLkDaE6sCZn6F6wUI9tvS_Gw1vaFAx6rd6',
+    videoUrl: 'https://www.youtube.com/watch?v=NKpuX_yzdYs',
+    embedId: 'NKpuX_yzdYs',
     description: 'Non-technical introduction to AI strategy, ethics, and business applications',
     skillLevel: 'Beginner',
     category: 'AI + Business',
@@ -136,8 +136,8 @@ const curatedCourses: CuratedCourse[] = [
     instructor: 'Sentdex',
     channelName: 'Sentdex',
     channelUrl: 'https://www.youtube.com/@sentdex',
-    videoUrl: 'https://www.youtube.com/playlist?list=PLQVvvaa0QuDdttJXlLtAJxJetJcqmqlQq',
-    embedId: 'PLQVvvaa0QuDdttJXlLtAJxJetJcqmqlQq',
+    videoUrl: 'https://www.youtube.com/watch?v=Wo5dMEP_BbI',
+    embedId: 'Wo5dMEP_BbI',
     description: 'Build neural networks from scratch using Python without external libraries',
     skillLevel: 'Intermediate',
     category: 'Neural Networks',
@@ -153,8 +153,8 @@ const curatedCourses: CuratedCourse[] = [
     institution: 'fast.ai',
     channelName: 'fastai',
     channelUrl: 'https://www.youtube.com/@fastai',
-    videoUrl: 'https://www.youtube.com/playlist?list=PLfYUBJiXbdtSL3ajtG6lbiFdlIP_hjWlG',
-    embedId: 'PLfYUBJiXbdtSL3ajtG6lbiFdlIP_hjWlG',
+    videoUrl: 'https://www.youtube.com/watch?v=8SF_h3xF3cE',
+    embedId: '8SF_h3xF3cE',
     description: 'Practical deep learning covering computer vision, NLP, and tabular data using PyTorch',
     skillLevel: 'Intermediate',
     category: 'Deep Learning',
@@ -181,35 +181,35 @@ const curatedCourses: CuratedCourse[] = [
   },
   {
     id: '9',
-    title: 'AI for Robotics',
-    instructor: 'Sebastian Thrun',
-    institution: 'Udacity',
-    channelName: 'Udacity',
-    channelUrl: 'https://www.youtube.com/@udacity',
-    videoUrl: 'https://www.youtube.com/playlist?list=PLAwxTw4SYaPnMwH3z3tqsI_eVmSRk8fZb',
-    embedId: 'PLAwxTw4SYaPnMwH3z3tqsI_eVmSRk8fZb',
-    description: 'AI applications in robotics including path planning, localization, and Kalman filters',
-    skillLevel: 'Intermediate',
-    category: 'AI Applications',
-    tags: ['Robotics', 'Path Planning', 'Localization', 'Kalman Filters'],
-    duration: '14+ hours',
-    thumbnail: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=400',
+    title: 'Python for Everybody - Full Course',
+    instructor: 'Chuck Severance',
+    institution: 'University of Michigan',
+    channelName: 'freeCodeCamp.org',
+    channelUrl: 'https://www.youtube.com/@freecodecamp',
+    videoUrl: 'https://www.youtube.com/watch?v=8DvywoWv6fI',
+    embedId: '8DvywoWv6fI',
+    description: 'Complete Python programming course covering basics to advanced concepts',
+    skillLevel: 'Beginner',
+    category: 'Programming',
+    tags: ['Python', 'Programming', 'Basics', 'Web Scraping'],
+    duration: '14 hours',
+    thumbnail: 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?q=80&w=400',
     requiredTier: 'freemium'
   },
   {
     id: '10',
-    title: 'Build an AI Startup',
-    instructor: 'Latent Space',
-    channelName: 'Latent Space',
-    channelUrl: 'https://www.youtube.com/@LatentSpacePod',
-    videoUrl: 'https://www.youtube.com/watch?v=5xvF0jNNmT4',
-    embedId: '5xvF0jNNmT4',
-    description: 'AI tools, product design, and business strategy for building AI startups',
-    skillLevel: 'All Levels',
-    category: 'AI + Business',
-    tags: ['Startup', 'Product Design', 'Business Strategy', 'AI Tools'],
-    duration: '2 hours',
-    thumbnail: 'https://images.unsplash.com/photo-1553484771-371a605b060b?q=80&w=400',
+    title: 'TensorFlow 2.0 Complete Course',
+    instructor: 'Tim Ruscica',
+    channelName: 'Tech With Tim',
+    channelUrl: 'https://www.youtube.com/@TechWithTim',
+    videoUrl: 'https://www.youtube.com/watch?v=tPYj3fFJGjk',
+    embedId: 'tPYj3fFJGjk',
+    description: 'Comprehensive TensorFlow 2.0 course covering neural networks and deep learning',
+    skillLevel: 'Intermediate',
+    category: 'Deep Learning',
+    tags: ['TensorFlow', 'Neural Networks', 'Deep Learning', 'Python'],
+    duration: '7 hours',
+    thumbnail: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?q=80&w=400',
     requiredTier: 'freemium'
   }
 ];
@@ -254,12 +254,13 @@ const YouTubeCourses: React.FC<YouTubeCoursesProps> = ({
   };
 
   const getYouTubeEmbedUrl = (embedId: string) => {
+    // Handle both single videos and playlists
     if (embedId.startsWith('PL')) {
       // Playlist
-      return `https://www.youtube.com/embed/videoseries?list=${embedId}`;
+      return `https://www.youtube.com/embed/videoseries?list=${embedId}&rel=0&modestbranding=1`;
     } else {
       // Single video
-      return `https://www.youtube.com/embed/${embedId}`;
+      return `https://www.youtube.com/embed/${embedId}?rel=0&modestbranding=1`;
     }
   };
 
@@ -300,7 +301,7 @@ const YouTubeCourses: React.FC<YouTubeCoursesProps> = ({
               <DropdownMenuItem onClick={() => setCategoryFilter('Machine Learning')}>Machine Learning</DropdownMenuItem>
               <DropdownMenuItem onClick={() => setCategoryFilter('Deep Learning')}>Deep Learning</DropdownMenuItem>
               <DropdownMenuItem onClick={() => setCategoryFilter('Neural Networks')}>Neural Networks</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setCategoryFilter('AI Applications')}>AI Applications</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter('Programming')}>Programming</DropdownMenuItem>
               <DropdownMenuItem onClick={() => setCategoryFilter('AI + Business')}>AI + Business</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -434,7 +435,8 @@ const YouTubeCourses: React.FC<YouTubeCoursesProps> = ({
                   src={getYouTubeEmbedUrl(selectedCourse.embedId)}
                   title={selectedCourse.title}
                   frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
                   allowFullScreen
                   className="rounded-lg"
                 />
