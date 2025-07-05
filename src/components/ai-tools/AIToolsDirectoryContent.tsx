@@ -8,7 +8,7 @@ import ToolTierComparison from '@/components/ai-tools/ToolTierComparison';
 import TierToolsSection from '@/components/ai-tools/TierToolsSection';
 import ToolInterfaceModal from '@/components/ai-tools/ToolInterfaceModal';
 import DirectoryTabs from '@/components/ai-tools/components/DirectoryTabs';
-import { LayoutGrid, ListFilter } from 'lucide-react';
+import { LayoutGrid, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface AIToolsDirectoryContentProps {
@@ -60,29 +60,31 @@ const AIToolsDirectoryContent: React.FC<AIToolsDirectoryContentProps> = ({
   };
 
   const viewControls = (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1 sm:gap-2">
       <Button 
         variant={viewType === 'grid' ? 'default' : 'outline'} 
-        size="icon"
+        size="sm"
         onClick={() => setViewType('grid')}
-        className="h-8 w-8"
+        className="h-8 w-8 p-0 sm:px-2 sm:w-auto"
       >
-        <LayoutGrid className="h-4 w-4" />
+        <LayoutGrid className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+        <span className="hidden sm:inline ml-1">Grid</span>
       </Button>
       <Button 
         variant={viewType === 'list' ? 'default' : 'outline'}
-        size="icon"
+        size="sm"
         onClick={() => setViewType('list')}
-        className="h-8 w-8"
+        className="h-8 w-8 p-0 sm:px-2 sm:w-auto"
       >
-        <ListFilter className="h-4 w-4" />
+        <List className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+        <span className="hidden sm:inline ml-1">List</span>
       </Button>
     </div>
   );
 
   return (
     <>
-      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="mb-8">
+      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="mb-6 sm:mb-8">
         <DirectoryTabs activeTab={activeTab} onTabChange={setActiveTab} />
         
         {/* All Tools Tab */}
@@ -160,14 +162,14 @@ const AIToolsDirectoryContent: React.FC<AIToolsDirectoryContentProps> = ({
         
         {/* Compare Tab */}
         <TabsContent value="compare" className="mt-0">
-          <div className="mb-6 p-5 bg-[#f5f8fa] border border-blue-100 rounded-lg">
-            <h2 className="text-xl font-semibold mb-2">AI Tool Tier Comparison</h2>
-            <p className="text-gray-600">Compare features and capabilities across different subscription tiers</p>
+          <div className="mb-4 sm:mb-6 p-4 sm:p-5 bg-[#f5f8fa] border border-blue-100 rounded-lg">
+            <h2 className="text-lg sm:text-xl font-semibold mb-2">AI Tool Tier Comparison</h2>
+            <p className="text-sm sm:text-base text-gray-600">Compare features and capabilities across different subscription tiers</p>
           </div>
           
           <ToolTierComparison />
           
-          <div className="mt-12 space-y-12">
+          <div className="mt-8 sm:mt-12 space-y-8 sm:space-y-12">
             {toolsByTier.map(({ tier, tools }) => (
               <TierToolsSection 
                 key={tier}
