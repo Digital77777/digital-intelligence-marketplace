@@ -75,7 +75,7 @@ export const useAIToolsSearch = () => {
             description: entry.Description,
             category: entry.Category,
             tier: 'freemium',
-            icon: <Zap className="h-full w-full" />,
+            icon: React.createElement(Zap, { className: "h-full w-full" }),
             externalUrl: entry.Link,
             use_cases: [entry.Category],
           }));
