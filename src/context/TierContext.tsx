@@ -1,188 +1,44 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { toast } from 'sonner';
-import { useUser } from '@/context/UserContext';
-import { supabase } from '@/integrations/supabase/client';
-import { AIToolTier } from '@/data/ai-tools-tiers';
 
-export type TierType = AIToolTier;
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
+
+type Tier = 'freemium' | 'basic' | 'pro';
 
 interface TierContextType {
-  currentTier: TierType;
-  setCurrentTier: (tier: TierType) => void;
-  setTier: (tier: TierType) => void;
-  upgradePrompt: (requiredTier: TierType) => void;
-  canAccess: (feature: string) => boolean;
-  getTierFeatures: (tier: TierType) => string[];
-  isSubscribed: boolean;
-  subscriptionEnd: string | null;
-  refreshSubscription: () => Promise<void>;
-  isLoading: boolean;
+  currentTier: Tier;
+  upgradePrompt: (requiredTier: Tier) => void;
+  hasAccess: (requiredTier: Tier) => boolean;
 }
 
 const TierContext = createContext<TierContextType | undefined>(undefined);
 
-export const TierProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [currentTier, setCurrentTier] = useState<TierType>('freemium');
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const { user, session } = useUser();
-
-  // Superuser email for override
-  const SUPERUSER_EMAIL = "bbadibanga55@gmail.com";
+export const TierProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
+  const [currentTier, setCurrentTier] = useState<Tier>('freemium');
 
   useEffect(() => {
-    // If this is the superuser, force pro tier and access
-    if (user && user.email === SUPERUSER_EMAIL) {
+    if (user?.email === 'bbadibanga55@gmail.com') {
       setCurrentTier('pro');
-      setIsSubscribed(true);
-      setSubscriptionEnd(null);
-      return;
-    }
-
-    if (user && session) {
-      refreshSubscription();
     } else {
       setCurrentTier('freemium');
-      setIsSubscribed(false);
-      setSubscriptionEnd(null);
     }
-  }, [user, session]);
+  }, [user]);
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('success') === 'true') {
-      toast.success("Payment successful! Your subscription is being activated.");
-      refreshSubscription();
-      window.history.replaceState({}, '', window.location.pathname);
-    } else if (urlParams.get('canceled') === 'true') {
-      toast.error("Payment was canceled.");
-      window.history.replaceState({}, '', window.location.pathname);
-    }
-  }, []);
-
-  const refreshSubscription = async () => {
-    // Skip real checks for superuser
-    if (user && user.email === SUPERUSER_EMAIL) {
-      setCurrentTier('pro');
-      setIsSubscribed(true);
-      setSubscriptionEnd(null);
-      return;
-    }
-
-    if (!user || !session) return;
-
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('check-subscription');
-      if (error) {
-        console.error('Error checking subscription:', error);
-        return;
-      }
-      if (data) {
-        setCurrentTier(data.subscription_tier || 'freemium');
-        setIsSubscribed(data.subscribed || false);
-        setSubscriptionEnd(data.subscription_end || null);
-      }
-    } catch (error) {
-      console.error('Failed to check subscription:', error);
-    } finally {
-      setIsLoading(false);
-    }
+  const upgradePrompt = (requiredTier: Tier) => {
+    toast.error(`This feature requires ${requiredTier} tier. Please upgrade your account.`);
   };
 
-  const upgradePrompt = (requiredTier: TierType) => {
-    toast.error(`This feature requires a ${requiredTier} subscription. Please upgrade to continue.`);
-  };
-
-  const setTier = (tier: TierType) => {
-    if (tier === 'freemium') {
-      setCurrentTier(tier);
-      setIsSubscribed(false);
-      setSubscriptionEnd(null);
-    }
-    // For paid tiers, this will be handled by the payment flow
-  };
-
-  const canAccess = (feature: string): boolean => {
-    // Superuser: allow all
-    if (user && user.email === SUPERUSER_EMAIL) return true;
-
-    const tierHierarchy = {
-      'freemium': 0,
-      'basic': 1,
-      'pro': 2
-    };
-
-    const featureRequirements: { [key: string]: number } = {
-      'ai-tools-directory': 0,
-      'learning-hub': 0,
-      'ai-streams': 0,
-      'marketplace': 0,
-      'forums': 0,
-      'team-dashboard': 1,
-      'workflow-designer': 1,
-      'collaboration-hub': 1,
-      'ai-studio': 2,
-      'business-insights': 2,
-      'pipeline-designer': 2,
-      'compliance-center': 2,
-      'learning-academy': 2,
-      'forum-category-basic': 1,
-      'forum-category-pro': 2,
-      'forum-category-freemium': 0,
-    };
-
-    const requiredLevel = featureRequirements[feature] ?? 0;
-    const userLevel = tierHierarchy[currentTier];
-    return userLevel >= requiredLevel;
-  };
-
-  const getTierFeatures = (tier: TierType): string[] => {
-    const features = {
-      'freemium': [
-        'Basic AI Tools Access',
-        'Community Forums',
-        'Learning Resources',
-        'AI Streams (Limited)',
-        'Basic Marketplace Access'
-      ],
-      'basic': [
-        'Advanced AI Tools',
-        'Team Collaboration',
-        'Workflow Designer',
-        'Enhanced Forums',
-        'Full Marketplace Access',
-        'Priority Support'
-      ],
-      'pro': [
-        'All AI Tools & Features',
-        'AI Studio',
-        'Business Insights',
-        'Pipeline Designer',
-        'Compliance Center',
-        'Learning Academy',
-        'Advanced Analytics',
-        'Custom Integrations',
-        'Dedicated Support'
-      ]
-    };
-
-    return features[tier] || [];
+  const hasAccess = (requiredTier: Tier) => {
+    const tierLevels = { freemium: 0, basic: 1, pro: 2 };
+    return tierLevels[currentTier] >= tierLevels[requiredTier];
   };
 
   return (
-    <TierContext.Provider value={{ 
-      currentTier, 
-      setCurrentTier, 
-      setTier,
-      upgradePrompt, 
-      canAccess, 
-      getTierFeatures,
-      isSubscribed,
-      subscriptionEnd,
-      refreshSubscription,
-      isLoading
+    <TierContext.Provider value={{
+      currentTier,
+      upgradePrompt,
+      hasAccess
     }}>
       {children}
     </TierContext.Provider>
