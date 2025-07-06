@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '@/context/UserContext';
+import { useAuth } from '@/context/AuthContext';
 import { useTier } from '@/context/TierContext';
 import {
   DropdownMenu,
@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { User, Settings, LogOut, Shield } from 'lucide-react';
 
 const NavbarUserMenu = () => {
-  const { user, profile, logout } = useUser();
+  const { user, signOut } = useAuth();
   const { currentTier } = useTier();
   const navigate = useNavigate();
 
@@ -42,26 +42,33 @@ const NavbarUserMenu = () => {
     );
   }
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-8 flex items-center gap-2 rounded-full px-2 text-white hover:bg-white/20">
           <Avatar className="h-7 w-7">
-            {profile?.avatar_url ? (
-              <AvatarImage src={profile.avatar_url} alt={profile.username || "User Avatar"} />
-            ) : (
-              <AvatarFallback className="bg-[#0066cc] text-white">{profile?.username?.charAt(0).toUpperCase() || profile?.full_name?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
-            )}
+            <AvatarFallback className="bg-[#0066cc] text-white">
+              {user.email?.charAt(0).toUpperCase() || "U"}
+            </AvatarFallback>
           </Avatar>
-          <span className="text-sm hidden sm:inline font-medium">{profile?.username || profile?.full_name || "Account"}</span>
+          <span className="text-sm hidden sm:inline font-medium">
+            {user.user_metadata?.full_name || user.email}
+          </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{profile?.username || profile?.full_name || user.email}</p>
+            <p className="text-sm font-medium leading-none">
+              {user.user_metadata?.full_name || user.email}
+            </p>
             <p className="text-xs leading-none text-muted-foreground">
-              {profile?.email || user.email}
+              {user.email}
             </p>
           </div>
         </DropdownMenuLabel>
@@ -80,7 +87,7 @@ const NavbarUserMenu = () => {
           </span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={logout}>
+        <DropdownMenuItem onClick={handleSignOut}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>

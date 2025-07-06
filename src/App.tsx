@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { navItems } from "./nav-items";
-import { UserProvider } from "@/context/UserContext";
+import { AuthProvider } from "@/context/AuthContext";
 import { TierProvider } from "@/context/TierContext";
 import { HelmetProvider } from 'react-helmet-async';
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -47,7 +47,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <HelmetProvider>
       <TooltipProvider>
-        <UserProvider>
+        <AuthProvider>
           <TierProvider>
             <Toaster />
             <BrowserRouter>
@@ -77,7 +77,7 @@ const App = () => (
               </ErrorBoundary>
             </BrowserRouter>
           </TierProvider>
-        </UserProvider>
+        </AuthProvider>
       </TooltipProvider>
     </HelmetProvider>
   </QueryClientProvider>
