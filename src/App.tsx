@@ -8,6 +8,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { TierProvider } from "@/context/TierContext";
 import { HelmetProvider } from 'react-helmet-async';
 import ErrorBoundary from "@/components/ErrorBoundary";
+import AppErrorBoundary from "@/components/common/AppErrorBoundary";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import AIToolsDirectory from "./pages/AIToolsDirectory";
@@ -50,7 +51,7 @@ const App = () => (
           <TierProvider>
             <Toaster />
             <BrowserRouter>
-              <ErrorBoundary>
+              <AppErrorBoundary>
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<Auth />} />
@@ -73,7 +74,7 @@ const App = () => (
                     <Route key={to} path={to} element={page} />
                   ))}
                 </Routes>
-              </ErrorBoundary>
+              </AppErrorBoundary>
             </BrowserRouter>
           </TierProvider>
         </AuthProvider>
