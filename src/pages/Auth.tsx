@@ -1,66 +1,21 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { useErrorHandler } from '@/hooks/useErrorHandler';
+import { useUser } from '@/context/UserContext';
 import AuthContainer from '@/components/auth/AuthContainer';
 import AuthTabs from '@/components/auth/AuthTabs';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { useAuthActions } from '@/hooks/useAuthActions';
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { user, signIn, signUp, loading } = useAuth();
-  const { handleAsyncError } = useErrorHandler();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { user, isLoading } = useUser();
+  const { handleSignIn, handleSignUp, error } = useAuthActions();
 
   useEffect(() => {
     if (user) {
       navigate('/');
     }
   }, [user, navigate]);
-
-  const handleSignIn = async (email: string, password: string) => {
-    setError(null);
-    setIsSubmitting(true);
-
-    const result = await handleAsyncError(
-      () => signIn(email, password),
-      'Sign in failed'
-    );
-
-    if (result && !result.error) {
-      navigate('/');
-    } else if (result?.error) {
-      setError(result.error.message);
-    }
-
-    setIsSubmitting(false);
-  };
-
-  const handleSignUp = async (email: string, password: string, fullName?: string) => {
-    setError(null);
-    setIsSubmitting(true);
-
-    const result = await handleAsyncError(
-      () => signUp(email, password, fullName),
-      'Sign up failed'
-    );
-
-    if (result?.error) {
-      setError(result.error.message);
-    }
-
-    setIsSubmitting(false);
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" text="Loading..." />
-      </div>
-    );
-  }
 
   if (user) {
     return null;
@@ -71,7 +26,7 @@ const Auth = () => {
       <AuthTabs
         onSignIn={handleSignIn}
         onSignUp={handleSignUp}
-        isLoading={isSubmitting}
+        isLoading={isLoading}
         error={error}
       />
     </AuthContainer>

@@ -1,12 +1,49 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Youtube } from 'lucide-react';
-import CourseFilters from './components/CourseFilters';
-import CourseCard from './components/CourseCard';
-import VideoModal from './components/VideoModal';
-import { useYouTubeCourses } from './hooks/useYouTubeCourses';
-import { CuratedCourse } from './types/course';
+import { Input } from '@/components/ui/input';
+import { 
+  Play, 
+  Clock, 
+  Eye, 
+  Search, 
+  ExternalLink, 
+  Lock,
+  Youtube,
+  Filter,
+  GraduationCap,
+  Users
+} from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem
+} from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useTier } from '@/context/TierContext';
+import { toast } from 'sonner';
+
+interface CuratedCourse {
+  id: string;
+  title: string;
+  instructor: string;
+  institution?: string;
+  channelName: string;
+  channelUrl: string;
+  videoUrl: string;
+  playlistUrl?: string;
+  embedId: string;
+  description: string;
+  skillLevel: 'Beginner' | 'Intermediate' | 'Advanced' | 'All Levels';
+  category: string;
+  tags: string[];
+  duration: string;
+  thumbnail: string;
+  requiredTier: 'freemium' | 'basic' | 'pro';
+}
 
 const curatedCourses: CuratedCourse[] = [
   {
@@ -188,20 +225,44 @@ const YouTubeCourses: React.FC<YouTubeCoursesProps> = ({
   category = '',
   difficulty = ''
 }) => {
-  const {
-    localSearch,
-    setLocalSearch,
-    categoryFilter,
-    setCategoryFilter,
-    difficultyFilter,
-    setDifficultyFilter,
-    selectedCourse,
-    showVideoModal,
-    setShowVideoModal,
-    filteredCourses,
-    openVideo,
-    clearFilters
-  } = useYouTubeCourses(curatedCourses);
+  const [localSearch, setLocalSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [difficultyFilter, setDifficultyFilter] = useState('');
+  const [selectedCourse, setSelectedCourse] = useState<CuratedCourse | null>(null);
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const { currentTier } = useTier();
+
+  const filteredCourses = curatedCourses.filter(course => {
+    const matchesSearch = !localSearch || !searchQuery || 
+      course.title.toLowerCase().includes((localSearch || searchQuery).toLowerCase()) ||
+      course.description.toLowerCase().includes((localSearch || searchQuery).toLowerCase()) ||
+      course.instructor.toLowerCase().includes((localSearch || searchQuery).toLowerCase()) ||
+      course.tags.some(tag => tag.toLowerCase().includes((localSearch || searchQuery).toLowerCase()));
+    
+    const matchesCategory = !categoryFilter && !category || 
+      course.category === (categoryFilter || category);
+    
+    const matchesDifficulty = !difficultyFilter && !difficulty || 
+      course.skillLevel === (difficultyFilter || difficulty);
+
+    return matchesSearch && matchesCategory && matchesDifficulty;
+  });
+
+  const openVideo = (course: CuratedCourse) => {
+    setSelectedCourse(course);
+    setShowVideoModal(true);
+  };
+
+  const getYouTubeEmbedUrl = (embedId: string) => {
+    // Handle both single videos and playlists
+    if (embedId.startsWith('PL')) {
+      // Playlist
+      return `https://www.youtube.com/embed/videoseries?list=${embedId}&rel=0&modestbranding=1`;
+    } else {
+      // Single video
+      return `https://www.youtube.com/embed/${embedId}?rel=0&modestbranding=1`;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -214,14 +275,53 @@ const YouTubeCourses: React.FC<YouTubeCoursesProps> = ({
       </div>
 
       {/* Search and Filters */}
-      <CourseFilters
-        searchQuery={localSearch}
-        onSearchChange={setLocalSearch}
-        categoryFilter={categoryFilter}
-        onCategoryChange={setCategoryFilter}
-        difficultyFilter={difficultyFilter}
-        onDifficultyChange={setDifficultyFilter}
-      />
+      <div className="flex flex-col md:flex-row gap-4 items-center">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search courses..."
+            className="pl-9"
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+          />
+        </div>
+        
+        <div className="flex gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <Filter className="mr-2 h-4 w-4" />
+                Category
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => setCategoryFilter('')}>All Categories</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter('AI Fundamentals')}>AI Fundamentals</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter('Machine Learning')}>Machine Learning</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter('Deep Learning')}>Deep Learning</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter('Neural Networks')}>Neural Networks</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter('Programming')}>Programming</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter('AI + Business')}>AI + Business</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <Filter className="mr-2 h-4 w-4" />
+                Level
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => setDifficultyFilter('')}>All Levels</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDifficultyFilter('Beginner')}>Beginner</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDifficultyFilter('Intermediate')}>Intermediate</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDifficultyFilter('Advanced')}>Advanced</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
 
       {/* Results Count */}
       <div className="flex items-center justify-between">
@@ -237,22 +337,129 @@ const YouTubeCourses: React.FC<YouTubeCoursesProps> = ({
       {/* Courses Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCourses.map((course) => (
-          <CourseCard
-            key={course.id}
-            course={course}
-            onWatchCourse={openVideo}
-            onViewChannel={(url) => window.open(url, '_blank')}
-          />
+          <Card key={course.id} className="overflow-hidden hover:shadow-lg transition-all duration-300">
+            <div className="relative">
+              <img 
+                src={course.thumbnail} 
+                alt={course.title}
+                className="w-full h-48 object-cover"
+              />
+              <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
+                <div className="opacity-0 hover:opacity-100 transition-opacity duration-300">
+                  <div className="bg-white/90 rounded-full p-3">
+                    <Play className="h-6 w-6 text-gray-900" />
+                  </div>
+                </div>
+              </div>
+              <div className="absolute top-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+                {course.duration}
+              </div>
+              <div className="absolute top-2 left-2">
+                <Badge variant="secondary">{course.skillLevel}</Badge>
+              </div>
+            </div>
+            
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between mb-2">
+                <Badge variant="outline">{course.category}</Badge>
+                {course.institution && (
+                  <div className="flex items-center text-xs text-muted-foreground">
+                    <GraduationCap className="h-3 w-3 mr-1" />
+                    {course.institution}
+                  </div>
+                )}
+              </div>
+              <CardTitle className="text-sm line-clamp-2 leading-tight">
+                {course.title}
+              </CardTitle>
+            </CardHeader>
+            
+            <CardContent className="pt-0">
+              <p className="text-xs text-muted-foreground mb-2">
+                by {course.instructor}
+              </p>
+              <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
+                {course.description}
+              </p>
+              <div className="flex flex-wrap gap-1 mb-2">
+                {course.tags.slice(0, 3).map((tag, index) => (
+                  <Badge key={index} variant="outline" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+            
+            <CardFooter className="pt-0 flex gap-2">
+              <Button 
+                className="flex-1" 
+                onClick={() => openVideo(course)}
+              >
+                <Play className="mr-2 h-4 w-4" />
+                Watch Course
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => window.open(course.channelUrl, '_blank')}
+              >
+                <Users className="h-4 w-4" />
+              </Button>
+            </CardFooter>
+          </Card>
         ))}
       </div>
 
       {/* Video Modal */}
-      <VideoModal
-        isOpen={showVideoModal}
-        onClose={() => setShowVideoModal(false)}
-        course={selectedCourse}
-        onOpenExternal={(url) => window.open(url, '_blank')}
-      />
+      <Dialog open={showVideoModal} onOpenChange={setShowVideoModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>{selectedCourse?.title}</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(selectedCourse?.videoUrl, '_blank')}
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Open in YouTube
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
+          {selectedCourse && (
+            <div className="space-y-4">
+              <div className="aspect-video">
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src={getYouTubeEmbedUrl(selectedCourse.embedId)}
+                  title={selectedCourse.title}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                  className="rounded-lg"
+                />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <GraduationCap className="h-4 w-4" />
+                  {selectedCourse.instructor}
+                  {selectedCourse.institution && ` • ${selectedCourse.institution}`}
+                </div>
+                <p className="text-sm">{selectedCourse.description}</p>
+                <div className="flex flex-wrap gap-1">
+                  {selectedCourse.tags.map((tag, index) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {filteredCourses.length === 0 && (
         <div className="text-center py-12">
@@ -261,7 +468,11 @@ const YouTubeCourses: React.FC<YouTubeCoursesProps> = ({
           <p className="text-muted-foreground mb-4">
             Try adjusting your search terms or filters
           </p>
-          <Button onClick={clearFilters}>
+          <Button onClick={() => {
+            setLocalSearch('');
+            setCategoryFilter('');
+            setDifficultyFilter('');
+          }}>
             Clear Filters
           </Button>
         </div>

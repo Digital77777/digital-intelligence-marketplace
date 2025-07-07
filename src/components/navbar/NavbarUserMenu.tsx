@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useUser } from '@/context/UserContext';
 import { useTier } from '@/context/TierContext';
 import {
   DropdownMenu,
@@ -11,12 +11,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { User, LogOut, Shield } from 'lucide-react';
+import { User, Settings, LogOut, Shield } from 'lucide-react';
 
 const NavbarUserMenu = () => {
-  const { user, signOut } = useAuth();
+  const { user, profile, logout } = useUser();
   const { currentTier } = useTier();
   const navigate = useNavigate();
 
@@ -42,33 +42,26 @@ const NavbarUserMenu = () => {
     );
   }
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
-  };
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-8 flex items-center gap-2 rounded-full px-2 text-white hover:bg-white/20">
           <Avatar className="h-7 w-7">
-            <AvatarFallback className="bg-[#0066cc] text-white">
-              {user.email?.charAt(0).toUpperCase() || "U"}
-            </AvatarFallback>
+            {profile?.avatar_url ? (
+              <AvatarImage src={profile.avatar_url} alt={profile.username || "User Avatar"} />
+            ) : (
+              <AvatarFallback className="bg-[#0066cc] text-white">{profile?.username?.charAt(0).toUpperCase() || profile?.full_name?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
+            )}
           </Avatar>
-          <span className="text-sm hidden sm:inline font-medium">
-            {user.user_metadata?.full_name || user.email}
-          </span>
+          <span className="text-sm hidden sm:inline font-medium">{profile?.username || profile?.full_name || "Account"}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">
-              {user.user_metadata?.full_name || user.email}
-            </p>
+            <p className="text-sm font-medium leading-none">{profile?.username || profile?.full_name || user.email}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {user.email}
+              {profile?.email || user.email}
             </p>
           </div>
         </DropdownMenuLabel>
@@ -87,7 +80,7 @@ const NavbarUserMenu = () => {
           </span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut}>
+        <DropdownMenuItem onClick={logout}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>

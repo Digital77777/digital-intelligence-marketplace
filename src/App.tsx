@@ -4,11 +4,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { navItems } from "./nav-items";
-import { AuthProvider } from "@/context/AuthContext";
+import { UserProvider } from "@/context/UserContext";
 import { TierProvider } from "@/context/TierContext";
 import { HelmetProvider } from 'react-helmet-async';
 import ErrorBoundary from "@/components/ErrorBoundary";
-import AppErrorBoundary from "@/components/common/AppErrorBoundary";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import AIToolsDirectory from "./pages/AIToolsDirectory";
@@ -31,14 +30,15 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: (failureCount, error) => {
+        // Don't retry on authentication errors
         if (error?.message?.includes('Authentication') || error?.message?.includes('401')) {
           return false;
         }
         return failureCount < 3;
       },
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-      staleTime: 5 * 60 * 1000,
-      gcTime: 10 * 60 * 1000,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
     },
   },
 });
@@ -47,11 +47,11 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <HelmetProvider>
       <TooltipProvider>
-        <AuthProvider>
+        <UserProvider>
           <TierProvider>
             <Toaster />
             <BrowserRouter>
-              <AppErrorBoundary>
+              <ErrorBoundary>
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<Auth />} />
@@ -74,10 +74,10 @@ const App = () => (
                     <Route key={to} path={to} element={page} />
                   ))}
                 </Routes>
-              </AppErrorBoundary>
+              </ErrorBoundary>
             </BrowserRouter>
           </TierProvider>
-        </AuthProvider>
+        </UserProvider>
       </TooltipProvider>
     </HelmetProvider>
   </QueryClientProvider>
