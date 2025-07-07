@@ -11,10 +11,10 @@ export const useErrorHandler = () => {
     toast.error(errorMessage);
   }, []);
 
-  const handleAsyncError = useCallback(async <T>(
-    asyncFn: () => Promise<T>,
+  const handleAsyncError = useCallback(async (
+    asyncFn: () => Promise<any>,
     context?: string
-  ): Promise<T | null> => {
+  ): Promise<any> => {
     try {
       return await asyncFn();
     } catch (error) {
