@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { AIToolItem } from '@/data/ai-tools-tiers';
+import { CUSTOM_INTERFACES } from './customInterfaces';
+
 import ImageGeneratorInterface from "./interfaces/ImageGeneratorInterface";
 import TaskBotMiniInterface from "./interfaces/TaskBotMiniInterface";
 import CopyCraftFreeInterface from "./interfaces/CopyCraftFreeInterface";
@@ -45,128 +47,92 @@ interface CustomInterfaceRendererProps {
 
 const CustomInterfaceRenderer: React.FC<CustomInterfaceRendererProps> = ({ tool, onOpenChange }) => {
     console.log('CustomInterfaceRenderer: Rendering tool:', tool.name);
-    
-    switch (tool.name) {
-      case "TaskBot Mini":
-        return <TaskBotMiniInterface />;
-      case "CopyCraft Free":
-        return <CopyCraftFreeInterface />;
-      case "FieldSim XR":
-        return <FieldSimXRInterface />;
-      case "AI Text Summarizer":
-        return <AITextSummarizerInterface />;
-      case "InsightLite":
-        return <InsightLiteInterface />;
-      case "AI Image Generator":
-        return <ImageGeneratorInterface />;
-      case "AI Presentation Maker":
-        return <AIPresentationMakerInterface />;
-      case "AI Language Translator":
-        return <AITranslatorInterface />;
-      case "AI Basic Simulator":
-        return <AIBasicSimulatorInterface />;
-      case "Forum Assistant":
-        return <ForumAssistantInterface />;
-      case "CropMind AI":
-        return <CropMindInterface tool={tool} onBack={() => onOpenChange(false)} />;
-      case "SmartPest Sentinel":
-        return <SmartPestSentinelInterface />;
-      case "Livestock Guardian Vision":
-        return <LivestockGuardianVisionInterface />;
-      case "AgriMesh Network":
-        return <AgriMeshNetworkInterface />;
-      case "AI Code Assistant":
-        return <AICodeAssistantInterface />;
-      case "AI Email Writer":
-        return <AIEmailWriterInterface />;
-      case "AI Music Composer Basic":
-        return <AIMusicComposerBasicInterface />;
-      case "DataFlow Pro":
-        return <DataFlowProInterface onBack={() => onOpenChange(false)} />;
-      case "AutoPilot Studio":
-        return <AutoPilotStudioInterface onBack={() => onOpenChange(false)} />;
-      case "ModelMaker Lite":
-        return <ModelMakerLiteInterface onBack={() => onOpenChange(false)} />;
-      case "SEO Boost AI":
-        return <SEOBoostAIInterface onBack={() => onOpenChange(false)} />;
-      case "TeamSync AI":
-        return <TeamSyncAIInterface onBack={() => onOpenChange(false)} />;
-      case "AgroBot Commander":
-        return <AgroBotCommanderInterface onBack={() => onOpenChange(false)} />;
-      case "AquaYield OS":
-        console.log('CustomInterfaceRenderer: Rendering AquaYield OS interface');
-        return <AquaYieldOSInterface onBack={() => onOpenChange(false)} />;
-      case "Farm P&L AI":
-        console.log('CustomInterfaceRenderer: Rendering Farm P&L AI interface');
-        return <FarmPLAIInterface onBack={() => onOpenChange(false)} />;
-      case "AgroRisk Navigator":
-        return <AgroRiskNavigatorInterface onBack={() => onOpenChange(false)} />;
-      case "AI Social Media Manager":
-        return <AISocialMediaManagerInterface onBack={() => onOpenChange(false)} />;
-      case "AI Video Editer":
-        return <AIVideoEditerInterface onBack={() => onOpenChange(false)} />;
-      case "AI Voice Generator":
-        return <AIVoiceGeneratorInterface onBack={() => onOpenChange(false)} />;
-      case "Predictirix Enterprise":
-        return <PredictirixEnterpriseInterface onBack={() => onOpenChange(false)} />;
-      case "NeuroForge Pro":
-        return <NeuroForgeProInterface onBack={() => onOpenChange(false)} />;
-      case "OmniFlow AI":
-        return <OmniFlowAIInterface onBack={() => onOpenChange(false)} />;
-      case "AI Marketplace Publisher":
-        return <AIMarketplacePublisherInterface onBack={() => onOpenChange(false)} />;
-      case "EthicsGuard AI":
-        return <EthicsGuardAIInterface onBack={() => onOpenChange(false)} />;
-      case "CloudBridge AI":
-        return <CloudBridgeAIInterface onBack={() => onOpenChange(false)} />;
-      case "AgriTrial AI":
-        return <AgriTrialAIInterface onBack={() => onOpenChange(false)} />;
-      case "RegenCert Hub":
-        return <RegenCertHubInterface onBack={() => onOpenChange(false)} />;
-      default:
-        console.log('CustomInterfaceRenderer: No custom interface found for:', tool.name);
-        return null;
-    }
-};
 
-export const CUSTOM_INTERFACES = [
-    "TaskBot Mini",
-    "CopyCraft Free", 
-    "FieldSim XR",
-    "AI Text Summarizer",
-    "InsightLite",
-    "AI Image Generator",
-    "AI Presentation Maker",
-    "AI Language Translator",
-    "AI Basic Simulator",
-    "Forum Assistant",
-    "CropMind AI",
-    "SmartPest Sentinel",
-    "Livestock Guardian Vision",
-    "AgriMesh Network",
-    "AI Code Assistant",
-    "AI Email Writer",
-    "AI Music Composer Basic",
-    "DataFlow Pro",
-    "AutoPilot Studio",
-    "ModelMaker Lite",
-    "SEO Boost AI",
-    "TeamSync AI",
-    "AgroBot Commander",
-    "AquaYield OS",
-    "Farm P&L AI",
-    "AgroRisk Navigator",
-    "AI Social Media Manager",
-    "AI Video Editer",
-    "AI Voice Generator",
-    "Predictirix Enterprise",
-    "NeuroForge Pro",
-    "OmniFlow AI",
-    "AI Marketplace Publisher",
-    "EthicsGuard AI",
-    "CloudBridge AI",
-    "AgriTrial AI",
-    "RegenCert Hub"
-];
+    const renderInterface = () => {
+      switch (tool.name) {
+        case "TaskBot Mini":
+          return <Suspense fallback={<div>Loading...</div>}><TaskBotMiniInterface /></Suspense>;
+        case "CopyCraft Free":
+          return <Suspense fallback={<div>Loading...</div>}><CopyCraftFreeInterface /></Suspense>;
+        case "FieldSim XR":
+          return <Suspense fallback={<div>Loading...</div>}><FieldSimXRInterface /></Suspense>;
+        case "AI Text Summarizer":
+          return <Suspense fallback={<div>Loading...</div>}><AITextSummarizerInterface /></Suspense>;
+        case "InsightLite":
+          return <Suspense fallback={<div>Loading...</div>}><InsightLiteInterface /></Suspense>;
+        case "AI Image Generator":
+          return <Suspense fallback={<div>Loading...</div>}><ImageGeneratorInterface /></Suspense>;
+        case "AI Presentation Maker":
+          return <Suspense fallback={<div>Loading...</div>}><AIPresentationMakerInterface /></Suspense>;
+        case "AI Language Translator":
+          return <Suspense fallback={<div>Loading...</div>}><AITranslatorInterface /></Suspense>;
+        case "AI Basic Simulator":
+          return <Suspense fallback={<div>Loading...</div>}><AIBasicSimulatorInterface /></Suspense>;
+        case "Forum Assistant":
+          return <Suspense fallback={<div>Loading...</div>}><ForumAssistantInterface /></Suspense>;
+        case "CropMind AI":
+          return <Suspense fallback={<div>Loading...</div>}><CropMindInterface.default tool={tool} /></Suspense>;
+        case "SmartPest Sentinel":
+          return <Suspense fallback={<div>Loading...</div>}><SmartPestSentinelInterface /></Suspense>;
+        case "Livestock Guardian Vision":
+          return <Suspense fallback={<div>Loading...</div>}><LivestockGuardianVisionInterface /></Suspense>;
+        case "AgriMesh Network":
+          return <Suspense fallback={<div>Loading...</div>}><AgriMeshNetworkInterface /></Suspense>;
+        case "AI Code Assistant":
+          return <Suspense fallback={<div>Loading...</div>}><AICodeAssistantInterface /></Suspense>;
+        case "AI Email Writer":
+          return <Suspense fallback={<div>Loading...</div>}><AIEmailWriterInterface /></Suspense>;
+        case "AI Music Composer Basic":
+          return <Suspense fallback={<div>Loading...</div>}><AIMusicComposerBasicInterface /></Suspense>;
+        case "DataFlow Pro":
+          return <Suspense fallback={<div>Loading...</div>}><DataFlowProInterface onBack={() => onOpenChange(false)} /></Suspense>;
+        case "AutoPilot Studio":
+          return <Suspense fallback={<div>Loading...</div>}><AutoPilotStudioInterface onBack={() => onOpenChange(false)} /></Suspense>;
+        case "ModelMaker Lite":
+          return <Suspense fallback={<div>Loading...</div>}><ModelMakerLiteInterface onBack={() => onOpenChange(false)} /></Suspense>;
+        case "SEO Boost AI":
+          return <Suspense fallback={<div>Loading...</div>}><SEOBoostAIInterface onBack={() => onOpenChange(false)} /></Suspense>;
+        case "TeamSync AI":
+          return <Suspense fallback={<div>Loading...</div>}><TeamSyncAIInterface onBack={() => onOpenChange(false)} /></Suspense>;
+        case "AgroBot Commander":
+          return <Suspense fallback={<div>Loading...</div>}><AgroBotCommanderInterface onBack={() => onOpenChange(false)} /></Suspense>;
+        case "AquaYield OS":
+          console.log('CustomInterfaceRenderer: Rendering AquaYield OS interface');
+          return <Suspense fallback={<div>Loading...</div>}><AquaYieldOSInterface onBack={() => onOpenChange(false)} /></Suspense>;
+        case "Farm P&L AI":
+          console.log('CustomInterfaceRenderer: Rendering Farm P&L AI interface');
+          return <Suspense fallback={<div>Loading...</div>}><FarmPLAIInterface onBack={() => onOpenChange(false)} /></Suspense>;
+        case "AgroRisk Navigator":
+          return <Suspense fallback={<div>Loading...</div>}><AgroRiskNavigatorInterface onBack={() => onOpenChange(false)} /></Suspense>;
+        case "AI Social Media Manager":
+          return <Suspense fallback={<div>Loading...</div>}><AISocialMediaManagerInterface onBack={() => onOpenChange(false)} /></Suspense>;
+        case "AI Video Editer":
+          return <Suspense fallback={<div>Loading...</div>}><AIVideoEditerInterface onBack={() => onOpenChange(false)} /></Suspense>;
+        case "AI Voice Generator":
+          return <Suspense fallback={<div>Loading...</div>}><AIVoiceGeneratorInterface onBack={() => onOpenChange(false)} /></Suspense>;
+        case "Predictirix Enterprise":
+          return <Suspense fallback={<div>Loading...</div>}><PredictirixEnterpriseInterface onBack={() => onOpenChange(false)} /></Suspense>;
+        case "NeuroForge Pro":
+          return <Suspense fallback={<div>Loading...</div>}><NeuroForgeProInterface onBack={() => onOpenChange(false)} /></Suspense>;
+        case "OmniFlow AI":
+          return <Suspense fallback={<div>Loading...</div>}><OmniFlowAIInterface  /></Suspense>;
+        case "AI Marketplace Publisher":
+          return <Suspense fallback={<div>Loading...</div>}><AIMarketplacePublisherInterface  /></Suspense>;
+        case "EthicsGuard AI":
+          return <Suspense fallback={<div>Loading...</div>}><EthicsGuardAIInterface  /></Suspense>;
+        case "CloudBridge AI":
+          return <Suspense fallback={<div>Loading...</div>}><CloudBridgeAIInterface  /></Suspense>;
+        case "AgriTrial AI":
+          return <Suspense fallback={<div>Loading...</div>}><AgriTrialAIInterface  /></Suspense>;
+        case "RegenCert Hub":
+          return <Suspense fallback={<div>Loading...</div>}><RegenCertHubInterface  /></Suspense>;
+        default:
+          console.log('CustomInterfaceRenderer: No custom interface found for:', tool.name);
+          return null;
+      }
+    };
+
+    return renderInterface();
+};
 
 export default CustomInterfaceRenderer;
