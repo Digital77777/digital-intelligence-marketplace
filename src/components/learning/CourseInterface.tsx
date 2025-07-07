@@ -101,6 +101,12 @@ ${course.content || 'Content not available for offline viewing.'}
     return <CourseErrorState />;
   }
 
+  // Convert course data to match expected Course type
+  const normalizedCourse = {
+    ...course,
+    id: typeof course.id === 'string' ? parseInt(course.id, 10) : course.id
+  };
+
   return (
     <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
@@ -114,7 +120,7 @@ ${course.content || 'Content not available for offline viewing.'}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <div className="lg:col-span-3">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold">{course.title}</h1>
+            <h1 className="text-2xl font-bold">{normalizedCourse.title}</h1>
             <Button 
               variant="outline" 
               onClick={handleSaveCourseContent}
@@ -125,7 +131,7 @@ ${course.content || 'Content not available for offline viewing.'}
           </div>
           
           <CourseTabs
-            course={course}
+            course={normalizedCourse}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             onProgressUpdate={handleUpdateProgress}
@@ -136,7 +142,7 @@ ${course.content || 'Content not available for offline viewing.'}
         
         <div className="col-span-1 order-first lg:order-last">
           <CourseSidebar 
-            course={course} 
+            course={normalizedCourse} 
             progress={userProgress} 
             onMarkComplete={() => handleUpdateProgress(100)}
             onTabChange={setActiveTab}

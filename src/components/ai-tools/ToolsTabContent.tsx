@@ -3,6 +3,9 @@ import React from 'react';
 import { AIToolItem } from '@/data/ai-tools-tiers';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import AIToolCard from '@/components/ai-tools/AIToolCard';
+import FreemiumToolsGrid from '@/components/ai-tools/components/FreemiumToolsGrid';
+import FreemiumToolsHeader from '@/components/ai-tools/components/FreemiumToolsHeader';
+import FreemiumViewControls from '@/components/ai-tools/components/FreemiumViewControls';
 import { Spinner } from '@/components/ui/spinner';
 
 interface ToolsTabContentProps {
@@ -26,6 +29,36 @@ const ToolsTabContent: React.FC<ToolsTabContentProps> = ({
   viewControls,
   viewType = 'grid'
 }) => {
+  // Check if this is specifically for freemium tools
+  const isFreemiumTab = title.toLowerCase().includes('freemium');
+  
+  if (isFreemiumTab) {
+    return (
+      <>
+        <FreemiumToolsHeader toolCount={filteredTools?.length || 0} />
+        <div className="flex justify-between items-center mb-6">
+          <Alert className={`flex-grow mr-4 ${alertColor || "bg-blue-50 border-blue-200 text-blue-800"}`}>
+            <AlertTitle>Free AI Tools</AlertTitle>
+            <AlertDescription className="text-inherit opacity-80">
+              {description}
+            </AlertDescription>
+          </Alert>
+          <FreemiumViewControls 
+            viewType={viewType}
+            onViewTypeChange={() => {}} // This will be handled by parent component
+          />
+        </div>
+        <FreemiumToolsGrid
+          tools={filteredTools}
+          isLoading={isLoading}
+          onToolSelect={onToolSelect}
+          viewType={viewType}
+        />
+      </>
+    );
+  }
+
+  // Default layout for other tiers
   return (
     <>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">

@@ -1,89 +1,120 @@
+
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Zap, Plus, Target, Briefcase, Users, Settings, Award } from 'lucide-react';
+import { Briefcase, Users, Settings, DollarSign, Plus, Sparkles } from 'lucide-react';
+import { useTier } from '@/context/TierContext';
+
 interface MarketplaceHeroProps {
   onPostProject: () => void;
   onCreateFreelancerProfile: () => void;
 }
+
 const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
   onPostProject,
   onCreateFreelancerProfile
 }) => {
-  const stats = [{
-    label: 'Active Projects',
-    value: '1,234',
-    icon: <Briefcase className="w-5 h-5" />,
-    color: 'text-blue-600'
-  }, {
-    label: 'AI Experts',
-    value: '2,567',
-    icon: <Users className="w-5 h-5" />,
-    color: 'text-green-600'
-  }, {
-    label: 'Tools Available',
-    value: '890',
-    icon: <Settings className="w-5 h-5" />,
-    color: 'text-purple-600'
-  }, {
-    label: 'Success Rate',
-    value: '98%',
-    icon: <Award className="w-5 h-5" />,
-    color: 'text-orange-600'
-  }];
-  return <div className="mb-12 relative overflow-hidden rounded-3xl">
-      <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-800 h-96 md:h-[450px] flex items-center relative">
-        <div className="container mx-auto px-8 relative z-10">
-          <div className="max-w-4xl py-[94px]">
-            <div className="mb-6 my-[3px]">
-              <Badge variant="secondary" className="mb-4 px-4 py-2 bg-white/20 backdrop-blur-sm border-white/30 text-white">
-                <Zap className="w-4 h-4 mr-2" />
-                World's Premier AI Marketplace
-              </Badge>
-            </div>
-            <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6 animate-fade-in leading-tight text-left md:text-4xl">
-              Connect with
-              <span className="block bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
-                AI Experts
-              </span>
-              Worldwide
-            </h1>
-            <p className="text-white/90 text-xl max-w-3xl mb-8 animate-slide-up leading-relaxed md:text-xl py-0 my-0">
-              Hire top AI talent, discover cutting-edge tools, and grow your business with the most trusted AI marketplace platform.
-            </p>
-            
-            {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-              {stats.map((stat, index) => <div key={index} className="text-center my-0 py-0">
-                  <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm mb-2 ${stat.color}`}>
-                    {stat.icon}
-                  </div>
-                  <div className="text-2xl font-bold text-white">{stat.value}</div>
-                  <div className="text-white/80 text-sm">{stat.label}</div>
-                </div>)}
-            </div>
+  const navigate = useNavigate();
+  const { currentTier } = useTier();
 
-            <div className="flex flex-col sm:flex-row gap-4 animate-slide-up" style={{
-            animationDelay: "0.2s"
-          }}>
-              <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 font-semibold px-8 py-4 text-lg" onClick={onPostProject}>
-                <Plus className="w-5 h-5 mr-2" />
-                Post a Project
-              </Button>
-              <Button variant="outline" size="lg" onClick={onCreateFreelancerProfile} className="border-white text-white font-semibold px-8 py-4 text-lg backdrop-blur-sm bg-gray-900 hover:bg-gray-800">
-                <Target className="w-5 h-5 mr-2" />
-                Start Freelancing
-              </Button>
-            </div>
-          </div>
-        </div>
-        
-        {/* Background Elements */}
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="absolute -right-20 -top-20 w-96 h-96 bg-purple-500/30 rounded-full filter blur-3xl"></div>
-        <div className="absolute -left-20 -bottom-20 w-96 h-96 bg-blue-500/30 rounded-full filter blur-3xl"></div>
-        <div className="absolute right-1/4 top-1/4 w-64 h-64 bg-yellow-400/20 rounded-full filter blur-2xl"></div>
+  const handleSubmitTool = () => {
+    navigate('/submit-tool');
+  };
+
+  const handleCreateService = () => {
+    navigate('/marketplace/create-service');
+  };
+
+  return (
+    <div className="mb-12">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          Digital Intelligence Marketplace
+        </h1>
+        <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          Connect with AI experts, discover innovative tools, and grow your business with cutting-edge solutions.
+        </p>
       </div>
-    </div>;
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={onPostProject}>
+          <CardContent className="p-6 text-center">
+            <Briefcase className="h-12 w-12 mx-auto mb-4 text-blue-600" />
+            <h3 className="font-semibold mb-2">Post a Project</h3>
+            <p className="text-sm text-muted-foreground">Find experts for your AI projects</p>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={onCreateFreelancerProfile}>
+          <CardContent className="p-6 text-center">
+            <Users className="h-12 w-12 mx-auto mb-4 text-green-600" />
+            <h3 className="font-semibold mb-2">Become an Expert</h3>
+            <p className="text-sm text-muted-foreground">Offer your AI expertise</p>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={handleCreateService}>
+          <CardContent className="p-6 text-center">
+            <DollarSign className="h-12 w-12 mx-auto mb-4 text-purple-600" />
+            <h3 className="font-semibold mb-2">Create Service</h3>
+            <p className="text-sm text-muted-foreground">Offer your skills as a service</p>
+          </CardContent>
+        </Card>
+
+        <Card 
+          className="hover:shadow-md transition-shadow cursor-pointer border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50" 
+          onClick={handleSubmitTool}
+        >
+          <CardContent className="p-6 text-center">
+            <div className="relative">
+              <Plus className="h-12 w-12 mx-auto mb-4 text-amber-600" />
+              {(currentTier === 'basic' || currentTier === 'pro') && (
+                <Badge className="absolute -top-2 -right-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white">
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  New
+                </Badge>
+              )}
+            </div>
+            <h3 className="font-semibold mb-2">Submit Your Tool</h3>
+            <p className="text-sm text-muted-foreground">
+              {currentTier === 'freemium' 
+                ? 'Upgrade to submit tools' 
+                : 'Share your AI tool or service'
+              }
+            </p>
+            {currentTier === 'freemium' && (
+              <Badge variant="secondary" className="mt-2">
+                Basic+ Required
+              </Badge>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg p-6 text-center">
+        <h2 className="text-2xl font-semibold mb-2">Join thousands of innovators</h2>
+        <p className="text-muted-foreground mb-4">
+          Whether you're looking to hire, get hired, or discover tools - we've got you covered.
+        </p>
+        <div className="flex justify-center gap-4 flex-wrap">
+          <Button onClick={onPostProject}>
+            <Briefcase className="h-4 w-4 mr-2" />
+            Post Project
+          </Button>
+          <Button variant="outline" onClick={handleSubmitTool}>
+            <Plus className="h-4 w-4 mr-2" />
+            Submit Tool
+          </Button>
+          <Button variant="outline" onClick={handleCreateService}>
+            <DollarSign className="h-4 w-4 mr-2" />
+            Create Service
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 };
+
 export default MarketplaceHero;

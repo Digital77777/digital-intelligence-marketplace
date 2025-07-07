@@ -298,6 +298,42 @@ export type Database = {
         }
         Relationships: []
       }
+      cash_conversion_requests: {
+        Row: {
+          cash_amount: number
+          id: string
+          payment_details: Json | null
+          payment_method: string | null
+          processed_at: string | null
+          requested_at: string
+          status: string
+          token_amount: number
+          user_id: string
+        }
+        Insert: {
+          cash_amount: number
+          id?: string
+          payment_details?: Json | null
+          payment_method?: string | null
+          processed_at?: string | null
+          requested_at?: string
+          status?: string
+          token_amount: number
+          user_id: string
+        }
+        Update: {
+          cash_amount?: number
+          id?: string
+          payment_details?: Json | null
+          payment_method?: string | null
+          processed_at?: string | null
+          requested_at?: string
+          status?: string
+          token_amount?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       certifications: {
         Row: {
           badge_image: string
@@ -595,6 +631,41 @@ export type Database = {
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      earnings: {
+        Row: {
+          amount: number
+          created_at: string
+          earning_type: string
+          id: string
+          user_id: string
+          vlog_id: string | null
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          earning_type: string
+          id?: string
+          user_id: string
+          vlog_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          earning_type?: string
+          id?: string
+          user_id?: string
+          vlog_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "earnings_vlog_id_fkey"
+            columns: ["vlog_id"]
+            isOneToOne: false
+            referencedRelation: "vlogs"
             referencedColumns: ["id"]
           },
         ]
@@ -1470,6 +1541,63 @@ export type Database = {
         }
         Relationships: []
       }
+      marketplace_tool_submissions: {
+        Row: {
+          admin_notes: string | null
+          category: string
+          contact_info: string
+          created_at: string
+          detailed_description: string
+          external_link: string
+          id: string
+          images: string[]
+          pricing_model: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          short_description: string
+          status: string
+          submitter_id: string
+          tool_name: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          category: string
+          contact_info: string
+          created_at?: string
+          detailed_description: string
+          external_link: string
+          id?: string
+          images: string[]
+          pricing_model: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          short_description: string
+          status?: string
+          submitter_id: string
+          tool_name: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          category?: string
+          contact_info?: string
+          created_at?: string
+          detailed_description?: string
+          external_link?: string
+          id?: string
+          images?: string[]
+          pricing_model?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          short_description?: string
+          status?: string
+          submitter_id?: string
+          tool_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       marketplace_tools: {
         Row: {
           api_documentation: string | null
@@ -1620,6 +1748,7 @@ export type Database = {
           is_active: boolean | null
           model_type: Database["public"]["Enums"]["dataset_type"]
           name: string
+          user_id: string
         }
         Insert: {
           created_at?: string
@@ -1629,6 +1758,7 @@ export type Database = {
           is_active?: boolean | null
           model_type: Database["public"]["Enums"]["dataset_type"]
           name: string
+          user_id: string
         }
         Update: {
           created_at?: string
@@ -1638,6 +1768,7 @@ export type Database = {
           is_active?: boolean | null
           model_type?: Database["public"]["Enums"]["dataset_type"]
           name?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -1772,13 +1903,17 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          cash_balance: number | null
           created_at: string
           display_name: string | null
           followers_count: number | null
           following_count: number | null
           id: string
+          pending_earnings: number | null
           revenue: number | null
           tier: string | null
+          token_balance: number | null
+          total_earnings: number | null
           total_likes: number | null
           updated_at: string
           username: string
@@ -1786,13 +1921,17 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          cash_balance?: number | null
           created_at?: string
           display_name?: string | null
           followers_count?: number | null
           following_count?: number | null
           id: string
+          pending_earnings?: number | null
           revenue?: number | null
           tier?: string | null
+          token_balance?: number | null
+          total_earnings?: number | null
           total_likes?: number | null
           updated_at?: string
           username: string
@@ -1800,13 +1939,17 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          cash_balance?: number | null
           created_at?: string
           display_name?: string | null
           followers_count?: number | null
           following_count?: number | null
           id?: string
+          pending_earnings?: number | null
           revenue?: number | null
           tier?: string | null
+          token_balance?: number | null
+          total_earnings?: number | null
           total_likes?: number | null
           updated_at?: string
           username?: string
@@ -2169,6 +2312,36 @@ export type Database = {
         }
         Relationships: []
       }
+      token_transactions: {
+        Row: {
+          cash_amount: number | null
+          created_at: string
+          description: string | null
+          id: string
+          token_amount: number
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          cash_amount?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          token_amount: number
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          cash_amount?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          token_amount?: number
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tool_reviews: {
         Row: {
           created_at: string | null
@@ -2313,28 +2486,31 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          email: string
           full_name: string | null
           id: string
           updated_at: string
-          username: string
+          username: string | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          email: string
           full_name?: string | null
           id: string
           updated_at?: string
-          username: string
+          username?: string | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          email?: string
           full_name?: string | null
           id?: string
           updated_at?: string
-          username?: string
+          username?: string | null
         }
         Relationships: []
       }
@@ -2450,6 +2626,35 @@ export type Database = {
           views?: number
         }
         Relationships: []
+      }
+      vlog_views: {
+        Row: {
+          id: string
+          user_id: string
+          viewed_at: string
+          vlog_id: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          viewed_at?: string
+          vlog_id: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          viewed_at?: string
+          vlog_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vlog_views_vlog_id_fkey"
+            columns: ["vlog_id"]
+            isOneToOne: false
+            referencedRelation: "vlogs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vlogs: {
         Row: {
@@ -2661,11 +2866,36 @@ export type Database = {
     }
     Functions: {
       calculate_compliance_score: {
+        Args:
+          | Record<PropertyKey, never>
+          | {
+              p_user_id: string
+              p_regulation: Database["public"]["Enums"]["regulation_type"]
+            }
+        Returns: number
+      }
+      convert_tokens_to_cash: {
         Args: {
           p_user_id: string
-          p_regulation: Database["public"]["Enums"]["regulation_type"]
+          p_token_amount: number
+          p_payment_method?: string
+          p_payment_details?: Json
         }
-        Returns: number
+        Returns: string
+      }
+      create_user_profile: {
+        Args: { user_id: string; username: string; display_name: string }
+        Returns: undefined
+      }
+      get_course_feedback: {
+        Args: { p_course_id: string }
+        Returns: {
+          id: string
+          user_id: string
+          comment: string
+          rating: number
+          created_at: string
+        }[]
       }
       get_my_team_ids: {
         Args: Record<PropertyKey, never>
@@ -2685,6 +2915,18 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: {
           team_id: string
+        }[]
+      }
+      get_user_profile: {
+        Args: { p_user_id: string }
+        Returns: {
+          id: string
+          username: string
+          display_name: string
+          avatar_url: string
+          bio: string
+          created_at: string
+          updated_at: string
         }[]
       }
       get_user_tier: {

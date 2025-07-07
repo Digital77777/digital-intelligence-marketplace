@@ -19,7 +19,14 @@ const fetchCollaborationData = async (): Promise<CollaborationHubData> => {
   }
   
   console.log('Collaboration data fetched successfully:', data);
-  return data;
+  return data || {
+    discussions: [],
+    files: [],
+    teamMembers: [],
+    tasks: [],
+    activities: [],
+    teams: []
+  };
 };
 
 export const useCollaborationData = () => {
@@ -32,29 +39,20 @@ export const useCollaborationData = () => {
     queryFn: fetchCollaborationData,
     enabled: !!user,
     retry: (failureCount, error) => {
-      // Only retry network errors, not authentication errors
-      if (error.message.includes('Authentication required')) {
-        return false;
-      }
-      return failureCount < 2;
+      console.log(`Retry attempt ${failureCount} for collaboration data:`, error);
+      return failureCount < 3;
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-  });
-
-  // Show error toast only once per session
-  useEffect(() => {
-    if (isError && error && !hasShownError) {
-      console.error('Collaboration data error:', error);
-      toast.error('Failed to load collaboration data', {
-        description: 'Please try refreshing the page or check your connection.',
-        action: {
-          label: 'Retry',
-          onClick: () => refetch(),
-        },
-      });
-      setHasShownError(true);
+    meta: {
+      onError: (error) => {
+        console.error('Collaboration query error:', error);
+        if (!hasShownError) {
+          toast.error('Failed to load collaboration data');
+          setHasShownError(true);
+        }
+      }
     }
-  }, [isError, error, hasShownError, refetch]);
+  });
 
   // Reset error state when user changes
   useEffect(() => {

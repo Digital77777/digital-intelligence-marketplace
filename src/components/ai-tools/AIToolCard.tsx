@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Card,
@@ -69,55 +70,60 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
 
   if (compact) {
     return (
-      <Card className={`overflow-hidden transition-all duration-300 ease-in-out border dark:border-gray-700 ${hasAccess ? 'hover:shadow-lg hover:border-primary/50 dark:hover:border-primary/70' : 'opacity-60 hover:opacity-80 border-dashed'} group bg-white dark:bg-gray-800`}>
-        <div className="p-3 flex justify-between items-start">
-          <div className="flex items-center gap-3">
-            <div className={`text-primary p-2.5 rounded-md text-2xl group-hover:scale-105 transition-transform ${hasAccess ? 'bg-primary/10' : 'bg-gray-100 dark:bg-gray-700'}`}>
+      <Card className={`overflow-hidden transition-all duration-300 ease-in-out border dark:border-gray-700 ${hasAccess ? 'hover:shadow-md hover:border-primary/50 dark:hover:border-primary/70' : 'opacity-60 hover:opacity-80 border-dashed'} group bg-white dark:bg-gray-800`}>
+        <div className="p-3 sm:p-4 flex flex-col sm:flex-row sm:justify-between sm:items-start space-y-3 sm:space-y-0">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className={`text-primary p-2 sm:p-2.5 rounded-md text-xl sm:text-2xl group-hover:scale-105 transition-transform ${hasAccess ? 'bg-primary/10' : 'bg-gray-100 dark:bg-gray-700'} flex-shrink-0`}>
               {tool.icon}
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className={`font-medium text-sm group-hover:text-primary truncate ${hasAccess ? 'text-gray-800 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'}`}>{tool.name}</h3>
-              <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-                <span className="text-primary">{getCategoryIcon(tool.category)}</span>
+              <h3 className={`font-medium text-sm sm:text-base group-hover:text-primary truncate ${hasAccess ? 'text-gray-800 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'}`}>{tool.name}</h3>
+              <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <span className="text-primary flex-shrink-0">{getCategoryIcon(tool.category)}</span>
                 <span className="capitalize truncate">{tool.category.replace('-', ' ')}</span>
               </div>
+              <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 line-clamp-2 sm:hidden">{tool.description}</p>
             </div>
           </div>
-          <Badge variant="outline" className={`${getTierBadgeColor(tool.tier)} px-2 py-0.5 text-xs flex items-center gap-1 border shadow-xs`}>
-            {getTierIcon(tool.tier)}
-            <span className="hidden sm:inline">{getTierLabel(tool.tier)}</span>
-          </Badge>
+          <div className="flex items-center justify-between gap-2 sm:flex-col sm:items-end sm:gap-1.5">
+            <Badge variant="outline" className={`${getTierBadgeColor(tool.tier)} px-2 py-0.5 text-xs flex items-center gap-1 border shadow-xs flex-shrink-0`}>
+              {getTierIcon(tool.tier)}
+              <span className="sm:inline">{getTierLabel(tool.tier)}</span>
+            </Badge>
+            {tool.externalUrl ? (
+              <Button variant="default" size="sm" className="text-xs px-3 py-1 h-7" asChild>
+                <a href={tool.externalUrl} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="h-3 w-3 mr-1" />
+                  <span className="hidden sm:inline">Visit</span>
+                  <span className="sm:hidden">Go</span>
+                </a>
+              </Button>
+            ) : (
+              <Button 
+                variant={hasAccess ? "default" : "outline"} 
+                size="sm" 
+                className={`text-xs px-3 py-1 h-7 ${hasAccess ? 'bg-primary hover:bg-primary/90 text-primary-foreground' : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 border-dashed'}`}
+                onClick={() => onSelect?.(tool)}
+              >
+                {hasAccess ? (
+                  <>
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    <span className="hidden sm:inline">Launch</span>
+                    <span className="sm:hidden">Use</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="h-3 w-3 mr-1" />
+                    <span className="hidden sm:inline">Upgrade</span>
+                    <span className="sm:hidden">🔒</span>
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
         </div>
-        <div className="px-3 pb-3 border-t dark:border-gray-700/50 pt-3">
-          {tool.externalUrl ? (
-            <Button variant="default" size="sm" className="w-full" asChild>
-              <a href={tool.externalUrl} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="h-3.5 w-3.5 mr-1" />
-                Visit Tool
-                <ArrowRight className="h-3.5 w-3.5 ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-300" />
-              </a>
-            </Button>
-          ) : (
-            <Button 
-              variant={hasAccess ? "default" : "outline"} 
-              size="sm" 
-              className={`w-full ${hasAccess ? 'bg-primary hover:bg-primary/90 text-primary-foreground' : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 border-dashed'}`}
-              onClick={() => onSelect?.(tool)}
-            >
-              {hasAccess ? (
-                <>
-                  <ExternalLink className="h-3.5 w-3.5 mr-1" />
-                  Launch
-                  <ArrowRight className="h-3.5 w-3.5 ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-300" />
-                </>
-              ) : (
-                <>
-                  <Lock className="h-3.5 w-3.5 mr-1" />
-                  Upgrade to {getTierLabel(tool.tier)}
-                </>
-              )}
-            </Button>
-          )}
+        <div className="hidden sm:block px-3 pb-3 border-t dark:border-gray-700/50 pt-3">
+          <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">{tool.description}</p>
         </div>
       </Card>
     );
@@ -125,7 +131,7 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
 
   return (
     <Card className={`overflow-hidden h-full flex flex-col border dark:border-gray-700/80 ${hasAccess ? 'hover:shadow-xl hover:border-primary/40 dark:hover:border-primary/60 hover:-translate-y-1' : 'opacity-70 hover:opacity-85 border-dashed'} group bg-white dark:bg-gray-800/70 backdrop-blur-sm transition-all duration-300 ease-in-out`}>
-      <CardHeader className={`pb-2 relative ${hasAccess ? 'bg-gray-50/30 dark:bg-gray-900/20' : 'bg-gray-100/50 dark:bg-gray-800/50'} dark:border-b dark:border-gray-700/50`}>
+      <CardHeader className={`pb-3 sm:pb-2 relative ${hasAccess ? 'bg-gray-50/30 dark:bg-gray-900/20' : 'bg-gray-100/50 dark:bg-gray-800/50'} dark:border-b dark:border-gray-700/50`}>
         <ToolCardHeader tool={tool} getCategoryIcon={getCategoryIcon} />
         {!hasAccess && (
           <div className="absolute top-2 right-2">
@@ -134,11 +140,11 @@ const AIToolCard: React.FC<AIToolCardProps> = ({ tool, compact = false, onSelect
         )}
       </CardHeader>
       
-      <CardContent className="flex-grow">
+      <CardContent className="flex-grow p-3 sm:p-4">
         <ToolCardContent tool={tool} />
       </CardContent>
       
-      <div className="p-4 pt-0">
+      <div className="p-3 sm:p-4 pt-0">
         <ToolCardFooter tool={tool} hasAccess={hasAccess} onSelect={onSelect} />
       </div>
     </Card>

@@ -1,8 +1,8 @@
 
-import React, { Component, ErrorInfo, ReactNode } from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import React, { Component, ReactNode } from 'react';
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, AlertTriangle } from "lucide-react";
+import { AlertCircle, RefreshCw, Home } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
@@ -11,49 +11,72 @@ interface Props {
 
 interface State {
   hasError: boolean;
-  error: Error | null;
+  error?: Error;
+  errorInfo?: any;
 }
 
 class ErrorBoundary extends Component<Props, State> {
-  public state: State = {
-    hasError: false,
-    error: null,
-  };
+  constructor(props: Props) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
-  public static getDerivedStateFromError(error: Error): State {
+  static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("Uncaught error:", error, errorInfo);
+  componentDidCatch(error: Error, errorInfo: any) {
+    console.error('Error caught by boundary:', error, errorInfo);
+    this.setState({ errorInfo });
   }
 
-  public render() {
+  handleReload = () => {
+    window.location.reload();
+  };
+
+  handleGoHome = () => {
+    window.location.href = '/';
+  };
+
+  render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
         return this.props.fallback;
       }
-      
+
       return (
-        <div className="flex items-center justify-center min-h-[50vh] p-6">
-          <Alert variant="destructive" className="max-w-lg">
-            <AlertTriangle className="h-5 w-5" />
-            <AlertTitle className="text-lg font-semibold mb-2">
-              Something went wrong
-            </AlertTitle>
-            <AlertDescription className="text-sm mb-4">
-              {this.state.error?.message || "An unexpected error occurred"}
-            </AlertDescription>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => window.location.reload()}
-              className="flex items-center gap-2"
-            >
-              <RefreshCw className="h-4 w-4" /> 
-              Reload page
-            </Button>
-          </Alert>
+        <div className="min-h-screen flex items-center justify-center p-4">
+          <Card className="max-w-md w-full">
+            <CardContent className="pt-6">
+              <div className="text-center space-y-4">
+                <AlertCircle className="w-12 h-12 text-red-500 mx-auto" />
+                <h2 className="text-xl font-semibold text-gray-900">Something went wrong</h2>
+                <p className="text-gray-600">
+                  {this.state.error?.message || 'An unexpected error occurred while loading this page.'}
+                </p>
+                <div className="flex gap-2 justify-center">
+                  <Button onClick={this.handleReload} variant="outline">
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Reload Page
+                  </Button>
+                  <Button onClick={this.handleGoHome}>
+                    <Home className="w-4 h-4 mr-2" />
+                    Go Home
+                  </Button>
+                </div>
+                {process.env.NODE_ENV === 'development' && (
+                  <details className="mt-4 text-left">
+                    <summary className="cursor-pointer text-sm text-gray-500">
+                      Technical Details
+                    </summary>
+                    <pre className="mt-2 text-xs bg-gray-100 p-2 rounded overflow-auto">
+                      {this.state.error?.stack}
+                    </pre>
+                  </details>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       );
     }

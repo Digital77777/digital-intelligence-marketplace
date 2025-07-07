@@ -16,6 +16,7 @@ export interface Team {
   name: string;
   description: string | null;
   created_at: string;
+  created_by: string;
 }
 
 export interface TeamDashboardData {

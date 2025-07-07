@@ -52,13 +52,13 @@ const AllToolsTab: React.FC<AllToolsTabProps> = ({
       />
       
       {isLoading ? (
-        <div className="flex justify-center py-12">
+        <div className="flex justify-center py-8 sm:py-12">
           <Spinner size="lg" />
         </div>
       ) : filteredTools && filteredTools.length > 0 ? (
         <div className={viewType === 'grid' 
-          ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
-          : "space-y-4"
+          ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
+          : "space-y-3 sm:space-y-4"
         }>
           {filteredTools.map(tool => (
             <AIToolCard 
@@ -70,18 +70,22 @@ const AllToolsTab: React.FC<AllToolsTabProps> = ({
           ))}
         </div>
       ) : (
-        <div className="py-12 text-center">
-          <SearchX className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h2 className="text-xl font-bold mb-2">No tools found</h2>
-          <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
+        <div className="py-8 sm:py-12 text-center px-4">
+          <SearchX className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-muted-foreground mb-3 sm:mb-4" />
+          <h2 className="text-lg sm:text-xl font-bold mb-2">No tools found</h2>
+          <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 max-w-lg mx-auto">
             We couldn't find any AI tools matching your search criteria. 
             Try adjusting your filters or search terms.
           </p>
-          <Button onClick={() => {
-            setSearchQuery('');
-            setSelectedCategory('all');
-            setSelectedTier('all');
-          }}>
+          <Button 
+            onClick={() => {
+              setSearchQuery('');
+              setSelectedCategory('all');
+              setSelectedTier('all');
+            }}
+            size="sm"
+            className="sm:size-default"
+          >
             Clear Filters
           </Button>
         </div>
