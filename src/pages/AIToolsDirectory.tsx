@@ -1,16 +1,19 @@
 
 import React from 'react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import MobileStickyFooter from '@/components/MobileStickyFooter';
-import DirectoryHeader from '@/components/ai-tools/components/DirectoryHeader';
-import AIToolsDirectoryContent from '@/components/ai-tools/AIToolsDirectoryContent';
-import { useAIToolsSearch } from '@/components/ai-tools/hooks/useAIToolsSearch';
-import useScrollToTop from '@/hooks/useScrollToTop';
+import { useSearchParams } from 'react-router-dom';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import MobileStickyFooter from '../components/MobileStickyFooter';
+import AIToolsDirectoryContent from '../components/ai-tools/AIToolsDirectoryContent';
+import { useAIToolsSearch } from '../hooks/useAIToolsSearch';
+import useScrollToTop from '../hooks/useScrollToTop';
+import ProductionReadyChecklist from '../components/ProductionReadyChecklist';
 
 const AIToolsDirectory = () => {
   useScrollToTop();
-  
+  const [searchParams] = useSearchParams();
+  const toolId = searchParams.get('toolId');
+
   const {
     searchQuery,
     setSearchQuery,
@@ -24,16 +27,29 @@ const AIToolsDirectory = () => {
     setActiveTab,
     allPlatformTools,
     filteredTools,
-    isLoading
+    isLoading,
   } = useAIToolsSearch();
-  
+
+  if (toolId) {
+    return (
+      <div className="min-h-screen flex flex-col bg-white">
+        <Navbar />
+        <main className="flex-1 pt-24 px-4 md:px-6 pb-12 bg-white">
+          <div className="max-w-4xl mx-auto">
+            <ProductionReadyChecklist toolId={toolId} />
+          </div>
+        </main>
+        <Footer />
+        <MobileStickyFooter />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Navbar />
       <main className="flex-1 pt-24 px-4 md:px-6 pb-12 bg-white">
         <div className="max-w-7xl mx-auto">
-          <DirectoryHeader totalTools={allPlatformTools?.length || 0} />
-          
           <AIToolsDirectoryContent
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
@@ -51,7 +67,6 @@ const AIToolsDirectory = () => {
           />
         </div>
       </main>
-      
       <Footer />
       <MobileStickyFooter />
     </div>

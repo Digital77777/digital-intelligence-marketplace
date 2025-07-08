@@ -22,6 +22,7 @@ const LaunchChecklist = () => {
     { id: 'edge-functions', title: 'Edge Functions', status: 'pending' },
     { id: 'ai-tools', title: 'AI Tools (38 tools)', status: 'pending' },
     { id: 'team-features', title: 'Team Features', status: 'pending' },
+    { id: 'performance-monitoring', title: 'Performance Monitoring', status: 'pending' },
   ]);
 
   const updateItemStatus = (id: string, status: ChecklistItem['status'], message?: string) => {
@@ -100,6 +101,20 @@ const LaunchChecklist = () => {
       }
     } catch (error) {
       updateItemStatus('team-features', 'error', 'Team features check failed');
+    }
+
+    // Check Performance Monitoring
+    updateItemStatus('performance-monitoring', 'checking');
+    try {
+      const { checkPerformanceMetrics } = await import('@/services/performanceMetricsService');
+      const result = await checkPerformanceMetrics();
+      if (result.success) {
+        updateItemStatus('performance-monitoring', 'success', result.message);
+      } else {
+        updateItemStatus('performance-monitoring', 'error', result.message);
+      }
+    } catch (error) {
+      updateItemStatus('performance-monitoring', 'error', 'Failed to check performance metrics.');
     }
   };
 

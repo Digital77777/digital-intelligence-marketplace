@@ -1,9 +1,9 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useDebounce } from '@/hooks/use-debounce';
+import { useDebounce } from './use-debounce';
 import { useQuery } from '@tanstack/react-query';
-import { AIToolItem, AIToolTier, aiTools, toolCategories } from '@/data/ai-tools-tiers';
+import { AIToolItem, AIToolTier, aiTools, toolCategories } from '../data/ai-tools-tiers';
 import { v4 as uuidv4 } from 'uuid';
 import { Zap } from 'lucide-react';
 
