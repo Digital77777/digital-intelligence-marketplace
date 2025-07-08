@@ -78,7 +78,7 @@ class DatabaseManager:
     async def get_stats(self) -> dict:
         """Get database statistics"""
         try:
-            if not self.database:
+            if self.database is None:
                 return {"status": "disconnected"}
                 
             stats = await self.database.command("dbStats")
