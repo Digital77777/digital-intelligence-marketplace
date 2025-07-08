@@ -256,9 +256,9 @@ async def create_status_check(input: StatusCheckCreate, request: Request):
 
 @api_router.get("/status", response_model=List[StatusCheck], tags=["status"])
 async def get_status_checks(
-    limit: int = Field(100, ge=1, le=1000, description="Number of records to return"),
-    skip: int = Field(0, ge=0, description="Number of records to skip"),
-    client_name: Optional[str] = Field(None, description="Filter by client name")
+    limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),
+    skip: int = Query(0, ge=0, description="Number of records to skip"),
+    client_name: Optional[str] = Query(None, description="Filter by client name")
 ):
     """Get status checks with pagination and filtering"""
     start_time = time.time()
