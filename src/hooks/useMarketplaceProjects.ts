@@ -4,16 +4,22 @@ import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 
 type MarketplaceProject = Database['public']['Tables']['marketplace_projects']['Row'];
+type ProjectStatus = Database['public']['Enums']['project_status'];
 
-export const useMarketplaceProjects = () => {
+export const useMarketplaceProjects = (status?: ProjectStatus) => {
   return useQuery({
-    queryKey: ['marketplace-projects'],
+    queryKey: ['marketplace-projects', status],
     queryFn: async (): Promise<MarketplaceProject[]> => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('marketplace_projects')
         .select('*')
-        .eq('status', 'open')
         .order('created_at', { ascending: false });
+
+      if (status) {
+        query = query.eq('status', status);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching marketplace projects:', error);

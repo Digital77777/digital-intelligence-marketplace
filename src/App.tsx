@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -25,6 +24,7 @@ import CreateFreelancerProfile from "./pages/CreateFreelancerProfile";
 import CreateService from "./pages/CreateService";
 import TeamDashboard from "./pages/TeamDashboard";
 import CollaborationHub from "./pages/CollaborationHub";
+import ProjectDetails from "./pages/ProjectDetails";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -70,6 +70,7 @@ const App = () => (
                   <Route path="/marketplace/post-project" element={<PostProject />} />
                   <Route path="/marketplace/create-freelancer-profile" element={<CreateFreelancerProfile />} />
                   <Route path="/marketplace/create-service" element={<CreateService />} />
+                  <Route path="/project/:projectId" element={<ProjectDetails />} />
                   {navItems.map(({ to, page }) => (
                     <Route key={to} path={to} element={page} />
                   ))}
