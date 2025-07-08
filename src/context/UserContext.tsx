@@ -83,17 +83,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (email: string, password: string, fullName?: string) => {
     setIsLoading(true);
     try {
-      const redirectUrl = `${window.location.origin}/`;
-      
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: redirectUrl,
           data: {
-            full_name: fullName
-          }
-        }
+            full_name: fullName,
+          },
+        },
       });
 
       if (error) {
@@ -105,7 +102,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
 
-      toast.success('Check your email to confirm your account!');
+      toast.success('Account created successfully! Please check your email to confirm your account.');
+      
+      // Automatically sign in the user
+      await login(email, password);
+
     } catch (error) {
       throw error;
     } finally {

@@ -17,13 +17,14 @@ export const useAuthActions = () => {
     }
   };
 
-  const handleSignUp = async (email: string, password: string, fullName?: string) => {
+  const handleSignUp = async (email: string, password: string, fullName?: string): Promise<boolean> => {
     setError(null);
     try {
       await register(email, password, fullName);
-      // Don't navigate on signup as email confirmation is required
+      return true;
     } catch (err: any) {
       setError(err.message || 'An unexpected error occurred. Please try again.');
+      return false;
     }
   };
 
