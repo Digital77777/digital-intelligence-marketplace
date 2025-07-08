@@ -1,36 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { CheckCircle2, Circle, AlertCircle } from 'lucide-react';
-import { useUser } from '../context/UserContext';
-import { supabase } from '../integrations/supabase/client';
-import { checkPerformanceMetrics } from '../services/performanceMetricsService';
-import { AIToolItem, aiTools } from '../data/ai-tools-tiers';
-import { ToolChecklistItem, getChecklistForTool } from '../data/checklistItems';
+import { useAIToolChecklist } from '@/hooks/useAIToolChecklist';
+import { ToolChecklistItem } from '@/data/checklistItems';
 
 interface ProductionReadyChecklistProps {
   toolId: string;
 }
 
 const ProductionReadyChecklist: React.FC<ProductionReadyChecklistProps> = ({ toolId }) => {
-  const [tool, setTool] = useState<AIToolItem | null>(null);
-  const [checklist, setChecklist] = useState<ToolChecklistItem[]>([]);
-
-  useEffect(() => {
-    const currentTool = aiTools.find(t => t.id === toolId);
-    if (currentTool) {
-      setTool(currentTool);
-      setChecklist(getChecklistForTool(currentTool));
-    }
-  }, [toolId]);
-
-  const runChecks = () => {
-    // Mock running checks
-    setChecklist(prev => prev.map(item => ({ ...item, status: 'checking' })));
-    setTimeout(() => {
-      setChecklist(prev => prev.map(item => ({ ...item, status: Math.random() > 0.3 ? 'success' : 'error', message: 'Check complete' })));
-    }, 1500);
-  };
+  const { tool, checklist, runChecks, allPassed, hasErrors } = useAIToolChecklist(toolId);
 
   const getStatusIcon = (status: ToolChecklistItem['status']) => {
     switch (status) {
@@ -48,9 +28,6 @@ const ProductionReadyChecklist: React.FC<ProductionReadyChecklistProps> = ({ too
   if (!tool) {
     return <div>Tool not found</div>;
   }
-
-  const allPassed = checklist.every(item => item.status === 'success');
-  const hasErrors = checklist.some(item => item.status === 'error');
 
   return (
     <Card className="w-full max-w-2xl mx-auto">

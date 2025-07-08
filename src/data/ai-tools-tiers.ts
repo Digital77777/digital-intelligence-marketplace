@@ -427,6 +427,20 @@ export const aiTools: AIToolItem[] = [
   },
   {
     id: '15',
+    name: 'AI Streams',
+    description: 'Watch tutorials, research presentations, and live demos from AI experts',
+    category: 'video-editing',
+    tier: 'basic',
+    icon: '🎬',
+    featured: true,
+    function: 'Watch and share AI-related video content',
+    use_cases: ['Learning new AI techniques', 'Watching research presentations', 'Following live coding sessions', 'Sharing your own AI projects'],
+    uniqueSellingPoint: 'A dedicated platform for high-quality AI video content',
+    technologies: ['React', 'Supabase', 'Video.js', 'FFmpeg'],
+    integrations: ['YouTube', 'Vimeo', 'Twitch', 'Google Drive']
+  },
+  {
+    id: '17',
     name: 'ModelMaker Lite',
     description: 'Build and evaluate basic ML models with intuitive UI',
     category: 'machine-learning',
@@ -439,7 +453,7 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Jupyter', 'Google Colab', 'MLflow', 'Weights & Biases']
   },
   {
-    id: '16',
+    id: '18',
     name: 'SEO Boost AI',
     description: 'Analyze and optimize content for search engines',
     category: 'seo',
@@ -452,7 +466,7 @@ export const aiTools: AIToolItem[] = [
     integrations: ['WordPress', 'Shopify', 'Webflow', 'Squarespace']
   },
   {
-    id: '17',
+    id: '19',
     name: 'TeamSync AI',
     description: 'Sync team tasks, summaries, and collaborative notes',
     category: 'collaboration',
@@ -467,7 +481,7 @@ export const aiTools: AIToolItem[] = [
 
   // PRO TIER (9 tools)
   {
-    id: '18',
+    id: '20',
     name: 'AI Social Media Manager',
     description: 'Complete social media management with content creation and scheduling',
     category: 'marketing',
@@ -482,7 +496,7 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Hootsuite', 'Buffer', 'Sprout Social', 'Later']
   },
   {
-    id: '19',
+    id: '21',
     name: 'AI Video Editor',
     description: 'Auto-edit videos with captions, transitions, and effects',
     category: 'video-editing',
@@ -496,7 +510,7 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Adobe Premiere', 'Final Cut Pro', 'DaVinci Resolve', 'YouTube']
   },
   {
-    id: '20',
+    id: '22',
     name: 'AI Voice Generator',
     description: 'Generate realistic speech from text with voice cloning',
     category: 'voice',
@@ -510,7 +524,7 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Audacity', 'Adobe Audition', 'Spotify', 'Apple Podcasts']
   },
   {
-    id: '21',
+    id: '23',
     name: 'Predictirix Enterprise',
     description: 'Predict business KPIs and outcomes from historical data',
     category: 'data-analysis',
@@ -524,7 +538,7 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Salesforce', 'SAP', 'Oracle', 'Microsoft Dynamics']
   },
   {
-    id: '22',
+    id: '24',
     name: 'NeuroForge Pro',
     description: 'Train and deploy custom deep learning models',
     category: 'machine-learning',
@@ -538,7 +552,7 @@ export const aiTools: AIToolItem[] = [
     integrations: ['AWS SageMaker', 'Google AI Platform', 'Azure ML', 'Paperspace']
   },
   {
-    id: '23',
+    id: '25',
     name: 'OmniFlow AI',
     description: 'Enterprise-level workflow automation and orchestration',
     category: 'automation',
@@ -551,7 +565,7 @@ export const aiTools: AIToolItem[] = [
     integrations: ['SAP', 'Oracle', 'Salesforce', 'Microsoft Dynamics']
   },
   {
-    id: '24',
+    id: '26',
     name: 'AI Marketplace Publisher',
     description: 'Publish and monetize AI models and APIs',
     category: 'development',
@@ -564,7 +578,7 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Hugging Face', 'GitHub', 'Docker Hub', 'AWS Marketplace']
   },
   {
-    id: '25',
+    id: '27',
     name: 'EthicsGuard AI',
     description: 'Analyze AI systems for ethical risks and bias detection',
     category: 'ethics',
@@ -577,7 +591,7 @@ export const aiTools: AIToolItem[] = [
     integrations: ['MLflow', 'Weights & Biases', 'TensorBoard', 'Neptune']
   },
   {
-    id: '26',
+    id: '28',
     name: 'CloudBridge AI',
     description: 'Manage and deploy AI projects across cloud platforms',
     category: 'cloud',
@@ -592,7 +606,7 @@ export const aiTools: AIToolItem[] = [
 
   // AGRICULTURE TOOLS - FREEMIUM TIER (4 tools)
   {
-    id: '27',
+    id: '30',
     name: 'CropMind AI',
     description: 'Generative Agronomist for Smallholders - Daily crop insights using satellite and soil data',
     category: 'agriculture',
@@ -609,7 +623,7 @@ export const aiTools: AIToolItem[] = [
     demoAvailable: true
   },
   {
-    id: '28',
+    id: '31',
     name: 'SmartPest Sentinel',
     description: 'Pest trap + camera + AI network for real-time pest detection and mitigation advice',
     category: 'agriculture',
@@ -624,7 +638,7 @@ export const aiTools: AIToolItem[] = [
     demoAvailable: true
   },
   {
-    id: '29',
+    id: '32',
     name: 'Livestock Guardian Vision',
     description: 'Vision-based animal health alert system using low-cost cameras',
     category: 'agriculture',
@@ -639,7 +653,7 @@ export const aiTools: AIToolItem[] = [
     demoAvailable: true
   },
   {
-    id: '30',
+    id: '33',
     name: 'AgriMesh Network',
     description: 'Hyperlocal Crop Intelligence Network - Peer-powered decentralized farming insights',
     category: 'agriculture',
@@ -656,7 +670,7 @@ export const aiTools: AIToolItem[] = [
 
   // AGRICULTURE TOOLS - BASIC TIER (4 tools)
   {
-    id: '31',
+    id: '34',
     name: 'AgroBot Commander',
     description: 'Centralized control system for autonomous farm robots with optimization and analytics',
     category: 'agriculture',
@@ -670,7 +684,7 @@ export const aiTools: AIToolItem[] = [
     integrations: ['John Deere', 'Solinftec', 'Weather stations', 'Farm management systems']
   },
   {
-    id: '32',
+    id: '35',
     name: 'Aquayield OS',
     description: 'AI irrigation scheduler that integrates weather, crop stage, and soil sensors',
     category: 'agriculture',
@@ -683,7 +697,7 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Soil moisture sensors', 'Weather stations', 'Pump controllers', 'Farm sensors']
   },
   {
-    id: '33',
+    id: '36',
     name: 'FarmP&L AI',
     description: 'Automated profitability tracking tool for fields, crops, and seasons',
     category: 'agriculture',
@@ -696,7 +710,7 @@ export const aiTools: AIToolItem[] = [
     integrations: ['John Deere', 'Climate FieldView', 'Bushel', 'Financial systems']
   },
   {
-    id: '34',
+    id: '37',
     name: 'AgroRisk Navigator',
     description: 'Risk simulator for weather/climate-driven yield and insurance planning',
     category: 'agriculture',
@@ -711,7 +725,7 @@ export const aiTools: AIToolItem[] = [
 
   // AGRICULTURE TOOLS - PRO TIER (4 tools)
   {
-    id: '35',
+    id: '38',
     name: 'AgriTrial AI',
     description: 'Field trial management & analytics platform for ag companies and co-ops',
     category: 'agriculture',
@@ -725,7 +739,7 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Drone platforms', 'Satellite imagery', 'Research databases', 'Report systems']
   },
   {
-    id: '36',
+    id: '39',
     name: 'RegenCert Hub',
     description: 'Digital tool for managing, verifying, and marketing regenerative agriculture practices',
     category: 'agriculture',
@@ -739,7 +753,7 @@ export const aiTools: AIToolItem[] = [
     integrations: ['CropX', 'Agmatix', 'Carbon exchanges', 'Buyer marketplaces']
   },
   {
-    id: '37',
+    id: '40',
     name: 'AgroAPI Marketplace',
     description: 'Centralized API store for AgriTech developers to access agriculture datasets',
     category: 'agriculture',
@@ -752,7 +766,7 @@ export const aiTools: AIToolItem[] = [
     integrations: ['Weather services', 'Satellite providers', 'Soil databases', 'Developer platforms']
   },
   {
-    id: '38',
+    id: '41',
     name: 'Fieldsim Xr',
     description: 'Immersive farm training simulator using real-world data and mixed reality',
     category: 'agriculture',

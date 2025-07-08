@@ -432,6 +432,37 @@ export const autoPilotStudioChecklist: ToolChecklistItem[] = [
   },
 ];
 
+export const aiStreamsChecklist: ToolChecklistItem[] = [
+  {
+    id: 'ai-streams-api',
+    toolId: '15',
+    title: 'API Connectivity',
+    status: 'pending',
+    details: 'Check connection to video streaming and processing APIs.',
+  },
+  {
+    id: 'ai-streams-upload',
+    toolId: '15',
+    title: 'Upload Functionality',
+    status: 'pending',
+    details: 'Verify that video upload and processing are working correctly.',
+  },
+  {
+    id: 'ai-streams-search',
+    toolId: '15',
+    title: 'Search and Filtering',
+    status: 'pending',
+    details: 'Ensure that search and filtering options are functional.',
+  },
+  {
+    id: 'ai-streams-access',
+    toolId: '15',
+    title: 'Tier-Based Access',
+    status: 'pending',
+    details: 'Verify that tier-based access controls are enforced.',
+  },
+];
+
 export const getChecklistForTool = (tool: AIToolItem): ToolChecklistItem[] => {
   switch (tool.id) {
     case '1':
@@ -462,7 +493,8 @@ export const getChecklistForTool = (tool: AIToolItem): ToolChecklistItem[] => {
       return dataFlowProChecklist;
     case '14':
       return autoPilotStudioChecklist;
-    // Add other tool checklists here
+    case '15':
+      return aiStreamsChecklist;
     default:
       return [];
   }
