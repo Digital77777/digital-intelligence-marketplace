@@ -213,7 +213,7 @@ async def create_status_check(input: StatusCheckCreate, request: Request):
         )
         
         # Get database
-        if not db_manager.database:
+        if db_manager.database is None:
             raise DatabaseError("Database not connected")
         
         # Create status object
