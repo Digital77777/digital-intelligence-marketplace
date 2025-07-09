@@ -266,7 +266,7 @@ async def get_status_checks(
     try:
         logger.info("Fetching status checks", limit=limit, skip=skip, client_name=client_name)
         
-        if not db_manager.database:
+        if db_manager.database is None:
             raise DatabaseError("Database not connected")
         
         # Build query
