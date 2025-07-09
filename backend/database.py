@@ -67,7 +67,7 @@ class DatabaseManager:
     async def health_check(self) -> bool:
         """Check database health"""
         try:
-            if not self.database:
+            if self.database is None:
                 return False
             await self.database.command('ping')
             return True
