@@ -103,10 +103,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       toast.success('Account created successfully! Please check your email to confirm your account.');
-      
-      // Automatically sign in the user
-      await login(email, password);
-
     } catch (error) {
       throw error;
     } finally {
