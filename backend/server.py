@@ -302,7 +302,7 @@ async def get_status_check(status_id: str):
     try:
         logger.info("Fetching status check", status_id=status_id)
         
-        if not db_manager.database:
+        if db_manager.database is None:
             raise DatabaseError("Database not connected")
         
         # Validate UUID format
