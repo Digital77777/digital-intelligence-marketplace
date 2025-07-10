@@ -1,6 +1,5 @@
 import React, { lazy, Suspense } from 'react';
 import { AIToolItem } from '@/data/ai-tools-tiers';
-import { CUSTOM_INTERFACES } from './customInterfaces';
 
 import ImageGeneratorInterface from "./interfaces/ImageGeneratorInterface";
 import TaskBotMiniInterface from "./interfaces/TaskBotMiniInterface";
@@ -71,7 +70,7 @@ const CustomInterfaceRenderer: React.FC<CustomInterfaceRendererProps> = ({ tool,
         case "Forum Assistant":
           return <Suspense fallback={<div>Loading...</div>}><ForumAssistantInterface /></Suspense>;
         case "CropMind AI":
-          return <Suspense fallback={<div>Loading...</div>}><CropMindInterface.default tool={tool} /></Suspense>;
+          return <Suspense fallback={<div>Loading...</div>}><CropMindInterface tool={tool} onBack={() => onOpenChange(false)} /></Suspense>;
         case "SmartPest Sentinel":
           return <Suspense fallback={<div>Loading...</div>}><SmartPestSentinelInterface /></Suspense>;
         case "Livestock Guardian Vision":

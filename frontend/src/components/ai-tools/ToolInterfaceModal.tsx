@@ -4,7 +4,8 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { AIToolItem } from '@/data/ai-tools-tiers';
 import { useTier } from '@/context/TierContext';
 import { useToolConnection } from './hooks/useToolConnection';
-import CustomInterfaceRenderer, { CUSTOM_INTERFACES } from './CustomInterfaceRenderer';
+import { CUSTOM_INTERFACES } from './customInterfaces';
+import CustomInterfaceRenderer from './CustomInterfaceRenderer';
 import StandardToolInterface from './StandardToolInterface';
 
 interface ToolInterfaceModalProps {

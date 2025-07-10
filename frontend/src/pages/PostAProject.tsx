@@ -10,51 +10,46 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { toast } from 'sonner';
 
-const serviceSchema = z.object({
+const projectSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters'),
   description: z.string().min(20, 'Description must be at least 20 characters'),
-  price: z.coerce.number().positive('Price must be positive'),
-  category: z.string().min(2, 'Category is required'),
-  delivery_time_days: z.coerce.number().int().positive('Delivery time must be a positive number'),
-  tags: z.string().optional(),
+  project_type: z.enum(['service', 'tool', 'job']),
+  budget_min: z.coerce.number().positive('Minimum budget must be positive'),
+  budget_max: z.coerce.number().positive('Maximum budget must be positive'),
+  deadline: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'Invalid date' }),
 });
 
-const CreateService = () => {
+const PostAProject = () => {
   const { user } = useUser();
   const navigate = useNavigate();
-  const form = useForm<z.infer<typeof serviceSchema>>({
-    resolver: zodResolver(serviceSchema),
+  const form = useForm<z.infer<typeof projectSchema>>({
+    resolver: zodResolver(projectSchema),
     defaultValues: {
       title: '',
       description: '',
-      category: '',
-      tags: '',
+      project_type: 'job',
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof serviceSchema>) => {
+  const onSubmit = async (values: z.infer<typeof projectSchema>) => {
     if (!user) {
-      toast.error('You must be logged in to create a service.');
+      toast.error('You must be logged in to post a project.');
       return;
     }
 
     const { data, error } = await supabase
-      .from('marketplace_services')
-      .insert([{ 
-        ...values, 
-        seller_id: user.id,
-        tags: values.tags?.split(',').map(tag => tag.trim()) || [],
-        is_active: true,
-      }]);
+      .from('marketplace_projects')
+      .insert([{ ...values, client_id: user.id, status: 'open' }]);
 
     if (error) {
-      toast.error('Failed to create service. Please try again.');
-      console.error('Error creating service:', error);
+      toast.error('Failed to post project. Please try again.');
+      console.error('Error posting project:', error);
     } else {
-      toast.success('Service created successfully!');
+      toast.success('Project posted successfully!');
       navigate('/marketplace');
     }
   };
@@ -64,7 +59,7 @@ const CreateService = () => {
       <Navbar />
       <main className="flex-1 pt-24 pb-12 px-4">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6">Create a New Service</h1>
+          <h1 className="text-3xl font-bold mb-6">Post a New Project</h1>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
@@ -72,9 +67,9 @@ const CreateService = () => {
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Service Title</FormLabel>
+                    <FormLabel>Project Title</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., I will design a modern logo" {...field} />
+                      <Input placeholder="e.g., Build a new website" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -85,9 +80,9 @@ const CreateService = () => {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Service Description</FormLabel>
+                    <FormLabel>Project Description</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Describe your service in detail..." {...field} />
+                      <Textarea placeholder="Describe your project in detail..." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -95,13 +90,22 @@ const CreateService = () => {
               />
               <FormField
                 control={form.control}
-                name="category"
+                name="project_type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Design, Development" {...field} />
-                    </FormControl>
+                    <FormLabel>Project Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a project type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="job">Job</SelectItem>
+                        <SelectItem value="service">Service</SelectItem>
+                        <SelectItem value="tool">Tool</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -109,12 +113,12 @@ const CreateService = () => {
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="price"
+                  name="budget_min"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Price ($)</FormLabel>
+                      <FormLabel>Minimum Budget ($)</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="e.g., 100" {...field} />
+                        <Input type="number" placeholder="e.g., 500" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -122,12 +126,12 @@ const CreateService = () => {
                 />
                 <FormField
                   control={form.control}
-                  name="delivery_time_days"
+                  name="budget_max"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Delivery Time (days)</FormLabel>
+                      <FormLabel>Maximum Budget ($)</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="e.g., 3" {...field} />
+                        <Input type="number" placeholder="e.g., 2000" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -136,19 +140,19 @@ const CreateService = () => {
               </div>
               <FormField
                 control={form.control}
-                name="tags"
+                name="deadline"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tags (comma-separated)</FormLabel>
+                    <FormLabel>Deadline</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., logo design, branding" {...field} />
+                      <Input type="date" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               <Button type="submit" className="w-full">
-                Create Service
+                Post Project
               </Button>
             </form>
           </Form>
@@ -159,4 +163,4 @@ const CreateService = () => {
   );
 };
 
-export default CreateService;
+export default PostAProject;
