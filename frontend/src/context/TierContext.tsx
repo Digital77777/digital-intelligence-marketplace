@@ -28,17 +28,7 @@ export const TierProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(false);
   const { user, session } = useUser();
 
-  // Superuser email for override
-  const SUPERUSER_EMAIL = "bbadibanga55@gmail.com";
-
   useEffect(() => {
-    // If this is the superuser, force pro tier and access
-    if (user && user.email === SUPERUSER_EMAIL) {
-      setCurrentTier('pro');
-      setIsSubscribed(true);
-      setSubscriptionEnd(null);
-      return;
-    }
 
     if (user && session) {
       refreshSubscription();
@@ -62,13 +52,6 @@ export const TierProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const refreshSubscription = async () => {
-    // Skip real checks for superuser
-    if (user && user.email === SUPERUSER_EMAIL) {
-      setCurrentTier('pro');
-      setIsSubscribed(true);
-      setSubscriptionEnd(null);
-      return;
-    }
 
     if (!user || !session) return;
 
@@ -105,8 +88,6 @@ export const TierProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const canAccess = (feature: string): boolean => {
-    // Superuser: allow all
-    if (user && user.email === SUPERUSER_EMAIL) return true;
 
     const tierHierarchy = {
       'freemium': 0,
