@@ -1,119 +1,123 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Workflow } from '@/components/workflow/types';
-import { useUser } from '@/context/UserContext';
-import { useEffect } from 'react';
-
-const fetchWorkflows = async (): Promise<Workflow[]> => {
-    const { data, error } = await supabase
-        .from('workflows')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-    if (error) throw error;
-
-    return data?.map(workflow => ({
-        ...workflow,
-        steps: Array.isArray(workflow.steps) ? workflow.steps : []
-    })) || [];
-};
+import { v4 as uuidv4 } from 'uuid';
 
 export const useWorkflows = () => {
-    const queryClient = useQueryClient();
-    const { toast } = useToast();
-    const { user } = useUser();
+  const [workflows, setWorkflows] = useState<Workflow[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
-    const { data: workflows = [], isLoading, isError, error } = useQuery<Workflow[], Error>({
-        queryKey: ['workflows'],
-        queryFn: fetchWorkflows,
-    });
-    
-    useEffect(() => {
-        if (isError) {
-            console.error('Error fetching workflows:', error);
-            toast({
-                title: "Error",
-                description: error?.message || "Failed to load workflows",
-                variant: "destructive"
-            });
+  // Mock data for frontend-only version
+  const mockWorkflows: Workflow[] = [
+    {
+      id: '1',
+      name: 'Customer Onboarding',
+      description: 'Automated workflow for new customer onboarding process',
+      steps: [
+        {
+          id: '1',
+          name: 'Welcome Email',
+          description: 'Send welcome email to new customer',
+          type: 'notification',
+          config: { template: 'welcome', delay: 0 },
+          order: 0
+        },
+        {
+          id: '2',
+          name: 'Account Setup',
+          description: 'Create customer account and profile',
+          type: 'action',
+          config: { action: 'create_account' },
+          order: 1
         }
-    }, [isError, error, toast]);
-
-    const createWorkflowMutation = useMutation({
-        mutationFn: async (newWorkflow: { name: string, description: string }) => {
-            if (!user) throw new Error("You must be logged in to create a workflow.");
-            
-            const { data, error } = await supabase
-                .from('workflows')
-                .insert([{
-                    name: newWorkflow.name,
-                    description: newWorkflow.description,
-                    steps: [],
-                    status: 'draft',
-                    created_by: user.id,
-                }])
-                .select()
-                .single();
-
-            if (error) throw error;
-            return data;
+      ],
+      status: 'active',
+      created_at: new Date().toISOString(),
+      created_by: 'demo-user',
+      team_id: null
+    },
+    {
+      id: '2',
+      name: 'Data Processing Pipeline',
+      description: 'AI-powered data analysis and classification workflow',
+      steps: [
+        {
+          id: '3',
+          name: 'Data Validation',
+          description: 'Validate incoming data format',
+          type: 'condition',
+          config: { rules: ['format', 'completeness'] },
+          order: 0
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['workflows'] });
-            toast({
-                title: "Success",
-                description: "Workflow created successfully"
-            });
-        },
-        onError: (error: any) => {
-            console.error('Error creating workflow:', error);
-            toast({
-                title: "Error",
-                description: `Failed to create workflow: ${error.message}`,
-                variant: "destructive"
-            });
+        {
+          id: '4',
+          name: 'AI Classification',
+          description: 'Classify data using machine learning model',
+          type: 'ai-model',
+          config: { model: 'classifier', confidence: 0.8 },
+          order: 1
         }
-    });
+      ],
+      status: 'draft',
+      created_at: new Date().toISOString(),
+      created_by: 'demo-user',
+      team_id: null
+    }
+  ];
 
-    const updateWorkflowMutation = useMutation({
-        mutationFn: async (workflowToUpdate: Partial<Workflow> & { id: string }) => {
-            const { error } = await supabase
-                .from('workflows')
-                .update({
-                    name: workflowToUpdate.name,
-                    description: workflowToUpdate.description,
-                    steps: workflowToUpdate.steps,
-                    status: workflowToUpdate.status
-                })
-                .eq('id', workflowToUpdate.id)
-                .select()
-                .single();
+  useEffect(() => {
+    // Simulate loading delay
+    setTimeout(() => {
+      setWorkflows(mockWorkflows);
+      setIsLoading(false);
+    }, 1000);
+  }, []);
 
-            if (error) throw error;
-            return workflowToUpdate;
-        },
-        onSuccess: (updatedWorkflow) => {
-             queryClient.invalidateQueries({ queryKey: ['workflows'] });
-            toast({
-                title: "Success",
-                description: "Workflow updated successfully"
-            });
-        },
-        onError: (error: any) => {
-            console.error('Error updating workflow:', error);
-            toast({
-                title: "Error",
-                description: "Failed to update workflow",
-                variant: "destructive"
-            });
-        }
-    });
+  const createWorkflow = {
+    mutateAsync: async (workflowData: { name: string; description: string }) => {
+      const newWorkflow: Workflow = {
+        id: uuidv4(),
+        name: workflowData.name,
+        description: workflowData.description,
+        steps: [],
+        status: 'draft',
+        created_at: new Date().toISOString(),
+        created_by: 'demo-user',
+        team_id: null
+      };
 
-    return {
-        workflows,
-        isLoading,
-        createWorkflow: createWorkflowMutation,
-        updateWorkflow: updateWorkflowMutation,
-    };
+      setWorkflows(prev => [...prev, newWorkflow]);
+      toast({
+        title: "Success",
+        description: "Workflow created successfully"
+      });
+      
+      return newWorkflow;
+    },
+    isPending: false
+  };
+
+  const updateWorkflow = {
+    mutateAsync: async (workflowData: Partial<Workflow> & { id: string }) => {
+      setWorkflows(prev => 
+        prev.map(w => w.id === workflowData.id ? { ...w, ...workflowData } : w)
+      );
+      
+      toast({
+        title: "Success",
+        description: "Workflow updated successfully"
+      });
+      
+      return workflowData;
+    },
+    isPending: false
+  };
+
+  return {
+    workflows,
+    isLoading,
+    createWorkflow,
+    updateWorkflow
+  };
 };
